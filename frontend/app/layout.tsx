@@ -92,7 +92,7 @@ export default function RootLayout({
       lang="en"
       data-theme="night"
       className={`${cormorant.variable} ${notoSerifDevanagari.variable} ${inter.variable} ${ibmPlexMono.variable}`}
-      data-script="romanized"
+      data-script="devanagari"
     >
       <head>
         <link rel="manifest" href="/sadhana/manifest.json" />

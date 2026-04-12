@@ -203,7 +203,7 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className={styles.page}>
+    <div className={styles.page} data-raga={profile?.currentRaga ?? undefined}>
       <div className={styles.container}>
         {/* Back arrow */}
         <button

@@ -165,7 +165,7 @@ export default function HomePage() {
   }
 
   return (
-    <div className={styles.page}>
+    <div className={styles.page} data-raga={todayRaga.id}>
       {/* Ambient tanpura waveform background */}
       <TanpuraViz active={false} />
 

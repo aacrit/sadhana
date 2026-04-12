@@ -10,7 +10,13 @@
 
 import type { ReactNode } from 'react';
 import { AuthProvider } from './lib/auth';
+import ScriptToggle from './components/ScriptToggle';
 
 export default function Providers({ children }: { children: ReactNode }) {
-  return <AuthProvider>{children}</AuthProvider>;
+  return (
+    <AuthProvider>
+      {children}
+      <ScriptToggle />
+    </AuthProvider>
+  );
 }

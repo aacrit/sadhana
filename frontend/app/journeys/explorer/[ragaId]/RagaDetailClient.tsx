@@ -176,6 +176,7 @@ export default function RagaDetailClient({ ragaId }: RagaDetailClientProps) {
   return (
     <motion.div
       className={styles.page}
+      data-raga={ragaId}
       variants={stagger}
       initial="hidden"
       animate="visible"

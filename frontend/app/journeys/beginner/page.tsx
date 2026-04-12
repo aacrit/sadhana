@@ -645,7 +645,7 @@ export default function BeginnerPage() {
     const copy = PHASE_COPY[phase];
 
     return (
-      <div className={lessonStyles.lessonPage} role="main" aria-label="Lesson: Your First Raga - Bhoopali">
+      <div className={lessonStyles.lessonPage} data-raga={todayRaga.id} role="main" aria-label="Lesson: Your First Raga - Bhoopali">
         {/* Exit lesson */}
         <button
           type="button"
@@ -990,6 +990,7 @@ export default function BeginnerPage() {
   return (
     <motion.div
       className={homeStyles.page}
+      data-raga={todayRaga.id}
       variants={staggerContainer}
       initial="hidden"
       animate="visible"
