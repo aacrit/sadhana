@@ -268,6 +268,14 @@ export class VoicePipeline {
   }
 
   /**
+   * Returns the AnalyserNode for external visualization (VoiceWave).
+   * Returns null if the pipeline is not running.
+   */
+  getAnalyserNode(): AnalyserNode | null {
+    return this.analyserNode;
+  }
+
+  /**
    * Updates the Sa frequency (retuning).
    */
   updateSa(hz: number): void {

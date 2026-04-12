@@ -78,6 +78,9 @@ export interface LessonAudioControls {
   stopVoicePipeline(): void;
   pipelineActive: boolean;
 
+  // AnalyserNode for VoiceWave visualization
+  getAnalyserNode(): AnalyserNode | null;
+
   // Cleanup
   dispose(): void;
 }
@@ -401,6 +404,10 @@ export function useLessonAudio(
   // Return controls
   // -----------------------------------------------------------------------
 
+  const getAnalyserNode = useCallback((): AnalyserNode | null => {
+    return voicePipelineRef.current?.getAnalyserNode() ?? null;
+  }, []);
+
   return {
     startTanpura,
     stopTanpura,
@@ -413,6 +420,7 @@ export function useLessonAudio(
     startVoicePipeline,
     stopVoicePipeline,
     pipelineActive,
+    getAnalyserNode,
     dispose,
   };
 }

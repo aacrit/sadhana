@@ -108,7 +108,7 @@ export default function RootLayout({
         <ServiceWorkerRegistrar />
         <Providers>
           <Navbar />
-          <main id="main-content">{children}</main>
+          <main id="main-content" style={{ paddingTop: 'var(--navbar-height, 48px)' }}>{children}</main>
         </Providers>
       </body>
     </html>
