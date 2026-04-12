@@ -1,16 +1,17 @@
 'use client';
 
 /**
- * Auth callback page — handles OAuth redirect from Supabase.
+ * Auth callback page -- Void design language.
  *
- * After Google OAuth, Supabase redirects here with a code in the URL hash.
- * The Supabase client automatically exchanges the code for a session.
- * This page waits for the session to resolve, then redirects to /.
+ * Handles OAuth redirect from Supabase.
+ * Black void, centered logo, quiet "Signing you in..." text.
+ * All redirect logic preserved exactly.
  */
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '../../lib/supabase';
+import Logo from '../../components/Logo';
 import styles from '../auth.module.css';
 
 export default function AuthCallbackPage() {
@@ -43,10 +44,10 @@ export default function AuthCallbackPage() {
   }, [router]);
 
   return (
-    <div className={styles.page}>
-      <div className={styles.container}>
-        <div className={styles.loadingDot} aria-label="Signing you in" />
-        <p className={styles.loadingText}>Completing sign-in...</p>
+    <div className={styles.callbackPage}>
+      <div className={styles.callbackContainer}>
+        <Logo size={48} variant="icon" />
+        <p className={styles.callbackText}>Signing you in...</p>
       </div>
     </div>
   );
