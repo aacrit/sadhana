@@ -105,8 +105,6 @@ export default function ScriptToggle() {
         bottom: 'var(--space-6)',
         right: 'var(--space-4)',
         zIndex: 'var(--z-sticky)',
-        width: '40px',
-        height: '40px',
         minWidth: 'var(--touch-min)',
         minHeight: 'var(--touch-min)',
         display: 'flex',

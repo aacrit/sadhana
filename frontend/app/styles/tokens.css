@@ -417,6 +417,31 @@ body {
   border-width: 0;
 }
 
+/* Skip navigation -- hidden until focused via keyboard */
+.skip-nav {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  z-index: var(--z-toast);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  color: var(--text);
+  background: var(--bg-2);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.skip-nav:focus {
+  left: var(--space-4);
+  top: var(--space-4);
+  width: auto;
+  height: auto;
+}
+
 /* =======================================================================
    TEXTURE SURFACES
    ======================================================================= */

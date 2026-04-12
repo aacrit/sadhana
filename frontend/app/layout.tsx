@@ -101,8 +101,13 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-title" content="Sadhana" />
       </head>
       <body>
+        <a href="#main-content" className="skip-nav">
+          Skip to main content
+        </a>
         <ServiceWorkerRegistrar />
-        <Providers>{children}</Providers>
+        <Providers>
+          <main id="main-content">{children}</main>
+        </Providers>
       </body>
     </html>
   );
