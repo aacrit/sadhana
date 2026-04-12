@@ -259,6 +259,12 @@ npm run test:engine  # Test engine only — raga grammar, frequency ratios, tala
 
 Engine-first architecture, Hindustani-first framing, Dhrupad design system, $0 constraint, audio-first pedagogy, McLeod Pitch Method + RNNoise voice pipeline, Supabase data layer, Framer Motion + GSAP + Three.js animation stack, Claude Max CLI only for agent work.
 
+**Level System (locked — D+B):**
+- Levels unlocked by specific musical acts, not XP. Examples: "Sing Bhairav's pakad within ±20 cents across 3 separate sessions" → Sadhaka. Engine validates. Cannot be gamed.
+- When unlocked: no popup, no confetti. Interface deepens invisibly (B). Cents needle appears by default. New raga tabs surface. Tanpura gains a second voice. Student notices one day — that's the ceremony.
+- XP tracks consistency only (streak maintenance, sessions completed). It is the practice log, not the grade.
+- v1 ships with B (gradual deepening). Mastery gates (D) designed now, enforced from v1.1.
+
 **v1 Scope (locked):**
 - Full engine (`/engine/`) — all physics, theory, analysis, synthesis, voice modules. Tested. Correct.
 - All four journeys exist as entry points from day one — shows the full vision immediately.
