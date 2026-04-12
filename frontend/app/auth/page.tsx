@@ -1,15 +1,15 @@
 'use client';
 
 /**
- * Auth page — sign in to remember your practice.
+ * Auth page -- Void design language.
  *
- * Dhrupad-styled, minimal. Three options:
- *   1. Google OAuth (primary)
- *   2. Email/password (secondary)
- *   3. Continue as guest (tertiary — stores flag in localStorage)
+ * A liminal threshold: pure black, elements floating in void.
+ * The logo is the only warm element, breathing with saffron light.
  *
- * On success, redirects to /.
- * Saffron used only on the Google sign-in button outline (earned: active auth).
+ * Three auth paths (logic untouched from auth.tsx):
+ *   1. Google OAuth (prominent, full-width)
+ *   2. Email/password (collapsed behind a text link)
+ *   3. Guest entry (bottom, near-invisible)
  */
 
 import { useState, useCallback, type FormEvent } from 'react';
@@ -28,6 +28,7 @@ export default function AuthPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [isEmailOpen, setIsEmailOpen] = useState(false);
 
   // If already signed in, redirect to home
   if (user) {
@@ -45,7 +46,7 @@ export default function AuthPage() {
     if (authError) {
       setError(authError.message);
     }
-    // Google OAuth redirects away — no further action needed
+    // Google OAuth redirects away -- no further action needed
   };
 
   const handleEmailSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -88,6 +89,10 @@ export default function AuthPage() {
     setError(null);
   }, []);
 
+  const toggleEmailForm = useCallback(() => {
+    setIsEmailOpen((prev) => !prev);
+  }, []);
+
   // -----------------------------------------------------------------------
   // Render
   // -----------------------------------------------------------------------
@@ -95,20 +100,19 @@ export default function AuthPage() {
   return (
     <div className={styles.page}>
       <div className={styles.container}>
-        {/* Logo */}
+        {/* Logo with saffron glow */}
         <div className={styles.logoWrap}>
-          <Logo size={48} variant="full" />
+          <div className={styles.logoGlow} aria-hidden="true" />
+          <Logo size={64} variant="icon" />
         </div>
 
         {/* Heading */}
-        <h1 className={styles.heading}>
-          Sign in to remember your practice
-        </h1>
+        <h1 className={styles.heading}>Begin your practice.</h1>
         <p className={styles.subheading}>
-          Your Sa, your streaks, your ragas — saved across sessions.
+          Your Sa, your ragas, your riyaz — remembered.
         </p>
 
-        {/* Google sign-in */}
+        {/* Google sign-in -- prominent */}
         <button
           type="button"
           className={styles.googleButton}
@@ -147,75 +151,96 @@ export default function AuthPage() {
           <span className={styles.dividerText}>or</span>
         </div>
 
-        {/* Email/password form */}
-        <form
-          className={styles.form}
-          onSubmit={handleEmailSubmit}
-          noValidate
-        >
-          <label className={styles.label} htmlFor="auth-email">
-            Email
-          </label>
-          <input
-            id="auth-email"
-            type="email"
-            className={styles.input}
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="you@example.com"
-            autoComplete="email"
-            required
-          />
-
-          <label className={styles.label} htmlFor="auth-password">
-            Password
-          </label>
-          <input
-            id="auth-password"
-            type="password"
-            className={styles.input}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="At least 6 characters"
-            autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
-            minLength={6}
-            required
-          />
-
-          {error && (
-            <p
-              className={styles.error}
-              role="alert"
-            >
-              {error}
-            </p>
-          )}
-
-          <button
-            type="submit"
-            className={styles.submitButton}
-            disabled={submitting || !email || !password}
-          >
-            {submitting
-              ? 'Please wait...'
-              : mode === 'signin'
-                ? 'Sign in'
-                : 'Create account'}
-          </button>
-        </form>
-
-        {/* Toggle sign-in / sign-up */}
+        {/* Email toggle -- collapsed by default */}
         <button
           type="button"
-          className={styles.toggleLink}
-          onClick={toggleMode}
+          className={styles.emailToggle}
+          onClick={toggleEmailForm}
+          aria-expanded={isEmailOpen}
+          aria-controls="email-form-wrap"
         >
-          {mode === 'signin'
-            ? 'Need an account? Sign up'
-            : 'Already have an account? Sign in'}
+          {isEmailOpen ? 'Hide email sign-in' : 'Sign in with email \u2192'}
         </button>
 
-        {/* Guest link */}
+        {/* Email form -- slides open */}
+        <div
+          id="email-form-wrap"
+          className={`${styles.emailFormWrap} ${isEmailOpen ? styles.emailFormOpen : ''}`}
+        >
+          <form
+            className={styles.form}
+            onSubmit={handleEmailSubmit}
+            noValidate
+          >
+            <label className={styles.label} htmlFor="auth-email">
+              Email
+            </label>
+            <input
+              id="auth-email"
+              type="email"
+              className={styles.input}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@example.com"
+              autoComplete="email"
+              required
+              tabIndex={isEmailOpen ? 0 : -1}
+            />
+
+            <label className={styles.label} htmlFor="auth-password">
+              Password
+            </label>
+            <input
+              id="auth-password"
+              type="password"
+              className={styles.input}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="At least 6 characters"
+              autoComplete={
+                mode === 'signup' ? 'new-password' : 'current-password'
+              }
+              minLength={6}
+              required
+              tabIndex={isEmailOpen ? 0 : -1}
+            />
+
+            {error && (
+              <p className={styles.error} role="alert">
+                {error}
+              </p>
+            )}
+
+            <button
+              type="submit"
+              className={styles.submitButton}
+              disabled={submitting || !email || !password}
+              tabIndex={isEmailOpen ? 0 : -1}
+            >
+              {submitting
+                ? 'Please wait...'
+                : mode === 'signin'
+                  ? 'Sign in'
+                  : 'Create account'}
+            </button>
+          </form>
+
+          {/* Toggle sign-in / sign-up -- only visible when email is open */}
+          <div style={{ display: 'flex', justifyContent: 'center' }}>
+            <button
+              type="button"
+              className={styles.toggleLink}
+              onClick={toggleMode}
+              tabIndex={isEmailOpen ? 0 : -1}
+            >
+              {mode === 'signin'
+                ? 'Need an account? Sign up'
+                : 'Already have an account? Sign in'}
+            </button>
+          </div>
+        </div>
+
+        {/* Guest link -- barely visible */}
         <Link
           href="/"
           className={styles.guestLink}
@@ -224,7 +249,7 @@ export default function AuthPage() {
             handleGuestContinue();
           }}
         >
-          Continue as guest
+          Enter without an account
         </Link>
       </div>
     </div>
