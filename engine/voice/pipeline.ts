@@ -84,6 +84,8 @@ export interface VoiceEvent {
   readonly accuracy?: number;
   /** Full pitch result for advanced consumers. */
   readonly pitchResult?: PitchResult;
+  /** Rolling pitch history: recent [timestamp, hz] pairs for waveform. */
+  readonly pitchHistory?: readonly [number, number][];
   /** Timestamp (AudioContext currentTime). */
   readonly timestamp: number;
 }
@@ -146,6 +148,10 @@ export class VoicePipeline {
   private swaraBuffer: Swara[] = [];
   private lastSilenceTime: number = 0;
 
+  // Rolling buffer of recent [timestamp, hz] pairs for waveform visualization
+  private pitchHistory: [number, number][] = [];
+  private readonly PITCH_HISTORY_MAX = 30; // ~500ms at 60fps
+
   // Debounce: don't fire pakad detection too frequently
   private lastPakadTime: number = 0;
   private readonly PAKAD_COOLDOWN_MS = 5000;
@@ -180,12 +186,20 @@ export class VoicePipeline {
       );
     }
 
-    // Request microphone access
+    // Request microphone access.
+    //
+    // CRITICAL: All browser-level audio processing MUST be disabled for
+    // pitch detection. Echo cancellation modifies frequency content,
+    // noise suppression cuts soft vowel onset, and AGC distorts amplitude
+    // which corrupts clarity scores. RNNoise (when integrated) handles
+    // denoising; we don't need browser-level noise suppression.
     this.mediaStream = await navigator.mediaDevices.getUserMedia({
       audio: {
-        echoCancellation: true,
-        noiseSuppression: true, // Browser-level noise suppression
-        autoGainControl: true,
+        echoCancellation: false,
+        noiseSuppression: false,
+        autoGainControl: false,
+        sampleRate: { ideal: 44100 },
+        channelCount: 1,
       },
     });
 
@@ -243,6 +257,7 @@ export class VoicePipeline {
 
     this.pitchDetector = null;
     this.swaraBuffer = [];
+    this.pitchHistory = [];
   }
 
   /**
@@ -282,6 +297,14 @@ export class VoicePipeline {
    */
   getSwaraBuffer(): readonly Swara[] {
     return [...this.swaraBuffer];
+  }
+
+  /**
+   * Returns the rolling pitch history: recent [timestamp, hz] pairs.
+   * Used for waveform visualization.
+   */
+  getPitchHistory(): readonly [number, number][] {
+    return [...this.pitchHistory];
   }
 
   // -------------------------------------------------------------------------
@@ -364,6 +387,12 @@ export class VoicePipeline {
       this.config.level ?? 'shishya',
     );
 
+    // Maintain pitch history for waveform visualization
+    this.pitchHistory.push([timestamp, hz]);
+    if (this.pitchHistory.length > this.PITCH_HISTORY_MAX) {
+      this.pitchHistory.shift();
+    }
+
     const event: VoiceEvent = {
       type: 'pitch',
       hz,
@@ -373,6 +402,7 @@ export class VoicePipeline {
       inRaga: result.inRagaContext,
       accuracy: result.accuracy,
       pitchResult: result,
+      pitchHistory: [...this.pitchHistory],
       timestamp,
     };
 

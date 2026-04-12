@@ -202,6 +202,7 @@ const IDLE_VOICE_FEEDBACK: VoiceFeedback = {
 function pitchResultToFeedback(
   result: PitchResult,
   targetSwara: string,
+  pitchHistory?: readonly [number, number][],
 ): VoiceFeedback {
   return {
     hz: result.hz,
@@ -210,7 +211,7 @@ function pitchResultToFeedback(
     detectedSwara: result.nearestSwara,
     confidence: result.clarity,
     amplitude: result.accuracy,
-    pitchHistory: [],
+    pitchHistory: pitchHistory ?? [],
   };
 }
 
@@ -324,6 +325,10 @@ export default function BeginnerPage() {
   const [micGateActive, setMicGateActive] = useState(false);
   const [skipMic, setSkipMic] = useState(false);
 
+  // Headphone callout — shown once per session before first singing phase
+  const [headphoneCalloutDismissed, setHeadphoneCalloutDismissed] = useState(false);
+  const headphoneTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   // Audio hook — provides tanpura, swara playback, voice pipeline
   const audio = useLessonAudio(saHz, 'bhoopali');
 
@@ -363,6 +368,22 @@ export default function BeginnerPage() {
   // Determine the target swara label for the current voice phase
   const voiceTargetSwara = phase === 'sing_sa' ? 'Sa' : 'Sa';
 
+  // Show headphone callout on first voice phase, auto-dismiss after 6s
+  const showHeadphoneCallout = isVoicePhase && !headphoneCalloutDismissed;
+
+  useEffect(() => {
+    if (showHeadphoneCallout) {
+      headphoneTimerRef.current = setTimeout(() => {
+        setHeadphoneCalloutDismissed(true);
+      }, 6000);
+      return () => {
+        if (headphoneTimerRef.current) {
+          clearTimeout(headphoneTimerRef.current);
+        }
+      };
+    }
+  }, [showHeadphoneCallout]);
+
   // ---------------------------------------------------------------------------
   // Phase navigation
   // ---------------------------------------------------------------------------
@@ -401,7 +422,7 @@ export default function BeginnerPage() {
   /** Attempt to start the voice pipeline with error handling. */
   const safeStartVoicePipeline = useCallback(
     async (
-      onPitch: (result: PitchResult) => void,
+      onPitch: (result: PitchResult, pitchHistory?: readonly [number, number][]) => void,
       onPakad?: () => void,
     ) => {
       if (skipMic) return;
@@ -527,9 +548,9 @@ export default function BeginnerPage() {
           }
 
           // Priority 3: Wire PitchResult to VoiceFeedback
-          await safeStartVoicePipeline((result: PitchResult) => {
+          await safeStartVoicePipeline((result: PitchResult, pitchHistory?: readonly [number, number][]) => {
             const target = phase === 'sing_sa' ? 'Sa' : 'Sa';
-            setVoiceFeedback(pitchResultToFeedback(result, target));
+            setVoiceFeedback(pitchResultToFeedback(result, target, pitchHistory));
           });
         };
         startVoice();
@@ -540,8 +561,8 @@ export default function BeginnerPage() {
         // Priority 3: Wire PitchResult to VoiceFeedback + pakad detection
         const startPakadVoice = async () => {
           await safeStartVoicePipeline(
-            (result: PitchResult) => {
-              setVoiceFeedback(pitchResultToFeedback(result, result.nearestSwara));
+            (result: PitchResult, pitchHistory?: readonly [number, number][]) => {
+              setVoiceFeedback(pitchResultToFeedback(result, result.nearestSwara, pitchHistory));
             },
             () => {
               setPakadTriggered(true);
@@ -596,17 +617,17 @@ export default function BeginnerPage() {
     const restartVoice = async () => {
       if (phase === 'pakad_watch') {
         await safeStartVoicePipeline(
-          (result: PitchResult) => {
-            setVoiceFeedback(pitchResultToFeedback(result, result.nearestSwara));
+          (result: PitchResult, pitchHistory?: readonly [number, number][]) => {
+            setVoiceFeedback(pitchResultToFeedback(result, result.nearestSwara, pitchHistory));
           },
           () => {
             setPakadTriggered(true);
           },
         );
       } else {
-        await safeStartVoicePipeline((result: PitchResult) => {
+        await safeStartVoicePipeline((result: PitchResult, pitchHistory?: readonly [number, number][]) => {
           const target = phase === 'sing_sa' ? 'Sa' : 'Sa';
-          setVoiceFeedback(pitchResultToFeedback(result, target));
+          setVoiceFeedback(pitchResultToFeedback(result, target, pitchHistory));
         });
       }
     };
@@ -664,6 +685,36 @@ export default function BeginnerPage() {
           <h1 className={lessonStyles.phaseTitle}>{copy.screenTitle}</h1>
           <p className={lessonStyles.phaseBody}>{copy.body}</p>
         </header>
+
+        {/* Headphone callout — shown once per session on first voice phase */}
+        <AnimatePresence>
+          {showHeadphoneCallout && (
+            <motion.div
+              key="headphone-callout"
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.25 }}
+              className={lessonStyles.headphoneCallout}
+              role="status"
+              aria-live="polite"
+            >
+              <span className={lessonStyles.headphoneCalloutText}>
+                For best results, use headphones — the tanpura drone can interfere with pitch detection.
+              </span>
+              <button
+                type="button"
+                className={lessonStyles.headphoneCalloutDismiss}
+                onClick={() => setHeadphoneCalloutDismissed(true)}
+                aria-label="Dismiss headphone suggestion"
+              >
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                  <path d="M10.5 3.5L3.5 10.5M3.5 3.5L10.5 10.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                </svg>
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Phase content */}
         <div className={lessonStyles.phaseContent}>

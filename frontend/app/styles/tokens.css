@@ -165,8 +165,11 @@
 
   /* -- Texture --------------------------------------------------------- */
   --jali-opacity: 0.04;
-  --jali-opacity-reveal: 1;
+  --jali-opacity-raga: 0.08;
+  --jali-opacity-pitch: 0.12;
   --jali-opacity-settle: 0.15;
+  --jali-opacity-level: 0.20;
+  --jali-opacity-reveal: 1;
   --jali-size: 48px 48px;
   --ink-diffusion-duration: 2400ms;
   --ink-diffusion-feather: 20%;
