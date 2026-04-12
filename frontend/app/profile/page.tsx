@@ -20,6 +20,7 @@ import { useAuth } from '../lib/auth';
 import { getRecentRagas } from '../lib/supabase';
 import { getLevelTitle } from '../lib/types';
 import type { LevelTitle, RecentRaga } from '../lib/types';
+import { getLevelIcon } from '../components/icons';
 import styles from './profile.module.css';
 
 // ---------------------------------------------------------------------------
@@ -243,6 +244,12 @@ export default function ProfilePage() {
                     : 'none',
               }}
             >
+              {(() => {
+                const LevelIcon = getLevelIcon(levelTitle);
+                return LevelIcon ? (
+                  <LevelIcon size={16} color="rgba(255,255,255,0.92)" />
+                ) : null;
+              })()}
               {levelTitle}
             </span>
           </div>
@@ -364,7 +371,21 @@ export default function ProfilePage() {
                         ? { background: LEVEL_BADGE_COLORS[node.title] }
                         : undefined
                     }
-                  />
+                  >
+                    {(() => {
+                      const NodeIcon = getLevelIcon(node.title);
+                      return NodeIcon ? (
+                        <NodeIcon
+                          size={isCurrent ? 28 : 20}
+                          color={
+                            isFuture
+                              ? 'var(--text-3)'
+                              : 'rgba(255,255,255,0.9)'
+                          }
+                        />
+                      ) : null;
+                    })()}
+                  </span>
                   <div className={styles.levelInfo}>
                     <span
                       className={`${styles.levelName} ${

@@ -23,6 +23,7 @@ import {
 } from '@/engine/theory';
 import type { Raga, Prahara, Rasa, SwaraNote } from '@/engine/theory/types';
 import { useLessonAudio } from '../../lib/lesson-audio';
+import { getRagaIcon } from '../../components/icons';
 import styles from '../../styles/explorer.module.css';
 
 // ---------------------------------------------------------------------------
@@ -387,6 +388,8 @@ export default function ExplorerPage() {
             const swaraCount = getArohaCount(raga);
             const isPlaying = playingRagaId === raga.id;
 
+            const RagaIcon = getRagaIcon(raga.id);
+
             return (
               <motion.article
                 key={raga.id}
@@ -394,6 +397,11 @@ export default function ExplorerPage() {
                 variants={fadeUp}
                 role="listitem"
               >
+                {RagaIcon && (
+                  <div className={styles.ragaIconWrap}>
+                    <RagaIcon size={40} color="var(--text-2)" />
+                  </div>
+                )}
                 <h2 className={styles.ragaName}>{raga.name}</h2>
                 <span className={styles.ragaDevanagari}>
                   {raga.nameDevanagari}

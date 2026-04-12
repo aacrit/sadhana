@@ -102,6 +102,7 @@
 .levelBadge {
   display: inline-flex;
   align-items: center;
+  gap: var(--space-1-5);
   padding: var(--space-1) var(--space-3);
   border-radius: var(--radius-full);
   font-family: var(--font-sans);
@@ -270,9 +271,9 @@
 .levelTrack::before {
   content: '';
   position: absolute;
-  left: calc(var(--space-4) + 5px);
-  top: 6px;
-  bottom: 6px;
+  left: calc(var(--space-4) + 17px);
+  top: 18px;
+  bottom: 18px;
   width: 1px;
   background: var(--border);
 }
@@ -290,8 +291,11 @@
 }
 
 .levelDot {
-  width: 12px;
-  height: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
   border-radius: var(--radius-full);
   border: 2px solid var(--border);
   background: var(--bg);

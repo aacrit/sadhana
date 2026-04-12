@@ -25,6 +25,8 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import Logo from './components/Logo';
 import TanpuraViz from './components/TanpuraViz';
+import { getJourneyIcon } from './components/icons';
+import FreeformIcon from './components/icons/FreeformIcon';
 import { useAuth } from './lib/auth';
 import { getRecentRagas } from './lib/supabase';
 import { getRagaForTimeOfDay } from '@/engine/theory';
@@ -256,6 +258,8 @@ export default function HomePage() {
         {JOURNEYS.map((journey) => {
           const isLocked = !journey.accessible;
 
+          const JourneyIcon = getJourneyIcon(journey.id);
+
           const card = (
             <motion.div
               key={journey.id}
@@ -263,6 +267,11 @@ export default function HomePage() {
               variants={cardVariants}
               role="listitem"
             >
+              {JourneyIcon && (
+                <div className={styles.journeyIconWrap}>
+                  <JourneyIcon size={48} color="var(--text-3)" />
+                </div>
+              )}
               <span className={styles.journeyName}>{journey.name}</span>
               <span className={styles.journeySanskrit}>
                 {journey.nameSanskrit}
@@ -288,6 +297,11 @@ export default function HomePage() {
               style={{ textDecoration: 'none', color: 'inherit' }}
             >
               <motion.div variants={cardVariants} role="listitem">
+                {JourneyIcon && (
+                  <div className={styles.journeyIconWrap}>
+                    <JourneyIcon size={48} color="var(--text-2)" />
+                  </div>
+                )}
                 <span className={styles.journeyName}>{journey.name}</span>
                 <span className={styles.journeySanskrit}>
                   {journey.nameSanskrit}
@@ -313,6 +327,9 @@ export default function HomePage() {
           className={styles.freeformCard}
           style={{ textDecoration: 'none', color: 'inherit' }}
         >
+          <div className={styles.journeyIconWrap}>
+            <FreeformIcon size={40} color="var(--text-3)" />
+          </div>
           <span className={styles.freeformName}>Freeform Riyaz</span>
           <span className={styles.freeformSanskrit}>Swatantra</span>
           <p className={styles.freeformDescription}>

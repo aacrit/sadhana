@@ -164,6 +164,14 @@
   pointer-events: none;
 }
 
+.journeyIconWrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: var(--space-2);
+  opacity: 0.8;
+}
+
 .journeyName {
   font-family: var(--font-serif);
   font-size: var(--text-xl);

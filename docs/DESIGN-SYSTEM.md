@@ -475,3 +475,52 @@ When practice ends or raga changes:
 1. Current raga world fades via reverse ink diffusion (2400ms).
 2. Brief neutral state (base palette).
 3. New raga world diffuses in (if changing ragas).
+
+---
+
+## Icon System
+
+Full icon direction in `docs/ICON-DIRECTION.md`. Summary:
+
+### Level Mega Icons (Harmonic Accumulation)
+
+Each level icon contains the geometry of all previous levels. The unifying structure is the tanpura string.
+
+| Level | Geometry | What is added |
+|-------|----------|---------------|
+| Shishya | Single string + hollow Sa point | Knows only Sa |
+| Sadhaka | Two strings (Sa+Pa) + interval mark + filled Sa | Hears intervals |
+| Varistha | Four strings + resonance arcs | Hears overtones |
+| Guru | Closed arc + 22 shruti radiants (zarr-kashi) | Hears everything |
+
+Sizes: 200px (hero/profile), 64px (badge), 16px (silhouette).
+
+### Journey Icons
+
+| Journey | Shape | Quality |
+|---------|-------|---------|
+| Beginner | Ascending curve with tick marks | Guided, rising |
+| Explorer | Branching paths from single root | Choice, discovery |
+| Scholar | Precise lattice with emphasized nodes | Analysis, precision |
+| Master | Opening spiral with marks along curve | Generation, creation |
+| Freeform | Gapped circle with undulating wave | Freedom, pure voice |
+
+### Arrival Motion
+
+| Interaction | Spring preset |
+|-------------|--------------|
+| Page-load | Tanpura Release (400/15), 80ms stagger |
+| Hover | Andolan (120/8), 3% scale |
+| Press | Kan (1000/30), instant snap |
+| Level unlock | Meend (80/20) + GSAP path draw, ~1600ms |
+
+### Jali Texture Thresholds
+
+| Trigger | Opacity | Duration |
+|---------|---------|----------|
+| Default (ambient) | 4% | Persistent |
+| Raga world active | 8% | 2400ms ramp |
+| Correct pitch sustained >2s | 12% | 600ms ramp |
+| Pakad recognition | 100% -> 15% -> 4% | GSAP multi-phase |
+| Level unlock | 20% | 1200ms up, 2400ms down |
+| Session complete | 10% | 800ms up, 1600ms down |

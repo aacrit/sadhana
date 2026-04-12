@@ -198,6 +198,14 @@
   border-color: var(--text-3);
 }
 
+.ragaIconWrap {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  margin-bottom: var(--space-1);
+  opacity: 0.8;
+}
+
 .ragaName {
   font-family: var(--font-serif);
   font-size: var(--text-xl);
