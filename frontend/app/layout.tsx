@@ -12,6 +12,7 @@ import { Cormorant_Garamond, Noto_Serif_Devanagari, Inter, IBM_Plex_Mono } from 
 import Providers from './providers';
 import './globals.css';
 import ServiceWorkerRegistrar from './components/ServiceWorkerRegistrar';
+import Navbar from './components/Navbar';
 
 // ---------------------------------------------------------------------------
 // Fonts — the four voices of Ragamala
@@ -106,6 +107,7 @@ export default function RootLayout({
         </a>
         <ServiceWorkerRegistrar />
         <Providers>
+          <Navbar />
           <main id="main-content">{children}</main>
         </Providers>
       </body>

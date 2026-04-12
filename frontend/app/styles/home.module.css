@@ -4,6 +4,9 @@
  * Single-column, centered, cinematic entry. The tanpura waveform
  * fills the background. Journeys stack vertically on mobile,
  * 2x2 grid on desktop.
+ *
+ * Per-card color worlds: Beginner (saffron hairline), Explorer (Sadhaka green),
+ * Scholar (lapis + gold), Master (gold glow), Freeform (void portal).
  */
 
 .page {
@@ -12,8 +15,24 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: var(--space-6) var(--space-4);
+  padding: calc(var(--navbar-height, 48px) + var(--space-6)) var(--space-4) var(--space-6);
   overflow: hidden;
+}
+
+/* Vignette overlay — radial darkening at edges like a Mughal miniature border */
+.page::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse 80% 70% at 50% 45%,
+    transparent 0%,
+    transparent 50%,
+    rgba(0, 0, 0, 0.15) 80%,
+    var(--canvas-vignette-outer, rgba(0, 0, 0, 0.35)) 100%
+  );
 }
 
 /* -- Header ---------------------------------------------------------- */
@@ -112,7 +131,7 @@
   }
 }
 
-/* -- Journey card ---------------------------------------------------- */
+/* -- Journey card (base) --------------------------------------------- */
 
 .journeyCard {
   position: relative;
@@ -125,7 +144,7 @@
   border: 1px solid var(--border);
   cursor: pointer;
   overflow: hidden;
-  transition: transform var(--dur-fast) var(--spring),
+  transition: transform var(--dur-fast) var(--ease-out),
               border-color var(--dur-fast) var(--ease-out),
               box-shadow var(--dur-fast) var(--ease-out);
   text-decoration: none;
@@ -133,7 +152,7 @@
   min-height: var(--touch-min);
 }
 
-/* Jali lattice texture on journey cards */
+/* Jali lattice texture on journey cards (default white) */
 .journeyCard::before {
   content: '';
   position: absolute;
@@ -147,21 +166,14 @@
   z-index: 0;
 }
 
-.journeyCard:hover {
-  transform: translateY(-2px);
-  border-color: var(--text-3);
-  box-shadow: var(--shadow-md);
-}
-
 .journeyCard:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
 
+/* Locked cards: NOT dimmed. Full visual richness. Aspirational. */
 .journeyCardLocked {
-  opacity: 0.5;
   cursor: default;
-  pointer-events: none;
 }
 
 .journeyIconWrap {
@@ -170,6 +182,8 @@
   justify-content: center;
   margin-bottom: var(--space-2);
   opacity: 0.8;
+  position: relative;
+  z-index: 1;
 }
 
 .journeyName {
@@ -177,6 +191,8 @@
   font-size: var(--text-xl);
   font-weight: var(--weight-regular);
   color: var(--text);
+  position: relative;
+  z-index: 1;
 }
 
 .journeySanskrit {
@@ -185,6 +201,8 @@
   font-weight: var(--weight-light);
   color: var(--text-3);
   font-style: italic;
+  position: relative;
+  z-index: 1;
 }
 
 .journeyDescription {
@@ -192,6 +210,8 @@
   font-size: var(--text-sm);
   color: var(--text-2);
   line-height: var(--leading-relaxed);
+  position: relative;
+  z-index: 1;
 }
 
 .journeyLockMessage {
@@ -199,6 +219,265 @@
   font-size: var(--text-xs);
   color: var(--text-3);
   margin-top: var(--space-2);
+  position: relative;
+  z-index: 1;
+}
+
+/* =======================================================================
+   PER-CARD COLOR WORLDS
+   ======================================================================= */
+
+/* -- Beginner / Arambh -- Shishya palette ----------------------------- */
+
+.cardBeginner {
+  background: var(--card-beginner-bg, #0A1A14);
+  border: 1px solid var(--card-beginner-border, rgba(232, 135, 30, 0.2));
+}
+
+.cardBeginner::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cpath d='M24 0L30 6L48 6L42 12L48 18L42 18L48 24L42 30L48 42L42 42L36 48L30 42L24 48L18 42L12 48L6 42L0 48L0 42L6 36L0 30L0 24L6 18L0 12L6 6L0 6L6 0L12 6L18 0L24 6L30 0Z' fill='none' stroke='%23E8871E' stroke-width='0.5'/%3E%3Cpath d='M24 12L30 18L36 12L42 18L36 24L42 30L36 36L30 30L24 36L18 30L12 36L6 30L12 24L6 18L12 12L18 18Z' fill='none' stroke='%23E8871E' stroke-width='0.5'/%3E%3C/svg%3E");
+  opacity: 0.03;
+}
+
+.cardBeginner .journeySanskrit {
+  color: rgba(232, 135, 30, 0.5);
+}
+
+.cardBeginner:hover {
+  transform: translateY(-2px) scale(1.015);
+  border-color: rgba(232, 135, 30, 0.35);
+  box-shadow: inset 0 0 30px rgba(232, 135, 30, 0.04);
+}
+
+.cardBeginner:active {
+  transform: scale(0.98);
+  border-color: rgba(232, 135, 30, 0.5);
+}
+
+/* -- Explorer / Anveshana -- Sadhaka palette -------------------------- */
+
+.cardExplorer {
+  background:
+    radial-gradient(ellipse at 20% 80%, rgba(45, 106, 79, 0.08) 0%, transparent 60%),
+    linear-gradient(160deg, #0F241C 0%, #132E22 50%, #1A3A2E 100%);
+  border: 1px solid var(--card-explorer-border, rgba(45, 106, 79, 0.25));
+}
+
+.cardExplorer::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cpath d='M24 0L30 6L48 6L42 12L48 18L42 18L48 24L42 30L48 42L42 42L36 48L30 42L24 48L18 42L12 48L6 42L0 48L0 42L6 36L0 30L0 24L6 18L0 12L6 6L0 6L6 0L12 6L18 0L24 6L30 0Z' fill='none' stroke='%235C9E6E' stroke-width='0.5'/%3E%3Cpath d='M24 12L30 18L36 12L42 18L36 24L42 30L36 36L30 30L24 36L18 30L12 36L6 30L12 24L6 18L12 12L18 18Z' fill='none' stroke='%235C9E6E' stroke-width='0.5'/%3E%3C/svg%3E");
+  opacity: 0.04;
+}
+
+.cardExplorer .journeySanskrit {
+  color: rgba(92, 158, 110, 0.6);
+}
+
+.cardExplorer:hover {
+  transform: translateY(-2px) scale(1.015);
+  border-color: rgba(45, 106, 79, 0.4);
+  box-shadow: inset 0 0 30px rgba(92, 158, 110, 0.04);
+}
+
+.cardExplorer:active {
+  transform: scale(0.98);
+  border-color: rgba(45, 106, 79, 0.5);
+}
+
+/* -- Scholar / Vidvan -- Varistha palette ----------------------------- */
+
+.cardScholar {
+  background:
+    radial-gradient(ellipse at 80% 20%, rgba(30, 58, 95, 0.12) 0%, transparent 50%),
+    linear-gradient(170deg, #0D1520 0%, #142235 50%, #1E3A5F 100%);
+  border: 1px solid var(--card-scholar-border, rgba(212, 175, 55, 0.15));
+  cursor: default;
+}
+
+.cardScholar::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cpath d='M24 0L30 6L48 6L42 12L48 18L42 18L48 24L42 30L48 42L42 42L36 48L30 42L24 48L18 42L12 48L6 42L0 48L0 42L6 36L0 30L0 24L6 18L0 12L6 6L0 6L6 0L12 6L18 0L24 6L30 0Z' fill='none' stroke='%237A9EC8' stroke-width='0.5'/%3E%3Cpath d='M24 12L30 18L36 12L42 18L36 24L42 30L36 36L30 30L24 36L18 30L12 36L6 30L12 24L6 18L12 12L18 18Z' fill='none' stroke='%237A9EC8' stroke-width='0.5'/%3E%3C/svg%3E");
+  opacity: 0.03;
+}
+
+.cardScholar .journeyName {
+  color: #D8DEE8;
+}
+
+.cardScholar .journeySanskrit {
+  color: rgba(212, 175, 55, 0.4);
+}
+
+.cardScholar .journeyLockMessage {
+  border-top: 1px solid rgba(212, 175, 55, 0.15);
+  padding-top: var(--space-3);
+  margin-top: auto;
+}
+
+.cardScholar:hover {
+  box-shadow: inset 0 0 40px rgba(30, 58, 95, 0.06);
+}
+
+/* -- Master / Acharya -- Guru palette -------------------------------- */
+
+.cardMaster {
+  background:
+    radial-gradient(ellipse at 50% 50%, rgba(212, 175, 55, 0.06) 0%, transparent 50%),
+    linear-gradient(175deg, #12100A 0%, #1A1608 50%, #221E0E 100%);
+  border: 1px solid var(--card-master-border, rgba(212, 175, 55, 0.2));
+  cursor: default;
+}
+
+.cardMaster::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cpath d='M24 0L30 6L48 6L42 12L48 18L42 18L48 24L42 30L48 42L42 42L36 48L30 42L24 48L18 42L12 48L6 42L0 48L0 42L6 36L0 30L0 24L6 18L0 12L6 6L0 6L6 0L12 6L18 0L24 6L30 0Z' fill='none' stroke='%23D4AF37' stroke-width='0.5'/%3E%3Cpath d='M24 12L30 18L36 12L42 18L36 24L42 30L36 36L30 30L24 36L18 30L12 36L6 30L12 24L6 18L12 12L18 18Z' fill='none' stroke='%23D4AF37' stroke-width='0.5'/%3E%3C/svg%3E");
+  opacity: 0.025;
+}
+
+.cardMaster .journeyName {
+  color: #E8DCC8;
+}
+
+.cardMaster .journeySanskrit {
+  color: rgba(212, 175, 55, 0.5);
+}
+
+.cardMaster .journeyLockMessage {
+  border-top: 1px solid rgba(212, 175, 55, 0.2);
+  padding-top: var(--space-3);
+  margin-top: auto;
+}
+
+.cardMaster:hover {
+  box-shadow: inset 0 0 40px rgba(212, 175, 55, 0.04);
+}
+
+/* =======================================================================
+   FREEFORM CARD -- The void portal
+   ======================================================================= */
+
+.freeformCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  width: 100%;
+  max-width: var(--max-width);
+  aspect-ratio: 16 / 7;
+  min-height: 160px;
+  margin-top: var(--space-6);
+  padding: var(--space-8) var(--space-6);
+  border-radius: var(--radius-xl);
+  border: none;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  text-decoration: none;
+  color: inherit;
+  background:
+    radial-gradient(
+      ellipse 120% 100% at 50% 50%,
+      #0A1A14 0%,
+      var(--freeform-indigo, #0D0D1A) 30%,
+      var(--freeform-violet, #1A0A2E) 70%,
+      #0A1A14 100%
+    );
+  background-size: 200% 200%;
+  animation: freeformShift 30s ease-in-out infinite;
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+
+/* Edge glow -- emits rather than contains */
+.freeformCard::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: linear-gradient(
+    135deg,
+    var(--freeform-violet-accent, rgba(139, 92, 246, 0.08)) 0%,
+    transparent 30%,
+    transparent 70%,
+    var(--freeform-sapphire-accent, rgba(59, 130, 246, 0.06)) 100%
+  );
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.5;
+  transition: opacity var(--dur-fast) var(--ease-out);
+}
+
+@keyframes freeformShift {
+  0%   { background-position: 0% 50%; }
+  25%  { background-position: 50% 0%; }
+  50%  { background-position: 100% 50%; }
+  75%  { background-position: 50% 100%; }
+  100% { background-position: 0% 50%; }
+}
+
+.freeformCard:hover {
+  animation-duration: 12s;
+  transform: scale(1.01);
+}
+
+.freeformCard:hover::after {
+  opacity: 1;
+}
+
+.freeformCard:hover .freeformDescription {
+  animation: none;
+  opacity: 0.9;
+}
+
+.freeformCard:active {
+  transform: scale(0.99);
+  animation-play-state: paused;
+}
+
+.freeformCard:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.freeformName {
+  font-family: var(--font-serif);
+  font-size: var(--text-xl);
+  font-weight: var(--weight-light);
+  color: var(--text);
+  letter-spacing: var(--tracking-wide);
+  position: relative;
+  z-index: 1;
+}
+
+.freeformSanskrit {
+  font-family: var(--font-serif);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-light);
+  color: var(--freeform-violet-accent, rgba(139, 92, 246, 0.5));
+  font-style: italic;
+  position: relative;
+  z-index: 1;
+}
+
+.freeformDescription {
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  color: var(--text-3);
+  line-height: var(--leading-relaxed);
+  animation: freeformBreathe 6s ease-in-out infinite;
+  position: relative;
+  z-index: 1;
+}
+
+.freeformIconWrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: var(--space-3);
+  position: relative;
+  z-index: 1;
+}
+
+@keyframes freeformBreathe {
+  0%, 100% { opacity: 0.5; }
+  50%      { opacity: 0.8; }
 }
 
 /* -- Loading state --------------------------------------------------- */
@@ -222,38 +501,6 @@
 @keyframes homePulse {
   0%, 100% { opacity: 0.3; transform: scale(0.8); }
   50% { opacity: 1; transform: scale(1.2); }
-}
-
-/* -- Auth banner (non-blocking) -------------------------------------- */
-
-.authBanner {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-2);
-  width: 100%;
-  max-width: var(--max-width);
-  padding: var(--space-3) var(--space-4);
-  margin-bottom: var(--space-4);
-  border-radius: var(--radius-md);
-  background: var(--bg-3);
-  border: 1px solid var(--border);
-  text-decoration: none;
-  color: var(--text-2);
-  z-index: var(--z-base);
-  min-height: var(--touch-min);
-  transition: border-color var(--dur-fast) var(--ease-out),
-              color var(--dur-fast) var(--ease-out);
-}
-
-.authBanner:hover {
-  border-color: var(--text-3);
-  color: var(--text);
-}
-
-.authBannerText {
-  font-family: var(--font-sans);
-  font-size: var(--text-sm);
 }
 
 /* -- XP display ------------------------------------------------------ */
@@ -310,65 +557,21 @@
   color: var(--text-2);
 }
 
-/* -- Freeform card (standalone, below journey grid) ------------------ */
-
-.freeformCard {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  padding: var(--space-5) var(--space-6);
-  margin-top: var(--space-4);
-  border-radius: var(--radius-lg);
-  background: transparent;
-  border: 1px dashed var(--border);
-  cursor: pointer;
-  transition: transform var(--dur-fast) var(--spring),
-              border-color var(--dur-fast) var(--ease-out),
-              background var(--dur-fast) var(--ease-out);
-  text-decoration: none;
-  color: inherit;
-  min-height: var(--touch-min);
-  text-align: center;
-}
-
-.freeformCard:hover {
-  transform: translateY(-2px);
-  border-color: var(--accent-dim);
-  background: var(--bg-3);
-}
-
-.freeformCard:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-}
-
-.freeformName {
-  font-family: var(--font-serif);
-  font-size: var(--text-lg);
-  font-weight: var(--weight-regular);
-  color: var(--text);
-}
-
-.freeformSanskrit {
-  font-family: var(--font-serif);
-  font-size: var(--text-sm);
-  font-weight: var(--weight-light);
-  color: var(--text-3);
-  font-style: italic;
-}
-
-.freeformDescription {
-  font-family: var(--font-sans);
-  font-size: var(--text-sm);
-  color: var(--text-3);
-  line-height: var(--leading-relaxed);
-}
-
 /* -- Reduced motion -------------------------------------------------- */
 
 @media (prefers-reduced-motion: reduce) {
   .loadingDot {
     animation: none;
     opacity: 1;
+  }
+
+  .freeformCard {
+    animation: none;
+    background-position: 50% 50%;
+  }
+
+  .freeformDescription {
+    animation: none;
+    opacity: 0.7;
   }
 }

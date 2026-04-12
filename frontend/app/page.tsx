@@ -1,21 +1,20 @@
 /**
  * page.tsx — Journey selection screen
  *
- * The entry point to Sadhana. Shows all four journeys, the current
- * time-of-day raga, the user's streak, and the tanpura waveform
- * as an ambient background.
+ * The entry point to Sadhana. Shows all four journeys in a color-world
+ * grid, the Freeform void portal below, the current time-of-day raga,
+ * the user's streak, and the tanpura waveform as an ambient background.
  *
- * Auth-aware:
- *   - Shows real XP, level, streak from profile if signed in
- *   - Falls back to zeros for guests
- *   - Shows a non-blocking sign-in banner if not authenticated and not guest
- *   - Loading state: pulsing saffron dot
+ * Auth state is handled by the persistent Navbar (layout.tsx).
+ * No inline auth banner.
  *
- * Beginner: fully accessible.
- * Explorer: partially accessible.
- * Scholar/Master: locked behind level gate.
+ * Per-card color worlds: Beginner (saffron), Explorer (green),
+ * Scholar (lapis), Master (gold). Freeform breaks the grid.
  *
- * Framer Motion: journeys animate in with stagger.
+ * Framer Motion spring physics:
+ *   - Tanpura Release (400/15) for page-load card stagger
+ *   - Andolan (120/8) for hover
+ *   - Kan (1000/30) for press/tap
  */
 
 'use client';
@@ -81,14 +80,26 @@ const JOURNEYS: JourneyMeta[] = [
 ];
 
 // ---------------------------------------------------------------------------
-// Animation variants
+// Per-card CSS class map
+// ---------------------------------------------------------------------------
+
+const CARD_CLASS_MAP: Record<string, string | undefined> = {
+  beginner: styles.cardBeginner,
+  explorer: styles.cardExplorer,
+  scholar: styles.cardScholar,
+  master: styles.cardMaster,
+};
+
+// ---------------------------------------------------------------------------
+// Animation variants — Tanpura Release spring (400/15)
 // ---------------------------------------------------------------------------
 
 const containerVariants = {
   hidden: {},
   visible: {
     transition: {
-      staggerChildren: 0.1,
+      staggerChildren: 0.08,
+      delayChildren: 0.15,
     },
   },
 };
@@ -99,8 +110,51 @@ const cardVariants = {
     opacity: 1,
     y: 0,
     transition: {
-      duration: 0.5,
-      ease: [0.16, 1, 0.3, 1] as const,
+      type: 'spring' as const,
+      stiffness: 400,
+      damping: 15,
+    },
+  },
+};
+
+const iconVariants = {
+  hidden: { opacity: 0, scale: 0.7 },
+  visible: (i: number) => ({
+    opacity: 1,
+    scale: 1,
+    transition: {
+      type: 'spring' as const,
+      stiffness: 400,
+      damping: 15,
+      delay: i * 0.08 + 0.04,
+    },
+  }),
+};
+
+const freeformVariants = {
+  hidden: { opacity: 0, y: 40 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      type: 'spring' as const,
+      stiffness: 400,
+      damping: 15,
+      delay: 0.15 + (4 * 0.08) + 0.12,
+    },
+  },
+};
+
+const freeformIconVariants = {
+  hidden: { opacity: 0, scale: 0.7 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    transition: {
+      type: 'spring' as const,
+      stiffness: 400,
+      damping: 15,
+      delay: 0.15 + (4 * 0.08) + 0.12 + 0.04,
     },
   },
 };
@@ -116,15 +170,6 @@ const headerVariants = {
     },
   },
 };
-
-// ---------------------------------------------------------------------------
-// Guest flag helper
-// ---------------------------------------------------------------------------
-
-function isGuestMode(): boolean {
-  if (typeof window === 'undefined') return false;
-  return localStorage.getItem('sadhana_guest') === 'true';
-}
 
 // ---------------------------------------------------------------------------
 // Page
@@ -152,8 +197,9 @@ export default function HomePage() {
   const streak = profile?.streak ?? 0;
   const xp = profile?.xp ?? 0;
 
-  // Show auth banner if not signed in and not in guest mode
-  const showAuthBanner = !loading && !user && !isGuest && !isGuestMode();
+  // Suppress unused variable warnings — isGuest and loading are
+  // consumed by the Navbar (via layout.tsx), not on the page directly.
+  void isGuest;
 
   // Loading state
   if (loading) {
@@ -170,30 +216,6 @@ export default function HomePage() {
     <div className={styles.page} data-raga={todayRaga.id}>
       {/* Ambient tanpura waveform background */}
       <TanpuraViz active={false} />
-
-      {/* Auth banner (non-blocking) */}
-      {showAuthBanner && (
-        <Link href="/auth" className={styles.authBanner}>
-          <span className={styles.authBannerText}>
-            Sign in to save your progress
-          </span>
-          <svg
-            width="14"
-            height="14"
-            viewBox="0 0 16 16"
-            fill="none"
-            aria-hidden="true"
-          >
-            <path
-              d="M6 4L10 8L6 12"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </Link>
-      )}
 
       {/* Header: logo + tagline */}
       <motion.header
@@ -255,22 +277,27 @@ export default function HomePage() {
         role="list"
         aria-label="Choose your journey"
       >
-        {JOURNEYS.map((journey) => {
+        {JOURNEYS.map((journey, i) => {
           const isLocked = !journey.accessible;
-
           const JourneyIcon = getJourneyIcon(journey.id);
+          const cardClass = CARD_CLASS_MAP[journey.id] || '';
 
-          const card = (
-            <motion.div
-              key={journey.id}
-              className={`${styles.journeyCard} ${isLocked ? styles.journeyCardLocked : ''}`}
-              variants={cardVariants}
-              role="listitem"
-            >
+          // Card content — shared between locked and linked states
+          const cardContent = (
+            <>
               {JourneyIcon && (
-                <div className={styles.journeyIconWrap}>
-                  <JourneyIcon size={48} color="var(--text-3)" />
-                </div>
+                <motion.div
+                  className={styles.journeyIconWrap}
+                  variants={iconVariants}
+                  initial="hidden"
+                  animate="visible"
+                  custom={i}
+                >
+                  <JourneyIcon
+                    size={48}
+                    color={isLocked ? 'var(--text-3)' : 'var(--text-2)'}
+                  />
+                </motion.div>
               )}
               <span className={styles.journeyName}>{journey.name}</span>
               <span className={styles.journeySanskrit}>
@@ -284,52 +311,95 @@ export default function HomePage() {
                   Coming soon — reach Sadhaka level
                 </span>
               )}
-            </motion.div>
+            </>
           );
 
-          if (isLocked) return card;
+          if (isLocked) {
+            return (
+              <motion.div
+                key={journey.id}
+                className={`${styles.journeyCard} ${styles.journeyCardLocked} ${cardClass}`}
+                variants={cardVariants}
+                role="listitem"
+                aria-disabled="true"
+                tabIndex={0}
+              >
+                {cardContent}
+              </motion.div>
+            );
+          }
 
           return (
-            <Link
+            <motion.div
               key={journey.id}
-              href={journey.path}
-              className={styles.journeyCard}
-              style={{ textDecoration: 'none', color: 'inherit' }}
+              variants={cardVariants}
+              role="listitem"
+              whileHover={{
+                scale: 1.015,
+                transition: {
+                  type: 'spring',
+                  stiffness: 120,
+                  damping: 8,
+                },
+              }}
+              whileTap={{
+                scale: 0.98,
+                y: 2,
+                transition: {
+                  type: 'spring',
+                  stiffness: 1000,
+                  damping: 30,
+                },
+              }}
             >
-              <motion.div variants={cardVariants} role="listitem">
-                {JourneyIcon && (
-                  <div className={styles.journeyIconWrap}>
-                    <JourneyIcon size={48} color="var(--text-2)" />
-                  </div>
-                )}
-                <span className={styles.journeyName}>{journey.name}</span>
-                <span className={styles.journeySanskrit}>
-                  {journey.nameSanskrit}
-                </span>
-                <p className={styles.journeyDescription}>
-                  {journey.description}
-                </p>
-              </motion.div>
-            </Link>
+              <Link
+                href={journey.path}
+                className={`${styles.journeyCard} ${cardClass}`}
+                style={{ textDecoration: 'none', color: 'inherit' }}
+              >
+                {cardContent}
+              </Link>
+            </motion.div>
           );
         })}
       </motion.div>
 
-      {/* Freeform Riyaz — standalone card, separate from structured journeys */}
+      {/* Freeform Riyaz — standalone card, full-width void portal */}
       <motion.div
-        variants={cardVariants}
+        variants={freeformVariants}
         initial="hidden"
         animate="visible"
         style={{ width: '100%', maxWidth: 'var(--max-width)', padding: '0 var(--space-4)' }}
+        whileHover={{
+          scale: 1.01,
+          transition: {
+            type: 'spring',
+            stiffness: 120,
+            damping: 8,
+          },
+        }}
+        whileTap={{
+          scale: 0.99,
+          transition: {
+            type: 'spring',
+            stiffness: 1000,
+            damping: 30,
+          },
+        }}
       >
         <Link
           href="/journeys/freeform"
           className={styles.freeformCard}
           style={{ textDecoration: 'none', color: 'inherit' }}
         >
-          <div className={styles.journeyIconWrap}>
+          <motion.div
+            className={styles.freeformIconWrap}
+            variants={freeformIconVariants}
+            initial="hidden"
+            animate="visible"
+          >
             <FreeformIcon size={40} color="var(--text-3)" />
-          </div>
+          </motion.div>
           <span className={styles.freeformName}>Freeform Riyaz</span>
           <span className={styles.freeformSanskrit}>Swatantra</span>
           <p className={styles.freeformDescription}>
