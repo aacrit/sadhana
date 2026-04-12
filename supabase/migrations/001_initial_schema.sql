@@ -4,11 +4,6 @@
 -- ============================================================
 
 -- ─────────────────────────────────────────────────────────────
--- EXTENSIONS
--- ─────────────────────────────────────────────────────────────
-create extension if not exists "uuid-ossp";
-
--- ─────────────────────────────────────────────────────────────
 -- PROFILES
 -- Mirrors auth.users. Created automatically on first sign-in.
 -- ─────────────────────────────────────────────────────────────
@@ -55,7 +50,7 @@ create trigger on_auth_user_created
 -- One row per daily practice block.
 -- ─────────────────────────────────────────────────────────────
 create table public.sessions (
-  id            uuid        primary key default uuid_generate_v4(),
+  id            uuid        primary key default gen_random_uuid(),
   user_id       uuid        not null references public.profiles(id) on delete cascade,
   raga_id       text        not null,
   sa_hz         numeric(8,4) not null,
@@ -90,7 +85,7 @@ create index sessions_user_started_idx on public.sessions (user_id, started_at d
 -- Individual pitch/phrase attempts within a session.
 -- ─────────────────────────────────────────────────────────────
 create table public.exercise_attempts (
-  id            uuid        primary key default uuid_generate_v4(),
+  id            uuid        primary key default gen_random_uuid(),
   session_id    uuid        not null references public.sessions(id) on delete cascade,
   user_id       uuid        not null references public.profiles(id) on delete cascade,
   exercise_type text        not null
@@ -123,7 +118,7 @@ create index attempts_user_raga_idx on public.exercise_attempts (user_id, raga_i
 -- Which lessons a user has started / completed per journey.
 -- ─────────────────────────────────────────────────────────────
 create table public.lesson_progress (
-  id            uuid        primary key default uuid_generate_v4(),
+  id            uuid        primary key default gen_random_uuid(),
   user_id       uuid        not null references public.profiles(id) on delete cascade,
   lesson_id     text        not null,     -- matches content/curriculum YAML lesson id
   journey       text        not null,
@@ -184,7 +179,7 @@ create policy "Users can update own streak"
 -- Supports "recent ragas" and raga unlock tracking.
 -- ─────────────────────────────────────────────────────────────
 create table public.raga_encounters (
-  id              uuid      primary key default uuid_generate_v4(),
+  id              uuid      primary key default gen_random_uuid(),
   user_id         uuid      not null references public.profiles(id) on delete cascade,
   raga_id         text      not null,
   session_count   integer   not null default 0,
