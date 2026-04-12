@@ -1,0 +1,340 @@
+/**
+ * ear-training.module.css — Ear training exercise page
+ *
+ * Centered single-column: progress bar at top, question area,
+ * 4-option grid, feedback, round counter.
+ */
+
+/* -- Page layout ----------------------------------------------------- */
+
+.page {
+  position: relative;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--space-6) var(--space-4);
+  max-width: var(--max-width);
+  margin: 0 auto;
+}
+
+/* -- Back navigation ------------------------------------------------- */
+
+.backLink {
+  align-self: flex-start;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  color: var(--text-3);
+  text-decoration: none;
+  padding: var(--space-2);
+  margin-bottom: var(--space-4);
+  border-radius: var(--radius-sm);
+  min-height: var(--touch-min);
+  min-width: var(--touch-min);
+  transition: color var(--dur-fast) var(--ease-out);
+}
+
+.backLink:hover {
+  color: var(--text-2);
+}
+
+/* -- Header ---------------------------------------------------------- */
+
+.header {
+  width: 100%;
+  text-align: center;
+  margin-bottom: var(--space-6);
+}
+
+.title {
+  font-family: var(--font-serif);
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-light);
+  color: var(--text);
+  margin-bottom: var(--space-2);
+}
+
+.ragaLabel {
+  font-family: var(--font-serif);
+  font-size: var(--text-md);
+  color: var(--text-2);
+}
+
+/* -- Progress bar ---------------------------------------------------- */
+
+.progressBarContainer {
+  width: 100%;
+  margin-bottom: var(--space-8);
+}
+
+.progressBarTrack {
+  width: 100%;
+  height: 6px;
+  border-radius: var(--radius-full);
+  background: var(--bg-3);
+  overflow: hidden;
+}
+
+.progressBarFill {
+  height: 100%;
+  border-radius: var(--radius-full);
+  background: var(--text-2);
+  transition: width var(--dur-normal) var(--ease-out);
+}
+
+.progressLabel {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-3);
+  text-align: center;
+  margin-top: var(--space-2);
+}
+
+/* -- Question area --------------------------------------------------- */
+
+.questionArea {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-6);
+  margin-bottom: var(--space-8);
+  flex: 1;
+}
+
+.prompt {
+  font-family: var(--font-sans);
+  font-size: var(--text-md);
+  color: var(--text);
+  text-align: center;
+}
+
+.listenButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  width: 80px;
+  height: 80px;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--text-2);
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-out),
+              border-color var(--dur-fast) var(--ease-out),
+              color var(--dur-fast) var(--ease-out),
+              transform var(--dur-fast) var(--spring);
+}
+
+.listenButton:hover {
+  background: var(--bg-3);
+  border-color: var(--text-3);
+  color: var(--text);
+  transform: scale(1.05);
+}
+
+.listenButton:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.listenButtonPlaying {
+  background: var(--accent-dim);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* -- Options grid ---------------------------------------------------- */
+
+.optionsGrid {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+  max-width: 400px;
+}
+
+.optionButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+  min-height: var(--touch-min);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--bg-3);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: var(--text-lg);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-wide);
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-out),
+              border-color var(--dur-fast) var(--ease-out),
+              transform var(--dur-fast) var(--spring);
+}
+
+.optionButton:hover {
+  background: var(--bg-4);
+  border-color: var(--text-3);
+  transform: translateY(-1px);
+}
+
+.optionButton:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.optionButton:disabled {
+  cursor: default;
+  transform: none;
+}
+
+.optionCorrect {
+  background: var(--correct-dim);
+  border-color: var(--correct);
+  color: var(--correct);
+}
+
+.optionWrong {
+  background: var(--needs-work-dim);
+  border-color: var(--needs-work);
+  color: var(--needs-work);
+}
+
+.optionRevealCorrect {
+  background: var(--correct-dim);
+  border-color: var(--correct);
+  color: var(--correct);
+}
+
+/* -- Feedback message ------------------------------------------------ */
+
+.feedback {
+  text-align: center;
+  min-height: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.feedbackCorrect {
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  color: var(--correct);
+}
+
+.feedbackWrong {
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  color: var(--needs-work);
+}
+
+.feedbackXp {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--accent);
+}
+
+/* -- Complete screen ------------------------------------------------- */
+
+.completeScreen {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-6);
+  padding: var(--space-12) var(--space-4);
+  text-align: center;
+}
+
+.completeTitle {
+  font-family: var(--font-serif);
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-light);
+  color: var(--text);
+}
+
+.completeStats {
+  display: flex;
+  gap: var(--space-8);
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.statValue {
+  font-family: var(--font-mono);
+  font-size: var(--text-xl);
+  color: var(--text);
+}
+
+.statValueAccent {
+  color: var(--accent);
+}
+
+.statLabel {
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-widest);
+}
+
+.returnLink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-3) var(--space-8);
+  min-height: var(--touch-min);
+  min-width: 120px;
+  border: 1px solid var(--text-3);
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-wide);
+  text-decoration: none;
+  transition: background var(--dur-fast) var(--ease-out),
+              border-color var(--dur-fast) var(--ease-out),
+              transform var(--dur-fast) var(--spring);
+}
+
+.returnLink:hover {
+  background: var(--bg-4);
+  border-color: var(--text-2);
+  transform: translateY(-1px);
+}
+
+.returnLink:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* -- Reduced motion -------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .listenButton,
+  .optionButton,
+  .returnLink,
+  .progressBarFill {
+    transition: none;
+  }
+
+  .listenButton:hover,
+  .optionButton:hover,
+  .returnLink:hover {
+    transform: none;
+  }
+}

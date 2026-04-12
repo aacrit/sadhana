@@ -176,3 +176,121 @@
   color: var(--text-3);
   margin-top: var(--space-2);
 }
+
+/* -- Loading state --------------------------------------------------- */
+
+.loadingContainer {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100dvh;
+}
+
+.loadingDot {
+  width: 12px;
+  height: 12px;
+  border-radius: var(--radius-full);
+  background: var(--accent);
+  animation: homePulse 1.5s var(--ease-in-out) infinite;
+}
+
+@keyframes homePulse {
+  0%, 100% { opacity: 0.3; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.2); }
+}
+
+/* -- Auth banner (non-blocking) -------------------------------------- */
+
+.authBanner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  width: 100%;
+  max-width: var(--max-width);
+  padding: var(--space-3) var(--space-4);
+  margin-bottom: var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  text-decoration: none;
+  color: var(--text-2);
+  z-index: var(--z-base);
+  min-height: var(--touch-min);
+  transition: border-color var(--dur-fast) var(--ease-out),
+              color var(--dur-fast) var(--ease-out);
+}
+
+.authBanner:hover {
+  border-color: var(--text-3);
+  color: var(--text);
+}
+
+.authBannerText {
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+}
+
+/* -- XP display ------------------------------------------------------ */
+
+.xpDisplay {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-1);
+  margin-bottom: var(--space-4);
+  z-index: var(--z-base);
+}
+
+.xpValue {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--text-2);
+}
+
+.xpUnit {
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-widest);
+}
+
+/* -- Recently practiced ---------------------------------------------- */
+
+.recentRagas {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-6);
+  z-index: var(--z-base);
+}
+
+.recentLabel {
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-widest);
+}
+
+.recentList {
+  display: flex;
+  gap: var(--space-4);
+}
+
+.recentRagaName {
+  font-family: var(--font-serif);
+  font-size: var(--text-sm);
+  color: var(--text-2);
+}
+
+/* -- Reduced motion -------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .loadingDot {
+    animation: none;
+    opacity: 1;
+  }
+}

@@ -1,0 +1,160 @@
+# Copy layer for beginner-05-bhimpalasi
+# lesson-writer owns this file. Do not merge into the lesson YAML.
+# Theory audit: PENDING
+
+lesson_id: beginner-05-bhimpalasi
+
+# --- PHASE COPY ----------------------------------------------------
+
+phases:
+
+  listen:
+    screen_title: "Listen"
+    body: |
+      Close your eyes.
+      The tanpura is playing. Afternoon light.
+    audio_label: null
+
+  sa_calibration:
+    screen_title: "Find Your Sa"
+    body: |
+      Sa is the home note. Everything starts and returns here.
+      Hum or sing a comfortable pitch. Hold it steady.
+    prompt: "Sing or hum a comfortable note."
+    calibrating_message: "Listening..."
+    success_message: "That's your Sa."
+
+  aroha_listen:
+    screen_title: "Climbing Up"
+    body: |
+      Listen to Bhimpalasi ascending. Five notes going up.
+      Two are missing. Listen for the gaps.
+
+  aroha_show:
+    body: |
+      Ni Sa Ga Ma Pa Ni Sa.
+      Five notes up. Re and Dha absent.
+
+  avaroha_listen:
+    screen_title: "Coming Down"
+    body: |
+      Now descending. All seven notes appear.
+      The descent is where Bhimpalasi opens up.
+
+  avaroha_show:
+    body: |
+      Sa Ni Dha Pa Ma Ga Re Sa.
+      Seven notes down. The full story.
+
+  meet_komal_ga:
+    screen_title: "Komal Ga"
+    body: |
+      The lowered third. It gives Bhimpalasi its tenderness.
+      First, hear the natural Ga. Then komal Ga.
+
+  meet_komal_ni:
+    screen_title: "Komal Ni"
+    body: |
+      The lowered seventh. It adds yearning.
+      First, hear the natural Ni. Then komal Ni.
+
+  asymmetry:
+    screen_title: "The Ascent"
+    body: |
+      Five notes going up. Broad strokes.
+
+  asymmetry_down:
+    screen_title: "The Descent"
+    body: |
+      Seven notes coming down. Step by step.
+      The climb is spare. The descent tells the story.
+
+  meet_bhimpalasi:
+    screen_title: "Five Notes"
+    body: |
+      The ascending swaras of Bhimpalasi. Listen to each one.
+    swara_reveal_delay_ms: 1200
+
+  sing_sa:
+    screen_title: "Sing Sa"
+    body: |
+      The anchor.
+    feedback:
+      correct: "That's Sa."
+      sharp: "A little high. Settle into the tanpura."
+      flat: "A little low. Rise to meet the drone."
+      silence: "Whenever you're ready."
+
+  sing_pakad:
+    screen_title: "Sing the Signature"
+    body: |
+      Follow the guide tone. Ni Sa Ga Ma.
+      Ma is the heart of this raga. Arrive there.
+    feedback:
+      correct: "Correct."
+      wrong_swara: "Listen to the guide tone again."
+      guide_tone_label: "Guide"
+
+  pakad_listen:
+    screen_title: "Circling Ma"
+    body: |
+      Ma Ga Ma Pa. The raga circles its centre, then rises.
+
+  pakad_listen_2:
+    screen_title: "The Full Descent"
+    body: |
+      Pa Ma Ga Re Sa. All the missing notes appear.
+
+  pakad_watch:
+    screen_title: "Free Singing"
+    body: |
+      Sing freely in Bhimpalasi.
+      The tanpura is with you.
+    pakad_found_headline: "Bhimpalasi"
+    pakad_found_subtext: "Ni Sa Ga Ma"
+
+  complete:
+    screen_title: "Session Complete"
+    xp_line: "+40 XP"
+    streak_line: null
+
+# --- THEORY NOTE ---------------------------------------------------
+
+theory_note:
+  title: "Raga Bhimpalasi"
+  body: |
+    Bhimpalasi is an audava-sampoorna raga of the Kafi thaat. Its ascent
+    uses five swaras (Ni Sa Ga Ma Pa Ni Sa -- omitting Re and Dha), while
+    its descent uses all seven (Sa Ni Dha Pa Ma Ga Re Sa). This asymmetry
+    is the raga's structural genius: ascending in broad strokes, descending
+    with detailed expression. The komal Ga gives emotional depth; the komal
+    Ni adds yearning. Ma is the vadi -- the emotional centre around which
+    all phrases orbit. The samvadi is Sa. Bhimpalasi's rasa is karuna
+    (pathos) and shringar (devotion). It belongs to the late afternoon,
+    the 3rd and 4th prahar.
+
+# --- WESTERN BRIDGE ------------------------------------------------
+
+western_bridge:
+  title: "Western Equivalent"
+  body: |
+    Western listeners may sense something akin to a Dorian or natural
+    minor quality from the komal Ga and komal Ni, but Bhimpalasi's
+    identity lies in its vakra (oblique) movement and the emotional
+    centrality of Ma -- characteristics without a Western parallel.
+    The concept of a scale that uses different notes ascending and
+    descending has no standard equivalent in Western theory.
+
+# --- CULTURAL NOTE -------------------------------------------------
+
+cultural_note:
+  title: "Afternoon Light"
+  body: |
+    Bhimpalasi belongs to the late afternoon -- the sun past its zenith,
+    shadows lengthening, the day's intensity beginning to yield. In the
+    Hindustani tradition, this is the hour of devotion and tenderness.
+    The raga's emotional quality -- karuna, a compassionate pathos --
+    aligns with the softening quality of afternoon light. Bhimpalasi
+    is related to Bageshri (a night raga) through their shared thaat
+    and komal swaras, but where Bageshri aches with separation,
+    Bhimpalasi glows with quiet warmth.

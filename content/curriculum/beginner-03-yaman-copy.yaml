@@ -1,0 +1,140 @@
+# Copy layer for beginner-03-yaman
+# lesson-writer owns this file. Do not merge into the lesson YAML.
+# Theory audit: PENDING
+
+lesson_id: beginner-03-yaman
+
+# --- PHASE COPY ----------------------------------------------------
+
+phases:
+
+  listen:
+    screen_title: "Listen"
+    body: |
+      Close your eyes.
+      The tanpura is playing. Evening light.
+    audio_label: null
+
+  sa_calibration:
+    screen_title: "Find Your Sa"
+    body: |
+      Sa is the home note. Everything starts and returns here.
+      Hum or sing a comfortable pitch. Hold it steady.
+    prompt: "Sing or hum a comfortable note."
+    calibrating_message: "Listening..."
+    success_message: "That's your Sa."
+
+  aroha_listen:
+    screen_title: "Climbing Up"
+    body: |
+      Listen to Yaman ascending. It begins below Sa, from Ni.
+      That's unusual. Notice it.
+
+  aroha_show:
+    body: |
+      Ni Re Ga Ma Pa Dha Ni Sa.
+      Seven notes. All natural except one.
+
+  avaroha_listen:
+    screen_title: "Coming Down"
+    body: |
+      Now descending. Listen to the fourth note from the top.
+      It has a different quality.
+
+  avaroha_show:
+    body: |
+      Sa Ni Dha Pa Ma Ga Re Sa.
+
+  meet_ma_tivra:
+    screen_title: "Tivra Ma"
+    body: |
+      That different note is tivra Ma -- the only raised note in Yaman.
+      First, hear the natural Ma. Then the raised one.
+      The raised Ma lifts everything upward.
+
+  meet_yaman:
+    screen_title: "Seven Notes"
+    body: |
+      Yaman uses seven swaras. Listen to each one.
+    swara_reveal_delay_ms: 1200
+
+  sing_sa:
+    screen_title: "Sing Sa"
+    body: |
+      The anchor, as always.
+    feedback:
+      correct: "That's Sa."
+      sharp: "A little high. Settle into the tanpura."
+      flat: "A little low. Rise to meet the drone."
+      silence: "Whenever you're ready."
+
+  sing_aroha:
+    screen_title: "Sing the Ascent"
+    body: |
+      Follow the guide tone up. One note at a time.
+      When you reach Ma, notice how it pulls upward.
+    feedback:
+      correct: "Correct."
+      wrong_swara: "Listen to the guide tone again."
+      guide_tone_label: "Guide"
+
+  pakad_listen:
+    screen_title: "Yaman's Signature"
+    body: |
+      Ni Re Ga. This phrase opens Yaman.
+      It starts below Sa and rises. Listen.
+
+  pakad_listen_2:
+    screen_title: "The Turn"
+    body: |
+      Ga Ma Re Sa. A turn back down through tivra Ma.
+
+  pakad_watch:
+    screen_title: "Free Singing"
+    body: |
+      Sing freely. Use the notes of Yaman.
+      The tanpura is with you.
+    pakad_found_headline: "Yaman"
+    pakad_found_subtext: "Ni Re Ga"
+
+  complete:
+    screen_title: "Session Complete"
+    xp_line: "+35 XP"
+    streak_line: null
+
+# --- THEORY NOTE ---------------------------------------------------
+
+theory_note:
+  title: "Raga Yaman"
+  body: |
+    Yaman is a sampoorna (seven-note) raga of the Kalyan thaat. Its
+    defining feature is tivra Ma -- the raised fourth degree. Every other
+    swara is shuddha (natural). This single alteration transforms the
+    entire scale, creating an upward pull that gives Yaman its quality of
+    aspiration and quiet devotion. The vadi (most important swara) is Ga;
+    the samvadi is Ni. Its rasa is shant (peaceful) and shringar
+    (devotional). Yaman is traditionally sung in the evening, as
+    lamplight replaces sunlight.
+
+# --- WESTERN BRIDGE ------------------------------------------------
+
+western_bridge:
+  title: "Western Equivalent"
+  body: |
+    Western listeners may notice a resemblance to the Lydian mode --
+    a major scale with a raised fourth. The structural similarity is
+    real, but Yaman's identity lies in its characteristic phrases (Ni Re
+    Ga, Ga Ma Re Sa), specific ornaments, and the emotional weight given
+    to Ga and Ni -- none of which the mode label captures.
+
+# --- CULTURAL NOTE -------------------------------------------------
+
+cultural_note:
+  title: "The First Raga Many Learn"
+  body: |
+    Yaman is often the first sampoorna raga taught to students in the
+    Hindustani tradition. Its structure is clear, its beauty is immediate,
+    and its tivra Ma introduces the concept of altered swaras early.
+    Yet senior musicians spend lifetimes in Yaman. It rewards both the
+    beginner who hears its beauty for the first time and the master who
+    finds in it endless depth.

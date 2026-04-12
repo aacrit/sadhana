@@ -1,0 +1,278 @@
+/**
+ * auth.module.css — Sign-in page styles
+ *
+ * Dhrupad aesthetic: centered, single-column, austere.
+ * Logo at top, form centered, guest link at bottom.
+ * Saffron outline on Google button only (earned: this is the action).
+ */
+
+.page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100dvh;
+  padding: var(--space-6) var(--space-4);
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 360px;
+}
+
+/* -- Logo ------------------------------------------------------------ */
+
+.logoWrap {
+  margin-bottom: var(--space-8);
+}
+
+/* -- Heading --------------------------------------------------------- */
+
+.heading {
+  font-family: var(--font-serif);
+  font-size: var(--text-xl);
+  font-weight: var(--weight-light);
+  color: var(--text);
+  text-align: center;
+  margin-bottom: var(--space-2);
+  letter-spacing: var(--tracking-tight);
+}
+
+.subheading {
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  color: var(--text-3);
+  text-align: center;
+  margin-bottom: var(--space-8);
+  line-height: var(--leading-relaxed);
+}
+
+/* -- Google button --------------------------------------------------- */
+
+.googleButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  width: 100%;
+  min-height: var(--touch-min);
+  padding: var(--space-3) var(--space-6);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  font-weight: var(--weight-medium);
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-out),
+              border-color var(--dur-fast) var(--ease-out),
+              transform var(--dur-fast) var(--spring);
+}
+
+.googleButton:hover {
+  background: var(--accent-dim);
+  transform: translateY(-1px);
+}
+
+.googleButton:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* -- Divider --------------------------------------------------------- */
+
+.divider {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  margin: var(--space-6) 0;
+  gap: var(--space-3);
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.dividerText {
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-widest);
+}
+
+/* -- Form ------------------------------------------------------------ */
+
+.form {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: var(--space-2);
+}
+
+.label {
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-widest);
+  margin-top: var(--space-2);
+}
+
+.input {
+  width: 100%;
+  min-height: var(--touch-min);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg-2);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  transition: border-color var(--dur-fast) var(--ease-out);
+}
+
+.input::placeholder {
+  color: var(--text-3);
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--text-2);
+}
+
+.input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* -- Error message --------------------------------------------------- */
+
+.error {
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  color: var(--needs-work);
+  margin-top: var(--space-2);
+  text-align: center;
+}
+
+/* -- Submit button --------------------------------------------------- */
+
+.submitButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: var(--touch-min);
+  padding: var(--space-3) var(--space-6);
+  margin-top: var(--space-4);
+  border: 1px solid var(--text-3);
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-wide);
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-out),
+              border-color var(--dur-fast) var(--ease-out),
+              transform var(--dur-fast) var(--spring);
+}
+
+.submitButton:hover:not(:disabled) {
+  background: var(--bg-4);
+  border-color: var(--text-2);
+  transform: translateY(-1px);
+}
+
+.submitButton:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.submitButton:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* -- Toggle link (sign in / sign up) --------------------------------- */
+
+.toggleLink {
+  display: inline-block;
+  margin-top: var(--space-4);
+  padding: var(--space-2);
+  min-height: var(--touch-min);
+  background: none;
+  border: none;
+  color: var(--text-2);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  transition: color var(--dur-fast) var(--ease-out);
+}
+
+.toggleLink:hover {
+  color: var(--text);
+}
+
+/* -- Guest link ------------------------------------------------------ */
+
+.guestLink {
+  display: inline-block;
+  margin-top: var(--space-3);
+  padding: var(--space-2);
+  min-height: var(--touch-min);
+  color: var(--text-3);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  text-decoration: none;
+  transition: color var(--dur-fast) var(--ease-out);
+}
+
+.guestLink:hover {
+  color: var(--text-2);
+}
+
+/* -- Loading state (callback page) ----------------------------------- */
+
+.loadingDot {
+  width: 12px;
+  height: 12px;
+  border-radius: var(--radius-full);
+  background: var(--accent);
+  margin-bottom: var(--space-4);
+  animation: authPulse 1.5s var(--ease-in-out) infinite;
+}
+
+.loadingText {
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  color: var(--text-3);
+}
+
+@keyframes authPulse {
+  0%, 100% { opacity: 0.3; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.2); }
+}
+
+/* -- Reduced motion -------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .loadingDot {
+    animation: none;
+    opacity: 1;
+  }
+
+  .googleButton,
+  .submitButton {
+    transition: none;
+  }
+}

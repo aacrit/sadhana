@@ -385,6 +385,49 @@ export interface Tala {
 // Utility types
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// Tala utilities
+// ---------------------------------------------------------------------------
+
+/**
+ * A single beat event in a generated theka, with timing information.
+ * Used by the synthesis/tala-engine for scheduling tabla sounds.
+ */
+export interface TalaEvent {
+  /** Beat number within the cycle (1-indexed). */
+  readonly beat: number;
+  /** The tabla bol (syllable) at this beat. */
+  readonly bol: TalaBol;
+  /** Time in seconds from the start of the cycle when this beat occurs. */
+  readonly timeSeconds: number;
+  /** Whether this beat is sam (the first/anchor beat). */
+  readonly isSam: boolean;
+  /** Whether this beat is khali (the empty/unstressed beat). */
+  readonly isKhali: boolean;
+  /** The clap type for the vibhag this beat belongs to. */
+  readonly clapType: ClapType;
+}
+
+/**
+ * Position information for a beat within the tala's vibhag structure.
+ */
+export interface VibhagPosition {
+  /** The vibhag index (0-based). */
+  readonly vibhagIndex: number;
+  /** The beat's position within its vibhag (0-based). */
+  readonly beatInVibhag: number;
+  /** Whether this beat is sam. */
+  readonly isSam: boolean;
+  /** Whether this beat is khali. */
+  readonly isKhali: boolean;
+  /** The clap type for this vibhag. */
+  readonly clapType: ClapType;
+}
+
+// ---------------------------------------------------------------------------
+// Utility functions
+// ---------------------------------------------------------------------------
+
 /**
  * A helper to create a SwaraNote concisely.
  * Usage: n('Ga', 'madhya') or n('Re_k', 'taar')

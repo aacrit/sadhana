@@ -1,0 +1,44 @@
+{
+  "beginner": [
+    {
+      "id": "beginner-01-bhoopali",
+      "raga": "bhoopali",
+      "order": 1,
+      "prahara": [4, 5],
+      "time_of_day": "evening",
+      "unlock_requires": null
+    },
+    {
+      "id": "beginner-02-sa-pa-drone",
+      "raga": null,
+      "order": 2,
+      "prahara": null,
+      "time_of_day": null,
+      "unlock_requires": "beginner-01-bhoopali"
+    },
+    {
+      "id": "beginner-03-yaman",
+      "raga": "yaman",
+      "order": 3,
+      "prahara": [5, 6],
+      "time_of_day": "evening",
+      "unlock_requires": "beginner-02-sa-pa-drone"
+    },
+    {
+      "id": "beginner-04-bhairav",
+      "raga": "bhairav",
+      "order": 4,
+      "prahara": [1],
+      "time_of_day": "dawn",
+      "unlock_requires": "beginner-03-yaman"
+    },
+    {
+      "id": "beginner-05-bhimpalasi",
+      "raga": "bhimpalasi",
+      "order": 5,
+      "prahara": [3, 4],
+      "time_of_day": "afternoon",
+      "unlock_requires": "beginner-04-bhairav"
+    }
+  ]
+}

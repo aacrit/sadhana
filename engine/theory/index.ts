@@ -26,6 +26,8 @@ export type {
   Tala,
   TalaBol,
   ClapType,
+  TalaEvent,
+  VibhagPosition,
 } from './types';
 
 export { n } from './types';
@@ -77,7 +79,7 @@ export {
   generateOscillationTrajectory,
 } from './ornaments';
 
-// Talas
+// Talas — Teentaal
 export { teentaal } from './talas/teentaal';
 export {
   getBolAtBeat,
@@ -87,3 +89,36 @@ export {
   getClapTypeForBeat,
   generateTheka,
 } from './talas/teentaal';
+
+// Talas — Ektaal
+export { ektaal } from './talas/ektaal';
+export {
+  getBolAtBeat as ektaalGetBolAtBeat,
+  getBeatPosition as ektaalGetBeatPosition,
+  generateTheka as ektaalGenerateTheka,
+  getVibhagForBeat as ektaalGetVibhagForBeat,
+  isSam as ektaalIsSam,
+  isKhali as ektaalIsKhali,
+} from './talas/ektaal';
+
+// Talas — Jhaptaal
+export { jhaptaal } from './talas/jhaptaal';
+export {
+  getBolAtBeat as jhaptaalGetBolAtBeat,
+  getBeatPosition as jhaptaalGetBeatPosition,
+  generateTheka as jhaptaalGenerateTheka,
+  getVibhagForBeat as jhaptaalGetVibhagForBeat,
+  isSam as jhaptaalIsSam,
+  isKhali as jhaptaalIsKhali,
+} from './talas/jhaptaal';
+
+// Talas — Rupak
+export { rupak } from './talas/rupak';
+export {
+  getBolAtBeat as rupakGetBolAtBeat,
+  getBeatPosition as rupakGetBeatPosition,
+  generateTheka as rupakGenerateTheka,
+  getVibhagForBeat as rupakGetVibhagForBeat,
+  isSam as rupakIsSam,
+  isKhali as rupakIsKhali,
+} from './talas/rupak';

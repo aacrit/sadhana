@@ -1,0 +1,177 @@
+# Lesson B-02: Sa and Pa — The First Harmony
+# Journey: Beginner | Level: Shishya (1-3)
+# Presence Rule: you hear before you name.
+# Pre-raga ear training. No raga grammar active.
+
+id: beginner-02-sa-pa-drone
+journey: beginner
+level_range: [1, 3]          # Shishya
+raga_id: null                # pre-raga: Sa and Pa only
+duration_target_min: 8
+xp_award: 25
+
+meta:
+  title: "Sa and Pa"
+  subtitle: "The First Harmony"
+  time_of_day: null          # no prahara — available any time
+  rasa: null
+
+# --- PHASES -------------------------------------------------------
+
+phases:
+
+  # 1. LISTENING — hear the drone, Pa string prominent
+  - id: listen
+    type: tanpura_drone
+    duration_s: 30
+    instruction: |
+      Close your eyes. Listen.
+      The tanpura is playing. One of its strings sounds different.
+      You don't need to name it. Just notice.
+    tanpura:
+      strings: [Pa, Sa, Sa, Sa_upper]
+      sa_hz: null
+      pa_emphasis: true        # mix Pa string louder than usual
+
+  # 2. SA DETECTION — calibrate (skipped if already done)
+  - id: sa_calibration
+    type: sa_detection
+    skip_if: sa_already_set
+    instruction: |
+      Let's confirm your Sa — the home note.
+      Hum or sing a comfortable pitch. Hold it steady.
+    attempts: 5
+    min_clarity: 0.85
+    fallback_hz: 261.6256
+
+  # 3. HEAR SA ALONE
+  - id: hear_sa
+    type: phrase_playback
+    phrase: [Sa]
+    instruction: |
+      This is Sa. The anchor. Everything begins here.
+    repeat: 2
+    duration_per_note_s: 3
+    show_labels: false
+
+  # 4. HEAR PA ALONE
+  - id: hear_pa
+    type: phrase_playback
+    phrase: [Pa]
+    instruction: |
+      Now listen to this note. Higher than Sa, but related.
+      They belong together.
+    repeat: 2
+    duration_per_note_s: 3
+    show_labels: false
+
+  # 5. HEAR SA AND PA TOGETHER — reveal the interval
+  - id: hear_sa_pa
+    type: phrase_playback
+    phrase: [Sa, Pa]
+    instruction: |
+      Sa. Then Pa. Listen to the distance between them.
+    repeat: 3
+    show_labels: false
+
+  - id: hear_sa_pa_labeled
+    type: phrase_playback
+    phrase: [Sa, Pa]
+    instruction: |
+      Sa and Pa. The first harmony.
+    repeat: 1
+    show_labels: true
+
+  # 6. SING SA
+  - id: sing_sa
+    type: pitch_exercise
+    target_swara: Sa
+    duration_s: 15
+    instruction: |
+      Sing Sa. Let it settle into the drone.
+    feedback_layer: minimal
+    level_tolerance: shishya
+
+  # 7. SING PA
+  - id: sing_pa
+    type: pitch_exercise
+    target_swara: Pa
+    duration_s: 15
+    instruction: |
+      Now sing Pa. It sits above Sa. Let the tanpura guide you.
+    feedback_layer: minimal
+    level_tolerance: shishya
+
+  # 8. CALL AND RESPONSE — engine plays, student answers
+  - id: call_response_sa
+    type: call_response
+    rounds: 4
+    instruction: |
+      I'll play a note. You sing it back.
+    calls:
+      - engine_plays: Sa
+        student_sings: Sa
+      - engine_plays: Pa
+        student_sings: Pa
+      - engine_plays: Pa
+        student_sings: Pa
+      - engine_plays: Sa
+        student_sings: Sa
+    feedback_layer: standard
+    level_tolerance: shishya
+
+  # 9. CALL AND RESPONSE — engine plays one, student sings the other
+  - id: call_response_complement
+    type: call_response
+    rounds: 4
+    instruction: |
+      Now the opposite. I play Sa, you sing Pa. I play Pa, you sing Sa.
+    calls:
+      - engine_plays: Sa
+        student_sings: Pa
+      - engine_plays: Pa
+        student_sings: Sa
+      - engine_plays: Sa
+        student_sings: Pa
+      - engine_plays: Pa
+        student_sings: Sa
+    feedback_layer: standard
+    level_tolerance: shishya
+
+  # 10. FREE SINGING — Sa and Pa only
+  - id: free_sing
+    type: pitch_exercise
+    target_swara: null         # accept Sa or Pa
+    allowed_swaras: [Sa, Pa]
+    duration_s: 45
+    instruction: |
+      Move between Sa and Pa. Back and forth.
+      There is no rush. Let each note ring.
+    feedback_layer: standard
+    level_tolerance: shishya
+
+  # 11. COMPLETION
+  - id: complete
+    type: session_summary
+    show_accuracy: true
+    show_streak: true
+    message: |
+      Sa and Pa. The root and its fifth.
+      Every tanpura drone you will ever hear is built on this relationship.
+
+# --- ENGINE PARAMETERS --------------------------------------------
+
+engine:
+  raga_grammar_active: false   # no raga — just Sa and Pa
+  pakad_recognition: false
+  ornaments_shown: false
+  cents_display: hidden
+  accuracy_model: shishya
+
+# --- UNLOCK CONDITION ---------------------------------------------
+
+unlock_next:
+  lesson_id: beginner-03-yaman
+  requires:
+    min_sessions: 1
+    min_accuracy: 0.55

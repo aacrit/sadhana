@@ -1,0 +1,210 @@
+# Lesson B-05: Raga Bhimpalasi — The Afternoon Raga
+# Journey: Beginner | Level: Shishya (1-3)
+# Presence Rule: you hear before you name.
+# Engine source: engine/theory/ragas/bhimpalasi.ts
+# Prahara: 3-4 (late afternoon)
+
+id: beginner-05-bhimpalasi
+journey: beginner
+level_range: [1, 3]          # Shishya
+raga_id: bhimpalasi
+duration_target_min: 12
+xp_award: 40
+
+meta:
+  title: "The Afternoon Raga"
+  subtitle: "Raga Bhimpalasi"
+  time_of_day: afternoon      # prahara 3-4
+  rasa: karuna                # pathos, longing
+
+# --- PHASES -------------------------------------------------------
+
+phases:
+
+  # 1. LISTENING — tanpura drone, Bhimpalasi context
+  - id: listen
+    type: tanpura_drone
+    duration_s: 30
+    instruction: |
+      Close your eyes. Listen.
+      The tanpura is with you. Afternoon light.
+    tanpura:
+      strings: [Pa, Sa, Sa, Sa_upper]
+      sa_hz: null
+
+  # 2. SA DETECTION
+  - id: sa_calibration
+    type: sa_detection
+    skip_if: sa_already_set
+    instruction: |
+      Let's confirm your Sa.
+      Hum or sing a comfortable note. Hold it steady.
+    attempts: 5
+    min_clarity: 0.85
+    fallback_hz: 261.6256
+
+  # 3. HEAR THE AROHA — Ni(k) Sa Ga(k) Ma Pa Ni(k) Sa'
+  - id: aroha_listen
+    type: phrase_playback
+    phrase: [Ni_k_mandra, Sa, Ga_k, Ma, Pa, Ni_k, Sa_upper]
+    instruction: |
+      Listen to Bhimpalasi climbing. It uses only five notes going up.
+      Two notes are missing from the ascent. Listen for the gaps.
+    repeat: 2
+    show_labels: false
+
+  - id: aroha_show
+    type: phrase_playback
+    phrase: [Ni_k_mandra, Sa, Ga_k, Ma, Pa, Ni_k, Sa_upper]
+    instruction: |
+      Ni Sa Ga Ma Pa Ni Sa.
+      Five notes up. Re and Dha are absent. That's deliberate.
+    repeat: 1
+    show_labels: true
+
+  # 4. HEAR THE AVAROHA — Sa' Ni(k) Dha Pa Ma Ga(k) Re Sa
+  - id: avaroha_listen
+    type: phrase_playback
+    phrase: [Sa_upper, Ni_k, Dha, Pa, Ma, Ga_k, Re, Sa]
+    instruction: |
+      Now descending. All seven notes appear.
+      The descent is fuller, more detailed. This is where Bhimpalasi
+      opens up and speaks.
+    repeat: 2
+    show_labels: false
+
+  - id: avaroha_show
+    type: phrase_playback
+    phrase: [Sa_upper, Ni_k, Dha, Pa, Ma, Ga_k, Re, Sa]
+    instruction: |
+      Sa Ni Dha Pa Ma Ga Re Sa.
+      Seven notes down. Five up, seven down. The asymmetry is the raga.
+    repeat: 1
+    show_labels: true
+
+  # 5. MEET THE KOMAL SWARAS
+  - id: meet_komal_ga
+    type: swara_introduction
+    instruction: |
+      This is komal Ga — the lowered third.
+      It gives Bhimpalasi its tenderness, its depth.
+    swaras: [Ga, Ga_k]
+    presentation: comparison
+    audio_first: true
+
+  - id: meet_komal_ni
+    type: swara_introduction
+    instruction: |
+      And komal Ni — the lowered seventh.
+      It adds a quality of yearning. Something unresolved.
+    swaras: [Ni, Ni_k]
+    presentation: comparison
+    audio_first: true
+
+  # 6. EXPLAIN THE ASYMMETRY
+  - id: asymmetry
+    type: phrase_playback
+    phrase: [Ni_k_mandra, Sa, Ga_k, Ma, Pa, Ni_k, Sa_upper]
+    instruction: |
+      Five notes going up. Broad strokes.
+    repeat: 1
+    show_labels: true
+
+  - id: asymmetry_down
+    type: phrase_playback
+    phrase: [Sa_upper, Ni_k, Dha, Pa, Ma, Ga_k, Re, Sa]
+    instruction: |
+      Seven notes coming down. Step by step.
+      The climb is spare. The descent is where the story is told.
+      This creates the longing quality of Bhimpalasi.
+    repeat: 1
+    show_labels: true
+
+  # 7. INTRODUCTION — the five ascending swaras first
+  - id: meet_bhimpalasi
+    type: swara_introduction
+    instruction: |
+      Start with the five ascending swaras. Listen to each one.
+    swaras: [Sa, Ga_k, Ma, Pa, Ni_k]
+    presentation: sequential
+    audio_first: true
+
+  # 8. SING SA
+  - id: sing_sa
+    type: pitch_exercise
+    target_swara: Sa
+    duration_s: 15
+    instruction: |
+      Sing Sa. The anchor.
+    feedback_layer: minimal
+    level_tolerance: shishya
+
+  # 9. SING THE SIGNATURE PHRASE — Ni(k) Sa Ga(k) Ma
+  - id: sing_pakad
+    type: phrase_exercise
+    phrase: [Ni_k_mandra, Sa, Ga_k, Ma]
+    instruction: |
+      Follow the guide tone. This is Bhimpalasi's signature:
+      Ni Sa Ga Ma. A rising arc that arrives on Ma.
+      Ma is the heart of this raga.
+    guide_tone: true
+    feedback_layer: standard
+
+  # 10. HEAR MORE PAKAD
+  - id: pakad_listen
+    type: phrase_playback
+    phrase: [Ma, Ga_k, Ma, Pa]
+    instruction: |
+      Listen to how the raga turns around Ma.
+      Ma Ga Ma Pa. It circles, then rises.
+    repeat: 2
+    show_labels: false
+
+  - id: pakad_listen_2
+    type: phrase_playback
+    phrase: [Pa, Ma, Ga_k, Re, Sa]
+    instruction: |
+      And the descent. Pa Ma Ga Re Sa.
+      All the notes that were missing in the climb appear now.
+    repeat: 2
+    show_labels: false
+
+  # 11. PAKAD WATCH — free singing with recognition
+  - id: pakad_watch
+    type: passive_phrase_recognition
+    enabled: true
+    instruction: |
+      Now sing freely in Bhimpalasi. Let the raga move through you.
+      The tanpura is with you.
+    duration_s: 60
+    watch_for_pakad: true
+    pakad_reward:
+      xp_bonus: 15
+      ceremony: gsap_pakad_moment
+
+  # 12. COMPLETION
+  - id: complete
+    type: session_summary
+    show_accuracy: true
+    show_streak: true
+    message: |
+      You've met Bhimpalasi.
+      In the afternoon, when shadows lengthen and the day softens —
+      this raga carries that tenderness.
+
+# --- ENGINE PARAMETERS --------------------------------------------
+
+engine:
+  raga_grammar_active: true
+  pakad_recognition: true
+  ornaments_shown: false       # Shishya: no ornament hints yet
+  cents_display: hidden
+  accuracy_model: shishya
+
+# --- UNLOCK CONDITION ---------------------------------------------
+
+unlock_next:
+  lesson_id: null              # end of beginner sequence for now
+  requires:
+    min_sessions: 1
+    min_accuracy: 0.60
