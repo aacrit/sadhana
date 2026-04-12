@@ -9,7 +9,9 @@
 
 import type { Metadata, Viewport } from 'next';
 import { Cormorant_Garamond, Inter, IBM_Plex_Mono } from 'next/font/google';
+import Providers from './providers';
 import './globals.css';
+import ServiceWorkerRegistrar from './components/ServiceWorkerRegistrar';
 
 // ---------------------------------------------------------------------------
 // Fonts — the three voices of Dhrupad
@@ -84,8 +86,15 @@ export default function RootLayout({
       data-theme="night"
       className={`${cormorant.variable} ${inter.variable} ${ibmPlexMono.variable}`}
     >
+      <head>
+        <link rel="manifest" href="/sadhana/manifest.json" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="apple-mobile-web-app-title" content="Sadhana" />
+      </head>
       <body>
-        {children}
+        <ServiceWorkerRegistrar />
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

@@ -1,0 +1,382 @@
+/**
+ * explorer.module.css — Explorer journey landing page
+ *
+ * Raga browser with filter chips and card grid.
+ * Single-column on mobile, two columns on desktop.
+ * Follows Dhrupad design system tokens.
+ */
+
+/* -- Page layout ----------------------------------------------------- */
+
+.page {
+  position: relative;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--space-6) var(--space-4);
+  max-width: var(--max-width-wide);
+  margin: 0 auto;
+}
+
+/* -- Back navigation ------------------------------------------------- */
+
+.backLink {
+  align-self: flex-start;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  color: var(--text-3);
+  text-decoration: none;
+  padding: var(--space-2);
+  margin-bottom: var(--space-4);
+  border-radius: var(--radius-sm);
+  min-height: var(--touch-min);
+  min-width: var(--touch-min);
+  transition: color var(--dur-fast) var(--ease-out);
+}
+
+.backLink:hover {
+  color: var(--text-2);
+}
+
+/* -- Header ---------------------------------------------------------- */
+
+.header {
+  width: 100%;
+  text-align: center;
+  margin-bottom: var(--space-8);
+}
+
+.title {
+  font-family: var(--font-serif);
+  font-size: var(--text-3xl);
+  font-weight: var(--weight-light);
+  color: var(--text);
+  letter-spacing: var(--tracking-tight);
+  margin-bottom: var(--space-3);
+}
+
+.subtitle {
+  font-family: var(--font-serif);
+  font-size: var(--text-md);
+  font-weight: var(--weight-light);
+  color: var(--text-2);
+  letter-spacing: var(--tracking-wide);
+}
+
+/* -- Filter bar ------------------------------------------------------ */
+
+.filterBar {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+
+.filterGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.filterLabel {
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-widest);
+}
+
+.chipRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-2) var(--space-4);
+  min-height: var(--touch-min);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--text-2);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-regular);
+  letter-spacing: var(--tracking-wide);
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-out),
+              border-color var(--dur-fast) var(--ease-out),
+              color var(--dur-fast) var(--ease-out);
+  white-space: nowrap;
+}
+
+.chip:hover {
+  background: var(--bg-3);
+  border-color: var(--text-3);
+  color: var(--text);
+}
+
+.chip:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.chipActive {
+  background: var(--bg-4);
+  border-color: var(--text-2);
+  color: var(--text);
+}
+
+/* -- Raga grid ------------------------------------------------------- */
+
+.ragaGrid {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-4);
+  margin-bottom: var(--space-8);
+}
+
+@media (min-width: 640px) {
+  .ragaGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (min-width: 960px) {
+  .ragaGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* -- Raga card ------------------------------------------------------- */
+
+.ragaCard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-6);
+  border-radius: var(--radius-lg);
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  transition: border-color var(--dur-fast) var(--ease-out),
+              box-shadow var(--dur-fast) var(--ease-out),
+              transform var(--dur-fast) var(--spring);
+}
+
+.ragaCard:hover {
+  border-color: var(--text-3);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.ragaCard:focus-within {
+  border-color: var(--text-3);
+}
+
+.ragaName {
+  font-family: var(--font-serif);
+  font-size: var(--text-xl);
+  font-weight: var(--weight-regular);
+  color: var(--text);
+  letter-spacing: var(--tracking-tight);
+}
+
+.ragaDevanagari {
+  font-family: var(--font-serif);
+  font-size: var(--text-sm);
+  color: var(--text-3);
+  margin-top: calc(-1 * var(--space-2));
+}
+
+.ragaMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.ragaMetaTag {
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  color: var(--text-3);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-full);
+  background: var(--bg-2);
+  white-space: nowrap;
+}
+
+.ragaSwaraCount {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-3);
+}
+
+/* -- Card actions ---------------------------------------------------- */
+
+.cardActions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+}
+
+.playButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--touch-min);
+  height: var(--touch-min);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--text-2);
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-out),
+              border-color var(--dur-fast) var(--ease-out),
+              color var(--dur-fast) var(--ease-out);
+}
+
+.playButton:hover {
+  background: var(--accent-dim);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.playButton:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.playButtonActive {
+  background: var(--accent-dim);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.exploreLink {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--text-2);
+  text-decoration: none;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-full);
+  min-height: var(--touch-min);
+  transition: color var(--dur-fast) var(--ease-out);
+}
+
+.exploreLink:hover {
+  color: var(--text);
+}
+
+.exploreLink:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* -- Empty state ----------------------------------------------------- */
+
+.emptyState {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: var(--space-12) var(--space-4);
+}
+
+.emptyText {
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  color: var(--text-3);
+}
+
+/* -- Ear training CTA ------------------------------------------------ */
+
+.earTrainingSection {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-8) var(--space-6);
+  border-radius: var(--radius-lg);
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  text-align: center;
+}
+
+.earTrainingTitle {
+  font-family: var(--font-serif);
+  font-size: var(--text-lg);
+  font-weight: var(--weight-regular);
+  color: var(--text);
+}
+
+.earTrainingDescription {
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  color: var(--text-2);
+  line-height: var(--leading-relaxed);
+  max-width: 40ch;
+}
+
+.earTrainingLink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-3) var(--space-8);
+  min-height: var(--touch-min);
+  min-width: 120px;
+  border: 1px solid var(--text-3);
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-wide);
+  text-decoration: none;
+  transition: background var(--dur-fast) var(--ease-out),
+              border-color var(--dur-fast) var(--ease-out),
+              transform var(--dur-fast) var(--spring);
+}
+
+.earTrainingLink:hover {
+  background: var(--bg-4);
+  border-color: var(--text-2);
+  transform: translateY(-1px);
+}
+
+.earTrainingLink:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* -- Reduced motion -------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .ragaCard,
+  .chip,
+  .playButton,
+  .earTrainingLink {
+    transition: none;
+  }
+
+  .ragaCard:hover {
+    transform: none;
+  }
+
+  .earTrainingLink:hover {
+    transform: none;
+  }
+}

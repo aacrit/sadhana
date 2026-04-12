@@ -1,0 +1,368 @@
+/**
+ * explorer-detail.module.css — Raga detail page
+ *
+ * Single-column layout for deep raga exploration.
+ * Raga name large at top, metadata, description,
+ * aroha/avaroha with swara dots, pakad phrases.
+ */
+
+/* -- Page layout ----------------------------------------------------- */
+
+.page {
+  position: relative;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: var(--space-6) var(--space-4);
+  max-width: var(--max-width);
+  margin: 0 auto;
+}
+
+/* -- Back navigation ------------------------------------------------- */
+
+.backLink {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  color: var(--text-3);
+  text-decoration: none;
+  padding: var(--space-2);
+  margin-bottom: var(--space-6);
+  border-radius: var(--radius-sm);
+  min-height: var(--touch-min);
+  min-width: var(--touch-min);
+  transition: color var(--dur-fast) var(--ease-out);
+}
+
+.backLink:hover {
+  color: var(--text-2);
+}
+
+/* -- Raga header ----------------------------------------------------- */
+
+.ragaHeader {
+  width: 100%;
+  margin-bottom: var(--space-6);
+}
+
+.ragaName {
+  font-family: var(--font-serif);
+  font-size: var(--text-3xl);
+  font-weight: var(--weight-light);
+  color: var(--text);
+  letter-spacing: var(--tracking-tight);
+  margin-bottom: var(--space-1);
+}
+
+@media (min-width: 640px) {
+  .ragaName {
+    font-size: var(--text-4xl);
+  }
+}
+
+.ragaDevanagari {
+  font-family: var(--font-serif);
+  font-size: var(--text-lg);
+  color: var(--text-3);
+  margin-bottom: var(--space-4);
+}
+
+/* -- Metadata row ---------------------------------------------------- */
+
+.metaRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+  margin-bottom: var(--space-6);
+}
+
+.metaTag {
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  color: var(--text-3);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-full);
+  background: var(--bg-3);
+  border: 1px solid var(--border-2);
+  white-space: nowrap;
+}
+
+.metaTagLabel {
+  color: var(--text-2);
+}
+
+/* -- Description ----------------------------------------------------- */
+
+.description {
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  color: var(--text-2);
+  line-height: var(--leading-relaxed);
+  margin-bottom: var(--space-8);
+  max-width: 60ch;
+}
+
+/* -- Section --------------------------------------------------------- */
+
+.section {
+  width: 100%;
+  margin-bottom: var(--space-8);
+}
+
+.sectionTitle {
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-widest);
+  margin-bottom: var(--space-4);
+}
+
+/* -- Aroha / Avaroha ------------------------------------------------- */
+
+.scaleRow {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+.scaleItem {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.scaleLabel {
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  color: var(--text-2);
+  font-weight: var(--weight-medium);
+}
+
+.swaraDots {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.swaraDotWrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1-5);
+}
+
+.swaraDot {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  border: 2px solid var(--border);
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.swaraDotVadi {
+  border-color: var(--text-2);
+  background: var(--bg-4);
+}
+
+.swaraDotSamvadi {
+  border-color: var(--text-3);
+  background: var(--bg-3);
+}
+
+.swaraLabel {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-2);
+  letter-spacing: var(--tracking-wide);
+}
+
+.octaveLabel {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-3);
+}
+
+.scalePlayButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  min-height: var(--touch-min);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--text-2);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-out),
+              border-color var(--dur-fast) var(--ease-out),
+              color var(--dur-fast) var(--ease-out);
+  align-self: flex-start;
+  margin-top: var(--space-2);
+}
+
+.scalePlayButton:hover {
+  background: var(--accent-dim);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.scalePlayButton:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.scalePlayButtonActive {
+  background: var(--accent-dim);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* -- Pakad section --------------------------------------------------- */
+
+.pakadList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.pakadItem {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  min-height: var(--touch-min);
+}
+
+.pakadSargam {
+  flex: 1;
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--text);
+  letter-spacing: var(--tracking-wide);
+}
+
+.pakadPlayButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--touch-min);
+  height: var(--touch-min);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--text-2);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background var(--dur-fast) var(--ease-out),
+              border-color var(--dur-fast) var(--ease-out),
+              color var(--dur-fast) var(--ease-out);
+}
+
+.pakadPlayButton:hover {
+  background: var(--accent-dim);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.pakadPlayButton:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.pakadPlayButtonActive {
+  background: var(--accent-dim);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* -- Western bridge (collapsible) ------------------------------------ */
+
+.westernBridge {
+  width: 100%;
+  margin-bottom: var(--space-8);
+}
+
+.westernToggle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) 0;
+  border: none;
+  background: transparent;
+  color: var(--text-3);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  min-height: var(--touch-min);
+  transition: color var(--dur-fast) var(--ease-out);
+}
+
+.westernToggle:hover {
+  color: var(--text-2);
+}
+
+.westernToggle:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.westernToggleIcon {
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+
+.westernToggleIconOpen {
+  transform: rotate(90deg);
+}
+
+.westernContent {
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  color: var(--text-3);
+  line-height: var(--leading-relaxed);
+  padding: var(--space-4) 0;
+  max-width: 60ch;
+}
+
+/* -- Reduced motion -------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .scalePlayButton,
+  .pakadPlayButton,
+  .westernToggleIcon,
+  .backLink {
+    transition: none;
+  }
+}
+
+/* -- Responsive ------------------------------------------------------ */
+
+@media (min-width: 640px) {
+  .swaraDot {
+    width: 44px;
+    height: 44px;
+  }
+
+  .swaraLabel {
+    font-size: var(--text-sm);
+  }
+
+  .swaraDots {
+    gap: var(--space-4);
+  }
+}

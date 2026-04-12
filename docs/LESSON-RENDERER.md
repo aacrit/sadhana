@@ -1,0 +1,215 @@
+# Lesson Renderer Spec
+
+Last updated: 2026-04-11
+
+The lesson renderer loads a YAML lesson file and its copy overlay, then drives a state machine through phases. Each phase type maps to a React component.
+
+---
+
+## File Structure
+
+Each lesson consists of two files:
+
+- `content/curriculum/{id}.yaml` -- structure, engine parameters, phase sequence
+- `content/curriculum/{id}-copy.yaml` -- display text, feedback strings, theory/cultural notes
+
+The copy file is keyed by phase `id`. The renderer merges copy onto the phase object before passing it to the component. Phase YAML fields are authoritative for engine behavior; copy fields are authoritative for display text.
+
+## Loading
+
+```
+1. Parse {id}.yaml -> LessonDef
+2. Parse {id}-copy.yaml -> CopyDef
+3. For each phase in LessonDef.phases:
+   merge CopyDef.phases[phase.id] onto phase (copy wins for display fields)
+4. Attach CopyDef.theory_note, western_bridge, cultural_note to lesson metadata
+5. Initialize state machine at phase index 0
+```
+
+---
+
+## Phase Type Registry
+
+Each `type` value maps to one React component. Required fields listed per type.
+
+### `tanpura_drone`
+
+Starts tanpura, shows instruction, auto-advances after `duration_s`.
+
+| Field | Type | Required |
+|-------|------|----------|
+| duration_s | number | yes |
+| tanpura.strings | string[] | yes |
+| tanpura.sa_hz | number or null | yes (null = user Sa) |
+
+Component: `<TanpuraDronePhase />`
+
+### `sa_detection`
+
+Pitch detection loop to calibrate user's Sa. Skippable via `skip_if`.
+
+| Field | Type | Required |
+|-------|------|----------|
+| attempts | number | yes |
+| min_clarity | number | yes |
+| fallback_hz | number | yes |
+| skip_if | string | no |
+
+Component: `<SaDetectionPhase />`
+
+### `swara_introduction`
+
+Plays swaras one at a time (or in comparison pairs). Audio before labels.
+
+| Field | Type | Required |
+|-------|------|----------|
+| swaras | string[] | yes |
+| presentation | "sequential" or "comparison" | yes |
+| audio_first | boolean | yes |
+
+Component: `<SwaraIntroPhase />`
+
+### `phrase_playback`
+
+Plays a phrase with optional labels. User listens, does not sing.
+
+| Field | Type | Required |
+|-------|------|----------|
+| phrase | string[] | yes |
+| repeat | number | yes |
+| show_labels | boolean | yes |
+
+Component: `<PhrasePlaybackPhase />`
+
+### `pitch_exercise`
+
+Single-swara pitch hold. Voice pipeline active, feedback displayed.
+
+| Field | Type | Required |
+|-------|------|----------|
+| target_swara | string or null | yes (null = any allowed) |
+| duration_s | number | yes |
+| feedback_layer | "minimal" or "standard" or "full" | yes |
+| level_tolerance | string | yes |
+
+Optional: `allowed_swaras` (string[]) when target_swara is null.
+
+Component: `<PitchExercisePhase />`
+
+### `phrase_exercise`
+
+Multi-swara guided singing. Guide tone plays ahead, student follows.
+
+| Field | Type | Required |
+|-------|------|----------|
+| phrase | string[] | yes |
+| guide_tone | boolean | yes |
+| feedback_layer | string | yes |
+
+Component: `<PhraseExercisePhase />`
+
+### `call_response`
+
+Engine plays a note, student sings back (same or complement).
+
+| Field | Type | Required |
+|-------|------|----------|
+| rounds | number | yes |
+| calls | array of {engine_plays, student_sings} | yes |
+| feedback_layer | string | yes |
+| level_tolerance | string | yes |
+
+Component: `<CallResponsePhase />`
+
+### `passive_phrase_recognition`
+
+Free singing with pakad detection running in background.
+
+| Field | Type | Required |
+|-------|------|----------|
+| duration_s | number | yes |
+| watch_for_pakad | boolean | yes |
+| pakad_reward.xp_bonus | number | no |
+| pakad_reward.ceremony | string | no |
+
+Component: `<FreeSingingPhase />`
+
+### `session_summary`
+
+End screen. Shows accuracy, streak, XP, message.
+
+| Field | Type | Required |
+|-------|------|----------|
+| show_accuracy | boolean | yes |
+| show_streak | boolean | yes |
+| message | string | yes |
+
+Component: `<SessionSummaryPhase />`
+
+---
+
+## State Machine
+
+```
+States: LOADING -> READY -> PHASE_ACTIVE -> PHASE_COMPLETE -> (next phase or LESSON_COMPLETE)
+
+Transitions:
+  LOADING: fetch + parse YAML + copy -> READY
+  READY: user taps "Begin" (or auto-start if returning) -> PHASE_ACTIVE[0]
+  PHASE_ACTIVE[n]:
+    - Timer phases (tanpura_drone): auto-complete after duration_s
+    - Detection phases (sa_detection): complete on successful detection or skip
+    - Playback phases: complete after all repeats finish
+    - Exercise phases: complete after duration_s or user taps "Next"
+    - Free singing: complete after duration_s or user taps "Done"
+    - Summary: user taps "Finish"
+    -> PHASE_COMPLETE[n]
+  PHASE_COMPLETE[n]:
+    if n < phases.length - 1 -> PHASE_ACTIVE[n+1] (auto-advance, 500ms pause)
+    if n == phases.length - 1 -> LESSON_COMPLETE
+  LESSON_COMPLETE:
+    - Write session to Supabase (accuracy, duration, pakad detected)
+    - Evaluate unlock_next conditions
+    - Return to journey home
+```
+
+### Phase Completion Conditions
+
+| Type | Completes when |
+|------|---------------|
+| tanpura_drone | duration_s elapsed |
+| sa_detection | Sa detected with min_clarity, or skip_if met, or fallback after attempts |
+| swara_introduction | All swaras played (sequential) or both played (comparison) |
+| phrase_playback | All repeats played |
+| pitch_exercise | duration_s elapsed or user taps Next |
+| phrase_exercise | Student completes phrase or 3 failed attempts (advances anyway) |
+| call_response | All rounds completed |
+| passive_phrase_recognition | duration_s elapsed or user taps Done |
+| session_summary | User taps Finish |
+
+---
+
+## Error States
+
+| Error | Behavior |
+|-------|----------|
+| YAML parse failure | Show "Lesson unavailable" with retry |
+| Copy file missing | Render without copy (phase instruction fields used as fallback) |
+| Unknown phase type | Skip phase, log warning, advance to next |
+| Audio context blocked | Show "Tap to enable audio" overlay (iOS requirement) |
+| Mic permission denied | Skip voice phases, show listen-only mode |
+| No phases in YAML | Show "Lesson unavailable" |
+
+---
+
+## Tanpura Lifecycle
+
+The tanpura starts in the first `tanpura_drone` phase and does NOT stop until the lesson ends. It persists across all subsequent phases. The `session_summary` phase fades it out over 2 seconds.
+
+## Copy Overlay Rules
+
+1. Copy fields with matching phase ID override display text only
+2. Phase `instruction` field is the fallback if copy `body` is missing
+3. `screen_title` comes exclusively from copy (no fallback in YAML)
+4. `feedback` object in copy provides all feedback strings for exercise phases
+5. `theory_note`, `western_bridge`, `cultural_note` are accessible via info panel, not shown inline during practice
