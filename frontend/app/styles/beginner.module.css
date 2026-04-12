@@ -1,0 +1,300 @@
+/**
+ * beginner.module.css — Beginner journey home styles
+ *
+ * Single-column, practice-first. The riyaz card is the dominant element.
+ * Progress and recent ragas are secondary.
+ */
+
+.page {
+  position: relative;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--space-6) var(--space-4);
+  max-width: var(--max-width);
+  margin: 0 auto;
+}
+
+/* -- Navigation back ------------------------------------------------- */
+
+.backLink {
+  align-self: flex-start;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  color: var(--text-3);
+  text-decoration: none;
+  padding: var(--space-2);
+  margin-bottom: var(--space-4);
+  border-radius: var(--radius-sm);
+  min-height: var(--touch-min);
+  min-width: var(--touch-min);
+  transition: color var(--dur-fast) var(--ease-out);
+}
+
+.backLink:hover {
+  color: var(--text-2);
+}
+
+/* -- Page title ------------------------------------------------------- */
+
+.title {
+  font-family: var(--font-serif);
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-light);
+  color: var(--text);
+  text-align: center;
+  margin-bottom: var(--space-8);
+}
+
+/* -- Riyaz card (the primary action) --------------------------------- */
+
+.riyazCard {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-8) var(--space-6);
+  border-radius: var(--radius-lg);
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  margin-bottom: var(--space-8);
+  text-align: center;
+}
+
+.riyazLabel {
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-widest);
+}
+
+.riyazRaga {
+  font-family: var(--font-serif);
+  font-size: var(--text-3xl);
+  font-weight: var(--weight-light);
+  color: var(--text);
+  letter-spacing: var(--tracking-tight);
+}
+
+.riyazDescription {
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  color: var(--text-2);
+  line-height: var(--leading-relaxed);
+  max-width: 40ch;
+}
+
+.riyazTime {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-3);
+}
+
+.beginButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-3) var(--space-8);
+  min-height: var(--touch-min);
+  min-width: 120px;
+  border: 1px solid var(--text-3);
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-wide);
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-out),
+              border-color var(--dur-fast) var(--ease-out),
+              transform var(--dur-fast) var(--spring);
+}
+
+.beginButton:hover {
+  background: var(--bg-4);
+  border-color: var(--text-2);
+  transform: translateY(-1px);
+}
+
+.beginButton:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.riyazDone {
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  color: var(--correct);
+}
+
+/* -- Progress section ------------------------------------------------ */
+
+.progressSection {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin-bottom: var(--space-8);
+}
+
+.sectionTitle {
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-widest);
+}
+
+.progressRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.levelBadge {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1-5) var(--space-3);
+  border-radius: var(--radius-full);
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+}
+
+.levelTitle {
+  font-family: var(--font-serif);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-regular);
+}
+
+.levelNumber {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-3);
+}
+
+/* XP bar */
+
+.xpBar {
+  flex: 1;
+  min-width: 120px;
+  height: 6px;
+  border-radius: var(--radius-full);
+  background: var(--bg-2);
+  overflow: hidden;
+}
+
+.xpFill {
+  height: 100%;
+  border-radius: var(--radius-full);
+  background: var(--level-shishya);
+  transition: width var(--dur-slow) var(--ease-out);
+}
+
+.xpLabel {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-3);
+  white-space: nowrap;
+}
+
+/* Streak flame */
+
+.streakBadge {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1-5) var(--space-3);
+  border-radius: var(--radius-full);
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+}
+
+.streakValue {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+}
+
+.streakValueActive {
+  color: var(--accent);
+}
+
+.streakText {
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  color: var(--text-3);
+}
+
+/* -- Recent ragas ---------------------------------------------------- */
+
+.recentSection {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-bottom: var(--space-8);
+}
+
+.recentCard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  min-height: var(--touch-min);
+}
+
+.recentRagaName {
+  font-family: var(--font-serif);
+  font-size: var(--text-base);
+  color: var(--text);
+}
+
+.recentAccuracy {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--text-3);
+}
+
+.emptyRecent {
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  color: var(--text-3);
+  text-align: center;
+  padding: var(--space-6);
+}
+
+/* -- Callout for first-time users ------------------------------------ */
+
+.callout {
+  width: 100%;
+  padding: var(--space-5) var(--space-5);
+  border-radius: var(--radius-lg);
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+}
+
+.calloutTitle {
+  font-family: var(--font-serif);
+  font-size: var(--text-lg);
+  font-weight: var(--weight-regular);
+  color: var(--text);
+  margin-bottom: var(--space-3);
+}
+
+.calloutText {
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  color: var(--text-2);
+  line-height: var(--leading-relaxed);
+}

@@ -1,0 +1,178 @@
+/**
+ * home.module.css — Journey selection page styles
+ *
+ * Single-column, centered, cinematic entry. The tanpura waveform
+ * fills the background. Journeys stack vertically on mobile,
+ * 2x2 grid on desktop.
+ */
+
+.page {
+  position: relative;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--space-6) var(--space-4);
+  overflow: hidden;
+}
+
+/* -- Header ---------------------------------------------------------- */
+
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  margin-bottom: var(--space-8);
+  text-align: center;
+  z-index: var(--z-base);
+}
+
+.tagline {
+  font-family: var(--font-serif);
+  font-size: var(--text-lg);
+  font-weight: var(--weight-light);
+  color: var(--text-2);
+  letter-spacing: var(--tracking-wide);
+  margin-top: var(--space-2);
+}
+
+/* -- Streak ---------------------------------------------------------- */
+
+.streak {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-full);
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  z-index: var(--z-base);
+}
+
+.streakCount {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--text-2);
+}
+
+.streakActive {
+  color: var(--accent);
+}
+
+.streakLabel {
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-widest);
+}
+
+/* -- Today's raga ---------------------------------------------------- */
+
+.todayRaga {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  margin-bottom: var(--space-6);
+  z-index: var(--z-base);
+}
+
+.todayLabel {
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-widest);
+}
+
+.todayName {
+  font-family: var(--font-serif);
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-light);
+  color: var(--text);
+  letter-spacing: var(--tracking-tight);
+}
+
+/* -- Journey grid ---------------------------------------------------- */
+
+.journeyGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-4);
+  width: 100%;
+  max-width: var(--max-width);
+  z-index: var(--z-base);
+}
+
+@media (min-width: 640px) {
+  .journeyGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* -- Journey card ---------------------------------------------------- */
+
+.journeyCard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-6);
+  border-radius: var(--radius-lg);
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: transform var(--dur-fast) var(--spring),
+              border-color var(--dur-fast) var(--ease-out),
+              box-shadow var(--dur-fast) var(--ease-out);
+  text-decoration: none;
+  color: inherit;
+  min-height: var(--touch-min);
+}
+
+.journeyCard:hover {
+  transform: translateY(-2px);
+  border-color: var(--text-3);
+  box-shadow: var(--shadow-md);
+}
+
+.journeyCard:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.journeyCardLocked {
+  opacity: 0.5;
+  cursor: default;
+  pointer-events: none;
+}
+
+.journeyName {
+  font-family: var(--font-serif);
+  font-size: var(--text-xl);
+  font-weight: var(--weight-regular);
+  color: var(--text);
+}
+
+.journeySanskrit {
+  font-family: var(--font-serif);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-light);
+  color: var(--text-3);
+  font-style: italic;
+}
+
+.journeyDescription {
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  color: var(--text-2);
+  line-height: var(--leading-relaxed);
+}
+
+.journeyLockMessage {
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  color: var(--text-3);
+  margin-top: var(--space-2);
+}

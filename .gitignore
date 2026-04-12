@@ -1,0 +1,44 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build outputs
+.next/
+frontend/.next/
+frontend/out/
+out/
+dist/
+
+# TypeScript incremental build
+tsconfig.tsbuildinfo
+*.tsbuildinfo
+
+# Environment variables — never commit
+.env
+.env.local
+.env.*.local
+.env.production
+
+# Supabase local dev artifacts
+supabase/.temp/
+supabase/functions/.secrets
+
+# Vitest cache
+.vitest-cache/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Package manager lock (keep package-lock.json for reproducible installs)
+# yarn.lock
+# pnpm-lock.yaml
+
+# Logs
+*.log
+npm-debug.log*
