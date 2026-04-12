@@ -47,6 +47,9 @@ import PhrasePlayback from '../../components/PhrasePlayback';
 import PakadMoment from '../../components/PakadMoment';
 import VoiceVisualization from '../../components/VoiceVisualization';
 import VoiceWave from '../../components/VoiceWave';
+import Tantri from '../../components/Tantri';
+import type { TantriPlayEvent } from '@/engine/interaction/tantri';
+import { playSwaraNote, ensureAudioReady } from '@/engine/synthesis/swara-voice';
 import { useLessonAudio } from '../../lib/lesson-audio';
 import { useVoiceWave } from '../../lib/VoiceWaveContext';
 import homeStyles from '../../styles/beginner.module.css';
@@ -682,8 +685,26 @@ export default function BeginnerPage() {
 
     return (
       <div className={lessonStyles.lessonPage} data-raga={todayRaga.id} role="main" aria-label="Lesson: Your First Raga - Bhoopali">
-        {/* Voice waveform background — reacts to mic when pipeline active */}
-        <VoiceWave variant="full" style={{ opacity: 0.15 }} />
+        {/* Tantri string instrument — background layer */}
+        <Tantri
+          saHz={saHz}
+          ragaId="bhoopali"
+          level="shishya"
+          subLevel={currentPhaseIndex >= 2 ? 2 : 1}
+          variant="full"
+          analyser={audio.pipelineActive ? audio.getAnalyserNode() : null}
+          onStringTrigger={async (event: TantriPlayEvent) => {
+            try {
+              await ensureAudioReady();
+              await playSwaraNote(
+                { swara: event.swara, octave: event.octave },
+                saHz,
+                { duration: 0.8, volume: event.velocity * 0.6 },
+              );
+            } catch { /* audio not ready */ }
+          }}
+          style={{ position: 'absolute', inset: 0, zIndex: 0, opacity: 0.2 }}
+        />
 
         {/* Exit lesson */}
         <button

@@ -161,6 +161,7 @@ export interface SwaraEvent {
 export interface FreeformState {
   // Live pitch
   currentHz: number | null;
+  currentClarity: number;
   currentSwara: string | null;
   currentSwaraFull: string | null;
   currentDevanagari: string | null;
@@ -225,6 +226,7 @@ export function useFreeformSession(
   // State — values the UI renders
   // -----------------------------------------------------------------------
   const [currentHz, setCurrentHz] = useState<number | null>(null);
+  const [currentClarity, setCurrentClarity] = useState(0);
   const [currentSwara, setCurrentSwara] = useState<string | null>(null);
   const [currentSwaraFull, setCurrentSwaraFull] = useState<string | null>(null);
   const [currentDevanagari, setCurrentDevanagari] = useState<string | null>(null);
@@ -323,6 +325,7 @@ export function useFreeformSession(
           currentSwaraSymbolRef.current = null;
         }
         setCurrentHz(null);
+        setCurrentClarity(0);
         setCurrentSwara(null);
         setCurrentSwaraFull(null);
         setCurrentDevanagari(null);
@@ -342,6 +345,7 @@ export function useFreeformSession(
 
       // Update live state
       setCurrentHz(event.hz);
+      setCurrentClarity(event.clarity ?? event.pitchResult.clarity);
       setCurrentSwara(SHORT_NAME_MAP[detectedSwara]);
       setCurrentSwaraFull(FULL_NAME_MAP[detectedSwara]);
       setCurrentDevanagari(DEVANAGARI_MAP[detectedSwara]);
@@ -583,6 +587,7 @@ export function useFreeformSession(
   return {
     // Live pitch
     currentHz,
+    currentClarity,
     currentSwara,
     currentSwaraFull,
     currentDevanagari,

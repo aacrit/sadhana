@@ -77,6 +77,16 @@ export interface TantriProps {
   /** AnalyserNode from the voice pipeline for real-time input. */
   analyser?: AnalyserNode | null;
 
+  /**
+   * Live pitch data from the voice pipeline.
+   * When provided, Tantri uses this for accurate string mapping
+   * instead of relying solely on the analyser's amplitude.
+   */
+  pitchHz?: number | null;
+
+  /** Clarity of the pitch detection (0–1). */
+  pitchClarity?: number;
+
   /** Callback when a string is triggered by touch/click. */
   onStringTrigger?: (event: TantriPlayEvent) => void;
 
@@ -278,6 +288,8 @@ const Tantri = memo(function Tantri({
   subLevel = 1,
   variant = 'full',
   analyser = null,
+  pitchHz = null,
+  pitchClarity = 0,
   onStringTrigger,
   className,
   style,
@@ -289,6 +301,12 @@ const Tantri = memo(function Tantri({
   const lastFrameRef = useRef(0);
   const analyserDataRef = useRef<Float32Array<ArrayBuffer> | null>(null);
   const touchedStringRef = useRef<number | null>(null);
+  const pitchHzRef = useRef<number | null>(pitchHz);
+  const pitchClarityRef = useRef(pitchClarity);
+
+  // Keep pitch refs in sync with props
+  pitchHzRef.current = pitchHz;
+  pitchClarityRef.current = pitchClarity;
 
   // Track visible string indices for hit testing
   const visibleIndicesRef = useRef<number[]>([]);
@@ -351,31 +369,26 @@ const Tantri = memo(function Tantri({
     }
     lastFrameRef.current = now;
 
-    // --- Read voice data from analyser ---
+    // --- Read voice data ---
     let voiceAmplitude = 0;
     let voiceMap: VoiceMapResult | null = null;
 
+    // Get amplitude from analyser
     if (analyser && analyserDataRef.current) {
       analyser.getFloatTimeDomainData(analyserDataRef.current);
-
-      // Compute RMS amplitude
       let sum = 0;
       for (let i = 0; i < analyserDataRef.current.length; i++) {
         const v = analyserDataRef.current[i]!;
         sum += v * v;
       }
-      voiceAmplitude = Math.sqrt(sum / analyserDataRef.current.length);
-
-      // Estimate fundamental frequency from zero-crossings (fast, approximate)
-      // For accurate pitch, we rely on the voice pipeline's PitchResult
-      // The analyser gives us amplitude and waveform shape
-      voiceAmplitude = Math.min(voiceAmplitude * 5, 1); // Scale to 0-1 range
+      voiceAmplitude = Math.min(Math.sqrt(sum / analyserDataRef.current.length) * 5, 1);
     }
 
-    // Update field state from voice
-    // Note: For full accuracy, the parent should call mapVoiceToStrings with
-    // the real pitch data and pass it via a ref. The analyser alone gives us
-    // amplitude for visual intensity but not pitch-accurate string mapping.
+    // Map pitch to strings (accurate, from voice pipeline)
+    if (pitchHzRef.current && pitchHzRef.current > 0 && pitchClarityRef.current > 0) {
+      voiceMap = mapVoiceToStrings(pitchHzRef.current, pitchClarityRef.current, field);
+    }
+
     updateFieldFromVoice(field, voiceMap, voiceAmplitude);
 
     // --- Clear and render ---
