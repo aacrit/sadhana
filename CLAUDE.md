@@ -261,8 +261,11 @@ Engine-first architecture, Hindustani-first framing, Dhrupad design system, $0 c
 
 **v1 Scope (locked):**
 - Full engine (`/engine/`) — all physics, theory, analysis, synthesis, voice modules. Tested. Correct.
-- Beginner journey — daily riyaz, Sa detection, voice visualization (3 layers), 5 ragas (Bhairav/Bhoopali/Bhimpalasi/Yaman/Bageshri for time-of-day riyaz), Shishya levels 1–3.
-- Signature "wow" feature (from Scholar engine, surfaced to all): raga phrase recognition. When the student accidentally sings the pakad (characteristic phrase) of their current raga, the app recognizes it and surfaces it: "You just sang the pakad of Yaman." No action required from the student. The engine noticed. This bridges Beginner and Scholar in one moment.
+- All four journeys exist as entry points from day one — shows the full vision immediately.
+- Beginner journey: fully built. Daily riyaz, Sa detection, voice visualization (3 layers), 5 ragas (Bhairav/Bhoopali/Bhimpalasi/Yaman/Bageshri), Shishya levels 1–3.
+- Explorer journey: partially built. Raga browser, ear training exercises, phrase library.
+- Scholar + Master journeys: skeleton/placeholder — visible, navigable, locked behind level gate with "coming soon" depth. Students can see where they're going.
+- Signature "wow" feature (Scholar engine, surfaced to all): raga phrase recognition. When the student sings the pakad (characteristic phrase) of their current raga, the app recognizes it: "You just sang the pakad of Yaman." No action required. The engine noticed. Bridges Beginner and Scholar in one unrepeatable moment.
 
 **Daily Session Loop (locked):**
 - On open: app has already prepared today's riyaz. Raga chosen by time of day (dawn → Bhairav, morning → Bhoopali, afternoon → Bhimpalasi, evening → Yaman, night → Bageshri). Tanpura begins. Student sings. ~10 minutes. Zero decisions required.
