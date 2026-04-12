@@ -1,33 +1,37 @@
 /**
- * Sadhana Design System — Dhrupad
+ * Sadhana Design System -- Ragamala
  *
- * Named after the oldest surviving form of Hindustani classical music:
- * austere, geometric, meditative, precise. Everything here is a first-class
- * design decision. No placeholder values. No "we'll tweak later."
+ * Named after the Ragamala tradition of Indian miniature painting:
+ * a garland of ragas, each given a visual world of color, mood,
+ * season, and time of day. The foundation is Dhrupad -- austere,
+ * geometric, meditative, precise. Ragamala is its full flowering.
  *
- * Three type voices. Two modes. One accent, earned only.
+ * Four type voices. Two modes. Five raga color worlds.
+ * One accent (Saffron), earned only. One mastery register (Gold),
+ * zarr-kashi only -- hairline rules and single-point accents.
  */
 
-/* -----------------------------------------------------------------------
-   CUSTOM PROPERTIES — Night mode (default)
-   ----------------------------------------------------------------------- */
+/* =======================================================================
+   BASE TOKENS -- Night mode (default)
+   ======================================================================= */
 
 :root {
-  /* -- Typography ---------------------------------------------------- */
+  /* -- Typography ------------------------------------------------------ */
   --font-serif: 'Cormorant Garamond', Georgia, serif;
+  --font-devanagari: 'Noto Serif Devanagari', serif;
   --font-sans: 'Inter', system-ui, sans-serif;
   --font-mono: 'IBM Plex Mono', monospace;
 
-  /* Type scale — modular, base 16px, ratio ~1.25 (major third) */
-  --text-xs: 0.75rem;     /* 12px — fine print, cents values */
-  --text-sm: 0.875rem;    /* 14px — labels, captions */
-  --text-base: 1rem;      /* 16px — body */
-  --text-md: 1.125rem;    /* 18px — emphasis body */
-  --text-lg: 1.25rem;     /* 20px — section heads */
-  --text-xl: 1.5rem;      /* 24px — card titles */
-  --text-2xl: 2rem;       /* 32px — page titles */
-  --text-3xl: 2.5rem;     /* 40px — raga name in practice */
-  --text-4xl: 3.5rem;     /* 56px — cinematic raga reveal */
+  /* Type scale -- modular, base 16px, ratio ~1.25 (major third) */
+  --text-xs: 0.75rem;     /* 12px -- fine print, cents values */
+  --text-sm: 0.875rem;    /* 14px -- labels, captions */
+  --text-base: 1rem;      /* 16px -- body */
+  --text-md: 1.125rem;    /* 18px -- emphasis body */
+  --text-lg: 1.25rem;     /* 20px -- section heads */
+  --text-xl: 1.5rem;      /* 24px -- card titles */
+  --text-2xl: 2rem;       /* 32px -- page titles */
+  --text-3xl: 2.5rem;     /* 40px -- raga name in practice */
+  --text-4xl: 3.5rem;     /* 56px -- cinematic raga reveal */
 
   /* Line heights */
   --leading-tight: 1.15;
@@ -46,22 +50,29 @@
   --tracking-wide: 0.04em;
   --tracking-widest: 0.08em;
 
-  /* -- Colors: Night mode (default) ---------------------------------- */
-  --bg: #0D0D1A;
-  --bg-2: #13132B;
-  --bg-3: #1A1A3A;
-  --bg-4: #222250;
+  /* -- Colors: Night mode (default) ------------------------------------ */
+  /* Deep Malachite -- the color of a practice room before dawn */
+  --bg: #0A1A14;
+  --bg-2: #0F241C;
+  --bg-3: #142E24;
+  --bg-4: #1A3A2E;
   --text: #F0E6D3;
   --text-2: #B8A99A;
   --text-3: #7A6B5E;
   --border: rgba(240, 230, 211, 0.1);
   --border-2: rgba(240, 230, 211, 0.06);
 
-  /* Accent — earned only: correct answers, mastered badges, active streak */
+  /* Accent -- Saffron: earned only. Correct pitch, active streak, mastery. */
   --accent: #E8871E;
   --accent-hover: #D07518;
   --accent-dim: rgba(232, 135, 30, 0.15);
   --accent-glow: rgba(232, 135, 30, 0.25);
+
+  /* Mastery -- Gold: zarr-kashi only. Hairlines and points, never fills. */
+  --gold: #D4AF37;
+  --gold-dim: rgba(212, 175, 55, 0.15);
+  --gold-glow: rgba(212, 175, 55, 0.25);
+  --gold-hairline: rgba(212, 175, 55, 0.6);
 
   /* RAG status indicators */
   --correct: #22C55E;
@@ -71,17 +82,24 @@
   --needs-work: #EF4444;
   --needs-work-dim: rgba(239, 68, 68, 0.15);
 
-  /* Gamification levels */
-  --level-shishya: #6B7280;
-  --level-sadhaka: #3B82F6;
-  --level-varistha: #8B5CF6;
-  --level-guru: #E8871E;
+  /* Level colors -- interface deepens invisibly */
+  --level-shishya: #0A1A14;
+  --level-sadhaka: #2D6A4F;
+  --level-varistha: #1E3A5F;
+  --level-guru: #D4AF37;
 
   /* Overlay / scrim */
-  --scrim: rgba(13, 13, 26, 0.7);
-  --scrim-heavy: rgba(13, 13, 26, 0.9);
+  --scrim: rgba(10, 26, 20, 0.7);
+  --scrim-heavy: rgba(10, 26, 20, 0.9);
 
-  /* -- Spacing (4px base) -------------------------------------------- */
+  /* -- Raga color worlds (defaults -- overridden by [data-raga]) ------- */
+  --raga-bg: var(--bg);
+  --raga-mid: var(--bg-2);
+  --raga-accent: var(--accent);
+  --raga-text: var(--text);
+  --raga-glow: var(--accent-glow);
+
+  /* -- Spacing (4px base) ---------------------------------------------- */
   --space-0: 0;
   --space-px: 1px;
   --space-0-5: 0.125rem;  /*  2px */
@@ -99,7 +117,7 @@
   --space-20: 5rem;       /* 80px */
   --space-24: 6rem;       /* 96px */
 
-  /* -- Border radius ------------------------------------------------- */
+  /* -- Border radius (geometric, austere -- cut stone, not soft plastic) */
   --radius-sm: 4px;
   --radius-md: 8px;
   --radius-lg: 12px;
@@ -107,17 +125,20 @@
   --radius-2xl: 24px;
   --radius-full: 9999px;
 
-  /* -- Shadows ------------------------------------------------------- */
+  /* -- Shadows --------------------------------------------------------- */
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
   --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
   --shadow-glow: 0 0 20px var(--accent-dim);
+  --shadow-gold: 0 0 20px var(--gold-dim);
 
-  /* -- Motion -------------------------------------------------------- */
+  /* -- Motion ---------------------------------------------------------- */
+  /* CSS timing functions (fallback for non-spring contexts) */
   --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-in-out: cubic-bezier(0.45, 0, 0.55, 1);
 
+  /* Durations */
   --dur-instant: 0ms;
   --dur-fast: 150ms;
   --dur-normal: 300ms;
@@ -125,24 +146,70 @@
   --dur-ceremony: 1200ms;
   --dur-cinematic: 2400ms;
 
-  /* -- Z-index ------------------------------------------------------- */
+  /* Spring physics presets (consumed by JS via getComputedStyle) */
+  /* Tanpura Release -- long decay, natural string settling */
+  --spring-tanpura-stiffness: 400;
+  --spring-tanpura-damping: 15;
+  /* Meend -- glide between swaras, smooth, no overshoot */
+  --spring-meend-stiffness: 80;
+  --spring-meend-damping: 20;
+  /* Gamak -- rapid oscillation, aggressive overshoot */
+  --spring-gamak-stiffness: 600;
+  --spring-gamak-damping: 5;
+  /* Andolan -- subtle shake, breath, barely perceptible */
+  --spring-andolan-stiffness: 120;
+  --spring-andolan-damping: 8;
+  /* Kan -- grace note, instantaneous snap */
+  --spring-kan-stiffness: 1000;
+  --spring-kan-damping: 30;
+
+  /* -- Texture --------------------------------------------------------- */
+  --jali-opacity: 0.04;
+  --jali-opacity-reveal: 1;
+  --jali-opacity-settle: 0.15;
+  --jali-size: 48px 48px;
+  --ink-diffusion-duration: 2400ms;
+  --ink-diffusion-feather: 20%;
+
+  /* -- Z-index --------------------------------------------------------- */
+  --z-tanpura-bg: -1;
   --z-base: 1;
   --z-sticky: 50;
   --z-overlay: 100;
   --z-modal: 200;
   --z-toast: 300;
-  --z-tanpura-bg: -1;
 
-  /* -- Layout -------------------------------------------------------- */
+  /* -- Layout ---------------------------------------------------------- */
   --max-width: 720px;
   --max-width-wide: 1080px;
   --touch-min: 44px;
   --header-height: 56px;
 }
 
-/* -----------------------------------------------------------------------
-   Day mode overrides
-   ----------------------------------------------------------------------- */
+/* =======================================================================
+   DAY MODE
+   ======================================================================= */
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="night"]) {
+    --bg: #F5F0E8;
+    --bg-2: #EDE7DB;
+    --bg-3: #E5DDD0;
+    --bg-4: #DDD4C5;
+    --text: #1A1A2E;
+    --text-2: #4A4553;
+    --text-3: #8A8494;
+    --border: rgba(26, 26, 46, 0.12);
+    --border-2: rgba(26, 26, 46, 0.06);
+
+    --scrim: rgba(245, 240, 232, 0.7);
+    --scrim-heavy: rgba(245, 240, 232, 0.9);
+
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.08);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
+  }
+}
 
 [data-theme="day"] {
   --bg: #F5F0E8;
@@ -163,9 +230,117 @@
   --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
 }
 
-/* -----------------------------------------------------------------------
-   Reduced motion
-   ----------------------------------------------------------------------- */
+/* =======================================================================
+   RAGA COLOR WORLDS
+   Each raga provides a complete color environment, historically grounded
+   in the Mewar and Bundi-Kota Ragamala miniature painting traditions.
+   Activated via data-raga attribute. Transitions over 2400ms (ink diffusion).
+   ======================================================================= */
+
+/* -- Bhairav: Dawn --------------------------------------------------- */
+/* Pre-dawn austerity. Shiva as ascetic. Pale rose + ash blue.
+   Mewar: cool greys, restraint, the first light on temple stone. */
+[data-raga="bhairav"] {
+  --raga-bg: #1A1520;
+  --raga-mid: #2A2233;
+  --raga-accent: #C4A0A0;
+  --raga-text: #E8DDD5;
+  --raga-glow: rgba(196, 160, 160, 0.2);
+}
+
+/* -- Yaman: Evening (first lamp) ------------------------------------- */
+/* Deep violet evening. Oil-lamp amber. Architectural interiors.
+   Bundi-Kota: rich textiles, violet-indigo sky, warm lamplight. */
+[data-raga="yaman"] {
+  --raga-bg: #12101E;
+  --raga-mid: #1E1A30;
+  --raga-accent: #C9A84C;
+  --raga-text: #E8E0D0;
+  --raga-glow: rgba(201, 168, 76, 0.2);
+}
+
+/* -- Bhoopali: Dusk -------------------------------------------------- */
+/* Pentatonic simplicity. Open landscape at golden hour. Earth settling.
+   Mewar: earth tones, warm ochre, teal vegetation, clear sky. */
+[data-raga="bhoopali"] {
+  --raga-bg: #141A18;
+  --raga-mid: #1E2824;
+  --raga-accent: #C4956A;
+  --raga-text: #E5DDD0;
+  --raga-glow: rgba(196, 149, 106, 0.2);
+}
+
+/* -- Bhimpalasi: Afternoon ------------------------------------------- */
+/* Afternoon longing. Warm interiors, heavy drapery, red earth.
+   Bundi: saturated earth reds, sandstone, the weight of midday heat. */
+[data-raga="bhimpalasi"] {
+  --raga-bg: #1A1412;
+  --raga-mid: #2A2220;
+  --raga-accent: #B85C4A;
+  --raga-text: #E8DDD5;
+  --raga-glow: rgba(184, 92, 74, 0.2);
+}
+
+/* -- Bageshri: Night ------------------------------------------------- */
+/* Late night intimacy. Moonlit terraces. Silver-blue and jasmine.
+   Kota: deep indigo, silvered moonlight, solitary figures. */
+[data-raga="bageshri"] {
+  --raga-bg: #0D1218;
+  --raga-mid: #151E28;
+  --raga-accent: #7A9EB8;
+  --raga-text: #D8DEE8;
+  --raga-glow: rgba(122, 158, 184, 0.2);
+}
+
+/* =======================================================================
+   LEVEL-BASED INTERFACE DEEPENING
+   No announcements. The interface warms and gains authority silently.
+   ======================================================================= */
+
+/* Shishya: base malachite. No special treatment. */
+[data-level="shishya"] {
+  /* Default state -- no overrides needed */
+}
+
+/* Sadhaka: forest malachite warms the borders */
+[data-level="sadhaka"] {
+  --border: rgba(45, 106, 79, 0.15);
+  --border-2: rgba(45, 106, 79, 0.08);
+}
+
+/* Varistha: lapis enters. Precision instruments surface. */
+[data-level="varistha"] {
+  --border: rgba(30, 58, 95, 0.15);
+  --border-2: rgba(30, 58, 95, 0.08);
+}
+
+/* Guru: zarr-kashi rules appear. Gold enters the space. */
+[data-level="guru"] {
+  --border: var(--gold-hairline);
+  --border-2: rgba(212, 175, 55, 0.08);
+}
+
+/* =======================================================================
+   SCRIPT TOGGLE (Devanagari / Romanized)
+   ======================================================================= */
+
+/* Default: romanized -- musical terms use serif font */
+[data-script="romanized"] .swara-text,
+[data-script="romanized"] .raga-name,
+[data-script="romanized"] .tala-name {
+  font-family: var(--font-serif);
+}
+
+/* Devanagari: musical terms use Noto Serif Devanagari */
+[data-script="devanagari"] .swara-text,
+[data-script="devanagari"] .raga-name,
+[data-script="devanagari"] .tala-name {
+  font-family: var(--font-devanagari);
+}
+
+/* =======================================================================
+   REDUCED MOTION
+   ======================================================================= */
 
 @media (prefers-reduced-motion: reduce) {
   :root {
@@ -178,12 +353,13 @@
     --spring: ease;
     --ease-out: ease;
     --ease-in-out: ease;
+    --ink-diffusion-duration: 0ms;
   }
 }
 
-/* -----------------------------------------------------------------------
-   Global resets & base styles
-   ----------------------------------------------------------------------- */
+/* =======================================================================
+   GLOBAL RESETS & BASE STYLES
+   ======================================================================= */
 
 *,
 *::before,
@@ -212,19 +388,23 @@ body {
               color var(--dur-slow) var(--ease-out);
 }
 
-/* -----------------------------------------------------------------------
-   Utility classes — type voices
-   ----------------------------------------------------------------------- */
+/* =======================================================================
+   UTILITY CLASSES -- type voices
+   ======================================================================= */
 
 .type-serif {
   font-family: var(--font-serif);
+}
+
+.type-devanagari {
+  font-family: var(--font-devanagari);
 }
 
 .type-mono {
   font-family: var(--font-mono);
 }
 
-/* Screen-reader only — visually hidden but accessible to assistive tech */
+/* Screen-reader only -- visually hidden but accessible */
 .sr-only {
   position: absolute;
   width: 1px;
@@ -237,9 +417,44 @@ body {
   border-width: 0;
 }
 
-/* -----------------------------------------------------------------------
-   Focus styles — accessible, mode-aware
-   ----------------------------------------------------------------------- */
+/* =======================================================================
+   TEXTURE SURFACES
+   ======================================================================= */
+
+.jali-surface {
+  position: relative;
+}
+
+.jali-surface::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: var(--jali-opacity, 0.04);
+  pointer-events: none;
+  /* Jali pattern: geometric lattice inspired by Mughal stone screens.
+     Actual SVG pattern to be defined inline or as a data URI.
+     Placeholder background-size for the repeating unit. */
+  background-size: var(--jali-size);
+  background-repeat: repeat;
+  transition: opacity var(--dur-ceremony) var(--ease-out);
+  z-index: 0;
+}
+
+/* Zarr-kashi: gold hairline rules (Guru level only) */
+.zarr-kashi-rule {
+  border-top: 1px solid var(--gold-hairline);
+}
+
+.zarr-kashi-point {
+  width: 4px;
+  height: 4px;
+  border-radius: var(--radius-full);
+  background: var(--gold);
+}
+
+/* =======================================================================
+   FOCUS STYLES -- accessible, mode-aware
+   ======================================================================= */
 
 :focus-visible {
   outline: 2px solid var(--accent);
@@ -247,18 +462,18 @@ body {
   border-radius: var(--radius-sm);
 }
 
-/* -----------------------------------------------------------------------
-   Selection
-   ----------------------------------------------------------------------- */
+/* =======================================================================
+   SELECTION
+   ======================================================================= */
 
 ::selection {
   background-color: var(--accent-dim);
   color: var(--text);
 }
 
-/* -----------------------------------------------------------------------
-   Scrollbar (Night mode)
-   ----------------------------------------------------------------------- */
+/* =======================================================================
+   SCROLLBAR (Night mode)
+   ======================================================================= */
 
 ::-webkit-scrollbar {
   width: 6px;
