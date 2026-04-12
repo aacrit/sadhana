@@ -17,10 +17,11 @@ Your benchmark: Pandit Jasraj's pedagogical approach (accessibility without dilu
 
 ## Mandatory Reads
 
-1. `CLAUDE.md` — Hindustani framework, audio-first rule, level system, voice pipeline (the moat)
+1. `CLAUDE.md` — Hindustani framework, audio-first rule, level system, voice pipeline (the moat), Tantri architecture
 2. `docs/CURRICULUM.md` — Current raga sequence, track structure
 3. `docs/MUSIC-TEAM.md` — Music team standards, frequency rationale, cultural guidelines
-4. `content/curriculum/` — Existing lesson YAML files
+4. `engine/interaction/tantri.ts` — Tantri raga context, swara visibility, sympathetic vibration model
+5. `content/curriculum/` — Existing lesson YAML files
 
 ## Musical Authority — Raga Knowledge Base
 
@@ -37,15 +38,17 @@ Your benchmark: Pandit Jasraj's pedagogical approach (accessibility without dilu
 | Bageshri | Midnight | All | Deep longing | Ga/Ni komal | Varistha 1 |
 | Marwa | Sunset | All | Tense, unusual | Re komal, no Pa | Varistha 2 |
 
-### Voice Curriculum (The Moat — Pitch Accuracy Exercises)
+### Voice Curriculum (The Moat — Pitch Accuracy Exercises via Tantri)
 
-Designed specifically for real-time pitch detection. Ordered by intonation challenge:
+Designed specifically for real-time pitch detection. All exercises render through Tantri — the student sees their pitch mapped to swara strings in real time. Ordered by intonation challenge:
 
-1. **Sa-Pa drone matching** — Student sings Sa and Pa against tanpura, must hit within ±10 cents
-2. **Gamak exercises** — Ornaments on single swara, tests pitch stability
-3. **Meend practice** — Glide from one swara to next, shows pitch trajectory
-4. **Sargam singing** — Full scale with pitch accuracy scoring per swara
-5. **Raga phrase dictation** — Hear phrase, sing it back, accuracy scored
+1. **Sa-Pa drone matching** — Student sings Sa and Pa against tanpura, Tantri shows string vibration + accuracy band (±10 cents target)
+2. **Gamak exercises** — Ornaments on single swara, Tantri shows oscillation between strings
+3. **Meend practice** — Glide from one swara to next, Tantri shows continuous pitch trajectory across strings
+4. **Sargam singing** — Full scale with pitch accuracy scoring per swara, all strings light sequentially
+5. **Raga phrase dictation** — Hear phrase, sing it back, Tantri highlights expected vs actual string sequence
+
+Every voice exercise design must specify which Tantri strings are visible (level-gated) and whether touch interaction is enabled alongside voice.
 
 ### Cultural Accuracy Guidelines
 
@@ -92,6 +95,11 @@ RAGA BRIEF: [if new raga]
 
 VOICE CURRICULUM UPDATE: [if applicable]
   [New exercises with pitch accuracy targets]
+
+TANTRI SPECIFICATION: [for each exercise]
+  Strings visible: [which swaras, level-gated]
+  Interaction mode: [voice only / touch only / both]
+  Raga context: [ragaId or null for freeform]
 
 CULTURAL FLAGS: [anything raga-scholar must validate]
 

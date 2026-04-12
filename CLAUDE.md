@@ -263,6 +263,11 @@ npm run test:engine  # Test engine only — raga grammar, frequency ratios, tala
 | Task | Agent |
 |------|-------|
 | Engine architecture, raga objects, tala structures, voice pipeline | `audio-engineer` |
+| Tantri engine logic (`engine/interaction/tantri.ts`) | `audio-engineer` |
+| Tantri renderer bugs (`Tantri.tsx`) | `frontend-fixer` |
+| Tantri CSS/visual tokens (`tantri.module.css`, `--tantri-*`) | `brand-director` + `frontend-fixer` |
+| Tantri canvas performance, 60fps, voice-to-string latency | `perf-optimizer` |
+| Tantri integration in lessons/exercises | `frontend-builder` + `curriculum-designer` |
 | Frequency ratios, shruti science, pitch calibration | `acoustics-engineer` |
 | Raga knowledge, musicological accuracy, cultural framing | `music-director` + `raga-scholar` |
 | Validate raga objects in code against tradition | `raga-scholar` |
@@ -287,11 +292,12 @@ npm run test:engine  # Test engine only — raga grammar, frequency ratios, tala
 | Cycle | Sequence |
 |-------|---------|
 | **Engine Build** | acoustics-engineer → audio-engineer → raga-scholar (validate) → unit tests |
-| **Lesson Ship** | music-director → curriculum-designer → raga-scholar + acoustics-engineer (∥) → lesson-writer → frontend-builder + audio-engineer (∥) → uat-tester |
-| **Frontend Ship** | frontend-builder → uat-tester → frontend-fixer |
-| **Voice QA** | acoustics-engineer → audio-engineer → uat-tester |
-| **Brand Cycle** | brand-director → icon-creator → frontend-builder → uat-tester |
+| **Lesson Ship** | music-director → curriculum-designer (Tantri modes) → raga-scholar + acoustics-engineer (∥) → lesson-writer → frontend-builder (Tantri integration) + audio-engineer (∥) → uat-tester (Tantri suite) |
+| **Frontend Ship** | frontend-builder → uat-tester (incl. Tantri suite) → frontend-fixer |
+| **Voice QA** | acoustics-engineer → audio-engineer (Tantri audio layer) → uat-tester (Tantri suite) |
+| **Brand Cycle** | brand-director (Tantri tokens) → icon-creator → frontend-builder → uat-tester |
 | **Icon Cycle** | brand-director (approve) → icon-creator → frontend-builder (integrate) → uat-tester |
+| **Tantri QA** | audio-engineer (engine) → perf-optimizer (canvas fps) → uat-tester (Tantri suite) → frontend-fixer |
 
 ---
 

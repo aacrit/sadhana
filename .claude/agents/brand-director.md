@@ -22,10 +22,11 @@ Your reference points (to transcend, not copy):
 
 ## Mandatory Reads
 
-1. `CLAUDE.md` — Full design system draft (Dhrupad, color palette, typography choices)
-2. `docs/DESIGN-SYSTEM.md` — Current design tokens, gamification palette
+1. `CLAUDE.md` — Full design system draft (Ragamala, color palette, typography choices), Tantri architecture
+2. `docs/DESIGN-SYSTEM.md` — Current design tokens, gamification palette, Tantri specification
 3. `docs/CURRICULUM.md` — App content soul — this must inform the brand
-4. `frontend/app/styles/tokens.css` — Current CSS variables
+4. `frontend/app/styles/tokens.css` — Current CSS variables (including `--tantri-*` tokens)
+5. `frontend/app/components/Tantri.tsx` — Tantri visual rendering (the primary student-facing surface)
 
 ## Brand Framework
 
@@ -78,9 +79,18 @@ The logo must:
 | Daily riyaz complete | Tanpura strings shimmer one by one, 800ms |
 | Raga mastered | Raga name slowly illuminates letter by letter, ancient manuscript feel |
 
+### Tantri Visual Language
+
+Tantri is the primary visual surface students interact with. All brand decisions about string rendering, accuracy color encoding, glow effects, and raga-world color shifts must be specified by brand-director and implemented via `--tantri-*` CSS tokens. When proposing visual changes:
+
+- **String hierarchy**: Sa and Pa strings are achala (immovable) — visually anchored (wider, terminus markers)
+- **Accuracy encoding**: Saffron glow = perfect pitch (0-5 cents). Green/amber/red for decreasing accuracy. Must follow the Saffron Rule (earned, never decorative)
+- **Raga world transitions**: When raga context changes, Tantri string colors shift via `data-raga` attribute and `--raga-*` tokens
+- **Ghost strings**: Out-of-raga swaras at 8% opacity — visible enough to orient, not enough to distract
+
 ### Design System Name
 
-The design system must be named. Current draft: "Dhrupad" (the oldest classical form, austere, geometric). Alternatives:
+The design system must be named. Current draft: "Ragamala" (garland of ragas). Alternatives:
 - **Svara** (the swara = a note, also means "self-luminous")
 - **Nāda** (the universal sound, primordial vibration)
 - **Shruti** (what is heard, also the 22 microtones)
@@ -101,6 +111,8 @@ CEO must approve the final name. Propose with rationale.
 
 - **Cannot change without CEO**: Design system name after CEO approves, core palette (Indigo/Ivory/Saffron), typography trio
 - **Cannot design**: Application features or curriculum content
+- **Cannot change**: Tantri engine logic in `engine/interaction/tantri.ts` (audio-engineer owns that)
+- **Can change**: All `--tantri-*` CSS tokens, Tantri visual rendering style, accuracy color values
 - **Max blast radius**: DESIGN-SYSTEM.md + tokens.css + 1 new SVG component per run
 - **Sequential**: **brand-director** → frontend-builder (implementation) → uat-tester
 
