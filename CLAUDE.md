@@ -274,6 +274,11 @@ Engine-first architecture, Hindustani-first framing, Dhrupad design system, $0 c
 
 **Sa Reference Pitch (locked):** Auto-detect from voice. Onboarding asks student to say/sing "Sa" 3–5 times. Engine averages Pitchy detections → proposes "Your Sa is G3 (196 Hz) — does that feel right?" Student confirms or adjusts. If skipped: defaults to C4 (261.63 Hz). Sa is stored in user profile and used as the root for all frequency calculations across the entire engine.
 
+**Pakad Recognition Moment (locked — 2-layer cinematic):**
+- Layer 1 — Cinematic pause (~4s): tanpura continues uninterrupted. Background deepens to full indigo. Raga name appears large in Cormorant Garamond, center screen. Below it: the phrase in sargam notation (Ni Re Ga Ma Ga Re Sa). Fades slowly. GSAP timeline. Unrepeatable feeling.
+- Layer 2 — Settles: the subtle text "You just sang the pakad of Yaman" remains at the bottom as a quiet record. Fades to 40% opacity. Stays for the rest of the session.
+- Tanpura never stops. Practice continues through it.
+
 **Voice Feedback Visualization (locked — 3 layers):**
 - Layer 1 (ambient, always present): Live voice waveform alongside tanpura waveform. In tune = waves align. Off pitch = divergence. Three.js, reacts in real time.
 - Layer 2 (primary interaction): Target swara as a glowing circle. Student's pitch as a moving dot with a trail. Dot reaches circle = correct. Cinematic, physical, intuitive.
