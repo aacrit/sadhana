@@ -115,6 +115,7 @@
 /* -- Journey card ---------------------------------------------------- */
 
 .journeyCard {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
@@ -123,12 +124,27 @@
   background: var(--bg-3);
   border: 1px solid var(--border);
   cursor: pointer;
+  overflow: hidden;
   transition: transform var(--dur-fast) var(--spring),
               border-color var(--dur-fast) var(--ease-out),
               box-shadow var(--dur-fast) var(--ease-out);
   text-decoration: none;
   color: inherit;
   min-height: var(--touch-min);
+}
+
+/* Jali lattice texture on journey cards */
+.journeyCard::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: var(--jali-opacity, 0.04);
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cpath d='M24 0L30 6L48 6L42 12L48 18L42 18L48 24L42 30L48 42L42 42L36 48L30 42L24 48L18 42L12 48L6 42L0 48L0 42L6 36L0 30L0 24L6 18L0 12L6 6L0 6L6 0L12 6L18 0L24 6L30 0Z' fill='none' stroke='%23ffffff' stroke-width='0.5'/%3E%3Cpath d='M24 12L30 18L36 12L42 18L36 24L42 30L36 36L30 30L24 36L18 30L12 36L6 30L12 24L6 18L12 12L18 18Z' fill='none' stroke='%23ffffff' stroke-width='0.5'/%3E%3C/svg%3E");
+  background-size: var(--jali-size);
+  background-repeat: repeat;
+  border-radius: inherit;
+  z-index: 0;
 }
 
 .journeyCard:hover {
