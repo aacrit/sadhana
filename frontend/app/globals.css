@@ -1,0 +1,6 @@
+/**
+ * globals.css — Imports design tokens and provides page-level styles.
+ * This file is imported once in layout.tsx.
+ */
+
+@import './styles/tokens.css';

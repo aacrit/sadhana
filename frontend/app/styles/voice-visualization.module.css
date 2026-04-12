@@ -1,0 +1,218 @@
+/**
+ * voice-visualization.module.css — 3-layer voice feedback
+ *
+ * Layer 1: Ambient waveform canvas (full width)
+ * Layer 2: Target + pitch dot (primary interaction)
+ * Layer 3: Cents needle (precision, expandable)
+ */
+
+.container {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  max-height: 320px;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+}
+
+/* -- Layer 1: Waveform canvas ---------------------------------------- */
+
+.waveformCanvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* -- Layer 2: Target + pitch dot ------------------------------------- */
+
+.pitchLayer {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Target swara — glowing circle */
+.targetCircle {
+  position: absolute;
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radius-full);
+  border: 2px solid var(--text-3);
+  opacity: 0.4;
+  transition: border-color var(--dur-fast) var(--ease-out),
+              opacity var(--dur-fast) var(--ease-out);
+}
+
+.targetCircleCorrect {
+  border-color: var(--correct);
+  opacity: 0.8;
+  box-shadow: 0 0 24px var(--correct-dim);
+}
+
+.targetCircleInProgress {
+  border-color: var(--in-progress);
+  opacity: 0.6;
+}
+
+.targetCircleNeedsWork {
+  border-color: var(--needs-work);
+  opacity: 0.6;
+}
+
+/* Target swara label */
+.targetLabel {
+  position: absolute;
+  font-family: var(--font-mono);
+  font-size: var(--text-lg);
+  color: var(--text-2);
+  text-align: center;
+  pointer-events: none;
+}
+
+/* Pitch dot — student's current pitch */
+.pitchDot {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-radius: var(--radius-full);
+  background: var(--text);
+  box-shadow: 0 0 8px rgba(240, 230, 211, 0.3);
+  pointer-events: none;
+  /* Framer Motion handles positioning */
+}
+
+/* Pitch trail — last 500ms */
+.pitchTrail {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* -- Layer 3: Cents needle ------------------------------------------- */
+
+.centsLayer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 48px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(transparent, var(--bg-2));
+  transition: opacity var(--dur-normal) var(--ease-out),
+              height var(--dur-normal) var(--ease-out);
+}
+
+.centsLayerCollapsed {
+  height: 32px;
+  opacity: 0.4;
+  cursor: pointer;
+}
+
+.centsLayerCollapsed:hover {
+  opacity: 0.6;
+}
+
+.centsScale {
+  position: relative;
+  width: 80%;
+  max-width: 300px;
+  height: 2px;
+  background: var(--border);
+  border-radius: var(--radius-full);
+}
+
+/* Center mark (0 cents) */
+.centsMark {
+  position: absolute;
+  top: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  height: 10px;
+  background: var(--text-3);
+  border-radius: var(--radius-full);
+}
+
+/* Needle */
+.centsNeedle {
+  position: absolute;
+  top: -6px;
+  width: 4px;
+  height: 14px;
+  border-radius: var(--radius-full);
+  background: var(--text);
+  transition: left var(--dur-fast) var(--spring);
+}
+
+.centsNeedleCorrect {
+  background: var(--correct);
+}
+
+.centsNeedleInProgress {
+  background: var(--in-progress);
+}
+
+.centsNeedleNeedsWork {
+  background: var(--needs-work);
+}
+
+/* Cents value label */
+.centsValue {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-3);
+  margin-top: var(--space-1);
+}
+
+/* -- Tap hint (Beginner) --------------------------------------------- */
+
+.tapHint {
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  color: var(--text-3);
+  position: absolute;
+  bottom: var(--space-1);
+  text-align: center;
+  width: 100%;
+  pointer-events: none;
+}
+
+/* -- Reduced motion -------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .pitchDot,
+  .centsNeedle,
+  .targetCircle {
+    transition: none;
+  }
+
+  .pitchTrail {
+    display: none;
+  }
+}
+
+/* -- Responsive ------------------------------------------------------ */
+
+@media (min-width: 640px) {
+  .container {
+    max-height: 400px;
+  }
+
+  .targetCircle {
+    width: 80px;
+    height: 80px;
+  }
+
+  .pitchDot {
+    width: 14px;
+    height: 14px;
+  }
+}

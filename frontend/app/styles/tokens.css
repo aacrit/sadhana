@@ -1,0 +1,265 @@
+/**
+ * Sadhana Design System — Dhrupad
+ *
+ * Named after the oldest surviving form of Hindustani classical music:
+ * austere, geometric, meditative, precise. Everything here is a first-class
+ * design decision. No placeholder values. No "we'll tweak later."
+ *
+ * Three type voices. Two modes. One accent, earned only.
+ */
+
+/* -----------------------------------------------------------------------
+   CUSTOM PROPERTIES — Night mode (default)
+   ----------------------------------------------------------------------- */
+
+:root {
+  /* -- Typography ---------------------------------------------------- */
+  --font-serif: 'Cormorant Garamond', Georgia, serif;
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+
+  /* Type scale — modular, base 16px, ratio ~1.25 (major third) */
+  --text-xs: 0.75rem;     /* 12px — fine print, cents values */
+  --text-sm: 0.875rem;    /* 14px — labels, captions */
+  --text-base: 1rem;      /* 16px — body */
+  --text-md: 1.125rem;    /* 18px — emphasis body */
+  --text-lg: 1.25rem;     /* 20px — section heads */
+  --text-xl: 1.5rem;      /* 24px — card titles */
+  --text-2xl: 2rem;       /* 32px — page titles */
+  --text-3xl: 2.5rem;     /* 40px — raga name in practice */
+  --text-4xl: 3.5rem;     /* 56px — cinematic raga reveal */
+
+  /* Line heights */
+  --leading-tight: 1.15;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.75;
+
+  /* Font weights */
+  --weight-light: 300;
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+
+  /* Letter spacing */
+  --tracking-tight: -0.02em;
+  --tracking-normal: 0;
+  --tracking-wide: 0.04em;
+  --tracking-widest: 0.08em;
+
+  /* -- Colors: Night mode (default) ---------------------------------- */
+  --bg: #0D0D1A;
+  --bg-2: #13132B;
+  --bg-3: #1A1A3A;
+  --bg-4: #222250;
+  --text: #F0E6D3;
+  --text-2: #B8A99A;
+  --text-3: #7A6B5E;
+  --border: rgba(240, 230, 211, 0.1);
+  --border-2: rgba(240, 230, 211, 0.06);
+
+  /* Accent — earned only: correct answers, mastered badges, active streak */
+  --accent: #E8871E;
+  --accent-hover: #D07518;
+  --accent-dim: rgba(232, 135, 30, 0.15);
+  --accent-glow: rgba(232, 135, 30, 0.25);
+
+  /* RAG status indicators */
+  --correct: #22C55E;
+  --correct-dim: rgba(34, 197, 94, 0.15);
+  --in-progress: #F59E0B;
+  --in-progress-dim: rgba(245, 158, 11, 0.15);
+  --needs-work: #EF4444;
+  --needs-work-dim: rgba(239, 68, 68, 0.15);
+
+  /* Gamification levels */
+  --level-shishya: #6B7280;
+  --level-sadhaka: #3B82F6;
+  --level-varistha: #8B5CF6;
+  --level-guru: #E8871E;
+
+  /* Overlay / scrim */
+  --scrim: rgba(13, 13, 26, 0.7);
+  --scrim-heavy: rgba(13, 13, 26, 0.9);
+
+  /* -- Spacing (4px base) -------------------------------------------- */
+  --space-0: 0;
+  --space-px: 1px;
+  --space-0-5: 0.125rem;  /*  2px */
+  --space-1: 0.25rem;     /*  4px */
+  --space-1-5: 0.375rem;  /*  6px */
+  --space-2: 0.5rem;      /*  8px */
+  --space-3: 0.75rem;     /* 12px */
+  --space-4: 1rem;        /* 16px */
+  --space-5: 1.25rem;     /* 20px */
+  --space-6: 1.5rem;      /* 24px */
+  --space-8: 2rem;        /* 32px */
+  --space-10: 2.5rem;     /* 40px */
+  --space-12: 3rem;       /* 48px */
+  --space-16: 4rem;       /* 64px */
+  --space-20: 5rem;       /* 80px */
+  --space-24: 6rem;       /* 96px */
+
+  /* -- Border radius ------------------------------------------------- */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 24px;
+  --radius-full: 9999px;
+
+  /* -- Shadows ------------------------------------------------------- */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
+  --shadow-glow: 0 0 20px var(--accent-dim);
+
+  /* -- Motion -------------------------------------------------------- */
+  --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.45, 0, 0.55, 1);
+
+  --dur-instant: 0ms;
+  --dur-fast: 150ms;
+  --dur-normal: 300ms;
+  --dur-slow: 600ms;
+  --dur-ceremony: 1200ms;
+  --dur-cinematic: 2400ms;
+
+  /* -- Z-index ------------------------------------------------------- */
+  --z-base: 1;
+  --z-sticky: 50;
+  --z-overlay: 100;
+  --z-modal: 200;
+  --z-toast: 300;
+  --z-tanpura-bg: -1;
+
+  /* -- Layout -------------------------------------------------------- */
+  --max-width: 720px;
+  --max-width-wide: 1080px;
+  --touch-min: 44px;
+  --header-height: 56px;
+}
+
+/* -----------------------------------------------------------------------
+   Day mode overrides
+   ----------------------------------------------------------------------- */
+
+[data-theme="day"] {
+  --bg: #F5F0E8;
+  --bg-2: #EDE7DB;
+  --bg-3: #E5DDD0;
+  --bg-4: #DDD4C5;
+  --text: #1A1A2E;
+  --text-2: #4A4553;
+  --text-3: #8A8494;
+  --border: rgba(26, 26, 46, 0.12);
+  --border-2: rgba(26, 26, 46, 0.06);
+
+  --scrim: rgba(245, 240, 232, 0.7);
+  --scrim-heavy: rgba(245, 240, 232, 0.9);
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
+}
+
+/* -----------------------------------------------------------------------
+   Reduced motion
+   ----------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-instant: 0ms;
+    --dur-fast: 0ms;
+    --dur-normal: 0ms;
+    --dur-slow: 0ms;
+    --dur-ceremony: 0ms;
+    --dur-cinematic: 0ms;
+    --spring: ease;
+    --ease-out: ease;
+    --ease-in-out: ease;
+  }
+}
+
+/* -----------------------------------------------------------------------
+   Global resets & base styles
+   ----------------------------------------------------------------------- */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-normal);
+  color: var(--text);
+  background-color: var(--bg);
+  min-height: 100dvh;
+  overflow-x: hidden;
+  transition: background-color var(--dur-slow) var(--ease-out),
+              color var(--dur-slow) var(--ease-out);
+}
+
+/* -----------------------------------------------------------------------
+   Utility classes — type voices
+   ----------------------------------------------------------------------- */
+
+.type-serif {
+  font-family: var(--font-serif);
+}
+
+.type-mono {
+  font-family: var(--font-mono);
+}
+
+/* -----------------------------------------------------------------------
+   Focus styles — accessible, mode-aware
+   ----------------------------------------------------------------------- */
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* -----------------------------------------------------------------------
+   Selection
+   ----------------------------------------------------------------------- */
+
+::selection {
+  background-color: var(--accent-dim);
+  color: var(--text);
+}
+
+/* -----------------------------------------------------------------------
+   Scrollbar (Night mode)
+   ----------------------------------------------------------------------- */
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-3);
+}
