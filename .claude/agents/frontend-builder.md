@@ -1,7 +1,7 @@
 ---
 name: frontend-builder
 description: "MUST BE USED for building UI components and practice session views. Follows Rāga & Rhythm design system, Next.js 16/React 19/TypeScript. Read+write."
-model: opus
+model: sonnet
 allowed-tools: Read, Grep, Glob, Bash, Edit, Write
 ---
 

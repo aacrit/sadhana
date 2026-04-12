@@ -1,7 +1,7 @@
 ---
 name: perf-optimizer
 description: "Performance optimization — audio buffer latency, animation frame rate, Three.js render budget, bundle size, Lighthouse 90+. Read+write."
-model: opus
+model: sonnet
 allowed-tools: Read, Grep, Glob, Bash, Edit, Write
 ---
 

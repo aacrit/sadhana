@@ -1,7 +1,7 @@
 ---
 name: sadhana-coo
 description: "Chief Operating Officer — orchestrates all agents across 5 divisions, runs quality cycles, coordinates curriculum and frontend changes. Reports directly to CEO."
-model: opus
+model: sonnet
 allowed-tools: Read, Grep, Glob, Bash, Edit, Write, Agent, TaskCreate, TaskUpdate, TaskList, SendMessage, TeamCreate, TeamDelete
 ---
 

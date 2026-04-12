@@ -1,7 +1,7 @@
 ---
 name: uat-tester
 description: "UAT browser testing — lessons, voice pipeline, gamification flows, Day/Night modes, responsive layouts, accessibility. Invoked after every build. Read-only."
-model: opus
+model: sonnet
 allowed-tools: Read, Grep, Glob, Bash
 ---
 

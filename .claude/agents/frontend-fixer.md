@@ -1,7 +1,7 @@
 ---
 name: frontend-fixer
 description: "UI bug remediation — root-cause grouping, surgical fixes across Day/Night modes. Invoked after uat-tester reports failures. Read+write."
-model: opus
+model: sonnet
 allowed-tools: Read, Grep, Glob, Bash, Edit, Write
 ---
 

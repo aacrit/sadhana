@@ -1,7 +1,7 @@
 ---
 name: progress-analyst
 description: "Analyzes student learning data from Supabase, identifies curriculum gaps, and proposes adaptive hint improvements. Read-only."
-model: opus
+model: sonnet
 allowed-tools: Read, Grep, Glob, Bash
 ---
 
