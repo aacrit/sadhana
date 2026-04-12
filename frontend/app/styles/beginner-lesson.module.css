@@ -1,0 +1,252 @@
+/**
+ * beginner-lesson.module.css — Lesson practice view
+ *
+ * Single-column, centered. Phase title top, phase content center,
+ * progress dots bottom. Dhrupad aesthetic: sparse, focused, nothing extra.
+ */
+
+.lessonPage {
+  position: relative;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: var(--space-4);
+}
+
+/* -- Back link (exit lesson) ----------------------------------------- */
+
+.backLink {
+  align-self: flex-start;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  color: var(--text-3);
+  text-decoration: none;
+  padding: var(--space-2);
+  margin-bottom: var(--space-4);
+  border-radius: var(--radius-sm);
+  min-height: var(--touch-min);
+  min-width: var(--touch-min);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color var(--dur-fast) var(--ease-out);
+}
+
+.backLink:hover {
+  color: var(--text-2);
+}
+
+/* -- Phase header ---------------------------------------------------- */
+
+.phaseHeader {
+  text-align: center;
+  margin-bottom: var(--space-6);
+}
+
+.phaseTitle {
+  font-family: var(--font-serif);
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-light);
+  color: var(--text);
+  margin-bottom: var(--space-3);
+}
+
+.phaseBody {
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  color: var(--text-2);
+  line-height: var(--leading-relaxed);
+  max-width: 42ch;
+  margin: 0 auto;
+  white-space: pre-line;
+}
+
+/* -- Phase content area ---------------------------------------------- */
+
+.phaseContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+}
+
+/* -- Generic centered message (listen, sa_calibration, sing phases) --- */
+
+.centeredMessage {
+  text-align: center;
+  max-width: 42ch;
+}
+
+.centeredMessage p {
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  color: var(--text-2);
+  line-height: var(--leading-relaxed);
+}
+
+/* -- Listening pulse indicator --------------------------------------- */
+
+.listenPulse {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-full);
+  border: 2px solid var(--text-3);
+  animation: breathe 3s var(--ease-in-out) infinite;
+}
+
+@keyframes breathe {
+  0%, 100% { opacity: 0.3; transform: scale(0.95); }
+  50% { opacity: 0.7; transform: scale(1.05); }
+}
+
+/* -- Continue / action button ---------------------------------------- */
+
+.actionButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-3) var(--space-8);
+  min-height: var(--touch-min);
+  min-width: 120px;
+  border: 1px solid var(--text-3);
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-wide);
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-out),
+              border-color var(--dur-fast) var(--ease-out),
+              transform var(--dur-fast) var(--spring);
+}
+
+.actionButton:hover {
+  background: var(--bg-4);
+  border-color: var(--text-2);
+  transform: translateY(-1px);
+}
+
+.actionButton:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* -- Progress dots (bottom) ------------------------------------------ */
+
+.progressDots {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-6) 0 var(--space-4);
+}
+
+.progressDot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-full);
+  background: var(--border);
+  transition: background var(--dur-fast) var(--ease-out),
+              transform var(--dur-fast) var(--ease-out);
+}
+
+.progressDotCurrent {
+  background: var(--accent);
+  transform: scale(1.25);
+}
+
+.progressDotComplete {
+  background: var(--text-3);
+}
+
+/* -- Session complete screen ----------------------------------------- */
+
+.completeScreen {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-6);
+  text-align: center;
+}
+
+.completeTitle {
+  font-family: var(--font-serif);
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-light);
+  color: var(--text);
+}
+
+.completeMessage {
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  color: var(--text-2);
+  line-height: var(--leading-relaxed);
+  max-width: 36ch;
+  white-space: pre-line;
+}
+
+.completeStats {
+  display: flex;
+  gap: var(--space-8);
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.statValue {
+  font-family: var(--font-mono);
+  font-size: var(--text-xl);
+  color: var(--text);
+}
+
+.statValueAccent {
+  color: var(--accent);
+}
+
+.statLabel {
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-widest);
+}
+
+/* -- Reduced motion -------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .listenPulse {
+    animation: none;
+    opacity: 0.7;
+  }
+
+  .progressDot {
+    transition: none;
+  }
+}
+
+/* -- Responsive ------------------------------------------------------ */
+
+@media (min-width: 640px) {
+  .lessonPage {
+    padding: var(--space-6);
+  }
+
+  .phaseTitle {
+    font-size: var(--text-3xl);
+  }
+}

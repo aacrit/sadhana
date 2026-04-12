@@ -1,0 +1,116 @@
+/**
+ * swara-introduction.module.css — Sequential swara reveal
+ *
+ * Each swara: hear first, then see. Audio-first pedagogy.
+ * Cormorant Garamond for swara names, IBM Plex Mono for frequency hints.
+ */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-8);
+  padding: var(--space-6) var(--space-4);
+  width: 100%;
+}
+
+.swaraGrid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-6);
+  width: 100%;
+  max-width: 480px;
+}
+
+.swaraItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 64px;
+}
+
+.swaraName {
+  font-family: var(--font-serif);
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-light);
+  color: var(--text);
+  letter-spacing: var(--tracking-tight);
+  line-height: var(--leading-tight);
+}
+
+.swaraFrequency {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-3);
+  letter-spacing: var(--tracking-wide);
+}
+
+/* The "listening" indicator — pulses while audio plays */
+.listeningDot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-full);
+  background: var(--text-3);
+  animation: pulse 1.2s var(--ease-in-out) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.3); }
+}
+
+/* Continue button */
+.continueButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-3) var(--space-8);
+  min-height: var(--touch-min);
+  min-width: 120px;
+  border: 1px solid var(--text-3);
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-wide);
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-out),
+              border-color var(--dur-fast) var(--ease-out),
+              transform var(--dur-fast) var(--spring);
+}
+
+.continueButton:hover {
+  background: var(--bg-4);
+  border-color: var(--text-2);
+  transform: translateY(-1px);
+}
+
+.continueButton:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* -- Reduced motion -------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .listeningDot {
+    animation: none;
+    opacity: 1;
+  }
+}
+
+/* -- Responsive ------------------------------------------------------ */
+
+@media (min-width: 640px) {
+  .swaraName {
+    font-size: var(--text-3xl);
+  }
+
+  .swaraGrid {
+    gap: var(--space-8);
+  }
+}

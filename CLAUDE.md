@@ -274,7 +274,7 @@ Engine-first architecture, Hindustani-first framing, Dhrupad design system, $0 c
 - Signature "wow" feature (Scholar engine, surfaced to all): raga phrase recognition. When the student sings the pakad (characteristic phrase) of their current raga, the app recognizes it: "You just sang the pakad of Yaman." No action required. The engine noticed. Bridges Beginner and Scholar in one unrepeatable moment.
 
 **Daily Session Loop (locked):**
-- On open: app has already prepared today's riyaz. Raga chosen by time of day (dawn → Bhairav, morning → Bhoopali, afternoon → Bhimpalasi, evening → Yaman, night → Bageshri). Tanpura begins. Student sings. ~10 minutes. Zero decisions required.
+- On open: app has already prepared today's riyaz. Raga chosen by time of day (dawn → Bhairav, afternoon → Bhimpalasi, dusk → Bhoopali, evening → Yaman, night → Bageshri). Tanpura begins. Student sings. ~10 minutes. Zero decisions required.
 - On completion: transitions directly to free practice (student picks raga, exercise, or exploration). No friction between ritual and freedom.
 - If app is opened mid-day and riyaz is already done: goes straight to free practice.
 

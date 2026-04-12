@@ -1,0 +1,88 @@
+/**
+ * pakad-moment.module.css — Cinematic pakad recognition ceremony
+ *
+ * Full-screen overlay with deep indigo background.
+ * Raga name in Cormorant Garamond, sargam in IBM Plex Mono.
+ * Auto-dismisses after 4s. Toast persists at 40% opacity.
+ *
+ * The tanpura never stops — practice continues through the moment.
+ */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  background: color-mix(in srgb, var(--bg) 95%, transparent);
+  z-index: var(--z-overlay);
+  pointer-events: none;
+}
+
+.ragaName {
+  font-family: var(--font-serif);
+  font-size: 4.5rem;
+  font-weight: var(--weight-light);
+  color: var(--accent);
+  letter-spacing: var(--tracking-tight);
+  line-height: var(--leading-tight);
+  text-align: center;
+  padding: 0 var(--space-4);
+}
+
+.sargam {
+  font-family: var(--font-mono);
+  font-size: var(--text-md);
+  color: var(--text);
+  letter-spacing: var(--tracking-wide);
+  text-align: center;
+  opacity: 0.9;
+}
+
+/* Toast — persistent after overlay dismisses */
+.toast {
+  position: fixed;
+  bottom: var(--space-6);
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  color: var(--text-2);
+  opacity: 0.4;
+  pointer-events: none;
+  z-index: var(--z-toast);
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* -- Reduced motion -------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .overlay,
+  .ragaName,
+  .sargam,
+  .toast {
+    animation: none;
+    transition: none;
+  }
+}
+
+/* -- Responsive ------------------------------------------------------ */
+
+@media (max-width: 639px) {
+  .ragaName {
+    font-size: var(--text-3xl);
+  }
+
+  .sargam {
+    font-size: var(--text-base);
+  }
+}
+
+@media (min-width: 640px) {
+  .ragaName {
+    font-size: 4.5rem;
+  }
+}

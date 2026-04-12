@@ -1,0 +1,118 @@
+# Copy layer for beginner-01-bhoopali
+# lesson-writer owns this file. Do not merge into the lesson YAML.
+# Theory audit: PASSED (2026-04-11)
+
+lesson_id: beginner-01-bhoopali
+
+# ─── PHASE COPY ───────────────────────────────────────────────
+
+phases:
+
+  listen:
+    screen_title: "Listen"
+    body: |
+      Close your eyes.
+      The tanpura is playing. It will always be here with you.
+      You don't need to do anything yet.
+    audio_label: null
+
+  sa_calibration:
+    screen_title: "Find Your Sa"
+    body: |
+      Sa is the home note. Everything starts and returns here.
+      Hum or sing a comfortable pitch. Hold it steady.
+    prompt: "Sing or hum a comfortable note."
+    calibrating_message: "Listening..."
+    success_message: "That's your Sa."
+
+  meet_bhoopali:
+    screen_title: "Five Notes"
+    body: |
+      This raga uses only five notes.
+      Listen to each one.
+    swara_reveal_delay_ms: 1200
+
+  aroha_listen:
+    screen_title: "Climbing Up"
+    body: |
+      Listen to Bhoopali ascending. Twice.
+
+  aroha_show:
+    body: |
+      Sa Re Ga Pa Dha Sa.
+
+  avaroha_listen:
+    screen_title: "Coming Down"
+    body: |
+      Now descending. Twice.
+
+  avaroha_show:
+    body: |
+      Sa Dha Pa Ga Re Sa.
+
+  sing_sa:
+    screen_title: "Sing Sa"
+    body: |
+      Just Sa. Hold it as long as you like.
+      The tanpura is with you.
+    feedback:
+      correct: "That's Sa."
+      sharp: "A little high. Settle down into the tanpura."
+      flat: "A little low. Let your voice rise to meet the drone."
+      silence: "Whenever you're ready."
+
+  sing_aroha:
+    screen_title: "Sing the Ascent"
+    body: |
+      Follow the guide tone up. One note at a time.
+      Don't rush. Let each note land before moving on.
+    feedback:
+      correct: "Correct."
+      wrong_swara: "Listen to the guide tone again."
+      guide_tone_label: "Guide"
+
+  pakad_watch:
+    screen_title: "Free Singing"
+    body: |
+      Keep singing. Use the notes you've learned.
+      Let whatever wants to come, come.
+    pakad_found_headline: "Bhoopali"
+    pakad_found_subtext: "Ga Pa Dha Pa Ga"
+
+  complete:
+    screen_title: "Session Complete"
+    xp_line: "+30 XP"
+    streak_line: "Day 1"
+
+# ─── THEORY NOTE ──────────────────────────────────────────────
+
+theory_note:
+  title: "Raga Bhoopali"
+  body: |
+    Bhoopali is a pentatonic raga of the Kalyan thaat. Its five swaras
+    are Sa, Re, Ga, Pa, and Dha -- no Ma, no Ni. This absence gives
+    Bhoopali its open, spacious character. The vadi (most important
+    swara) is Ga; the samvadi is Dha. Its rasa is shant -- peaceful,
+    serene. Bhoopali is traditionally sung in the early evening, as
+    daylight fades.
+
+# ─── WESTERN BRIDGE ───────────────────────────────────────────
+
+western_bridge:
+  title: "Western Equivalent"
+  body: |
+    Bhoopali's five notes correspond to the major pentatonic scale.
+    In Western terms: C D E G A (if Sa = C). The resemblance is
+    structural only. Bhoopali carries specific melodic grammar --
+    phrases, emphasis, and ornaments -- that the pentatonic label
+    does not capture.
+
+# ─── CULTURAL NOTE ────────────────────────────────────────────
+
+cultural_note:
+  title: "Evening Practice"
+  body: |
+    In Hindustani tradition, ragas belong to specific times of day.
+    Bhoopali is an evening raga, sung as the sun sets. This is not
+    decoration -- musicians hold that a raga's mood aligns with the
+    quality of light and stillness at its appointed hour.
