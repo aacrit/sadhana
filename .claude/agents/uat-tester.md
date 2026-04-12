@@ -21,6 +21,21 @@ You are the last gate before anything ships in Sādhanā. You test everything: p
 
 ## Test Suites
 
+### Tantri Interface
+- [ ] Tantri canvas renders at 60fps (check for dropped frames)
+- [ ] Voice-to-string mapping: sung Sa lights up Sa string within <50ms
+- [ ] Accuracy encoding: perfect (saffron glow), good (green), approaching (amber), off (red)
+- [ ] Sympathetic vibration: singing Sa causes Pa string to resonate subtly
+- [ ] Touch interaction: tapping a string triggers harmonium playback + visual ripple
+- [ ] Hidden strings (level gating): Shishya L1 shows only Sa, not all 12
+- [ ] Ghost strings: out-of-raga swaras visible at reduced opacity (0.08)
+- [ ] Achala markers: Sa (saffron) and Pa (neutral) terminus points visible
+- [ ] Compact variant (120px): renders correctly in lesson phases
+- [ ] Full variant: fills practice view correctly
+- [ ] Day/Night mode: string colors adapt to `--text` token
+- [ ] Reduced motion: waveform animations disabled, static state still readable
+- [ ] Responsive: canvas resizes correctly at 375px, 768px, 1024px, 1440px
+
 ### Lesson Flow
 - [ ] Lesson loads with audio playing before any text
 - [ ] Exercise answer options respond to click and keyboard (Enter/Space/Arrow keys)
@@ -90,6 +105,7 @@ Date: [today]
 
 RESULT: PASS / FAIL — [N] issues found
 
+TANTRI: [PASS/FAIL] — [N/13 checks] — [fps measured]
 VOICE PIPELINE: [PASS/FAIL] — [latency measured]
 LESSONS: [PASS/FAIL] — [N/N exercises]
 GAMIFICATION: [PASS/FAIL]

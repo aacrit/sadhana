@@ -15,16 +15,21 @@ You optimize Sādhanā for the performance bar that a cinematic music app demand
 
 ## Mandatory Reads
 
-1. `CLAUDE.md` — Tech stack (Next.js 15, Framer Motion, GSAP, Three.js, Tone.js, RNNoise WASM)
+1. `CLAUDE.md` — Tech stack (Next.js 15, Framer Motion, GSAP, Three.js, Tone.js, RNNoise WASM), Tantri architecture
 2. `docs/AUDIO-ENGINE.md` — Voice pipeline latency requirements
 3. `docs/DESIGN-SYSTEM.md` — Animation targets, Three.js scene specs
-4. `frontend/app/` — Component structure for bundle analysis
+4. `engine/interaction/tantri.ts` — Tantri engine (field creation, voice mapping, waveform generation)
+5. `frontend/app/components/Tantri.tsx` — Canvas renderer (60fps target, DPR-aware)
+6. `frontend/app/` — Component structure for bundle analysis
 
 ## Performance Targets
 
 | Metric | Target | Critical |
 |--------|--------|---------|
 | Audio: mic-to-visual latency | <50ms | <100ms |
+| Tantri: canvas frame rate | 60fps | 30fps |
+| Tantri: voice-to-string mapping | <16ms | <33ms |
+| Tantri: touch-to-audio | <20ms | <50ms |
 | Animation: frame rate | 60fps | 30fps |
 | Three.js: render budget | <8ms/frame | <16ms/frame |
 | Lighthouse Performance | 90+ | 75+ |
@@ -39,6 +44,13 @@ You optimize Sādhanā for the performance bar that a cinematic music app demand
 - Buffer size: 256 samples (≈5.8ms at 44100Hz) — smaller = lower latency
 - RNNoise frame size: 480 samples — must batch correctly
 - Tone.js context: pre-warm on first user gesture, not on demand
+
+### Tantri Canvas
+- Canvas render loop: must complete in <8ms per frame (60fps budget minus GC headroom)
+- `mapVoiceToStrings()` runs every frame with pitch data — profile for hot-path allocations
+- `generateStringWaveform()` creates arrays each call — consider pre-allocated buffers
+- DPR capping: same 2× max as Three.js — no 3× on retina
+- `requestAnimationFrame` cancellation when tab hidden or Tantri not in viewport
 
 ### Three.js
 - Limit scene complexity: tanpura visualization ≤ 5000 vertices

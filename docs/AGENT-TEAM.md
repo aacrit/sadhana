@@ -23,16 +23,16 @@ CEO (Aacrit)
         │   ├── music-director        HCM authority, raga curation, voice curriculum
         │   ├── raga-scholar          Musicological validation (read-only)
         │   ├── acoustics-engineer    Frequency science, just intonation, pitch calibration
-        │   └── audio-engineer        Voice pipeline (RNNoise+Pitchy), Tone.js, synthesis
+        │   └── audio-engineer        Voice pipeline (RNNoise+Pitchy), Tone.js, Tantri audio layer
         │
         ├── Curriculum Division ————— "Every session earns its 15 minutes"
         │   ├── curriculum-designer   Learning path architecture, YAML lesson structure
         │   └── lesson-writer         Exercise copy, Presence Rule, theory notes
         │
         ├── Frontend Division ———————— "Cinematic. Responsive. Zero compromise."
-        │   ├── frontend-builder      Component engineering, gamification UI, Three.js scenes
-        │   ├── frontend-fixer        UI bug remediation, mode consistency
-        │   ├── brand-director        Logo, visual language, design system, motion personality
+        │   ├── frontend-builder      Component engineering, Tantri integration, gamification UI
+        │   ├── frontend-fixer        UI bug remediation, Tantri bug routing, mode consistency
+        │   ├── brand-director        Logo, visual language, Tantri visual tokens, design system
         │   └── icon-creator          Raga/tala/nav icon systems, display typeface, PWA icons
         │
         ├── Product Division ————————— "Every release moves the needle"
@@ -82,12 +82,13 @@ Agents are assigned to `opus` or `sonnet` based on whether reasoning depth direc
 
 | Cycle | Sequence | Trigger |
 |-------|---------|---------|
-| **Lesson Ship** | music-director → curriculum-designer → raga-scholar + acoustics-engineer (∥) → lesson-writer → frontend-builder + audio-engineer (∥) → uat-tester → frontend-fixer | New lesson |
-| **Frontend Ship** | frontend-builder → uat-tester → frontend-fixer | Non-lesson UI change |
+| **Lesson Ship** | music-director → curriculum-designer (Tantri modes) → raga-scholar + acoustics-engineer (∥) → lesson-writer → frontend-builder (Tantri integration) + audio-engineer (∥) → uat-tester (Tantri suite) → frontend-fixer | New lesson |
+| **Frontend Ship** | frontend-builder → uat-tester (incl. Tantri suite) → frontend-fixer | Non-lesson UI change |
 | **Raga Audit** | raga-scholar → lesson-writer → raga-scholar (recheck) | Content release |
-| **Voice QA** | acoustics-engineer → audio-engineer → uat-tester | Voice pipeline changes |
-| **Brand Cycle** | brand-director → icon-creator → frontend-builder → uat-tester | Brand/visual identity work |
+| **Voice QA** | acoustics-engineer → audio-engineer (Tantri audio layer) → uat-tester (Tantri suite) | Voice pipeline changes |
+| **Brand Cycle** | brand-director (Tantri tokens) → icon-creator → frontend-builder → uat-tester | Brand/visual identity work |
 | **Icon Cycle** | brand-director (approve) → icon-creator → frontend-builder (integrate) → uat-tester | New icon sets, display typeface, PWA icons |
+| **Tantri QA** | audio-engineer (engine) → perf-optimizer (canvas fps) → uat-tester (Tantri suite) → frontend-fixer | Tantri changes |
 | **Quality Cycle** | progress-analyst → curriculum-designer → raga-scholar | Data-driven curriculum update |
 
 (∥) = parallel safe

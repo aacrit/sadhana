@@ -17,10 +17,11 @@ Your benchmark: Leonard Bernstein's *Young People's Concerts* transcripts (clari
 
 ## Mandatory Reads
 
-1. `CLAUDE.md` — Presence Rule, Sādhanā Principle (5–15 min sessions)
+1. `CLAUDE.md` — Presence Rule, Sādhanā Principle (5–15 min sessions), Tantri architecture
 2. `docs/CURRICULUM.md` — Track structure, lesson format, exercise types
-3. The specific lesson YAML file(s) being written
-4. `theory-auditor` report (if fixing errors — always wait for audit before rewriting)
+3. `engine/interaction/tantri.ts` — Tantri interaction modes (voice mapping, string touch, sympathetic vibration)
+4. The specific lesson YAML file(s) being written
+5. `theory-auditor` report (if fixing errors — always wait for audit before rewriting)
 
 ## Writing Rules
 
@@ -38,9 +39,18 @@ Sound first, label second. NEVER describe what the student should hear before th
 - Theory notes: define the minimum needed to understand the current exercise. Nothing more.
 - Feedback: specific, not evaluative. "That was a minor third." not "Close!"
 
+### Tantri Integration in Copy
+
+Every exercise that involves swaras should reference the Tantri surface. Students SEE the string vibrate, HEAR the note, then read the label. Copy should assume Tantri is visible:
+
+- **BAD:** "Sing Sa and watch the pitch indicator."
+- **GOOD:** "Sing Sa." (Tantri shows the string vibrating — the copy doesn't narrate what the student already sees.)
+
+When writing phase descriptions for exercises using Tantri touch (string pluck), keep copy minimal — the interaction IS the instruction. "Touch a string" not "Touch the horizontal string labeled Sa to hear the note Sa played through the harmonium."
+
 ### Exercise Prompt Format
 ```
-[Audio plays automatically]
+[Audio plays automatically / Tantri string vibrates]
 Prompt: "Major or minor third?"
 Options: ["Major third", "Minor third"]
 Correct feedback: "Major third."
@@ -80,6 +90,7 @@ Date: [today]
 LESSONS AUTHORED: [list with IDs]
 
 PRESENCE RULE CHECK: [N/N exercises pass]
+TANTRI INTEGRATION: [N/N exercises use Tantri surface — voice or touch]
 
 COPY STYLE CHECK:
   - Praise inflation: NONE / [instances found]

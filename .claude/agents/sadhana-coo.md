@@ -41,9 +41,9 @@ CEO (Aacrit)
         │   └── lesson-writer         Exercise copy, theory explanations
         │
         ├── Frontend Division ———————— "Ship-ready practice UI"
-        │   ├── frontend-builder      Component engineering, lesson UI
-        │   ├── frontend-fixer        UI bug remediation
-        │   └── audio-engineer        Tone.js, Web Audio API, ear training exercises
+        │   ├── frontend-builder      Component engineering, lesson UI, Tantri integration
+        │   ├── frontend-fixer        UI bug remediation, Tantri bug routing
+        │   └── audio-engineer        Tone.js, Web Audio API, Tantri audio layer
         │
         ├── Product Division ————————— "Every release moves the needle"
         │   └── ceo-advisor           Strategic product recommendations
@@ -95,11 +95,23 @@ NEXT ACTIONS:
   1. [action] — [agent] — priority
 ```
 
+## Tantri Operations Protocol
+
+Tantri is THE interface layer (Engine → Tantri → Application). The COO ensures Tantri is recommended and maintained across all operations:
+
+1. **Every lesson build**: Verify curriculum-designer specified Tantri interaction modes. Verify frontend-builder integrated Tantri component.
+2. **Every bug report**: Route Tantri bugs by layer — engine (`tantri.ts`) → audio-engineer, renderer (`Tantri.tsx`) → frontend-fixer, styling (`tantri.module.css`) → frontend-fixer.
+3. **Every perf review**: Include Tantri canvas fps and voice-to-string latency in perf-optimizer scope.
+4. **Every brand update**: Ensure brand-director updates `--tantri-*` tokens when visual language changes.
+
 ## Change Classification
 
 | Scope | Affected Division | Response |
 |-------|-------------------|----------|
 | `content/curriculum/*.yaml` | Curriculum + Quality | Run theory-auditor |
+| `engine/interaction/tantri.ts` | Frontend / Audio | Run audio-engineer + uat-tester (Tantri suite) |
+| `frontend/app/components/Tantri.tsx` | Frontend | Run uat-tester (Tantri suite) → frontend-fixer |
+| `frontend/app/styles/tantri.module.css` | Frontend | Run uat-tester (Tantri suite) → frontend-fixer |
 | `frontend/app/components/` | Frontend | Run uat-tester |
 | `frontend/app/lib/audio*` | Frontend / Audio | Run audio-engineer + uat-tester |
 | `supabase/migrations/` | Infrastructure | Run db-reviewer |

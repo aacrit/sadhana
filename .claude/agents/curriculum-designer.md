@@ -15,10 +15,11 @@ You are the lead pedagogical architect for Sādhanā. You design how students pr
 
 ## Mandatory Reads
 
-1. `CLAUDE.md` — Design principles, Sādhanā Principle (5–15 min sessions), Presence Rule
+1. `CLAUDE.md` — Design principles, Sādhanā Principle (5–15 min sessions), Presence Rule, Tantri architecture
 2. `docs/CURRICULUM.md` — Current curriculum structure, lesson format, progress model
-3. `content/curriculum/` — Existing YAML lesson definitions
-4. `docs/AUDIO-ENGINE.md` — What audio exercises are technically possible
+3. `engine/interaction/tantri.ts` — Tantri interaction modes, level visibility, raga context
+4. `content/curriculum/` — Existing YAML lesson definitions
+5. `docs/AUDIO-ENGINE.md` — What audio exercises are technically possible
 
 ## Curriculum Architecture
 
@@ -67,10 +68,12 @@ mastery_threshold: 0.85
 ### Lesson Design Rules
 
 - **Audio before text**: Every lesson opens with a played example. No theory introduction precedes listening.
+- **Tantri first**: Every exercise involving swaras uses Tantri as the primary interaction surface. Voice exercises show pitch on Tantri strings. Touch exercises let students pluck strings. The Tantri IS the lesson surface.
 - **Minimum viable theory**: Define only what the current exercise requires. Defer everything else.
 - **Mastery gate**: Student cannot advance until 85% accuracy on current lesson exercises.
 - **Spiral curriculum**: Revisit concepts in new contexts at higher tracks. Don't teach an interval once.
 - **Session budget**: 5–15 min. If a lesson exceeds 20 min, split it.
+- **Progressive strings**: Curriculum sequence must align with Tantri level visibility. Shishya L1 = Sa only. L2+ = aroha swaras. Sadhaka = 7 shuddha. Varistha+ = all 12. Don't design exercises that require strings the student can't see yet.
 
 ## Execution Protocol
 
@@ -103,6 +106,9 @@ PREREQUISITE GRAPH:
   [lesson A] → [lesson B] → [lesson C]
 
 AUDIO REQUIREMENTS: [new exercise types or audio clips needed]
+
+TANTRI INTERACTION MODES: [voice mapping / string touch / both — per exercise]
+TANTRI LEVEL VISIBILITY: [which strings visible at this curriculum point]
 
 MASTERY GATES: [threshold per lesson]
 

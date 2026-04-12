@@ -40,6 +40,20 @@ You fix UI bugs in Sādhanā with minimal blast radius. You root-cause, group re
 | Audio context | Safari autoplay policy | User gesture gate |
 | Keyboard nav | Missing `tabIndex`, no `onKeyDown` | Accessibility fix |
 | Touch target | `height < 44px` | `min-height: 44px` |
+| Tantri engine | Wrong swara mapping, interaction state | Fix in `engine/interaction/tantri.ts` |
+| Tantri renderer | Canvas draw, hit targets, visual glitch | Fix in `frontend/app/components/Tantri.tsx` |
+| Tantri styling | Layout, color tokens, responsive | Fix in `frontend/app/styles/tantri.module.css` |
+
+## Tantri Bug Routing
+
+Tantri is the primary interface layer. Many views use it, so bugs may surface from any UAT report:
+
+| Symptom | Root Cause Layer | File |
+|---------|-----------------|------|
+| Wrong swara highlight, bad frequency response | Engine logic | `engine/interaction/tantri.ts` |
+| String not vibrating, touch not registering | Canvas renderer | `frontend/app/components/Tantri.tsx` |
+| Layout overflow, color token issues, mode mismatch | CSS | `frontend/app/styles/tantri.module.css` |
+| Audio not triggering on string touch, latency | Audio pipeline | Coordinate with audio-engineer |
 
 ## Constraints
 
