@@ -158,7 +158,7 @@ export class VoicePipeline {
 
   constructor(config: VoicePipelineConfig) {
     this.config = {
-      clarityThreshold: 0.85,
+      clarityThreshold: 0.70,
       fftSize: 2048,
       swaraBufferSize: 20,
       level: 'shishya',
@@ -387,7 +387,7 @@ export class VoicePipeline {
         this.audioContext.sampleRate,
       );
 
-      const threshold = this.config.clarityThreshold ?? 0.85;
+      const threshold = this.config.clarityThreshold ?? 0.70;
 
       if (clarity >= threshold && pitch > 50 && pitch < 2000) {
         // Valid pitch detected

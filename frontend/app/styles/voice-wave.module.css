@@ -10,7 +10,8 @@
 .canvas {
   display: block;
   pointer-events: none;
-  z-index: var(--z-tanpura-bg, 0);
+  /* z-index 0 not -1: negative z goes behind body background paint */
+  z-index: 0;
 }
 
 /* -- Full: fills the viewport behind practice content -- */

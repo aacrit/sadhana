@@ -36,7 +36,7 @@ import type { Swara } from '@/engine/theory/types';
 const DEFAULT_SA_HZ = 261.6256;
 
 /** Minimum duration in ms a swara must be stable to emit a SwaraEvent. */
-const SWARA_DEBOUNCE_MS = 300;
+const SWARA_DEBOUNCE_MS = 150;
 
 /** Maximum time on same swara before emitting a new event. */
 const SAME_SWARA_REPEAT_MS = 2000;
@@ -47,8 +47,8 @@ const HISTORY_MAX = 30;
 /** Minimum session duration in seconds to persist to Supabase. */
 const MIN_SESSION_DURATION_S = 30;
 
-/** Clarity threshold for pitch detection. */
-const CLARITY_THRESHOLD = 0.85;
+/** Clarity threshold for pitch detection. Lower = more responsive, higher = more accurate. */
+const CLARITY_THRESHOLD = 0.70;
 
 /** Cents threshold for "in tune". */
 const IN_TUNE_CENTS = 20;
@@ -256,6 +256,7 @@ export function useFreeformSession(
   const swaraStartHzRef = useRef<number>(0);
   const lastEventTimeRef = useRef<number>(0);
   const lastEmittedSwaraRef = useRef<Swara | null>(null);
+  const lastCentsDevRef = useRef<number>(0);
 
   // Session timing
   const sessionStartRef = useRef<number>(0);
@@ -316,7 +317,7 @@ export function useFreeformSession(
               currentSwaraSymbolRef.current,
               swaraStartHzRef.current,
               elapsed,
-              centsDev ?? 0,
+              lastCentsDevRef.current,
             );
           }
           currentSwaraSymbolRef.current = null;
@@ -345,6 +346,7 @@ export function useFreeformSession(
       setCurrentSwaraFull(FULL_NAME_MAP[detectedSwara]);
       setCurrentDevanagari(DEVANAGARI_MAP[detectedSwara]);
       setCentsDev(deviation);
+      lastCentsDevRef.current = deviation;
       setInTune(isInTune);
       setHarmonyStrength(harmony);
 
@@ -384,7 +386,7 @@ export function useFreeformSession(
         }
       }
     },
-    [emitSwaraEvent, centsDev],
+    [emitSwaraEvent],
   );
 
   // -----------------------------------------------------------------------
