@@ -259,6 +259,11 @@ npm run test:engine  # Test engine only — raga grammar, frequency ratios, tala
 
 Engine-first architecture, Hindustani-first framing, Dhrupad design system, $0 constraint, audio-first pedagogy, McLeod Pitch Method + RNNoise voice pipeline, Supabase data layer, Framer Motion + GSAP + Three.js animation stack, Claude Max CLI only for agent work.
 
+**v1 Scope (locked):**
+- Full engine (`/engine/`) — all physics, theory, analysis, synthesis, voice modules. Tested. Correct.
+- Beginner journey — daily riyaz, Sa detection, voice visualization (3 layers), 5 ragas (Bhairav/Bhoopali/Bhimpalasi/Yaman/Bageshri for time-of-day riyaz), Shishya levels 1–3.
+- Signature "wow" feature (from Scholar engine, surfaced to all): raga phrase recognition. When the student accidentally sings the pakad (characteristic phrase) of their current raga, the app recognizes it and surfaces it: "You just sang the pakad of Yaman." No action required from the student. The engine noticed. This bridges Beginner and Scholar in one moment.
+
 **Daily Session Loop (locked):**
 - On open: app has already prepared today's riyaz. Raga chosen by time of day (dawn → Bhairav, morning → Bhoopali, afternoon → Bhimpalasi, evening → Yaman, night → Bageshri). Tanpura begins. Student sings. ~10 minutes. Zero decisions required.
 - On completion: transitions directly to free practice (student picks raga, exercise, or exploration). No friction between ritual and freedom.
