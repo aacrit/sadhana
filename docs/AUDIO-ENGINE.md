@@ -19,7 +19,7 @@ Mic (getUserMedia) -> AnalyserNode (FFT 2048) -> Pitchy McLeod -> mapPitchToSwar
 
 1. **AnalyserNode + main-thread Pitchy** (not AudioWorklet). Pitchy runs in <5ms per frame -- fast enough without Worker overhead. AudioWorklet adds SharedArrayBuffer requirements and message passing latency with no measurable benefit at this scale.
 
-2. **RNNoise WASM: future enhancement.** Current pipeline works without denoising. Browser-level `noiseSuppression: true` in getUserMedia constraints provides basic noise reduction. When RNNoise is integrated, it inserts between mic source and AnalyserNode with no changes to the rest of the chain.
+2. **RNNoise WASM: future enhancement.** Current pipeline works without denoising. All browser-level audio processing (`echoCancellation`, `noiseSuppression`, `autoGainControl`) is **disabled** in getUserMedia constraints because they corrupt pitch detection. Echo cancellation modifies frequency content; noise suppression cuts soft vowel onset; AGC distorts amplitude which corrupts clarity scores. When RNNoise is integrated, it inserts between mic source and AnalyserNode with no changes to the rest of the chain.
 
 3. **Callback-based events** (not buffered). Only the latest pitch matters for real-time feedback. VoicePipeline emits `VoiceEvent` objects via `onPitch`, `onSilence`, and `onPakadDetected` callbacks.
 
@@ -63,7 +63,25 @@ await pipeline.start();  // Must be from user gesture on iOS
 pipeline.stop();
 ```
 
-Runtime methods: `updateSa(hz)`, `updateRaga(ragaId)`, `updateLevel(level)`, `getSwaraBuffer()`.
+Runtime methods: `updateSa(hz)`, `updateRaga(ragaId)`, `updateLevel(level)`, `getSwaraBuffer()`, `getPitchHistory()`.
+
+### getUserMedia Constraints
+
+All browser-level audio processing is disabled. This is critical for pitch detection accuracy:
+
+```typescript
+audio: {
+  echoCancellation: false,   // Modifies frequency content
+  noiseSuppression: false,   // Cuts soft vowel onset
+  autoGainControl: false,    // Distorts amplitude/clarity scores
+  sampleRate: { ideal: 44100 },
+  channelCount: 1,
+}
+```
+
+### VoiceEvent Pitch History
+
+Each VoiceEvent includes a rolling `pitchHistory: [timestamp, hz][]` (last ~30 readings). This feeds the waveform visualization canvas in VoiceVisualization.
 
 ---
 

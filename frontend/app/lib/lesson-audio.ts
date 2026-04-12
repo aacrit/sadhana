@@ -72,7 +72,7 @@ export interface LessonAudioControls {
 
   // Voice pipeline (sing_sa, sing_aroha, pakad_watch phases)
   startVoicePipeline(
-    onPitch: (result: PitchResult) => void,
+    onPitch: (result: PitchResult, pitchHistory?: readonly [number, number][]) => void,
     onPakad?: (match: PakadMatch) => void,
   ): Promise<void>;
   stopVoicePipeline(): void;
@@ -320,7 +320,7 @@ export function useLessonAudio(
 
   const startVoicePipeline = useCallback(
     async (
-      onPitch: (result: PitchResult) => void,
+      onPitch: (result: PitchResult, pitchHistory?: readonly [number, number][]) => void,
       onPakad?: (match: PakadMatch) => void,
     ): Promise<void> => {
       if (disposedRef.current) return;
@@ -339,7 +339,7 @@ export function useLessonAudio(
         onPitch: (event: VoiceEvent) => {
           if (disposedRef.current) return;
           if (event.type === 'pitch' && event.pitchResult) {
-            onPitch(event.pitchResult);
+            onPitch(event.pitchResult, event.pitchHistory);
           }
         },
         onSilence: () => {

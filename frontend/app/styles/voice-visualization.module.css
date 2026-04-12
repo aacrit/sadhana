@@ -141,15 +141,17 @@
   border-radius: var(--radius-full);
 }
 
-/* Needle */
-.centsNeedle {
+/* Needle — positioned by Framer Motion spring, NOT CSS transition.
+   This gives the "mechanical not digital" feel of a physical instrument. */
+.centsNeedleIndicator {
   position: absolute;
   top: -6px;
   width: 4px;
   height: 14px;
   border-radius: var(--radius-full);
   background: var(--text);
-  transition: left var(--dur-fast) var(--spring);
+  transform: translateX(-50%);
+  /* No CSS transition — Framer Motion useSpring handles positioning */
 }
 
 .centsNeedleCorrect {
@@ -189,7 +191,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .pitchDot,
-  .centsNeedle,
+  .centsNeedleIndicator,
   .targetCircle {
     transition: none;
   }

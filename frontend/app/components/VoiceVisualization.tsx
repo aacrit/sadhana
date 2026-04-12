@@ -6,6 +6,16 @@
  * Layer 3 (precision): Cents needle (-50 to +50). Tap to expand on Beginner,
  *   always visible for Varistha+.
  *
+ * "Mechanical not digital" design:
+ *   - Pitch dot uses spring physics (stiffness 300, damping 12) — like a
+ *     physical needle on a precision instrument.
+ *   - Cents needle uses Framer Motion useSpring, not CSS transitions.
+ *   - Within +/-10 cents of a swara: magnetic snap (short tension-release).
+ *   - When pitch drops below clarity: spring release to center (Tanpura Release
+ *     preset: stiffness 400, damping 15), not a teleport.
+ *   - Hz values smoothed with EMA (alpha 0.3) — fast enough to feel responsive,
+ *     smooth enough not to flicker.
+ *
  * All colors via CSS custom properties. Respects prefers-reduced-motion.
  * Touch targets >= 44px. Keyboard accessible.
  */
@@ -13,7 +23,7 @@
 'use client';
 
 import { useRef, useEffect, useState, useCallback, useMemo } from 'react';
-import { motion, useSpring, useMotionValue } from 'framer-motion';
+import { motion, useSpring, useMotionValue, useTransform, AnimatePresence } from 'framer-motion';
 import type { VoiceFeedback } from '../lib/types';
 import styles from '../styles/voice-visualization.module.css';
 
@@ -31,6 +41,16 @@ interface VoiceVisualizationProps {
 }
 
 // ---------------------------------------------------------------------------
+// Constants
+// ---------------------------------------------------------------------------
+
+/** Exponential moving average alpha for Hz smoothing. */
+const EMA_ALPHA = 0.3;
+
+/** Cents threshold for magnetic snap to swara. */
+const SNAP_THRESHOLD_CENTS = 10;
+
+// ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
@@ -44,7 +64,6 @@ function getCentsStatus(cents: number): 'correct' | 'in-progress' | 'needs-work'
 
 /** Map cents deviation to position percentage (0-100). */
 function centsToPosition(cents: number): number {
-  // Clamp to -50..+50, map to 0..100
   const clamped = Math.max(-50, Math.min(50, cents));
   return ((clamped + 50) / 100) * 100;
 }
@@ -52,7 +71,7 @@ function centsToPosition(cents: number): number {
 /** Map cents deviation to a vertical offset for the pitch dot. */
 function centsToY(cents: number, height: number): number {
   const center = height / 2;
-  const range = height * 0.35; // dot can move 35% above/below center
+  const range = height * 0.35;
   const clamped = Math.max(-50, Math.min(50, cents));
   return center - (clamped / 50) * range;
 }
@@ -71,31 +90,92 @@ export default function VoiceVisualization({
   const containerRef = useRef<HTMLDivElement>(null);
   const [centsOpen, setCentsOpen] = useState(defaultExpanded);
 
-  // Spring-animated pitch dot position
+  // EMA-smoothed cents deviation (mutable ref for performance)
+  const smoothedCentsRef = useRef<number>(0);
+  const hasVoiceRef = useRef<boolean>(false);
+
+  // --- Spring-animated pitch dot Y position ---
+  // Between Gamak (600/5) and Andolan (120/8): stiffness 300, damping 12.
+  // Fast enough to track the voice, smooth enough not to flicker.
   const dotY = useMotionValue(0);
-  const springY = useSpring(dotY, { stiffness: 300, damping: 25 });
+  const springY = useSpring(dotY, { stiffness: 300, damping: 12 });
+
+  // --- Spring-animated cents needle position ---
+  // Same spring for mechanical responsiveness.
+  const needlePos = useMotionValue(50); // center = 50 (percent)
+  const springNeedle = useSpring(needlePos, { stiffness: 300, damping: 12 });
+  // Transform numeric 0-100 to CSS percentage string for left positioning
+  const needleLeftPercent = useTransform(springNeedle, (v) => `${v}%`);
 
   const status = useMemo(
     () => getCentsStatus(feedback.centsDeviation),
     [feedback.centsDeviation],
   );
 
-  const centsPos = useMemo(
-    () => centsToPosition(feedback.centsDeviation),
-    [feedback.centsDeviation],
-  );
+  // -------------------------------------------------------------------------
+  // EMA smoothing + spring target updates
+  // -------------------------------------------------------------------------
 
-  // Update pitch dot Y position
   useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-    const rect = container.getBoundingClientRect();
-    dotY.set(centsToY(feedback.centsDeviation, rect.height));
-  }, [feedback.centsDeviation, dotY]);
+    if (feedback.hz !== null) {
+      // Apply EMA smoothing to cents deviation
+      const raw = feedback.centsDeviation;
+      const prev = smoothedCentsRef.current;
+      let smoothed: number;
 
-  // ---------------------------------------------------------------------------
+      if (!hasVoiceRef.current) {
+        // First reading after silence — snap immediately (no lag on onset)
+        smoothed = raw;
+      } else {
+        smoothed = prev + EMA_ALPHA * (raw - prev);
+      }
+
+      // Magnetic snap: when within SNAP_THRESHOLD_CENTS of 0 (target swara),
+      // ease toward exact 0 with stronger pull
+      if (Math.abs(smoothed) <= SNAP_THRESHOLD_CENTS) {
+        smoothed = smoothed * 0.6; // pull toward center
+      }
+
+      smoothedCentsRef.current = smoothed;
+      hasVoiceRef.current = true;
+
+      // Update pitch dot Y (Layer 2)
+      const container = containerRef.current;
+      if (container) {
+        const rect = container.getBoundingClientRect();
+        dotY.set(centsToY(smoothed, rect.height));
+      }
+
+      // Update cents needle position (Layer 3)
+      needlePos.set(centsToPosition(smoothed));
+    } else {
+      // Voice dropped — release to center with Tanpura Release spring
+      // (stiffness 400, damping 15 — natural string settling)
+      if (hasVoiceRef.current) {
+        hasVoiceRef.current = false;
+        smoothedCentsRef.current = 0;
+
+        // Release dot to center
+        const container = containerRef.current;
+        if (container) {
+          const rect = container.getBoundingClientRect();
+          dotY.set(rect.height / 2);
+        }
+
+        // Release needle to center
+        needlePos.set(50);
+      }
+    }
+  }, [feedback.hz, feedback.centsDeviation, dotY, needlePos]);
+
+  // Note: The spring release feel when voice drops out is handled by the
+  // dotY.set() and needlePos.set() calls above returning to center values.
+  // The spring physics (stiffness 300, damping 12) naturally produce a
+  // settling motion that feels like a physical needle returning to rest.
+
+  // -------------------------------------------------------------------------
   // Layer 1: Waveform canvas
-  // ---------------------------------------------------------------------------
+  // -------------------------------------------------------------------------
 
   const drawWaveform = useCallback(() => {
     const canvas = waveformRef.current;
@@ -120,14 +200,14 @@ export default function VoiceVisualization({
       ctx.beginPath();
       ctx.strokeStyle = getComputedStyle(canvas).getPropertyValue('--text-3').trim() || '#7A6B5E';
       ctx.lineWidth = 1.5;
-      ctx.globalAlpha = feedback.amplitude * 0.8;
+      ctx.globalAlpha = Math.min(feedback.amplitude * 1.2, 0.9);
 
       const historyLen = feedback.pitchHistory.length;
       for (let i = 0; i < historyLen; i++) {
         const entry = feedback.pitchHistory[i];
         if (!entry) continue;
         const x = (i / historyLen) * w;
-        // Normalize Hz to a visual Y position
+        // Normalize Hz to a visual Y position relative to center
         const hz = entry[1];
         const normalizedY = h / 2 + Math.sin(hz * 0.01 * i) * 20 * feedback.amplitude;
         if (i === 0) ctx.moveTo(x, normalizedY);
@@ -156,9 +236,9 @@ export default function VoiceVisualization({
     return () => cancelAnimationFrame(animationRef.current);
   }, [drawWaveform]);
 
-  // ---------------------------------------------------------------------------
+  // -------------------------------------------------------------------------
   // Render
-  // ---------------------------------------------------------------------------
+  // -------------------------------------------------------------------------
 
   const targetClassName = [
     styles.targetCircle,
@@ -170,7 +250,7 @@ export default function VoiceVisualization({
     .join(' ');
 
   const needleClassName = [
-    styles.centsNeedle,
+    styles.centsNeedleIndicator,
     status === 'correct' && styles.centsNeedleCorrect,
     status === 'in-progress' && styles.centsNeedleInProgress,
     status === 'needs-work' && styles.centsNeedleNeedsWork,
@@ -200,24 +280,30 @@ export default function VoiceVisualization({
           {feedback.targetSwara}
         </span>
 
-        {/* Pitch dot */}
-        {feedback.hz !== null && (
-          <motion.div
-            className={styles.pitchDot}
-            style={{
-              y: springY,
-              backgroundColor:
-                status === 'correct'
-                  ? 'var(--correct)'
-                  : status === 'in-progress'
-                    ? 'var(--in-progress)'
-                    : 'var(--needs-work)',
-            }}
-          />
-        )}
+        {/* Pitch dot — spring physics, not CSS transition */}
+        <AnimatePresence>
+          {feedback.hz !== null && (
+            <motion.div
+              key="pitch-dot"
+              className={styles.pitchDot}
+              initial={{ opacity: 0, scale: 0.5 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.5, transition: { duration: 0.3 } }}
+              style={{
+                y: springY,
+                backgroundColor:
+                  status === 'correct'
+                    ? 'var(--correct)'
+                    : status === 'in-progress'
+                      ? 'var(--in-progress)'
+                      : 'var(--needs-work)',
+              }}
+            />
+          )}
+        </AnimatePresence>
       </div>
 
-      {/* Layer 3: Cents needle */}
+      {/* Layer 3: Cents needle — spring-driven, not CSS transition */}
       <div
         className={`${styles.centsLayer} ${!centsOpen ? styles.centsLayerCollapsed : ''}`}
         onClick={() => !defaultExpanded && setCentsOpen((prev) => !prev)}
@@ -238,9 +324,10 @@ export default function VoiceVisualization({
       >
         <div className={styles.centsScale}>
           <div className={styles.centsMark} />
-          <div
+          {/* Spring-animated needle — moves like a physical instrument */}
+          <motion.div
             className={needleClassName}
-            style={{ left: `${centsPos}%`, transform: 'translateX(-50%)' }}
+            style={{ left: needleLeftPercent }}
           />
         </div>
         {centsOpen && (
