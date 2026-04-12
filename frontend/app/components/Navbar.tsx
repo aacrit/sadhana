@@ -13,13 +13,18 @@
 'use client';
 
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import Logo from './Logo';
 import { useAuth } from '../lib/auth';
 import { getLevelColor } from '../lib/types';
 import styles from '../styles/navbar.module.css';
 
 export default function Navbar() {
+  const pathname = usePathname();
   const { user, profile, loading, isGuest } = useAuth();
+
+  // Hide navbar on auth pages — void design language owns the full viewport
+  if (pathname.startsWith('/auth')) return null;
 
   // Determine display name initial for avatar
   const displayName = profile?.displayName || user?.email || 'S';

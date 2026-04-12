@@ -10,13 +10,18 @@
 
 import type { ReactNode } from 'react';
 import { AuthProvider } from './lib/auth';
+import { VoiceWaveProvider } from './lib/VoiceWaveContext';
 import ScriptToggle from './components/ScriptToggle';
+import VoiceWave from './components/VoiceWave';
 
 export default function Providers({ children }: { children: ReactNode }) {
   return (
     <AuthProvider>
-      {children}
-      <ScriptToggle />
+      <VoiceWaveProvider>
+        <VoiceWave variant="ambient" />
+        {children}
+        <ScriptToggle />
+      </VoiceWaveProvider>
     </AuthProvider>
   );
 }

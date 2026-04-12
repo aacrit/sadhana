@@ -46,7 +46,9 @@ import SwaraIntroduction from '../../components/SwaraIntroduction';
 import PhrasePlayback from '../../components/PhrasePlayback';
 import PakadMoment from '../../components/PakadMoment';
 import VoiceVisualization from '../../components/VoiceVisualization';
+import VoiceWave from '../../components/VoiceWave';
 import { useLessonAudio } from '../../lib/lesson-audio';
+import { useVoiceWave } from '../../lib/VoiceWaveContext';
 import homeStyles from '../../styles/beginner.module.css';
 import lessonStyles from '../../styles/beginner-lesson.module.css';
 
@@ -331,6 +333,19 @@ export default function BeginnerPage() {
 
   // Audio hook — provides tanpura, swara playback, voice pipeline
   const audio = useLessonAudio(saHz, 'bhoopali');
+  const { setAnalyser, setSaHz: setWaveSaHz } = useVoiceWave();
+
+  // Register analyser with VoiceWaveContext when pipeline is active
+  useEffect(() => {
+    if (audio.pipelineActive) {
+      const node = audio.getAnalyserNode();
+      setAnalyser(node);
+      setWaveSaHz(saHz);
+    } else {
+      setAnalyser(null);
+    }
+    return () => setAnalyser(null);
+  }, [audio.pipelineActive, audio, saHz, setAnalyser, setWaveSaHz]);
 
   // Track previous phase for cleanup
   const prevPhaseRef = useRef<LessonPhase>(phase);
@@ -667,6 +682,9 @@ export default function BeginnerPage() {
 
     return (
       <div className={lessonStyles.lessonPage} data-raga={todayRaga.id} role="main" aria-label="Lesson: Your First Raga - Bhoopali">
+        {/* Voice waveform background — reacts to mic when pipeline active */}
+        <VoiceWave variant="full" style={{ opacity: 0.15 }} />
+
         {/* Exit lesson */}
         <button
           type="button"

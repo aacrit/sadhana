@@ -87,6 +87,13 @@ export default function SwaraIntroduction({
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const completeCalled = useRef(false);
 
+  // Store onPlaySwara in a ref so advanceSwara doesn't depend on it.
+  // Without this, inline arrow function props like onPlaySwara={(s) => audio.playSwara(s)}
+  // create new references every render, causing advanceSwara to recreate and
+  // auto-advance timers to reset before they complete — the "stuck at step 3" bug.
+  const onPlaySwaraRef = useRef(onPlaySwara);
+  onPlaySwaraRef.current = onPlaySwara;
+
   // Clean up timers on unmount
   useEffect(() => {
     return () => {
@@ -111,9 +118,9 @@ export default function SwaraIntroduction({
 
       setIsPlaying(true);
 
-      // Trigger audio playback for this swara
-      if (onPlaySwara) {
-        onPlaySwara(swaras[next]!);
+      // Trigger audio playback for this swara (via ref to avoid dep instability)
+      if (onPlaySwaraRef.current) {
+        onPlaySwaraRef.current(swaras[next]!);
       }
 
       if (audioFirst) {
@@ -138,7 +145,7 @@ export default function SwaraIntroduction({
 
       return next;
     });
-  }, [swaras, swaras.length, audioFirst, revealDelayMs, onPlaySwara]);
+  }, [swaras, swaras.length, audioFirst, revealDelayMs]);
 
   // Auto-start the sequence on mount
   useEffect(() => {

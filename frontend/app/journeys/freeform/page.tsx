@@ -25,10 +25,11 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import Logo from '../../components/Logo';
-import TanpuraViz from '../../components/TanpuraViz';
+import VoiceWave from '../../components/VoiceWave';
 import { useFreeformSession } from '../../lib/useFreeformSession';
 import type { SwaraEvent } from '../../lib/useFreeformSession';
 import { useAuth } from '../../lib/auth';
+import { useVoiceWave } from '../../lib/VoiceWaveContext';
 import styles from './freeform.module.css';
 
 // ---------------------------------------------------------------------------
@@ -190,6 +191,7 @@ export default function FreeformPage() {
   const userSaHz = profile?.saHz ?? 261.63;
 
   const session = useFreeformSession(userSaHz);
+  const { setAnalyser, setSaHz } = useVoiceWave();
   const [hasStarted, setHasStarted] = useState(false);
   const [startError, setStartError] = useState<string | null>(null);
 
@@ -197,6 +199,18 @@ export default function FreeformPage() {
   const [ghosts, setGhosts] = useState<(SwaraEvent & { key: number })[]>([]);
   const ghostKeyRef = useRef(0);
   const prevHistoryLenRef = useRef(0);
+
+  // Register analyser with VoiceWaveContext when pipeline is active
+  useEffect(() => {
+    if (session.isListening) {
+      const node = session.getAnalyserNode();
+      setAnalyser(node);
+      setSaHz(userSaHz);
+    } else {
+      setAnalyser(null);
+    }
+    return () => setAnalyser(null);
+  }, [session.isListening, setAnalyser, setSaHz, userSaHz, session]);
 
   // Detect new swara events and add to ghost list
   useEffect(() => {
@@ -289,7 +303,7 @@ export default function FreeformPage() {
   if (!hasStarted) {
     return (
       <div className={styles.page}>
-        <TanpuraViz active={false} style={{ opacity: 0.15 }} />
+        <VoiceWave variant="full" style={{ opacity: 0.15 }} />
 
         <Link href="/" className={styles.backLink}>
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
@@ -333,7 +347,7 @@ export default function FreeformPage() {
   if (session.micPermission === 'denied') {
     return (
       <div className={styles.page}>
-        <TanpuraViz active={session.tanpuraActive} style={{ opacity: 0.15 }} />
+        <VoiceWave variant="full" style={{ opacity: 0.15 }} />
 
         <motion.div
           className={styles.startContent}
@@ -376,8 +390,8 @@ export default function FreeformPage() {
 
   return (
     <div className={styles.page}>
-      {/* Layer 1 — Ambient tanpura waveform */}
-      <TanpuraViz active={session.tanpuraActive} style={{ opacity: 0.15 }} />
+      {/* Layer 1 — Voice waveform with swara markers */}
+      <VoiceWave variant="full" style={{ opacity: 0.25 }} />
 
       {/* Layer 3 — Harmony pulse (z-index above swara field) */}
       <AnimatePresence mode="wait">

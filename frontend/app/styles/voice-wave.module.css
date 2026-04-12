@@ -1,0 +1,64 @@
+/**
+ * voice-wave.module.css — Styles for the unified VoiceWave component.
+ *
+ * Three variants:
+ *   .full    — 100dvh, fills viewport (freeform riyaz)
+ *   .compact — 80px strip (lessons, practice)
+ *   .ambient — fixed background, covers viewport (home, nav)
+ */
+
+.canvas {
+  display: block;
+  pointer-events: none;
+  z-index: var(--z-tanpura-bg, 0);
+}
+
+/* -- Full: fills the viewport behind practice content -- */
+
+.full {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* -- Compact: horizontal strip for lesson views -- */
+
+.compact {
+  width: 100%;
+  height: 80px;
+  border-radius: var(--radius-md, 8px);
+  opacity: 0.85;
+}
+
+/* -- Ambient: fixed background with very low opacity -- */
+
+.ambient {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.35;
+}
+
+/* -- Responsive: compact strip grows on larger screens -- */
+
+@media (min-width: 640px) {
+  .compact {
+    height: 100px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .compact {
+    height: 120px;
+  }
+}
+
+/* -- Reduced motion: static, no animation loop -- */
+
+@media (prefers-reduced-motion: reduce) {
+  .canvas {
+    opacity: 0.3;
+  }
+}

@@ -185,6 +185,7 @@ export interface FreeformControls {
   stopListening(): void;
   toggleTanpura(): void;
   dispose(): void;
+  getAnalyserNode(): AnalyserNode | null;
 }
 
 // ---------------------------------------------------------------------------
@@ -603,6 +604,9 @@ export function useFreeformSession(
     stopListening,
     toggleTanpura,
     dispose,
+
+    // AnalyserNode for VoiceWave visualization
+    getAnalyserNode: () => pipelineRef.current?.getAnalyserNode() ?? null,
   };
 }
 
