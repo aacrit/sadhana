@@ -389,3 +389,23 @@
     width: 120px;
   }
 }
+
+/* -- Error toast (shown in active session when mic fails) --------------- */
+
+.errorToast {
+  position: fixed;
+  top: calc(var(--navbar-height, 48px) + var(--space-3));
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: 90vw;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
+  background: rgba(0, 0, 0, 0.75);
+  border: 1px solid var(--in-progress);
+  color: var(--in-progress);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  text-align: center;
+  z-index: var(--z-overlay, 50);
+  pointer-events: none;
+}

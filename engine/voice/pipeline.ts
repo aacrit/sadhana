@@ -193,15 +193,34 @@ export class VoicePipeline {
     // noise suppression cuts soft vowel onset, and AGC distorts amplitude
     // which corrupts clarity scores. RNNoise (when integrated) handles
     // denoising; we don't need browser-level noise suppression.
-    this.mediaStream = await navigator.mediaDevices.getUserMedia({
-      audio: {
-        echoCancellation: false,
-        noiseSuppression: false,
-        autoGainControl: false,
-        sampleRate: { ideal: 44100 },
-        channelCount: 1,
-      },
-    });
+    try {
+      this.mediaStream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: false,
+          noiseSuppression: false,
+          autoGainControl: false,
+          sampleRate: { ideal: 44100 },
+          channelCount: 1,
+        },
+      });
+    } catch (micErr) {
+      // Some browsers don't support sampleRate constraint — retry without it
+      if (
+        micErr instanceof DOMException &&
+        (micErr.name === 'OverconstrainedError' || micErr.name === 'TypeError')
+      ) {
+        this.mediaStream = await navigator.mediaDevices.getUserMedia({
+          audio: {
+            echoCancellation: false,
+            noiseSuppression: false,
+            autoGainControl: false,
+            channelCount: 1,
+          },
+        });
+      } else {
+        throw micErr;
+      }
+    }
 
     // Create AudioContext
     this.audioContext = new AudioContext();

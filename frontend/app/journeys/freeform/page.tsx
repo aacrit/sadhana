@@ -271,11 +271,26 @@ export default function FreeformPage() {
       await session.startListening();
       setHasStarted(true);
     } catch (err) {
+      // Log the actual error for debugging
+      console.error('[Freeform] startListening failed:', err);
+
       if (session.micPermission === 'denied') {
-        // Handled via micPermission state
+        // Show permission denied UI
         setHasStarted(true);
       } else {
-        setStartError('Could not start audio. Please try again.');
+        // Still enter the session — tanpura can play without mic
+        setHasStarted(true);
+        // Surface specific error information
+        const msg = err instanceof Error ? err.message : String(err);
+        if (msg.includes('getUserMedia') || msg.includes('mediaDevices')) {
+          setStartError('Microphone not available. Tanpura will play without voice detection.');
+        } else if (msg.includes('Pitchy') || msg.includes('pitch detection')) {
+          setStartError('Pitch detection failed to load. Please reload the page.');
+        } else if (msg.includes('AudioContext')) {
+          setStartError('Audio engine not available. Please tap the page first, then try again.');
+        } else {
+          setStartError(`Audio issue: ${msg}`);
+        }
       }
     }
   }, [session]);
@@ -392,6 +407,19 @@ export default function FreeformPage() {
     <div className={styles.page}>
       {/* Layer 1 — Voice waveform with swara markers */}
       <VoiceWave variant="full" style={{ opacity: 0.25 }} />
+
+      {/* Audio error toast — shown when mic fails but session continues */}
+      {startError && (
+        <motion.div
+          className={styles.errorToast}
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          {startError}
+        </motion.div>
+      )}
 
       {/* Layer 3 — Harmony pulse (z-index above swara field) */}
       <AnimatePresence mode="wait">
