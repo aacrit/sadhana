@@ -150,9 +150,9 @@ engine/
 
 ---
 
-## Design System — Dhrupad
+## Design System — Sādhanā DS
 
-Named after the oldest surviving form of Hindustani classical music: austere, geometric, meditative, precise. The oldest form — and the foundation everything else grows from.
+The visual language is inseparable from the practice philosophy — they share a name. The aesthetic is guided by **Dhrupad** principles: the oldest surviving form of Hindustani classical music. Austere, geometric, meditative, precise. The foundation everything else grows from. In code and documentation, "Sādhanā DS" when disambiguation from the app is needed.
 
 | Decision | Choice |
 |----------|--------|
@@ -162,7 +162,7 @@ Named after the oldest surviving form of Hindustani classical music: austere, ge
 | Night bg | Deep Indigo `#0D0D1A` |
 | Day bg | Ivory `#F5F0E8` |
 | RAG | Correct `#22C55E` / In-progress `#F59E0B` / Needs-work `#EF4444` |
-| Logo | Tanpura drone geometry — 4 strings converging as overtone series. SVG. Works 16px–200px. |
+| Logo | Four tanpura strings (overtone series) converging to a Sa point (saffron). Open arc behind them — 225°–315°, top quadrant missing (the practice still to come). SVG. 16px–200px. |
 | Signature element | Reactive tanpura waveform (Three.js) — responds to student's voice in real time |
 | Motion | Framer Motion spring (interactions) + GSAP timelines (ceremonies) + Three.js (ambient) |
 
