@@ -224,6 +224,7 @@ npm run test:engine  # Test engine only — raga grammar, frequency ratios, tala
 | Validate raga objects in code against tradition | `raga-scholar` |
 | Journey UX design, gamification, level system | `frontend-builder` |
 | Visual identity, logo, Dhrupad design system | `brand-director` |
+| Icon design, raga/tala/nav icons, display typeface, PWA icons | `icon-creator` |
 | Lesson content, exercise copy, Presence Rule | `lesson-writer` |
 | Learning paths, raga curriculum sequence | `curriculum-designer` |
 | Schema, migrations, progress data | `db-reviewer` |
@@ -245,7 +246,8 @@ npm run test:engine  # Test engine only — raga grammar, frequency ratios, tala
 | **Lesson Ship** | music-director → curriculum-designer → raga-scholar + acoustics-engineer (∥) → lesson-writer → frontend-builder + audio-engineer (∥) → uat-tester |
 | **Frontend Ship** | frontend-builder → uat-tester → frontend-fixer |
 | **Voice QA** | acoustics-engineer → audio-engineer → uat-tester |
-| **Brand Cycle** | brand-director → frontend-builder → uat-tester |
+| **Brand Cycle** | brand-director → icon-creator → frontend-builder → uat-tester |
+| **Icon Cycle** | brand-director (approve) → icon-creator → frontend-builder (integrate) → uat-tester |
 
 ---
 

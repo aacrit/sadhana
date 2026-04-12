@@ -32,7 +32,8 @@ CEO (Aacrit)
         ├── Frontend Division ———————— "Cinematic. Responsive. Zero compromise."
         │   ├── frontend-builder      Component engineering, gamification UI, Three.js scenes
         │   ├── frontend-fixer        UI bug remediation, mode consistency
-        │   └── brand-director        Logo, visual language, design system, motion personality
+        │   ├── brand-director        Logo, visual language, design system, motion personality
+        │   └── icon-creator          Raga/tala/nav icon systems, display typeface, PWA icons
         │
         ├── Product Division ————————— "Every release moves the needle"
         │   └── ceo-advisor           Strategic product recommendations (read-only)
@@ -61,6 +62,7 @@ CEO (Aacrit)
 | `frontend-builder` | Frontend | opus | R+W | New components, gamification UI |
 | `frontend-fixer` | Frontend | opus | R+W | After UAT failures |
 | `brand-director` | Frontend | opus | R+W | Logo, visual language, design tokens |
+| `icon-creator` | Frontend | opus | R+W | Icon design, raga iconography, tala visuals, PWA icons, display typeface |
 | `db-reviewer` | Infrastructure | opus | R only | After migrations |
 | `update-docs` | Infrastructure | opus | R+W | After EVERY session with changes |
 | `perf-optimizer` | Infrastructure | opus | R+W | Latency issues / manual |
@@ -75,7 +77,8 @@ CEO (Aacrit)
 | **Frontend Ship** | frontend-builder → uat-tester → frontend-fixer | Non-lesson UI change |
 | **Raga Audit** | raga-scholar → lesson-writer → raga-scholar (recheck) | Content release |
 | **Voice QA** | acoustics-engineer → audio-engineer → uat-tester | Voice pipeline changes |
-| **Brand Cycle** | brand-director → frontend-builder → uat-tester | Brand/visual identity work |
+| **Brand Cycle** | brand-director → icon-creator → frontend-builder → uat-tester | Brand/visual identity work |
+| **Icon Cycle** | brand-director (approve) → icon-creator → frontend-builder (integrate) → uat-tester | New icon sets, display typeface, PWA icons |
 | **Quality Cycle** | progress-analyst → curriculum-designer → raga-scholar | Data-driven curriculum update |
 
 (∥) = parallel safe
@@ -113,6 +116,7 @@ raga-scholar, theory-auditor, progress-analyst, db-reviewer, sadhana-ciso, perf-
 | frontend-builder | builder |
 | frontend-fixer | ui-fixer |
 | brand-director | brand |
+| icon-creator | icons |
 | db-reviewer | dba |
 | update-docs | documenter |
 | perf-optimizer | perf |
