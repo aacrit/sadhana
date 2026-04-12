@@ -13,25 +13,26 @@
     "type-check": "tsc --noEmit -p frontend/tsconfig.json"
   },
   "dependencies": {
-    "next": "15.3.0",
-    "react": "19.1.0",
-    "react-dom": "19.1.0",
-    "tone": "^15.1.1",
+    "@supabase/supabase-js": "^2.49.4",
     "framer-motion": "^12.7.0",
     "gsap": "^3.12.7",
+    "next": "15.3.0",
+    "pitchy": "^4.1.0",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
     "three": "^0.170.0",
-    "@supabase/supabase-js": "^2.49.4",
-    "pitchy": "^4.1.0"
+    "tone": "^15.1.1",
+    "webaudiofont": "^3.0.4"
   },
   "devDependencies": {
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/three": "^0.170.0",
-    "typescript": "^5",
+    "@vitest/ui": "^3.1.2",
     "eslint": "^9",
     "eslint-config-next": "15.3.0",
-    "vitest": "^3.1.2",
-    "@vitest/ui": "^3.1.2"
+    "typescript": "^5",
+    "vitest": "^3.1.2"
   }
 }

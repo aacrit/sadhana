@@ -489,3 +489,122 @@ If the student is > 25 cents off, harmony strength is reduced by 0.4 (floor 0).
 ### Session Persistence
 
 Sessions >= 30s are saved to Supabase `sessions` table via dynamic import (fire-and-forget). Fields: `user_id`, `raga_id: 'freeform'`, `sa_hz`, `duration_s`, `xp_earned` (2 per minute), `journey: 'freeform'`, timestamps. Guest sessions are not persisted.
+
+---
+
+## Tiered Instrument System
+
+Source: `engine/synthesis/harmonium-sampler.ts`, `engine/synthesis/harmonium-samples.ts`, `engine/synthesis/tabla-samples.ts`
+
+### Tier Cascade
+
+The harmonium player implements a three-tier fallback system. On first load, Tier 1 plays immediately with zero latency. In the background, the player attempts to load Tier 2, then Tier 3. When a higher tier loads, playback seamlessly upgrades. If any tier fails, the system falls back silently.
+
+```
+Tier 3 (CC0 samples)  ->  Tier 2 (WebAudioFont)  ->  Tier 1 (additive synthesis)
+       best quality         good quality, fast load        instant, always available
+```
+
+| Tier | Source | Quality | Load Time | Size |
+|------|--------|---------|-----------|------|
+| 1 | 12-partial additive synthesis | Good (synthesised harmonium) | 0ms (code) | 0KB |
+| 2 | WebAudioFont reed organ (GM program 20) | Better (real sample-based) | ~500ms (CDN) | ~50KB |
+| 3 | CC0 harmonium samples (Freesound) | Best (multi-sampled, interpolated) | ~1-2s (self-hosted) | ~210KB |
+
+### HarmoniumPlayer API
+
+```typescript
+const player = new HarmoniumPlayer(audioContext, saHz);
+
+// Tier 1 plays immediately
+player.playNote(440, 0.5, 0.5);  // hz, duration, volume
+
+// Start background upgrade (call once after user gesture)
+await player.loadHigherTiers();
+
+// Now uses highest loaded tier
+player.playNote(440, 0.5, 0.5);
+
+// Check current tier
+player.currentTier;  // 1 | 2 | 3
+
+// Play a phrase
+await player.playPhrase([
+  { hz: 261.63, duration: 0.5 },
+  { hz: 294.33, duration: 0.5 },
+], 0.05);
+
+player.dispose();
+```
+
+### Tier 2: WebAudioFont Integration
+
+The `webaudiofont` npm package provides sample-based instrument playback. We use the Reed Organ preset (GM program 20), loaded from the CDN at `https://surikov.github.io/webaudiofontdata/sound/0200_GeneralUserGS_sf2_file.js`.
+
+**Just-intonation detune correction**: WebAudioFont samples are tuned to 12-tone equal temperament. Every note must be detuned to match the just-intonation ratios used throughout the engine:
+
+```typescript
+function hzToMidiWithDetune(hz: number): { midi: number; detune: number } {
+  const exactMidi = 69 + 12 * Math.log2(hz / 440);
+  const midi = Math.round(exactMidi);
+  const detune = (exactMidi - midi) * 100; // cents offset
+  return { midi, detune };
+}
+// detune applied via fractional pitch: adjustedPitch = midi + detune / 100
+```
+
+**Loading**: Dynamic import of the `webaudiofont` module, preset loaded via script tag injection. The preset JS file defines a global variable (`_tone_0200_...`) which is extracted after the script loads.
+
+### Tier 3: CC0 Harmonium Samples
+
+Source: Freesound -- cabled_mess harmonium pack (CC0, public domain)
+Pack URL: `https://freesound.org/people/cabled_mess/packs/29512/`
+
+7 samples spaced by minor 3rds covering C3 to C5. The engine uses `AudioBufferSourceNode.playbackRate` to pitch each sample to the exact just-intonation frequency:
+
+```typescript
+source.playbackRate.value = targetHz / sampleHz;
+```
+
+| Sample | MIDI | Hz (12-TET) |
+|--------|------|-------------|
+| harmonium-C3.ogg | 48 | 130.81 |
+| harmonium-E3.ogg | 52 | 164.81 |
+| harmonium-G3.ogg | 55 | 196.00 |
+| harmonium-C4.ogg | 60 | 261.63 |
+| harmonium-E4.ogg | 64 | 329.63 |
+| harmonium-G4.ogg | 67 | 392.00 |
+| harmonium-C5.ogg | 72 | 523.25 |
+
+Sample files are NOT checked into git. See `frontend/public/audio/harmonium/README.md` for download and preparation instructions. The engine requires at least 3 loaded samples before activating Tier 3.
+
+### Tabla Sample Upgrade
+
+Source: `engine/synthesis/tabla-samples.ts`
+
+Same tiered pattern for tabla. Tier 1 is the existing synthesised tabla (always available). When CC0 tabla bol samples are placed in `frontend/public/audio/tabla/`, TalaPlayer can use them as a per-bol upgrade. Missing bols fall back to synthesis individually.
+
+| Sample | Bol | Drum |
+|--------|-----|------|
+| dha.ogg | Dha | dayan + bayan |
+| dhin.ogg | Dhin | dayan + bayan |
+| na.ogg | Na | dayan only |
+| ta.ogg | Ta | dayan only |
+| tin.ogg | Tin | dayan only |
+| ge.ogg | Ge | bayan only |
+| ka.ogg | Ka | bayan only |
+| ti.ogg | Ti | dayan only |
+
+### lesson-audio.ts Integration
+
+The `useLessonAudio` hook creates a `HarmoniumPlayer` instance on first swara playback request. `loadHigherTiers()` is called immediately after construction (non-blocking). All `playSwara` and `playPhrase` calls delegate to the HarmoniumPlayer, which uses the highest available tier. If HarmoniumPlayer construction fails (e.g. no AudioContext), the hook falls back to direct `swara-voice.ts` calls.
+
+### PWA Offline Caching
+
+The service worker (`frontend/public/sw.js`) implements cache-first strategy for audio assets:
+
+- `sadhana-audio-v1` cache stores all `/audio/` requests (harmonium + tabla samples)
+- First fetch loads from network and caches the response
+- Subsequent fetches serve from cache (offline-capable)
+- External CDN requests (WebAudioFont presets from `surikov.github.io`) are not cached by the SW (loaded via script tag, not fetch)
+- Stale caches from previous versions are automatically cleaned on SW activation
