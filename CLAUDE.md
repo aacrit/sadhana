@@ -129,6 +129,7 @@ engine/
 │  Explorer ──────── raga browser, phrase library, ear training  │
 │  Scholar  ──────── full raga grammar, shruti analysis, theory  │
 │  Master   ──────── composition, phrase generation, teaching    │
+│  Freeform ──────── open riyaz, no goals, cinematic swara viz   │
 └─────────────────────────────┬───────────────────────────────────┘
                               │  React components
 ┌─────────────────────────────▼───────────────────────────────────┐
@@ -276,6 +277,7 @@ Engine-first architecture, Hindustani-first framing, Ragamala design system, $0 
 - All four journeys exist as entry points from day one — shows the full vision immediately.
 - Beginner journey: fully built. Daily riyaz, Sa detection, voice visualization (3 layers), 5 ragas (Bhairav/Bhoopali/Bhimpalasi/Yaman/Bageshri), Shishya levels 1–3.
 - Explorer journey: partially built. Raga browser, ear training exercises, phrase library.
+- Freeform journey: fully built. Open riyaz mode -- tanpura + voice, no goals, cinematic swara visualization (floating Devanagari/romanized swaras, ghost trail, harmony pulse), session saved to Supabase with `raga_id: 'freeform'`. Accessible from home at any level.
 - Scholar + Master journeys: skeleton/placeholder — visible, navigable, locked behind level gate with "coming soon" depth. Students can see where they're going.
 - Signature "wow" feature (Scholar engine, surfaced to all): raga phrase recognition. When the student sings the pakad (characteristic phrase) of their current raga, the app recognizes it: "You just sang the pakad of Yaman." No action required. The engine noticed. Bridges Beginner and Scholar in one unrepeatable moment.
 
@@ -287,7 +289,7 @@ Engine-first architecture, Hindustani-first framing, Ragamala design system, $0 
 **Sa Reference Pitch (locked):** Auto-detect from voice. Onboarding asks student to say/sing "Sa" 3–5 times. Engine averages Pitchy detections → proposes "Your Sa is G3 (196 Hz) — does that feel right?" Student confirms or adjusts. If skipped: defaults to C4 (261.63 Hz). Sa is stored in user profile and used as the root for all frequency calculations across the entire engine.
 
 **Pakad Recognition Moment (locked — 2-layer cinematic):**
-- Layer 1 — Cinematic pause (~4s): tanpura continues uninterrupted. Background deepens to full indigo. Raga name appears large in Cormorant Garamond, center screen. Below it: the phrase in sargam notation (Ni Re Ga Ma Ga Re Sa). Fades slowly. GSAP timeline. Unrepeatable feeling.
+- Layer 1 — Cinematic pause (~4s): tanpura continues uninterrupted. Background deepens to full `--raga-bg`. Jali pattern scales to full reveal. Raga name appears large in Cormorant Garamond (or Noto Serif Devanagari if script toggle is active), center screen. Below it: the phrase in sargam notation (Ni Re Ga Ma Ga Re Sa). Fades slowly. GSAP timeline. Unrepeatable feeling.
 - Layer 2 — Settles: the subtle text "You just sang the pakad of Yaman" remains at the bottom as a quiet record. Fades to 40% opacity. Stays for the rest of the session.
 - Tanpura never stops. Practice continues through it.
 
@@ -310,8 +312,10 @@ Sādhanā/
 │   └── voice/                # Pipeline, accuracy, feedback
 ├── frontend/
 │   ├── app/
-│   │   ├── journeys/         # Beginner / Explorer / Scholar / Master entry points
-│   │   ├── components/       # Shared: PracticeSession, VoiceFeedback, TanpuraViz...
+│   │   ├── auth/             # Void design language auth portal (Google, email, guest)
+│   │   ├── profile/          # XP, streak, level progression, encouragement
+│   │   ├── journeys/         # Beginner / Explorer / Scholar / Master / Freeform
+│   │   ├── components/       # Shared: PracticeSession, VoiceFeedback, TanpuraViz, ScriptToggle...
 │   │   ├── lib/              # Supabase client, types
 │   │   ├── three/            # Three.js tanpura waveform scene
 │   │   └── styles/           # tokens.css (Ragamala design tokens)
