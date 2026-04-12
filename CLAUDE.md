@@ -261,6 +261,11 @@ Engine-first architecture, Hindustani-first framing, Dhrupad design system, $0 c
 
 **Sa Reference Pitch (locked):** Auto-detect from voice. Onboarding asks student to say/sing "Sa" 3–5 times. Engine averages Pitchy detections → proposes "Your Sa is G3 (196 Hz) — does that feel right?" Student confirms or adjusts. If skipped: defaults to C4 (261.63 Hz). Sa is stored in user profile and used as the root for all frequency calculations across the entire engine.
 
+**Voice Feedback Visualization (locked — 3 layers):**
+- Layer 1 (ambient, always present): Live voice waveform alongside tanpura waveform. In tune = waves align. Off pitch = divergence. Three.js, reacts in real time.
+- Layer 2 (primary interaction): Target swara as a glowing circle. Student's pitch as a moving dot with a trail. Dot reaches circle = correct. Cinematic, physical, intuitive.
+- Layer 3 (precision detail, tap to reveal): Cents needle (−50 to +50). Shows exact deviation. Varistha/Guru journeys surface this by default; Beginner/Explorer on-demand.
+
 ---
 
 ## Project Structure
