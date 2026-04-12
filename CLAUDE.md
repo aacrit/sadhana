@@ -259,6 +259,8 @@ npm run test:engine  # Test engine only — raga grammar, frequency ratios, tala
 
 Engine-first architecture, Hindustani-first framing, Dhrupad design system, $0 constraint, audio-first pedagogy, McLeod Pitch Method + RNNoise voice pipeline, Supabase data layer, Framer Motion + GSAP + Three.js animation stack, Claude Max CLI only for agent work.
 
+**Sa Reference Pitch (locked):** Auto-detect from voice. Onboarding asks student to say/sing "Sa" 3–5 times. Engine averages Pitchy detections → proposes "Your Sa is G3 (196 Hz) — does that feel right?" Student confirms or adjusts. If skipped: defaults to C4 (261.63 Hz). Sa is stored in user profile and used as the root for all frequency calculations across the entire engine.
+
 ---
 
 ## Project Structure
