@@ -1,0 +1,390 @@
+/**
+ * freeform.module.css — Freeform Riyaz cinematic styles
+ *
+ * Full viewport, deep malachite background. Three visual layers:
+ * ambient tanpura waveform, floating swara field, harmony pulse.
+ * Minimal chrome. Maximum immersion.
+ */
+
+/* -- Page shell ------------------------------------------------------- */
+
+.page {
+  position: relative;
+  width: 100%;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  overflow: hidden;
+}
+
+/* -- Back link (start state) ------------------------------------------ */
+
+.backLink {
+  position: absolute;
+  top: var(--space-4);
+  left: var(--space-4);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  color: var(--text-3);
+  text-decoration: none;
+  z-index: var(--z-base);
+  padding: var(--space-2);
+}
+
+.backLink:hover {
+  color: var(--text-2);
+}
+
+/* -- Start state ------------------------------------------------------ */
+
+.startContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-6);
+  z-index: var(--z-base);
+  max-width: 400px;
+  padding: var(--space-4);
+}
+
+.startTitle {
+  font-family: var(--font-serif);
+  font-size: var(--text-3xl);
+  font-weight: var(--weight-light);
+  color: var(--text);
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
+  margin: 0;
+}
+
+.startSubtitle {
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  color: var(--text-3);
+  line-height: var(--leading-normal);
+  margin: 0;
+}
+
+.beginButton {
+  font-family: var(--font-sans);
+  font-size: var(--text-md);
+  font-weight: var(--weight-medium);
+  color: var(--bg);
+  background: var(--accent);
+  border: none;
+  border-radius: var(--radius-lg);
+  padding: var(--space-3) var(--space-10);
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-out);
+  min-height: var(--touch-min);
+}
+
+.beginButton:hover {
+  background: var(--accent-hover);
+}
+
+.beginButton:active {
+  transform: scale(0.97);
+}
+
+.errorMessage {
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  color: var(--needs-work);
+  margin: 0;
+}
+
+/* -- Permission denied state ------------------------------------------ */
+
+.permTitle {
+  font-family: var(--font-serif);
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-light);
+  color: var(--text);
+  margin: 0;
+}
+
+.permMessage {
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  color: var(--text-2);
+  margin: 0;
+  line-height: var(--leading-normal);
+}
+
+.permHint {
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  color: var(--text-3);
+  margin: 0;
+  line-height: var(--leading-normal);
+}
+
+.permBack {
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  color: var(--text-3);
+  text-decoration: none;
+}
+
+.permBack:hover {
+  color: var(--text-2);
+}
+
+/* -- HUD -------------------------------------------------------------- */
+
+.hud {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: var(--space-4);
+  z-index: var(--z-overlay);
+  pointer-events: none;
+}
+
+.hudLeft,
+.hudRight {
+  pointer-events: auto;
+}
+
+.hudMono {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: rgba(255, 255, 255, 0.40);
+  letter-spacing: var(--tracking-wide);
+}
+
+/* -- Swara field ------------------------------------------------------ */
+
+.swaraField {
+  position: relative;
+  width: 100%;
+  max-width: 600px;
+  height: 50vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: var(--z-base);
+}
+
+/* -- Current swara (large, centered) ---------------------------------- */
+
+.currentSwara {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  position: absolute;
+  z-index: 2;
+}
+
+.currentDevanagari {
+  font-family: var(--font-devanagari);
+  font-size: var(--text-3xl);
+  font-weight: var(--weight-light);
+  line-height: 1;
+  opacity: 0.7;
+}
+
+.currentSwaraName {
+  font-family: var(--font-serif);
+  font-size: 4.5rem; /* 72px — cinematic */
+  font-weight: var(--weight-light);
+  line-height: 1;
+  letter-spacing: var(--tracking-tight);
+}
+
+.currentSwaraFull {
+  font-family: var(--font-sans);
+  font-size: var(--text-xl);
+  font-weight: var(--weight-regular);
+  opacity: 0.50;
+  line-height: 1;
+}
+
+/* -- Ghost swaras (drifting, fading) ---------------------------------- */
+
+.ghost {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  z-index: 1;
+  pointer-events: none;
+  transform: translateX(-50%);
+}
+
+.ghostDevanagari {
+  font-family: var(--font-devanagari);
+  font-size: var(--text-sm);
+  opacity: 0.6;
+}
+
+.ghostRomanized {
+  font-family: var(--font-serif);
+  font-size: var(--text-md);
+}
+
+/* -- Harmony pulse (top layer glow) ----------------------------------- */
+
+.harmonyPulse {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-base);
+  pointer-events: none;
+}
+
+/* -- Cents needle ----------------------------------------------------- */
+
+.centsContainer {
+  position: absolute;
+  bottom: calc(var(--space-16) + var(--space-8));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: var(--z-overlay);
+  width: 160px;
+}
+
+.centsNeedle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.centsLabel {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  min-width: 36px;
+  text-align: right;
+  white-space: nowrap;
+  transition: color var(--dur-fast) var(--ease-out);
+}
+
+.centsTrack {
+  position: relative;
+  flex: 1;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.10);
+  border-radius: var(--radius-full);
+}
+
+.centsMark {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 1px;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.20);
+}
+
+.centsIndicator {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 14px;
+  height: 14px;
+  border-radius: var(--radius-full);
+  transition:
+    left var(--dur-fast) var(--ease-out),
+    background-color var(--dur-fast) var(--ease-out);
+  box-shadow: 0 0 8px currentColor;
+}
+
+/* -- Bottom controls -------------------------------------------------- */
+
+.bottomControls {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding: var(--space-6) var(--space-4);
+  z-index: var(--z-overlay);
+}
+
+.tanpuraToggle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  color: var(--text-3);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-2) var(--space-3);
+  cursor: pointer;
+  transition:
+    color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out);
+  min-height: var(--touch-min);
+}
+
+.tanpuraToggle:hover {
+  color: var(--text-2);
+  border-color: var(--text-3);
+}
+
+.tanpuraToggleActive {
+  color: var(--accent);
+  border-color: var(--accent-dim);
+}
+
+.tanpuraToggleActive:hover {
+  color: var(--accent-hover);
+}
+
+.tanpuraLabel {
+  pointer-events: none;
+}
+
+.endButton {
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  color: var(--text-3);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: var(--space-2) var(--space-3);
+  transition: color var(--dur-fast) var(--ease-out);
+  min-height: var(--touch-min);
+}
+
+.endButton:hover {
+  color: var(--text-2);
+}
+
+/* -- Responsive ------------------------------------------------------- */
+
+@media (max-width: 480px) {
+  .currentSwaraName {
+    font-size: 3.5rem;
+  }
+
+  .currentDevanagari {
+    font-size: var(--text-2xl);
+  }
+
+  .currentSwaraFull {
+    font-size: var(--text-lg);
+  }
+
+  .centsContainer {
+    width: 120px;
+  }
+}
