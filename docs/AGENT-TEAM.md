@@ -47,7 +47,7 @@ CEO (Aacrit)
 
 | Agent | Division | Model | R/W | Trigger |
 |-------|----------|-------|-----|---------|
-| `sadhana-coo` | Lead | opus | R+W | Auto on significant changes / manual |
+| `sadhana-coo` | Lead | sonnet | R+W | Auto on significant changes / manual |
 | `agent-architect` | Agent Eng | opus | R+W | Manual — agent design/audit |
 | `music-director` | Music Team | opus | R+W | Before any new raga or voice curriculum |
 | `raga-scholar` | Music Team | opus | R only | Before any Hindustani content ships |
@@ -56,18 +56,27 @@ CEO (Aacrit)
 | `curriculum-designer` | Curriculum | opus | R+W | New lessons, track restructuring |
 | `lesson-writer` | Curriculum | opus | R+W | After raga-scholar clears content |
 | `theory-auditor` | Quality | opus | R only | Non-Hindustani theory validation |
-| `progress-analyst` | Quality | opus | R only | After data accumulates / manual |
+| `progress-analyst` | Quality | sonnet | R only | After data accumulates / manual |
 | `bug-fixer` | Quality | opus | R+W | After test failures |
-| `uat-tester` | Quality | opus | R only | After every build |
-| `frontend-builder` | Frontend | opus | R+W | New components, gamification UI |
-| `frontend-fixer` | Frontend | opus | R+W | After UAT failures |
+| `uat-tester` | Quality | sonnet | R only | After every build |
+| `frontend-builder` | Frontend | sonnet | R+W | New components, gamification UI |
+| `frontend-fixer` | Frontend | sonnet | R+W | After UAT failures |
 | `brand-director` | Frontend | opus | R+W | Logo, visual language, design tokens |
 | `icon-creator` | Frontend | opus | R+W | Icon design, raga iconography, tala visuals, PWA icons, display typeface |
-| `db-reviewer` | Infrastructure | opus | R only | After migrations |
-| `update-docs` | Infrastructure | opus | R+W | After EVERY session with changes |
-| `perf-optimizer` | Infrastructure | opus | R+W | Latency issues / manual |
+| `db-reviewer` | Infrastructure | sonnet | R only | After migrations |
+| `update-docs` | Infrastructure | sonnet | R+W | After EVERY session with changes |
+| `perf-optimizer` | Infrastructure | sonnet | R+W | Latency issues / manual |
 | `ceo-advisor` | Product | opus | R only | Manual strategic review |
 | `sadhana-ciso` | Security | opus | R only | Manual / before launch |
+
+## Model Tiers
+
+Agents are assigned to `opus` or `sonnet` based on whether reasoning depth directly impacts output quality. All agents run on Claude Max CLI ($0).
+
+| Tier | Agents | Rationale |
+|------|--------|-----------|
+| **opus** | `music-director`, `raga-scholar`, `acoustics-engineer`, `audio-engineer`, `theory-auditor`, `curriculum-designer`, `lesson-writer`, `brand-director`, `icon-creator`, `ceo-advisor`, `agent-architect`, `sadhana-ciso` | Deep reasoning required: musicological judgment, cultural nuance, frequency physics, aesthetic decisions, security analysis, strategic thinking, pedagogical sequencing |
+| **sonnet** | `uat-tester`, `frontend-fixer`, `update-docs`, `db-reviewer`, `progress-analyst`, `perf-optimizer`, `sadhana-coo`, `frontend-builder` | Systematic/mechanical work: checklist QA, surgical fixes, doc sync, SQL patterns, data analysis, profiling, orchestration routing, TypeScript components |
 
 ## Sequential Cycles
 
