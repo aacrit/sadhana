@@ -1,0 +1,60 @@
+/**
+ * tantri.module.css — Tantri string instrument styles.
+ *
+ * Two modes:
+ *   full    — full-screen instrument (100vh minus header)
+ *   compact — 120px overlay strip (in-raga strings only)
+ *
+ * Ragamala tokens drive all visual decisions.
+ */
+
+/* -- Container ------------------------------------------------------ */
+
+.tantri {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.full {
+  height: calc(100dvh - var(--header-height, 56px));
+  min-height: 300px;
+}
+
+.compact {
+  height: var(--tantri-compact-height, 120px);
+}
+
+/* -- Canvas --------------------------------------------------------- */
+
+.canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+
+/* -- Reduced motion ------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .canvas {
+    /* Strings still render but without animation */
+    will-change: auto;
+  }
+}
+
+/* -- Responsive ----------------------------------------------------- */
+
+@media (min-width: 640px) {
+  .full {
+    height: calc(100dvh - var(--header-height, 56px) - var(--space-4));
+  }
+}
+
+@media (max-width: 480px) {
+  .compact {
+    height: 80px;
+  }
+}
