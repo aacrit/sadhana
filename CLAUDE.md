@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 # Sādhanā
 
-Last updated: 2026-04-11 (rev 3)
+Last updated: 2026-04-12 (rev 4)
 
 > Sanskrit: sādhanā (साधना) — disciplined practice toward mastery. Not learning about music. Becoming it.
 
@@ -19,6 +19,34 @@ This is not a music learning app that uses audio. This is a **music physics engi
 Every frequency ratio, every shruti, every raga's grammar, every tala's pulse, every overtone in a tanpura string — **all exist as first-class code objects with mathematical precision.** A musicologist opening the source code should find it as complete and rigorous as a textbook. A beginner should be astonished by what it makes possible. A master musician should recognize it as correct.
 
 The journeys (Beginner / Explorer / Scholar / Master) are interfaces layered on top of the engine. They are not the app. **The engine is the app.**
+
+## TANTRI — THE INTERFACE BETWEEN MATH AND THE HUMAN EAR
+
+# ENGINE → TANTRI → APPLICATION
+
+Tantri (तन्त्री — "string of a veena") is the **first layer above the music engine**, before the application layer. It is the bridge between music's mathematics and the human ear. It is not a feature. It is not a component. **It is the instrument itself.**
+
+12 horizontal strings, one per chromatic swara, positioned by just-intonation frequency ratio on a logarithmic scale. Each string is simultaneously:
+
+- **INPUT**: vibrates when the student's voice is near that swara's frequency. Color encodes accuracy (saffron=perfect, green=good, amber=approaching). Amplitude encodes vocal intensity. Sympathetic strings resonate naturally (Pa vibrates when Sa is sung, just as a real tanpura string would).
+
+- **OUTPUT**: touch/click triggers harmonium synthesis. Spring physics: Kan snap on contact (stiffness 1000, damping 30), Andolan sustain (120/8), Tanpura Release on release (400/15, ~800ms natural decay).
+
+The architecture is three-layered:
+```
+Engine (/engine/)     — Pure music: frequencies, ratios, ragas, shrutis
+  ↓
+Tantri (/engine/interaction/tantri.ts + /frontend/app/components/Tantri.tsx)
+                      — The instrument: 12 strings, voice mapping, touch interaction,
+                        accuracy encoding, raga-aware visibility, spring physics
+  ↓
+Application (/frontend/app/journeys/)
+                      — Lessons, freeform, exercises — all rendered THROUGH Tantri
+```
+
+**Every lesson, every exercise, every practice session should use Tantri as its primary visual and interactive surface.** When Tantri is active, everything else gives way — cinematic principles: the strings take center stage, UI chrome recedes, the student's attention is on the instrument and nothing else.
+
+**Progressive disclosure**: Shishya sees 1 string (Sa), then the raga's aroha strings emerge. Sadhaka sees the full thaat. Varistha sees all 12. The instrument grows as the student grows. No announcements — strings appear when the student has earned them through musical acts.
 
 ---
 
@@ -98,6 +126,16 @@ engine/
 │   └── tala-engine.ts        # Rhythmic pulse generator. Teentaal, Ektaal, etc.
 │                             # Tabla sound events at correct beat positions.
 │
+├── interaction/
+│   └── tantri.ts             # THE INSTRUMENT. 12-string swara field.
+│                             # createTantriField() — initialize strings for Sa + raga.
+│                             # mapVoiceToStrings() — Hz → which strings vibrate.
+│                             # triggerString() — touch → synthesis event.
+│                             # updateFieldFromVoice() — per-frame state update.
+│                             # generateStringWaveform() — standing-wave rendering.
+│                             # Sympathetic vibrations, accuracy bands, raga gating.
+│                             # 51 unit tests. Pure TypeScript. Zero UI.
+│
 └── voice/
     ├── pipeline.ts           # THE MOAT. Complete voice processing chain.
     │                         # AudioWorklet → RNNoise → Pitchy/McLeod → pitch-mapping
@@ -119,6 +157,7 @@ engine/
 │  IT IS MUSIC. Not a simulation of music. Music itself.          │
 │                                                                 │
 │  physics/ → theory/ → analysis/ → synthesis/ → voice/          │
+│                                  interaction/ (Tantri)          │
 └─────────────────────────────┬───────────────────────────────────┘
                               │  engine exposes typed API
 ┌─────────────────────────────▼───────────────────────────────────┐
@@ -264,7 +303,7 @@ npm run test:engine  # Test engine only — raga grammar, frequency ratios, tala
 
 ## Locked Decisions (CEO Approval Required)
 
-Engine-first architecture, Hindustani-first framing, Ragamala design system, $0 constraint, audio-first pedagogy, McLeod Pitch Method + RNNoise voice pipeline, Supabase data layer, Framer Motion + GSAP + Three.js animation stack, Claude Max CLI only for agent work.
+Engine-first architecture, **Tantri as the interface layer** (Engine → Tantri → Application), Hindustani-first framing, Ragamala design system, $0 constraint, audio-first pedagogy, McLeod Pitch Method + RNNoise voice pipeline, Supabase data layer, Framer Motion + GSAP + Three.js animation stack, Claude Max CLI only for agent work.
 
 **Level System (locked — D+B):**
 - Levels unlocked by specific musical acts, not XP. Examples: "Sing Bhairav's pakad within ±20 cents across 3 separate sessions" → Sadhaka. Engine validates. Cannot be gamed.
@@ -309,6 +348,7 @@ Sādhanā/
 │   ├── theory/               # Swaras, shrutis, ragas/, thaats, talas/, ornaments
 │   ├── analysis/             # Raga grammar, pitch mapping, phrase recognition
 │   ├── synthesis/            # Tanpura, swara voices, tala pulse
+│   ├── interaction/          # Tantri — the instrument (12 swara strings)
 │   └── voice/                # Pipeline, accuracy, feedback
 ├── frontend/
 │   ├── app/

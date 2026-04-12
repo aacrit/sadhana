@@ -524,3 +524,91 @@ Sizes: 200px (hero/profile), 64px (badge), 16px (silhouette).
 | Pakad recognition | 100% -> 15% -> 4% | GSAP multi-phase |
 | Level unlock | 20% | 1200ms up, 2400ms down |
 | Session complete | 10% | 800ms up, 1600ms down |
+
+---
+
+## Tantri -- The String Interface Engine
+
+Tantri (तन्त्री, Sanskrit: "string of a veena") is the universal swara visualization and interaction layer. It renders 12 horizontal strings -- one per chromatic swara (Sa, Re komal, Re, Ga komal, Ga, Ma, Ma tivra, Pa, Dha komal, Dha, Ni komal, Ni) -- positioned vertically by just-intonation frequency ratio on a logarithmic scale. The strings are simultaneously input (voice activates them) and output (touch/click produces sound via harmonium synth).
+
+Source: `frontend/app/components/Tantri.tsx` (when implemented).
+
+### String Anatomy
+
+Each string is a horizontal line spanning the full container width. Visual weight and opacity encode musical hierarchy.
+
+| Swara class | strokeWidth | Rest opacity | Label color | Distinguishing mark |
+|-------------|-------------|-------------|-------------|---------------------|
+| Sa (achala) | 2px | 0.15 | `--accent` | Saffron point at left terminus (r=2) |
+| Pa (achala) | 2px | 0.15 | `--text-2` | Neutral point at left terminus (r=1.5) |
+| In-raga swaras | 1px | 0.5 | `--raga-accent` (or `--text-2` if no raga active) | None |
+| Not-in-raga swaras | 1px | 0.08 | `--text-3` at 0.3 opacity | Ghost lines -- present but receded |
+
+Labels sit at the left margin in `--font-mono` at `--text-xs`. Touch target height is `--touch-min` (44px) regardless of visual string thickness.
+
+### Accuracy Encoding
+
+Voice pitch maps to the nearest swara string. Color temperature encodes accuracy; vibration amplitude encodes vocal intensity. Two independent channels.
+
+| Accuracy band | Cents deviation | String color | Opacity | Visual behavior |
+|---------------|----------------|-------------|---------|-----------------|
+| Perfect | 0-5 cents | `--accent` (Saffron) | 1.0 | Single radial ripple, 400ms ease-out, 0.15 opacity, expands to 2x string height |
+| Good | 5-15 cents | `--correct` | 0.6 | String brightens, no ripple |
+| Approaching | 15-30 cents | `--in-progress` | 0.3 | Faint pulse |
+| Off | >30 cents | Rest state | Rest | No change. Silence is the feedback. |
+
+When a not-in-raga swara is activated by voice: ghost string flickers `--needs-work` for 200ms (Gamak spring 600/5), then returns to ghost state.
+
+When perfect pitch is sustained >2 seconds: `--jali-opacity` rises to `--jali-opacity-pitch` (0.12) behind the string field. The architecture of the music becomes faintly visible.
+
+### Touch/Click Interaction
+
+| Phase | Spring preset | Duration | Character |
+|-------|--------------|----------|-----------|
+| Contact (press) | Kan (1000/30) | Instantaneous | String snaps to full amplitude. No wind-up. Like plucking a real string. |
+| Sustain (hold) | -- | Continuous | String vibrates at Andolan (120/8). Sound sustains via harmonium synth. |
+| Release | Tanpura Release (400/15) | ~800ms decay | String settles naturally. Sound envelope follows same curve. |
+| Haptic (mobile) | -- | Single short pulse | On contact only. |
+
+### Raga Context Behavior
+
+When a raga activates (via `data-raga`):
+1. Not-in-raga strings fade to ghost opacity (0.08) over `--dur-slow` (600ms).
+2. Remaining in-raga strings redistribute vertically to fill available height (Meend spring 80/20, 400ms). The raga breathes into the space.
+3. String labels inherit `--raga-accent` color from the active raga world.
+4. Komal/tivra variants are positioned by their actual just-intonation ratio -- spacing is acoustically truthful, not uniform.
+
+When raga deactivates: all 12 strings return to chromatic layout over 600ms.
+
+### Layout Modes
+
+| Mode | String field height | Visible strings | Label format | Use |
+|------|-------------------|----------------|-------------|-----|
+| Full-screen riyaz | 100vh minus header | All 12 (ghost + active) | Full swara name | Primary practice, freeform mode |
+| Compact overlay | 120px | In-raga only | Single character (S R G M P D N) | Lesson overlay, browser mode |
+| Transition | Meend (80/20), 400ms | Animated | Crossfade | Mode switch |
+
+### Tokens (CSS Custom Properties)
+
+```css
+/* Tantri string field */
+--tantri-string-sa-width: 2px;
+--tantri-string-pa-width: 2px;
+--tantri-string-default-width: 1px;
+--tantri-string-rest-opacity: 0.5;
+--tantri-string-ghost-opacity: 0.08;
+--tantri-string-achala-opacity: 0.15;
+--tantri-ripple-duration: 400ms;
+--tantri-ripple-opacity: 0.15;
+--tantri-ripple-scale: 2;
+--tantri-compact-height: 120px;
+--tantri-raga-transition: var(--dur-slow);
+```
+
+### Integration with Ragamala
+
+- Night mode: strings are `--text` (warm parchment) at low opacity against Deep Malachite. Saffron reads as fire in darkness.
+- Day mode: strings are `--text` (dark ink) at low opacity against Ivory. Saffron reads as the first brushstroke on a manuscript.
+- Raga worlds: labels inherit `--raga-accent`. Bhairav strings have pale rose labels. Yaman strings have amber labels. The entire field shifts with ink diffusion.
+- Jali texture: responds to sustained perfect pitch, connecting Tantri to the texture language.
+- Level progression: at Guru level, Sa's terminus point shifts from saffron to gold (`--gold`). A zarr-kashi single-point accent. The only gold in the string field.

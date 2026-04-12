@@ -26,6 +26,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import Logo from '../../components/Logo';
 import VoiceWave from '../../components/VoiceWave';
+import Tantri from '../../components/Tantri';
+import type { TantriPlayEvent } from '@/engine/interaction/tantri';
+import { playSwaraNote, ensureAudioReady } from '@/engine/synthesis/swara-voice';
 import { useFreeformSession } from '../../lib/useFreeformSession';
 import type { SwaraEvent } from '../../lib/useFreeformSession';
 import { useAuth } from '../../lib/auth';
@@ -311,6 +314,20 @@ export default function FreeformPage() {
     window.history.back();
   }, [session]);
 
+  // Tantri string trigger — touch a string to hear the swara
+  const handleStringTrigger = useCallback(async (event: TantriPlayEvent) => {
+    try {
+      await ensureAudioReady();
+      await playSwaraNote(
+        { swara: event.swara, octave: event.octave },
+        userSaHz,
+        { duration: 0.8, volume: event.velocity * 0.6 },
+      );
+    } catch {
+      // Audio not ready — silently fail
+    }
+  }, [userSaHz]);
+
   // -----------------------------------------------------------------------
   // Render: start state
   // -----------------------------------------------------------------------
@@ -405,8 +422,22 @@ export default function FreeformPage() {
 
   return (
     <div className={styles.page}>
-      {/* Layer 1 — Voice waveform with swara markers */}
-      <VoiceWave variant="full" style={{ opacity: 0.25 }} />
+      {/* Layer 0 — Tantri: interactive swara string instrument */}
+      <Tantri
+        saHz={userSaHz}
+        ragaId={null}
+        level="varistha"
+        subLevel={1}
+        variant="full"
+        analyser={session.getAnalyserNode()}
+        onStringTrigger={handleStringTrigger}
+        style={{
+          position: 'absolute',
+          inset: 0,
+          zIndex: 0,
+          opacity: 0.6,
+        }}
+      />
 
       {/* Audio error toast — shown when mic fails but session continues */}
       {startError && (
