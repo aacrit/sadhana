@@ -159,11 +159,73 @@ The jivari bridge excites higher partials far more than a normal plucked string,
 
 ---
 
-## Swara Playback
+## Swara Playback — Harmonium Additive Model
 
 Source: `engine/synthesis/swara-voice.ts`
 
-Sine oscillator with attack/release envelope. Separate AudioContext from tanpura drone for independent control.
+12-partial additive harmonium synthesis with enclosure resonance and bellows LFO. Separate AudioContext from tanpura drone for independent control.
+
+### Architecture
+
+```
+12 OscillatorNode (partials at f, 2f, 3f, ... 12f)
+  -> individual GainNode (amplitude weight per partial)
+    -> BiquadFilter (low formant 400Hz, peaking +4dB, Q=1.5)
+      -> BiquadFilter (high formant 1500Hz, peaking +3dB, Q=2.0)
+        -> master GainNode (ADSR envelope)
+          -> destination
+
+1 OscillatorNode (LFO, 4.5Hz sine)
+  -> 12 GainNode (depth = 1.5Hz * partial_index)
+    -> each partial OscillatorNode.frequency (pitch instability)
+```
+
+### Harmonium Spectral Model
+
+12-partial amplitude weights derived from acoustic harmonium reed analysis:
+
+| Partial | Amplitude |
+|---------|-----------|
+| 1 (fundamental) | 1.00 |
+| 2 | 0.90 |
+| 3 | 0.80 |
+| 4 | 0.65 |
+| 5 | 0.55 |
+| 6 | 0.40 |
+| 7 | 0.30 |
+| 8 | 0.20 |
+| 9 | 0.14 |
+| 10 | 0.09 |
+| 11 | 0.06 |
+| 12 | 0.04 |
+
+Each partial's amplitude is further scaled by 0.15 to prevent clipping with 12 simultaneous oscillators.
+
+### Enclosure Resonance
+
+Two biquad peaking filters in series simulate the wooden harmonium box:
+
+| Filter | Frequency | Q | Gain |
+|--------|-----------|---|------|
+| Low formant | 400 Hz | 1.5 | +4 dB |
+| High formant | 1500 Hz | 2.0 | +3 dB |
+
+### ADSR Envelope
+
+| Phase | Duration | Level |
+|-------|----------|-------|
+| Attack | 0.08s | 0 -> peak (bellows-to-reed delay) |
+| Decay | 0.15s | peak -> 0.85 * peak (initial brightness fade) |
+| Sustain | (note duration - attack - decay - release) | 0.85 * peak |
+| Release | 0.20s | sustain -> 0 (air pressure release) |
+
+### Bellows LFO (Pitch Instability)
+
+| Parameter | Value |
+|-----------|-------|
+| LFO frequency | 4.5 Hz (typical hand-pump rate) |
+| LFO depth | 1.5 Hz deviation (~10 cents at 261 Hz) |
+| LFO scaling | depth * partial_index (higher partials wobble more) |
 
 ### Functions
 
@@ -177,14 +239,114 @@ Sine oscillator with attack/release envelope. Separate AudioContext from tanpura
 
 ### Ornament Application
 
-Applied via `OscillatorNode.frequency` scheduling:
+Applied via `OscillatorNode.frequency` scheduling across all 12 partials. Each partial's frequency modulation is scaled proportionally to its harmonic number:
 
 | Shape | Ornament | Method |
 |-------|----------|--------|
-| sinusoidal | gamak, andolan | `generateOscillationTrajectory` -> `setValueAtTime` per step |
-| logarithmic | meend | `exponentialRampToValueAtTime` (0.7 * duration) |
-| impulse | kan, sparsh | `setValueAtTime` to adjacent frequency for 30ms, then target |
+| sinusoidal | gamak, andolan | `generateOscillationTrajectory` -> `setValueAtTime` per partial per step |
+| logarithmic | meend | `exponentialRampToValueAtTime` (0.7 * duration) on all partials |
+| impulse | kan, sparsh | `setValueAtTime` to adjacent frequency for 30ms on all partials |
 | sequence | murki, khatka, zamzama | Multiple `playSwaraNote` calls (not oscillator modulation) |
+
+---
+
+## Tala Engine — Synthesised Tabla
+
+Source: `engine/synthesis/tala-engine.ts`
+
+Additive tabla synthesis for tala playback. All sounds are synthesised from first principles, not samples. Two drum models (dayan and bayan) are combined according to bol dispatch tables.
+
+### Dayan Synthesis (Treble Drum, Pitched)
+
+The dayan has near-harmonic partials due to the syahi (iron-paste) loading:
+
+| Partial ratio | Amplitude |
+|---------------|-----------|
+| 1.0 | 1.0 |
+| 2.0 | 0.6 |
+| 3.01 | 0.3 |
+| 4.1 | 0.15 |
+
+Pitch envelope: starts at 2x fundamental, drops to fundamental over 25ms.
+5ms attack noise burst: bandpass filtered at fundamental * 3, Q=2.
+
+### Bayan Synthesis (Bass Drum, Inharmonic)
+
+The bayan has inharmonic membrane modes:
+
+| Partial ratio | Amplitude |
+|---------------|-----------|
+| 1.0 | 1.0 |
+| 1.47 | 0.5 |
+| 2.09 | 0.25 |
+| 2.56 | 0.12 |
+
+Open strokes ("Ge" character): fundamental slides down 50% over 200ms.
+Damped strokes ("Ka" style): no pitch slide, very short decay (max 80ms).
+
+### Bol Dispatch Table
+
+| Bol | Dayan | Bayan | Dayan Decay | Bayan Decay | Notes |
+|-----|-------|-------|-------------|-------------|-------|
+| Dha | yes | yes (open) | 0.35s | 0.40s | Full resonant stroke |
+| Dhin | yes | yes (open) | 0.25s | 0.25s | Tighter combined |
+| Na/Ta | yes | no | 0.15s | -- | Short treble |
+| Tin | yes | no | 0.30s | -- | Ringing treble |
+| Ge/Ghe | no | yes (open) | -- | 0.35s | Bass with pitch slide |
+| Ka/Ke | no | yes (damped) | -- | 0.08s | Sharp slap |
+| Ti | yes | no | 0.10s | -- | High freq (fund * 2.5) |
+
+Additional bols for Ektaal/Jhaptaal thekas: Dhi, Tu, Kat, DhaGe, TrKt.
+
+### TalaPlayer API
+
+```typescript
+const player = new TalaPlayer(audioContext, saHz);
+
+// Play a single bol
+player.playBol('Dha');
+player.playBol('Tin', audioContext.currentTime + 0.5, 0.8);
+
+// Start a continuous theka
+player.startTheka('teentaal', 80, (beat, isSam, isKhali) => {
+  // Update UI on each beat
+});
+
+// Control
+player.setTempo(100);
+player.setSa(293.66);
+player.stopTheka();
+player.dispose();
+```
+
+### Timing Model
+
+Uses `AudioContext.currentTime` scheduling (NOT `setInterval`). Schedules 4 beats ahead into the Web Audio timeline. Re-schedules when within 2 beats of the buffer end. The scheduling loop runs on `requestAnimationFrame`.
+
+Beat callbacks are fired via `setTimeout` timed to the scheduled audio event, providing approximate UI sync. The audio itself is always sample-accurate.
+
+### Supported Talas
+
+| Tala | Beats | Vibhag | Theka Source |
+|------|-------|--------|-------------|
+| Teentaal | 16 | 4+4+4+4 | `engine/theory/talas/teentaal.ts` |
+| Ektaal | 12 | 2+2+2+2+2+2 | `engine/theory/talas/ektaal.ts` |
+| Jhaptaal | 10 | 2+3+2+3 | `engine/theory/talas/jhaptaal.ts` |
+| Rupak | 7 | 3+2+2 | `engine/theory/talas/rupak.ts` |
+
+### Browser Audio Processing — Disabled
+
+All browser-level audio processing is disabled in `getUserMedia` constraints. This is critical for pitch detection accuracy and applies to the voice pipeline, not to synthesis output:
+
+```typescript
+audio: {
+  echoCancellation: false,   // Modifies frequency content
+  noiseSuppression: false,   // Cuts soft vowel onset
+  autoGainControl: false,    // Distorts amplitude/clarity scores
+}
+```
+
+Echo cancellation modifies the frequency spectrum, which corrupts pitch detection. Noise suppression cuts soft vowel onsets. AGC distorts amplitude, which corrupts Pitchy clarity scores. These are disabled at the `getUserMedia` constraint level, not via `AudioContext` processing.
 
 ---
 
