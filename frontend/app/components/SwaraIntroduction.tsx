@@ -84,7 +84,11 @@ export default function SwaraIntroduction({
   /** Whether the entire sequence has finished. */
   const [sequenceComplete, setSequenceComplete] = useState(false);
 
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // CRITICAL: separate timer refs for reveal vs auto-advance.
+  // If both use the same ref, the auto-advance effect cleanup kills
+  // the reveal timer when currentIndex changes — freezing the sequence.
+  const revealTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const advanceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const completeCalled = useRef(false);
 
   // Store onPlaySwara in a ref so advanceSwara doesn't depend on it.
@@ -94,10 +98,11 @@ export default function SwaraIntroduction({
   const onPlaySwaraRef = useRef(onPlaySwara);
   onPlaySwaraRef.current = onPlaySwara;
 
-  // Clean up timers on unmount
+  // Clean up both timers on unmount
   useEffect(() => {
     return () => {
-      if (timerRef.current) clearTimeout(timerRef.current);
+      if (revealTimerRef.current) clearTimeout(revealTimerRef.current);
+      if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current);
     };
   }, []);
 
@@ -125,7 +130,7 @@ export default function SwaraIntroduction({
 
       if (audioFirst) {
         // Play audio first, then reveal label after delay
-        timerRef.current = setTimeout(() => {
+        revealTimerRef.current = setTimeout(() => {
           setRevealedIndices((prevSet) => {
             const newSet = new Set(prevSet);
             newSet.add(next);
@@ -164,9 +169,9 @@ export default function SwaraIntroduction({
       currentIndex < swaras.length - 1
     ) {
       // Short pause between swaras to let the student absorb
-      timerRef.current = setTimeout(() => advanceSwara(), 800);
+      advanceTimerRef.current = setTimeout(() => advanceSwara(), 800);
       return () => {
-        if (timerRef.current) clearTimeout(timerRef.current);
+        if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current);
       };
     }
   }, [currentIndex, isPlaying, revealedIndices, swaras.length, advanceSwara]);

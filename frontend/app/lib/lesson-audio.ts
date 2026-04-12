@@ -43,7 +43,7 @@ const DEFAULT_SA_HZ = 261.6256;
 const SA_DETECTION_READINGS = 5;
 
 /** Minimum clarity for Sa detection readings. */
-const SA_DETECTION_CLARITY = 0.85;
+const SA_DETECTION_CLARITY = 0.70;
 
 // ---------------------------------------------------------------------------
 // Types
@@ -338,7 +338,7 @@ export function useLessonAudio(
         sa_hz: saHzRef.current,
         ragaId,
         level: 'shishya',
-        clarityThreshold: 0.85,
+        clarityThreshold: 0.70,
         onPitch: (event: VoiceEvent) => {
           if (disposedRef.current) return;
           if (event.type === 'pitch' && event.pitchResult) {
