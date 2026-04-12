@@ -12,8 +12,8 @@
 // Journey
 // ---------------------------------------------------------------------------
 
-/** The four journey entry points. */
-export type JourneyId = 'beginner' | 'explorer' | 'scholar' | 'master';
+/** The journey entry points (four structured + freeform). */
+export type JourneyId = 'beginner' | 'explorer' | 'scholar' | 'master' | 'freeform';
 
 /** Display metadata for a journey card. */
 export interface JourneyMeta {
@@ -67,6 +67,12 @@ export interface UserProfile {
   readonly xp: number;
   /** Current daily streak count. */
   readonly streak: number;
+  /** Longest streak ever achieved. */
+  readonly longestStreak: number;
+  /** Active journey path. */
+  readonly journey: JourneyId | null;
+  /** Current raga being practiced (raga ID or null). */
+  readonly currentRaga: string | null;
   /** Last practice session timestamp, or null if never practiced. */
   readonly lastPractice: Date | null;
   /** Whether today's riyaz has been completed. */
@@ -82,6 +88,9 @@ export const DEFAULT_USER: UserProfile = {
   level: 1,
   xp: 0,
   streak: 0,
+  longestStreak: 0,
+  journey: null,
+  currentRaga: null,
   lastPractice: null,
   riyazDone: false,
 };
