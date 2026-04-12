@@ -226,6 +226,67 @@
   letter-spacing: var(--tracking-widest);
 }
 
+/* -- Voice visualization (Priority 3) -------------------------------- */
+
+.voiceViz {
+  width: 100%;
+  margin-top: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+/* -- Mic permission gate (Priority 8) -------------------------------- */
+
+.micGate {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-6);
+  padding: var(--space-6);
+  text-align: center;
+}
+
+.micGateText {
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  color: var(--text-2);
+  line-height: var(--leading-relaxed);
+  max-width: 36ch;
+}
+
+.micGateActions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.actionButtonSecondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-2) var(--space-6);
+  min-height: var(--touch-min);
+  border: none;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--text-3);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-regular);
+  letter-spacing: var(--tracking-wide);
+  cursor: pointer;
+  transition: color var(--dur-fast) var(--ease-out);
+}
+
+.actionButtonSecondary:hover {
+  color: var(--text-2);
+}
+
+.actionButtonSecondary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 /* -- Reduced motion -------------------------------------------------- */
 
 @media (prefers-reduced-motion: reduce) {
@@ -248,5 +309,9 @@
 
   .phaseTitle {
     font-size: var(--text-3xl);
+  }
+
+  .micGateActions {
+    flex-direction: row;
   }
 }

@@ -14,6 +14,15 @@
  * (Supabase) will replace these later.
  *
  * Progress dots at the bottom: one per phase, current = saffron.
+ *
+ * Voice visualization: rendered during sing_sa, sing_aroha, and pakad_watch
+ * phases, receiving PitchResult mapped to VoiceFeedback.
+ *
+ * Mic permission: gated before the first voice phase (sing_sa). Permission
+ * denied or prompt states are handled with appropriate UI.
+ *
+ * Daily riyaz: time-of-day raga selection with localStorage-based completion
+ * tracking. After completion, shows "riyaz complete" state.
  */
 
 'use client';
@@ -23,10 +32,20 @@ import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getRagaForTimeOfDay } from '@/engine/theory';
 import { DEFAULT_USER, getLevelTitle, getLevelColor } from '../../lib/types';
-import type { RecentRaga } from '../../lib/types';
+import type { VoiceFeedback, RecentRaga } from '../../lib/types';
+import type { PitchResult } from '@/engine/analysis/pitch-mapping';
+import { useAuth } from '../../lib/auth';
+import {
+  saveSession,
+  completeRiyaz,
+  addXp,
+  updateSa,
+  getRecentRagas,
+} from '../../lib/supabase';
 import SwaraIntroduction from '../../components/SwaraIntroduction';
 import PhrasePlayback from '../../components/PhrasePlayback';
 import PakadMoment from '../../components/PakadMoment';
+import VoiceVisualization from '../../components/VoiceVisualization';
 import { useLessonAudio } from '../../lib/lesson-audio';
 import homeStyles from '../../styles/beginner.module.css';
 import lessonStyles from '../../styles/beginner-lesson.module.css';
@@ -162,14 +181,148 @@ function getTimeOfDayLabel(hour: number): string {
 }
 
 // ---------------------------------------------------------------------------
+// Priority 3: PitchResult -> VoiceFeedback mapping
+// ---------------------------------------------------------------------------
+
+/** Default VoiceFeedback when no voice is active. */
+const IDLE_VOICE_FEEDBACK: VoiceFeedback = {
+  hz: null,
+  centsDeviation: 0,
+  targetSwara: 'Sa',
+  detectedSwara: null,
+  confidence: 0,
+  amplitude: 0,
+  pitchHistory: [],
+};
+
+/**
+ * Maps a PitchResult from the voice pipeline to a VoiceFeedback for
+ * the VoiceVisualization component.
+ */
+function pitchResultToFeedback(
+  result: PitchResult,
+  targetSwara: string,
+): VoiceFeedback {
+  return {
+    hz: result.hz,
+    centsDeviation: result.deviationCents,
+    targetSwara,
+    detectedSwara: result.nearestSwara,
+    confidence: result.clarity,
+    amplitude: result.accuracy,
+    pitchHistory: [],
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Priority 4: localStorage key for riyaz completion
+// ---------------------------------------------------------------------------
+
+const RIYAZ_DATE_KEY = 'sadhana_riyaz_date';
+
+/** Get today's date as YYYY-MM-DD string. */
+function getTodayString(): string {
+  const d = new Date();
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+/** Check if today's riyaz has been completed (from localStorage). */
+function isRiyazCompleteToday(): boolean {
+  if (typeof window === 'undefined') return false;
+  try {
+    return localStorage.getItem(RIYAZ_DATE_KEY) === getTodayString();
+  } catch {
+    return false;
+  }
+}
+
+/** Mark today's riyaz as complete in localStorage. */
+function markRiyazComplete(): void {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.setItem(RIYAZ_DATE_KEY, getTodayString());
+  } catch {
+    // localStorage unavailable — silently fail
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Priority 8: Mic permission states
+// ---------------------------------------------------------------------------
+
+type MicPermission = 'unknown' | 'granted' | 'prompt' | 'denied';
+
+/**
+ * Queries the current microphone permission state.
+ * Falls back to 'prompt' if the Permissions API is unavailable.
+ */
+async function queryMicPermission(): Promise<MicPermission> {
+  try {
+    if (navigator.permissions) {
+      const status = await navigator.permissions.query({
+        name: 'microphone' as PermissionName,
+      });
+      if (status.state === 'granted') return 'granted';
+      if (status.state === 'denied') return 'denied';
+      return 'prompt';
+    }
+  } catch {
+    // Permissions API not available or microphone not queryable
+  }
+  return 'prompt';
+}
+
+/**
+ * Attempts to acquire microphone access. Returns true on success.
+ */
+async function requestMicAccess(): Promise<boolean> {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    // Immediately release the stream — we just needed permission
+    for (const track of stream.getTracks()) {
+      track.stop();
+    }
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Page component
 // ---------------------------------------------------------------------------
 
 export default function BeginnerPage() {
+  const { user: authUser, profile, refreshProfile } = useAuth();
+
   const [view, setView] = useState<'home' | 'lesson'>('home');
   const [phase, setPhase] = useState<LessonPhase>('listen');
   const [pakadTriggered, setPakadTriggered] = useState(false);
   const [saHz, setSaHz] = useState(261.63);
+
+  // Sync Sa Hz from profile when it loads
+  useEffect(() => {
+    if (profile?.saHz) {
+      setSaHz(profile.saHz);
+    }
+  }, [profile?.saHz]);
+
+  // Track lesson start time for session duration calculation
+  const lessonStartRef = useRef<Date | null>(null);
+
+  // Priority 3: Voice feedback state for VoiceVisualization
+  const [voiceFeedback, setVoiceFeedback] = useState<VoiceFeedback>(IDLE_VOICE_FEEDBACK);
+
+  // Priority 4: Riyaz completion tracking
+  const [riyazDone, setRiyazDone] = useState(false);
+
+  // Priority 8: Mic permission state
+  const [micPermission, setMicPermission] = useState<MicPermission>('unknown');
+  const [micGateActive, setMicGateActive] = useState(false);
+  const [skipMic, setSkipMic] = useState(false);
 
   // Audio hook — provides tanpura, swara playback, voice pipeline
   const audio = useLessonAudio(saHz, 'bhoopali');
@@ -177,16 +330,38 @@ export default function BeginnerPage() {
   // Track previous phase for cleanup
   const prevPhaseRef = useRef<LessonPhase>(phase);
 
+  // Check riyaz completion status on mount (localStorage for guests, profile for signed-in)
+  useEffect(() => {
+    if (profile?.riyazDone) {
+      setRiyazDone(true);
+    } else {
+      setRiyazDone(isRiyazCompleteToday());
+    }
+  }, [profile?.riyazDone]);
+
   // Home view state
   const hour = new Date().getHours();
   const todayRaga = useMemo(() => getRagaForTimeOfDay(hour), [hour]);
   const timeLabel = getTimeOfDayLabel(hour);
-  const user = DEFAULT_USER;
+  const user = profile ?? DEFAULT_USER;
   const levelTitle = getLevelTitle(user.level);
   const levelColor = getLevelColor(user.level);
   const xpProgress = Math.min((user.xp % 100) / 100, 1);
-  const recentRagas: RecentRaga[] = [];
   const isFirstTime = user.lastPractice === null;
+
+  // Fetch recent ragas from Supabase for signed-in users
+  const [recentRagas, setRecentRagas] = useState<RecentRaga[]>([]);
+  useEffect(() => {
+    if (authUser) {
+      getRecentRagas(authUser.id, 3).then(setRecentRagas);
+    }
+  }, [authUser]);
+
+  // Compute whether the voice phases should render VoiceVisualization
+  const isVoicePhase = phase === 'sing_sa' || phase === 'sing_aroha' || phase === 'pakad_watch';
+
+  // Determine the target swara label for the current voice phase
+  const voiceTargetSwara = phase === 'sing_sa' ? 'Sa' : 'Sa';
 
   // ---------------------------------------------------------------------------
   // Phase navigation
@@ -208,6 +383,7 @@ export default function BeginnerPage() {
     setView('lesson');
     setPhase('listen');
     setPakadTriggered(false);
+    lessonStartRef.current = new Date();
   }, []);
 
   const exitLesson = useCallback(() => {
@@ -217,6 +393,92 @@ export default function BeginnerPage() {
     setView('home');
     setPhase('listen');
   }, [audio]);
+
+  // ---------------------------------------------------------------------------
+  // Priority 8: Mic permission gate — runs before voice phases
+  // ---------------------------------------------------------------------------
+
+  /** Attempt to start the voice pipeline with error handling. */
+  const safeStartVoicePipeline = useCallback(
+    async (
+      onPitch: (result: PitchResult) => void,
+      onPakad?: () => void,
+    ) => {
+      if (skipMic) return;
+
+      try {
+        await audio.startVoicePipeline(
+          onPitch,
+          onPakad ? () => onPakad() : undefined,
+        );
+      } catch {
+        // Mic error — show denied UI
+        setMicPermission('denied');
+        setMicGateActive(true);
+      }
+    },
+    [audio, skipMic],
+  );
+
+  /** Attempt to start Sa detection with error handling. */
+  const safeStartSaDetection = useCallback(
+    async (onCandidate: (hz: number, clarity: number) => void) => {
+      try {
+        await audio.startSaDetection(onCandidate);
+      } catch {
+        setMicPermission('denied');
+        setMicGateActive(true);
+      }
+    },
+    [audio],
+  );
+
+  /** Handle mic permission check before entering voice phases. */
+  const checkMicPermission = useCallback(async (): Promise<boolean> => {
+    if (skipMic) return false;
+
+    const perm = await queryMicPermission();
+    setMicPermission(perm);
+
+    if (perm === 'granted') {
+      return true;
+    }
+
+    if (perm === 'denied') {
+      setMicGateActive(true);
+      return false;
+    }
+
+    // perm === 'prompt' — show the prompt UI
+    setMicGateActive(true);
+    return false;
+  }, [skipMic]);
+
+  /** Handle granting mic access from the permission UI. */
+  const handleGrantMic = useCallback(async () => {
+    const granted = await requestMicAccess();
+    if (granted) {
+      setMicPermission('granted');
+      setMicGateActive(false);
+    } else {
+      setMicPermission('denied');
+    }
+  }, []);
+
+  /** Handle "Continue without mic" — skips all voice phases. */
+  const handleSkipMic = useCallback(() => {
+    setSkipMic(true);
+    setMicGateActive(false);
+  }, []);
+
+  /** Handle "Try again" from denied state. */
+  const handleRetryMic = useCallback(async () => {
+    const perm = await queryMicPermission();
+    setMicPermission(perm);
+    if (perm === 'granted') {
+      setMicGateActive(false);
+    }
+  }, []);
 
   // ---------------------------------------------------------------------------
   // Audio lifecycle — start/stop based on phase transitions
@@ -231,6 +493,8 @@ export default function BeginnerPage() {
     if (voicePhases.includes(prev) && !voicePhases.includes(phase)) {
       audio.stopVoicePipeline();
       audio.stopSaDetection();
+      // Reset voice feedback to idle when leaving voice phases
+      setVoiceFeedback(IDLE_VOICE_FEEDBACK);
     }
 
     // Phase-specific audio actions
@@ -243,37 +507,113 @@ export default function BeginnerPage() {
         break;
 
       case 'sa_calibration':
-        audio.startSaDetection((hz: number) => {
+        safeStartSaDetection((hz: number) => {
           setSaHz(hz);
+          // Persist detected Sa to Supabase if signed in
+          if (authUser) {
+            updateSa(authUser.id, hz);
+          }
           advancePhase();
         });
         break;
 
       case 'sing_sa':
-      case 'sing_aroha':
-        audio.startVoicePipeline(() => {
-          // onPitch — pitch result available for visualization
-        });
-        break;
+      case 'sing_aroha': {
+        // Priority 8: Check mic permission before first voice phase
+        const startVoice = async () => {
+          if (phase === 'sing_sa' && !skipMic) {
+            const ok = await checkMicPermission();
+            if (!ok && !skipMic) return; // mic gate active, wait for user action
+          }
 
-      case 'pakad_watch':
-        audio.startVoicePipeline(
-          () => {
-            // onPitch
+          // Priority 3: Wire PitchResult to VoiceFeedback
+          await safeStartVoicePipeline((result: PitchResult) => {
+            const target = phase === 'sing_sa' ? 'Sa' : 'Sa';
+            setVoiceFeedback(pitchResultToFeedback(result, target));
+          });
+        };
+        startVoice();
+        break;
+      }
+
+      case 'pakad_watch': {
+        // Priority 3: Wire PitchResult to VoiceFeedback + pakad detection
+        const startPakadVoice = async () => {
+          await safeStartVoicePipeline(
+            (result: PitchResult) => {
+              setVoiceFeedback(pitchResultToFeedback(result, result.nearestSwara));
+            },
+            () => {
+              setPakadTriggered(true);
+            },
+          );
+        };
+        startPakadVoice();
+        break;
+      }
+
+      case 'complete': {
+        audio.stopVoicePipeline();
+        audio.stopTanpura();
+        setVoiceFeedback(IDLE_VOICE_FEEDBACK);
+        // Priority 4: Mark riyaz as complete (localStorage for guests)
+        markRiyazComplete();
+        setRiyazDone(true);
+        // Persist to Supabase if signed in
+        if (authUser) {
+          const now = new Date();
+          const startedAt = lessonStartRef.current ?? now;
+          const durationS = Math.round(
+            (now.getTime() - startedAt.getTime()) / 1000,
+          );
+          saveSession(authUser.id, {
+            ragaId: todayRaga.id ?? 'bhoopali',
+            duration: durationS,
+            xpEarned: 30,
+            accuracy: 0,
+            pakadsFound: pakadTriggered ? 1 : 0,
+            startedAt,
+            endedAt: now,
+          });
+          addXp(authUser.id, 30);
+          completeRiyaz(authUser.id);
+          // Refresh profile to show updated streak/XP
+          refreshProfile();
+        }
+        break;
+      }
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase, view, audio, advancePhase, safeStartVoicePipeline, safeStartSaDetection, checkMicPermission, skipMic, authUser]);
+
+  // Priority 8: When mic permission is granted after gate, restart the voice phase
+  useEffect(() => {
+    if (micPermission !== 'granted' || micGateActive) return;
+    const voicePhases: LessonPhase[] = ['sing_sa', 'sing_aroha', 'pakad_watch'];
+    if (!voicePhases.includes(phase)) return;
+
+    // Re-trigger the voice pipeline for the current phase
+    const restartVoice = async () => {
+      if (phase === 'pakad_watch') {
+        await safeStartVoicePipeline(
+          (result: PitchResult) => {
+            setVoiceFeedback(pitchResultToFeedback(result, result.nearestSwara));
           },
           () => {
-            // onPakad — pakad detected
             setPakadTriggered(true);
           },
         );
-        break;
-
-      case 'complete':
-        audio.stopVoicePipeline();
-        audio.stopTanpura();
-        break;
-    }
-  }, [phase, view, audio, advancePhase]);
+      } else {
+        await safeStartVoicePipeline((result: PitchResult) => {
+          const target = phase === 'sing_sa' ? 'Sa' : 'Sa';
+          setVoiceFeedback(pitchResultToFeedback(result, target));
+        });
+      }
+    };
+    restartVoice();
+    // Only re-run when micPermission changes to granted
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [micPermission]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -438,15 +778,74 @@ export default function BeginnerPage() {
                 {...phaseTransition}
                 className={lessonStyles.centeredMessage}
               >
-                <p>Whenever you are ready.</p>
-                <button
-                  type="button"
-                  className={lessonStyles.actionButton}
-                  onClick={advancePhase}
-                  style={{ marginTop: 'var(--space-8)' }}
-                >
-                  Continue
-                </button>
+                {/* Priority 8: Mic permission gate */}
+                {micGateActive && !skipMic ? (
+                  <div className={lessonStyles.micGate} role="alert">
+                    {micPermission === 'denied' ? (
+                      <>
+                        <p className={lessonStyles.micGateText}>
+                          Microphone access is needed to hear your singing.
+                          Please allow microphone access in your browser settings.
+                        </p>
+                        <div className={lessonStyles.micGateActions}>
+                          <button
+                            type="button"
+                            className={lessonStyles.actionButton}
+                            onClick={handleRetryMic}
+                          >
+                            Try again
+                          </button>
+                          <button
+                            type="button"
+                            className={lessonStyles.actionButtonSecondary}
+                            onClick={handleSkipMic}
+                          >
+                            Continue without mic
+                          </button>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <p className={lessonStyles.micGateText}>
+                          Sadhana needs to hear you sing.
+                        </p>
+                        <div className={lessonStyles.micGateActions}>
+                          <button
+                            type="button"
+                            className={lessonStyles.actionButton}
+                            onClick={handleGrantMic}
+                          >
+                            Grant access
+                          </button>
+                          <button
+                            type="button"
+                            className={lessonStyles.actionButtonSecondary}
+                            onClick={handleSkipMic}
+                          >
+                            Continue without mic
+                          </button>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                ) : (
+                  <>
+                    <p>Whenever you are ready.</p>
+                    {/* Priority 3: Voice visualization */}
+                    <VoiceVisualization
+                      feedback={isVoicePhase ? voiceFeedback : IDLE_VOICE_FEEDBACK}
+                      className={lessonStyles.voiceViz}
+                    />
+                    <button
+                      type="button"
+                      className={lessonStyles.actionButton}
+                      onClick={advancePhase}
+                      style={{ marginTop: 'var(--space-4)' }}
+                    >
+                      Continue
+                    </button>
+                  </>
+                )}
               </motion.div>
             )}
 
@@ -458,11 +857,16 @@ export default function BeginnerPage() {
                 className={lessonStyles.centeredMessage}
               >
                 <p>Follow the guide tone.</p>
+                {/* Priority 3: Voice visualization */}
+                <VoiceVisualization
+                  feedback={isVoicePhase ? voiceFeedback : IDLE_VOICE_FEEDBACK}
+                  className={lessonStyles.voiceViz}
+                />
                 <button
                   type="button"
                   className={lessonStyles.actionButton}
                   onClick={advancePhase}
-                  style={{ marginTop: 'var(--space-8)' }}
+                  style={{ marginTop: 'var(--space-4)' }}
                 >
                   Continue
                 </button>
@@ -476,6 +880,11 @@ export default function BeginnerPage() {
                 {...phaseTransition}
                 className={lessonStyles.centeredMessage}
               >
+                {/* Priority 3: Voice visualization */}
+                <VoiceVisualization
+                  feedback={isVoicePhase ? voiceFeedback : IDLE_VOICE_FEEDBACK}
+                  className={lessonStyles.voiceViz}
+                />
                 {!pakadTriggered && (
                   <button
                     type="button"
@@ -519,7 +928,9 @@ export default function BeginnerPage() {
                     <span className={lessonStyles.statLabel}>Earned</span>
                   </div>
                   <div className={lessonStyles.stat}>
-                    <span className={lessonStyles.statValue}>Day 1</span>
+                    <span className={lessonStyles.statValue}>
+                      Day {user.streak > 0 ? user.streak : 1}
+                    </span>
                     <span className={lessonStyles.statLabel}>Streak</span>
                   </div>
                 </div>
@@ -600,17 +1011,16 @@ export default function BeginnerPage() {
 
       {/* Today's riyaz card */}
       <motion.section className={homeStyles.riyazCard} variants={fadeUp} aria-label="Today's practice">
-        <span className={homeStyles.riyazLabel}>{timeLabel} raga</span>
+        <span className={homeStyles.riyazLabel}>
+          {riyazDone ? 'Riyaz complete' : `Today\u2019s riyaz`}
+        </span>
         <h2 className={homeStyles.riyazRaga}>{todayRaga.name}</h2>
         <p className={homeStyles.riyazDescription}>
-          {todayRaga.description}
+          {timeLabel} raga &middot; Prahara {todayRaga.prahara.join(', ')}
         </p>
-        <span className={homeStyles.riyazTime}>
-          Prahara {todayRaga.prahara.join(', ')}
-        </span>
-        {user.riyazDone ? (
+        {riyazDone ? (
           <span className={homeStyles.riyazDone}>
-            Today&rsquo;s riyaz complete
+            Today&rsquo;s riyaz complete &mdash; well done
           </span>
         ) : (
           <button
@@ -652,9 +1062,9 @@ export default function BeginnerPage() {
 
           <div className={homeStyles.streakBadge}>
             <span
-              className={`${homeStyles.streakValue} ${user.streak > 0 ? homeStyles.streakValueActive : ''}`}
+              className={`${homeStyles.streakValue} ${(profile?.streak ?? user.streak) > 0 ? homeStyles.streakValueActive : ''}`}
             >
-              {user.streak}
+              {profile?.streak ?? user.streak}
             </span>
             <span className={homeStyles.streakText}>day streak</span>
           </div>
