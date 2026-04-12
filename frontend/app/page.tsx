@@ -300,6 +300,26 @@ export default function HomePage() {
           );
         })}
       </motion.div>
+
+      {/* Freeform Riyaz — standalone card, separate from structured journeys */}
+      <motion.div
+        variants={cardVariants}
+        initial="hidden"
+        animate="visible"
+        style={{ width: '100%', maxWidth: 'var(--max-width)', padding: '0 var(--space-4)' }}
+      >
+        <Link
+          href="/journeys/freeform"
+          className={styles.freeformCard}
+          style={{ textDecoration: 'none', color: 'inherit' }}
+        >
+          <span className={styles.freeformName}>Freeform Riyaz</span>
+          <span className={styles.freeformSanskrit}>Swatantra</span>
+          <p className={styles.freeformDescription}>
+            No goals. No exercises. Just you and the raga.
+          </p>
+        </Link>
+      </motion.div>
     </div>
   );
 }

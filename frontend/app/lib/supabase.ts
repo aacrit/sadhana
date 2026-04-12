@@ -85,12 +85,22 @@ export async function getUserProfile(
   const lastRiyazDate = streakData?.last_riyaz_date as string | null;
   const riyazDone = lastRiyazDate === today;
 
+  // Map DB journey text to JourneyId (beginner/explorer/scholar/master)
+  const rawJourney = (profileData as Record<string, unknown>).journey as string | undefined;
+  const validJourneys = ['beginner', 'explorer', 'scholar', 'master', 'freeform'];
+  const journey = rawJourney && validJourneys.includes(rawJourney)
+    ? (rawJourney as import('./types').JourneyId)
+    : null;
+
   return {
     id: profileData.id as string,
     saHz: Number(profileData.sa_hz) || 261.63,
     level: levelTextToNumber(profileData.level as string),
     xp: (profileData.xp as number) ?? 0,
     streak: (streakData?.current_streak as number) ?? 0,
+    longestStreak: (streakData?.longest_streak as number) ?? 0,
+    journey,
+    currentRaga: (profileData.current_raga as string) ?? null,
     lastPractice: profileData.updated_at
       ? new Date(profileData.updated_at as string)
       : null,
