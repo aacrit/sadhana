@@ -135,7 +135,7 @@ engine/
 │  PRESENTATION  (/frontend/)                                     │
 │  Next.js 15 / React 19 / TypeScript                             │
 │  Framer Motion v12 · GSAP 3 · Three.js r170                     │
-│  Design system: Dhrupad                                         │
+│  Design system: Ragamala                                         │
 └─────────────────────────────┬───────────────────────────────────┘
                               │  Supabase JS
 ┌─────────────────────────────▼───────────────────────────────────┐
@@ -146,27 +146,31 @@ engine/
 
 **Total operational cost: $0.** No paid APIs. No paid inference. No paid audio. Everything that requires compute runs in the browser (AudioWorklet, WASM, Tone.js). Everything that requires storage uses Supabase free tier.
 
-**Tech stack**: Next.js 15 / React 19 / TypeScript strict, Tone.js 15 (synthesis — just intonation tuned), RNNoise.js WASM (denoising — $0 browser), Pitchy/McLeod Pitch Method (pitch detection — $0 browser), Framer Motion v12 (spring physics), GSAP 3 (cinematic sequences), Three.js r170 (tanpura waveform visualization). Google Fonts: Cormorant Garamond / Inter / IBM Plex Mono.
+**Tech stack**: Next.js 15 / React 19 / TypeScript strict, Tone.js 15 (synthesis — just intonation tuned), RNNoise.js WASM (denoising — $0 browser), Pitchy/McLeod Pitch Method (pitch detection — $0 browser), Framer Motion v12 (spring physics), GSAP 3 (cinematic sequences), Three.js r170 (tanpura waveform visualization). Google Fonts: Cormorant Garamond / Noto Serif Devanagari / Inter / IBM Plex Mono.
 
 ---
 
-## Design System — Sādhanā DS
+## Design System — Ragamala
 
-The visual language is inseparable from the practice philosophy — they share a name. The aesthetic is guided by **Dhrupad** principles: the oldest surviving form of Hindustani classical music. Austere, geometric, meditative, precise. The foundation everything else grows from. In code and documentation, "Sādhanā DS" when disambiguation from the app is needed.
+Named after the Ragamala tradition of Indian miniature painting: a garland of ragas, each given a visual world of color, mood, season, and time of day. The foundation is Dhrupad — austere, geometric, meditative, precise. Ragamala is its full flowering: the same rigor, now capable of shifting its entire color world in response to the raga being practiced. Full spec in `docs/DESIGN-SYSTEM.md`.
 
 | Decision | Choice |
 |----------|--------|
 | Layout | Single-column practice. One thing at a time. |
-| Typography | Cormorant Garamond (raga names, Sanskrit, titles) / Inter (UI) / IBM Plex Mono (frequencies, Hz, ratios, note data) |
-| Accent | Saffron `#E8871E` — earned only. Correct pitch. Mastered raga. Active streak. Never decorative. |
-| Night bg | Deep Indigo `#0D0D1A` |
+| Typography | Cormorant Garamond (raga names, Sanskrit, titles) / Noto Serif Devanagari (Devanagari script, toggle-able) / Inter (UI) / IBM Plex Mono (frequencies, Hz, ratios, note data) |
+| Accent | Saffron `#E8871E` — earned only. Correct pitch. Active streak. Never decorative. |
+| Mastery | Gold `#D4AF37` — above Saffron. Guru level, raga mastered. Zarr-kashi only: hairline rules, single-point accents, never filled. |
+| Night bg | Deep Malachite `#0A1A14` |
 | Day bg | Ivory `#F5F0E8` |
 | RAG | Correct `#22C55E` / In-progress `#F59E0B` / Needs-work `#EF4444` |
+| Raga worlds | 5 raga-responsive color environments (Bhairav/Yaman/Bhoopali/Bhimpalasi/Bageshri) via `data-raga` attribute, 2400ms ink-diffusion transitions, grounded in Mewar/Bundi-Kota Ragamala painting tradition. |
 | Logo | Four tanpura strings (overtone series) converging to a Sa point (saffron). Open arc behind them — 225°–315°, top quadrant missing (the practice still to come). SVG. 16px–200px. |
 | Signature element | Reactive tanpura waveform (Three.js) — responds to student's voice in real time |
-| Motion | Framer Motion spring (interactions) + GSAP timelines (ceremonies) + Three.js (ambient) |
+| Motion | Framer Motion spring (named ornament presets: Tanpura Release, Meend, Gamak, Andolan, Kan) + GSAP timelines (ceremonies) + Three.js (ambient) |
+| Texture | Jali pattern (4% opacity on cards, full reveal on pakad), ink diffusion (raga world transitions), zarr-kashi (gold hairlines, Guru only) |
+| Script toggle | Global Devanagari/romanized toggle, persisted to user profile. Default ON for Hindi/Marathi/Sanskrit users. |
 
-**Level system**: Shishya → Sadhaka → Varistha → Guru (levels 1→10)
+**Level system**: Shishya (`#0A1A14`) → Sadhaka (`#2D6A4F`) → Varistha (`#1E3A5F`) → Guru (`#D4AF37`) — interface deepens invisibly, no announcements
 
 ---
 
@@ -223,7 +227,7 @@ npm run test:engine  # Test engine only — raga grammar, frequency ratios, tala
 | Raga knowledge, musicological accuracy, cultural framing | `music-director` + `raga-scholar` |
 | Validate raga objects in code against tradition | `raga-scholar` |
 | Journey UX design, gamification, level system | `frontend-builder` |
-| Visual identity, logo, Dhrupad design system | `brand-director` |
+| Visual identity, logo, Ragamala design system | `brand-director` |
 | Icon design, raga/tala/nav icons, display typeface, PWA icons | `icon-creator` |
 | Lesson content, exercise copy, Presence Rule | `lesson-writer` |
 | Learning paths, raga curriculum sequence | `curriculum-designer` |
@@ -259,7 +263,7 @@ npm run test:engine  # Test engine only — raga grammar, frequency ratios, tala
 
 ## Locked Decisions (CEO Approval Required)
 
-Engine-first architecture, Hindustani-first framing, Dhrupad design system, $0 constraint, audio-first pedagogy, McLeod Pitch Method + RNNoise voice pipeline, Supabase data layer, Framer Motion + GSAP + Three.js animation stack, Claude Max CLI only for agent work.
+Engine-first architecture, Hindustani-first framing, Ragamala design system, $0 constraint, audio-first pedagogy, McLeod Pitch Method + RNNoise voice pipeline, Supabase data layer, Framer Motion + GSAP + Three.js animation stack, Claude Max CLI only for agent work.
 
 **Level System (locked — D+B):**
 - Levels unlocked by specific musical acts, not XP. Examples: "Sing Bhairav's pakad within ±20 cents across 3 separate sessions" → Sadhaka. Engine validates. Cannot be gamed.
@@ -310,7 +314,7 @@ Sādhanā/
 │   │   ├── components/       # Shared: PracticeSession, VoiceFeedback, TanpuraViz...
 │   │   ├── lib/              # Supabase client, types
 │   │   ├── three/            # Three.js tanpura waveform scene
-│   │   └── styles/           # tokens.css (Dhrupad design tokens)
+│   │   └── styles/           # tokens.css (Ragamala design tokens)
 │   └── next.config.ts
 ├── content/curriculum/       # YAML journey definitions
 ├── supabase/migrations/
@@ -320,7 +324,7 @@ Sādhanā/
 └── docs/
     ├── ENGINE.md             # Engine architecture, API reference
     ├── JOURNEYS.md           # Journey UX specs
-    ├── DESIGN-SYSTEM.md      # Dhrupad — tokens, motion grammar, logo
+    ├── DESIGN-SYSTEM.md      # Ragamala — tokens, motion grammar, logo, raga color worlds
     ├── AUDIO-ENGINE.md       # Voice pipeline, Tone.js patterns, frequency tables
     ├── MUSIC-TEAM.md         # Raga database standards, shruti science, cultural guidelines
     ├── AGENT-TEAM.md         # Agent roster, cycles, cost policy
