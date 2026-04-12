@@ -229,3 +229,83 @@ Principles:
 - Contextual: knows ornament expectations per raga per swara
 
 Color mapping: `correct` -> green, `in-progress` -> amber, `needs-work` -> red.
+
+---
+
+## useFreeformSession Hook
+
+Source: `frontend/app/lib/useFreeformSession.ts`
+
+React hook that manages the entire freeform riyaz audio session. Wires together TanpuraDrone, VoicePipeline, harmony strength calculation, swara event detection, and session persistence. All audio objects are ref-stored to avoid unnecessary re-renders.
+
+### Signature
+
+```typescript
+useFreeformSession(saHz?: number): FreeformState & FreeformControls
+```
+
+### FreeformState
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `currentHz` | `number \| null` | Live detected frequency |
+| `currentSwara` | `string \| null` | Short name: "Sa", "Re", "Ga", etc. |
+| `currentSwaraFull` | `string \| null` | Full name: "Komal Re", "Shuddha Ga", etc. |
+| `currentDevanagari` | `string \| null` | Devanagari glyph for the current swara |
+| `centsDev` | `number \| null` | Cents deviation from nearest shruti |
+| `inTune` | `boolean` | Within +/-20 cents |
+| `harmonyStrength` | `number` | 0-1 consonance with Sa (overtone-derived) |
+| `swaraHistory` | `SwaraEvent[]` | Rolling buffer of emitted swara events (max 30) |
+| `sessionDurationS` | `number` | Elapsed session time in seconds |
+| `totalSwaraCount` | `number` | Total swaras detected this session |
+| `isListening` | `boolean` | Voice pipeline active |
+| `tanpuraActive` | `boolean` | Tanpura drone playing |
+| `micPermission` | `'unknown' \| 'granted' \| 'denied'` | Microphone permission state |
+| `saHz` | `number` | Student's Sa frequency |
+
+### FreeformControls
+
+| Method | Description |
+|--------|-------------|
+| `startListening()` | Starts voice pipeline + tanpura. Requires user gesture on iOS. |
+| `stopListening()` | Stops pipeline, emits final pending swara, saves session to Supabase. |
+| `toggleTanpura()` | Mute/unmute the tanpura drone independently. |
+| `dispose()` | Full cleanup -- stops pipeline, timer, tanpura. Called on unmount. |
+
+### SwaraEvent Type
+
+```typescript
+interface SwaraEvent {
+  swara: string;           // Short name: "Sa" | "Re" | ...
+  swaraFull: string;       // Full: "Komal Re" | "Shuddha Ga" | ...
+  devanagari: string;      // Devanagari glyph
+  hz: number;              // Detected frequency
+  timestamp: number;       // performance.now() ms
+  durationMs: number;      // How long the swara was held
+  inTune: boolean;         // Within +/-20 cents
+  harmonyStrength: number; // 0-1 consonance with Sa
+}
+```
+
+### Swara Event Detection
+
+A swara must be stable for >= 300ms (`SWARA_DEBOUNCE_MS`) before emitting a SwaraEvent. If the student holds the same swara for > 2000ms (`SAME_SWARA_REPEAT_MS`), a repeat event is emitted. On silence, any pending swara that met the debounce threshold is emitted.
+
+### Harmony Strength
+
+Consonance values are derived from the overtone series:
+
+| Swara | Strength | Ratio |
+|-------|----------|-------|
+| Sa | 1.00 | 1:1 (unison) |
+| Pa | 0.85 | 3:2 (perfect fifth) |
+| Ma | 0.70 | 4:3 (perfect fourth) |
+| Ga | 0.65 | 5:4 (major third) |
+| Re, Dha | 0.50 | 9:8, 5:3 |
+| Re_k, Ga_k, Ma_t, Dha_k, Ni_k, Ni | 0.30 | Dissonant intervals |
+
+If the student is > 25 cents off, harmony strength is reduced by 0.4 (floor 0).
+
+### Session Persistence
+
+Sessions >= 30s are saved to Supabase `sessions` table via dynamic import (fire-and-forget). Fields: `user_id`, `raga_id: 'freeform'`, `sa_hz`, `duration_s`, `xp_earned` (2 per minute), `journey: 'freeform'`, timestamps. Guest sessions are not persisted.
