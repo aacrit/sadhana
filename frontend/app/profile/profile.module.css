@@ -1,0 +1,439 @@
+/**
+ * profile.module.css -- Profile page styles
+ *
+ * Single-column, centered, generous vertical rhythm.
+ * Sections breathe with whitespace -- no hard dividers.
+ * Level badge uses inline style for its background color.
+ */
+
+/* -- Page layout ----------------------------------------------------- */
+
+.page {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100dvh;
+  padding: var(--space-6) var(--space-4);
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 480px;
+}
+
+/* -- Back button ----------------------------------------------------- */
+
+.backButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--touch-min);
+  height: var(--touch-min);
+  background: none;
+  border: none;
+  color: var(--text-3);
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: color var(--dur-fast) var(--ease-out);
+  align-self: flex-start;
+  margin-bottom: var(--space-8);
+}
+
+.backButton:hover {
+  color: var(--text);
+}
+
+.backButton:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* -- Loading state --------------------------------------------------- */
+
+.loadingContainer {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100dvh;
+}
+
+.loadingDot {
+  width: 12px;
+  height: 12px;
+  border-radius: var(--radius-full);
+  background: var(--accent);
+  animation: profilePulse 1.5s var(--ease-in-out) infinite;
+}
+
+@keyframes profilePulse {
+  0%, 100% { opacity: 0.3; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.2); }
+}
+
+/* -- Header / Identity ----------------------------------------------- */
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-bottom: var(--space-10);
+}
+
+.nameRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.displayName {
+  font-family: var(--font-serif);
+  font-size: 28px;
+  font-weight: var(--weight-light);
+  color: var(--text);
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
+}
+
+.levelBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-full);
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-medium);
+  color: rgba(255, 255, 255, 0.92);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.journeyPath {
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  color: var(--text-3);
+}
+
+/* -- XP + Streak block ----------------------------------------------- */
+
+.statsBlock {
+  display: flex;
+  gap: var(--space-8);
+  align-items: flex-start;
+  margin-bottom: var(--space-3);
+}
+
+.statItem {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.statLabel {
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-widest);
+}
+
+.statValue {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xl);
+  color: var(--text);
+  line-height: 1;
+}
+
+.statValueActive {
+  color: var(--accent);
+}
+
+.streakRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* Geometric flame: a vertical line tapering to a point (SVG) */
+.streakMark {
+  flex-shrink: 0;
+}
+
+.streakSub {
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  color: var(--text-3);
+}
+
+.saHz {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--text-3);
+  margin-bottom: var(--space-10);
+}
+
+/* -- Encouragement --------------------------------------------------- */
+
+.encouragement {
+  font-family: var(--font-serif);
+  font-size: var(--text-lg);
+  font-weight: var(--weight-light);
+  font-style: italic;
+  color: var(--text-2);
+  line-height: var(--leading-relaxed);
+  margin-bottom: var(--space-12);
+}
+
+/* -- Recent ragas ---------------------------------------------------- */
+
+.recentSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin-bottom: var(--space-12);
+}
+
+.sectionLabel {
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-widest);
+}
+
+.ragaChips {
+  display: flex;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.ragaChip {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-full);
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+}
+
+.ragaChipName {
+  font-family: var(--font-serif);
+  font-size: var(--text-sm);
+  color: var(--text);
+}
+
+.ragaChipDot {
+  width: 4px;
+  height: 4px;
+  border-radius: var(--radius-full);
+  background: var(--text-3);
+  flex-shrink: 0;
+}
+
+.ragaChipTime {
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  color: var(--text-3);
+}
+
+.noRagas {
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  color: var(--text-3);
+  line-height: var(--leading-relaxed);
+}
+
+/* -- Level progression ----------------------------------------------- */
+
+.levelSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin-bottom: var(--space-16);
+}
+
+.levelTrack {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding-left: var(--space-4);
+  position: relative;
+}
+
+/* Vertical connecting line */
+.levelTrack::before {
+  content: '';
+  position: absolute;
+  left: calc(var(--space-4) + 5px);
+  top: 6px;
+  bottom: 6px;
+  width: 1px;
+  background: var(--border);
+}
+
+.levelNode {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  position: relative;
+  z-index: 1;
+}
+
+.levelNode:not(:last-child) {
+  margin-bottom: var(--space-6);
+}
+
+.levelDot {
+  width: 12px;
+  height: 12px;
+  border-radius: var(--radius-full);
+  border: 2px solid var(--border);
+  background: var(--bg);
+  flex-shrink: 0;
+  transition: background var(--dur-normal) var(--ease-out),
+              border-color var(--dur-normal) var(--ease-out),
+              box-shadow var(--dur-normal) var(--ease-out);
+}
+
+.levelDotCompleted {
+  background: var(--text-3);
+  border-color: var(--text-3);
+}
+
+.levelDotCurrent {
+  border-color: transparent;
+  box-shadow: 0 0 8px var(--accent-dim);
+}
+
+.levelDotFuture {
+  background: transparent;
+  border-color: var(--border);
+}
+
+.levelInfo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-0-5);
+}
+
+.levelName {
+  font-family: var(--font-serif);
+  font-size: var(--text-base);
+  color: var(--text);
+  font-weight: var(--weight-regular);
+}
+
+.levelNameDim {
+  color: var(--text-3);
+}
+
+.levelThreshold {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-3);
+}
+
+/* -- Sign out -------------------------------------------------------- */
+
+.signOutButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  align-self: center;
+  padding: var(--space-2) var(--space-4);
+  min-height: var(--touch-min);
+  background: none;
+  border: none;
+  color: var(--text-3);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  transition: color var(--dur-fast) var(--ease-out);
+  margin-top: var(--space-8);
+}
+
+.signOutButton:hover {
+  color: var(--text-2);
+}
+
+.signOutButton:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* -- Guest state ----------------------------------------------------- */
+
+.guestContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60dvh;
+  text-align: center;
+  gap: var(--space-4);
+}
+
+.guestHeading {
+  font-family: var(--font-serif);
+  font-size: var(--text-xl);
+  font-weight: var(--weight-light);
+  color: var(--text);
+}
+
+.guestText {
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  color: var(--text-3);
+  line-height: var(--leading-relaxed);
+  max-width: 320px;
+}
+
+.guestLink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-3) var(--space-6);
+  min-height: var(--touch-min);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg-3);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  text-decoration: none;
+  transition: border-color var(--dur-fast) var(--ease-out),
+              background var(--dur-fast) var(--ease-out);
+}
+
+.guestLink:hover {
+  border-color: var(--text-3);
+  background: var(--bg-4);
+}
+
+.guestLink:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* -- Reduced motion -------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .loadingDot {
+    animation: none;
+    opacity: 1;
+  }
+
+  .backButton,
+  .signOutButton,
+  .guestLink,
+  .levelDot {
+    transition: none;
+  }
+}
