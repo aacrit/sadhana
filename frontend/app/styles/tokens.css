@@ -187,6 +187,36 @@
   --max-width-wide: 1080px;
   --touch-min: 44px;
   --header-height: 56px;
+
+  /* -- Canvas texture -------------------------------------------------- */
+  --canvas-pattern-opacity: 0.035;
+  --canvas-grain-opacity: 0.02;
+  --canvas-vignette-outer: rgba(0, 0, 0, 0.35);
+  --canvas-pattern-size: 120px;
+
+  /* -- Navbar ---------------------------------------------------------- */
+  --navbar-height: 48px;
+  --navbar-bg: rgba(10, 26, 20, 0.85);
+  --navbar-border: rgba(255, 255, 255, 0.08);
+
+  /* -- Journey card palettes ------------------------------------------- */
+  --card-beginner-bg: #0A1A14;
+  --card-beginner-border: rgba(232, 135, 30, 0.2);
+  --card-explorer-bg: #132E22;
+  --card-explorer-accent: #5C9E6E;
+  --card-explorer-border: rgba(45, 106, 79, 0.25);
+  --card-scholar-bg: #142235;
+  --card-scholar-border: rgba(212, 175, 55, 0.15);
+  --card-master-bg: #1A1608;
+  --card-master-border: rgba(212, 175, 55, 0.2);
+
+  /* -- Freeform card --------------------------------------------------- */
+  --card-freeform-bg: #0A1A14;
+  --card-freeform-edge: #1A0A2E;
+  --freeform-indigo: #0D0D1A;
+  --freeform-violet: #1A0A2E;
+  --freeform-violet-accent: rgba(139, 92, 246, 0.5);
+  --freeform-sapphire-accent: rgba(59, 130, 246, 0.4);
 }
 
 /* =======================================================================
@@ -389,6 +419,32 @@ body {
   overflow-x: hidden;
   transition: background-color var(--dur-slow) var(--ease-out),
               color var(--dur-slow) var(--ease-out);
+}
+
+/* Canvas texture — Layer 1: Mehrab arch lattice (structural) */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  opacity: var(--canvas-pattern-opacity, 0.035);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cpath d='M10 120 L10 50 Q10 10 60 10 Q110 10 110 50 L110 120' fill='none' stroke='white' stroke-width='0.5'/%3E%3Cpath d='M25 120 L25 55 Q25 22 60 22 Q95 22 95 55 L95 120' fill='none' stroke='white' stroke-width='0.3'/%3E%3Ccircle cx='60' cy='12' r='1.5' fill='none' stroke='white' stroke-width='0.3'/%3E%3Cline x1='10' y1='120' x2='110' y2='120' stroke='white' stroke-width='0.3'/%3E%3C/svg%3E");
+  background-size: var(--canvas-pattern-size, 120px) var(--canvas-pattern-size, 120px);
+  background-repeat: repeat;
+}
+
+/* Canvas texture — Layer 2: Handmade paper grain (surface) */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: var(--canvas-grain-opacity, 0.02);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4' viewBox='0 0 4 4'%3E%3Ccircle cx='1' cy='1' r='0.5' fill='white'/%3E%3C/svg%3E");
+  background-size: 4px 4px;
+  background-repeat: repeat;
 }
 
 /* =======================================================================
