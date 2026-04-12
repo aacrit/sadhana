@@ -430,12 +430,14 @@ export default function FreeformPage() {
         subLevel={1}
         variant="full"
         analyser={session.getAnalyserNode()}
+        pitchHz={session.currentHz}
+        pitchClarity={session.currentClarity}
         onStringTrigger={handleStringTrigger}
         style={{
           position: 'absolute',
           inset: 0,
           zIndex: 0,
-          opacity: 0.6,
+          opacity: 0.7,
         }}
       />
 
