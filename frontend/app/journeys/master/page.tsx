@@ -153,55 +153,17 @@ export default function MasterPage() {
         ))}
       </motion.section>
 
-      {/* Gate panel — lock message + CTA */}
-      <motion.div className={styles.gatePanel} variants={fadeUp} role="region" aria-label="Access gate">
-        {/* Lock icon — outline strokes only, no fills */}
-        <svg
-          className={styles.gateLockIcon}
-          width="32"
-          height="32"
-          viewBox="0 0 32 32"
-          fill="none"
-          aria-hidden="true"
-        >
-          <rect
-            x="7"
-            y="14"
-            width="18"
-            height="13"
-            rx="2"
-            stroke="currentColor"
-            strokeWidth="1"
-          />
-          <path
-            d="M11 14V10a5 5 0 0 1 10 0v4"
-            stroke="currentColor"
-            strokeWidth="1"
-            strokeLinecap="round"
-          />
-          {/* Diamond keyhole — not a circle */}
-          <path
-            d="M16 18.5L17.5 20.5L16 22.5L14.5 20.5Z"
-            stroke="currentColor"
-            strokeWidth="1"
-            strokeLinejoin="round"
-          />
-        </svg>
-
+      {/* Horizon panel — what this journey will contain */}
+      <motion.div className={styles.gatePanel} variants={fadeUp} role="region" aria-label="Journey status">
         <p className={styles.gateTitle}>
-          The Guru level is earned through years of practice.
+          This journey is being built.
         </p>
 
         <p className={styles.gateDescription}>
-          The Master journey opens when the engine recognises you as Guru — a
-          practitioner who has demonstrated mastery of multiple ragas, sustained
-          daily practice across seasons, and begun to teach what they know. This
-          is not a level. It is a state of readiness.
+          The Master journey will contain composition tools, phrase generation,
+          teaching mode, and the full 22-shruti palette. The engine becomes
+          your instrument. Content is arriving with each update.
         </p>
-
-        <span className={styles.gateLevel} aria-label="Minimum level required: 7">
-          min_level: 7 / Guru
-        </span>
 
         <Link href="/" className={styles.practiceLink}>
           Return to practice

@@ -162,6 +162,31 @@ function resolveColor(cssVar: string, fallback: string): string {
   return resolved;
 }
 
+/** Resolve a numeric CSS token (e.g. '--tantri-string-rest-opacity: 0.5'). */
+const NUM_CACHE: Record<string, number> = {};
+function resolveNum(cssVar: string, fallback: number): number {
+  if (NUM_CACHE[cssVar] !== undefined) return NUM_CACHE[cssVar]!;
+  if (typeof document === 'undefined') return fallback;
+  const raw = getComputedStyle(document.documentElement)
+    .getPropertyValue(cssVar)
+    .trim();
+  const parsed = parseFloat(raw);
+  const resolved = Number.isFinite(parsed) ? parsed : fallback;
+  NUM_CACHE[cssVar] = resolved;
+  return resolved;
+}
+
+// Invalidate NUM_CACHE alongside COLOR_CACHE on theme/raga change
+if (typeof document !== 'undefined') {
+  const numObserver = new MutationObserver(() => {
+    for (const key of Object.keys(NUM_CACHE)) delete NUM_CACHE[key];
+  });
+  numObserver.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ['data-theme', 'data-raga', 'class'],
+  });
+}
+
 /** Accuracy band → resolved color. */
 function getAccuracyColor(band: AccuracyBand): string {
   switch (band) {
@@ -225,17 +250,21 @@ function renderString(
 
   if (stringWidth <= 0) return;
 
-  // String line width: thicker for visual prominence
-  const baseWidth = s.achala ? 2.5 : 1.5;
+  // String line width from CSS tokens
+  const baseWidth = s.achala
+    ? resolveNum('--tantri-string-sa-width', 2)
+    : resolveNum('--tantri-string-default-width', 1);
 
-  // Rest state opacity
+  // Rest state opacity from CSS tokens
   let baseOpacity: number;
   if (s.visibility === 'ghost') {
-    baseOpacity = 0.08;
+    baseOpacity = resolveNum('--tantri-string-ghost-opacity', 0.08);
   } else if (s.visibility === 'hidden') {
     return; // Don't render hidden strings
   } else {
-    baseOpacity = s.achala ? 0.25 : 0.6;
+    baseOpacity = s.achala
+      ? resolveNum('--tantri-string-achala-opacity', 0.15)
+      : resolveNum('--tantri-string-rest-opacity', 0.5);
   }
 
   // Color: rest state uses neutral, active uses accuracy color

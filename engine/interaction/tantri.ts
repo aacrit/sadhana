@@ -59,8 +59,11 @@ export const SPRING_PRESETS = {
   meend: { stiffness: 80, damping: 20 },
 } as const;
 
-/** Vibration decay rate per frame (multiplicative). */
+/** Vibration decay rate per frame at 60fps (multiplicative). */
 const VIBRATION_DECAY = 0.92;
+
+/** Target frame interval in seconds (60fps). */
+const TARGET_DT = 1 / 60;
 
 /** Minimum amplitude below which a string is considered at rest. */
 const REST_THRESHOLD = 0.005;
@@ -460,12 +463,19 @@ export function mapVoiceToStrings(
  * @param field - The TantriField to update
  * @param voiceMap - Result from mapVoiceToStrings, or null for silence
  * @param voiceAmplitude - Raw amplitude from the mic (0–1), drives vibration intensity
+ * @param dt - Frame delta in seconds (default 1/60). Used to correct for variable refresh rates.
  */
 export function updateFieldFromVoice(
   field: TantriField,
   voiceMap: VoiceMapResult | null,
   voiceAmplitude: number = 0,
+  dt: number = TARGET_DT,
 ): void {
+  // Scale factors for frame-rate independence
+  const dtScale = dt / TARGET_DT;
+  const lerpPrimary = Math.min(1, 0.3 * dtScale);
+  const lerpSympathetic = Math.min(1, 0.15 * dtScale);
+  const decay = Math.pow(VIBRATION_DECAY, dtScale);
   for (let i = 0; i < field.strings.length; i++) {
     const s = field.strings[i]!;
 
@@ -478,8 +488,8 @@ export function updateFieldFromVoice(
         voiceAmplitude * (voiceMap.accuracyBand === 'off' ? 0.3 : 1.0),
         MAX_AMPLITUDE,
       );
-      // Lerp toward target for smooth transitions
-      s.amplitude = s.amplitude + (targetAmp - s.amplitude) * 0.3;
+      // Lerp toward target for smooth transitions (frame-rate corrected)
+      s.amplitude = s.amplitude + (targetAmp - s.amplitude) * lerpPrimary;
       s.accuracyBand = voiceMap.accuracyBand;
       s.centsDev = voiceMap.centsDev;
     } else if (voiceMap) {
@@ -487,12 +497,12 @@ export function updateFieldFromVoice(
       const sym = voiceMap.sympathetic.find(([idx]) => idx === i);
       if (sym) {
         const targetAmp = Math.min(sym[1] * voiceAmplitude, MAX_AMPLITUDE * 0.2);
-        s.amplitude = s.amplitude + (targetAmp - s.amplitude) * 0.15;
+        s.amplitude = s.amplitude + (targetAmp - s.amplitude) * lerpSympathetic;
         s.accuracyBand = 'rest';
         s.centsDev = 0;
       } else {
-        // Decay toward rest
-        s.amplitude *= VIBRATION_DECAY;
+        // Decay toward rest (frame-rate corrected)
+        s.amplitude *= decay;
         if (s.amplitude < REST_THRESHOLD) {
           s.amplitude = 0;
           s.accuracyBand = 'rest';
@@ -500,8 +510,8 @@ export function updateFieldFromVoice(
         }
       }
     } else {
-      // Silence: all strings decay
-      s.amplitude *= VIBRATION_DECAY;
+      // Silence: all strings decay (frame-rate corrected)
+      s.amplitude *= decay;
       if (s.amplitude < REST_THRESHOLD) {
         s.amplitude = 0;
         s.accuracyBand = 'rest';

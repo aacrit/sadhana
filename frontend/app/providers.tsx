@@ -16,6 +16,7 @@
 
 import { useEffect } from 'react';
 import type { ReactNode } from 'react';
+import { MotionConfig } from 'framer-motion';
 import { AuthProvider } from './lib/auth';
 import { VoiceWaveProvider } from './lib/VoiceWaveContext';
 import { useReducedMotion } from './lib/useReducedMotion';
@@ -51,14 +52,16 @@ function ReducedMotionBridge() {
 
 export default function Providers({ children }: { children: ReactNode }) {
   return (
-    <AuthProvider>
-      <VoiceWaveProvider>
-        <ReducedMotionBridge />
-        <VoiceWave variant="ambient" />
-        {children}
-        <ThemeToggle />
-        <ScriptToggle />
-      </VoiceWaveProvider>
-    </AuthProvider>
+    <MotionConfig reducedMotion="user">
+      <AuthProvider>
+        <VoiceWaveProvider>
+          <ReducedMotionBridge />
+          <VoiceWave variant="ambient" />
+          {children}
+          <ThemeToggle />
+          <ScriptToggle />
+        </VoiceWaveProvider>
+      </AuthProvider>
+    </MotionConfig>
   );
 }

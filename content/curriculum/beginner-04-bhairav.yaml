@@ -83,7 +83,7 @@ phases:
     type: swara_introduction
     instruction: |
       This is komal Re — the lowered second note.
-      In Bhairav, it is the most powerful swara after Sa.
+      In Bhairav, komal Re has a powerful gravitational pull toward Sa.
       It sits just above Sa, almost touching it.
     swaras: [Re, Re_k]
     presentation: comparison    # play shuddha Re then komal Re

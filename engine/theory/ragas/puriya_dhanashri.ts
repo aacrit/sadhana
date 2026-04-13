@@ -114,7 +114,8 @@ export const puriya_dhanashri: Raga = {
   relatedRagas: ['puriya', 'marwa', 'poorvi', 'shri'],
 
   gharanaVariations:
-    'Jaipur-Atrauli gharana has a particularly strong tradition of Puriya Dhanashri, with ' +
+    'Vadi assignment varies by tradition: Ni (Jaipur-Atrauli, adopted here), Ma_t (some Bhatkhande texts), ' +
+    'or Pa (Kirana practice). Jaipur-Atrauli gharana has a particularly strong tradition of Puriya Dhanashri, with ' +
     'precise articulation of the vakra phrases. Kirana gharana explores the Ni with extended ' +
     'meend from Dha(k). Agra gharana presents the raga with a more architectural approach, ' +
     'emphasising the structural contrast between the lower and upper tetrachords. ' +
