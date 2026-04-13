@@ -204,7 +204,7 @@ Named after the Ragamala tradition of Indian miniature painting: a garland of ra
 | Day bg | Ivory `#F5F0E8` |
 | RAG | Correct `#22C55E` / In-progress `#F59E0B` / Needs-work `#EF4444` |
 | Raga worlds | 5 raga-responsive color environments (Bhairav/Yaman/Bhoopali/Bhimpalasi/Bageshri) via `data-raga` attribute, 2400ms ink-diffusion transitions, grounded in Mewar/Bundi-Kota Ragamala painting tradition. |
-| Logo | Four tanpura strings (overtone series) converging to a Sa point (saffron). Open arc behind them — 225°–315°, top quadrant missing (the practice still to come). SVG. 16px–200px. |
+| Logo | Tantri Resonance Mark: five horizontal strings at just-intonation intervals (Bhoopali pentatonic), Sa string carrying a standing wave (fundamental mode). Saffron Sa terminus point with glow halo. Strings fade rightward (practice continues). SVG. 16px–200px. |
 | Signature element | Reactive tanpura waveform (Three.js) — responds to student's voice in real time |
 | Motion | Framer Motion spring (named ornament presets: Tanpura Release, Meend, Gamak, Andolan, Kan) + GSAP timelines (ceremonies) + Three.js (ambient) |
 | Texture | Jali pattern (4% opacity on cards, full reveal on pakad), ink diffusion (raga world transitions), zarr-kashi (gold hairlines, Guru only) |

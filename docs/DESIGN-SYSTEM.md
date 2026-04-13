@@ -324,25 +324,44 @@ Named after the Mughal metalwork technique of inlaying gold wire into steel. In 
 
 ---
 
-## Logo
+## Logo -- Tantri Resonance Mark
 
 Source: `frontend/app/components/Logo.tsx`. Pure SVG, works 16px to 200px.
 
+**Concept:**
+The logo IS Tantri. Five horizontal strings at just-intonation intervals -- the pentatonic field of Raga Bhoopali (Sa Re Ga Pa Dha). Spacing follows logarithmic frequency ratios (1:1, 9:8, 5:4, 3:2, 5:3), making the intervals acoustically truthful, not decorative. The Sa string carries a standing wave -- the fundamental vibration mode -- the shape of a human voice activating the instrument. A saffron terminus point anchors the tonic. Strings extend rightward without boundary: the practice continues.
+
 **Anatomy:**
-- Four tanpura strings converging to a Sa point at bottom center
-- String 1 (fundamental/Sa): saffron `#E8871E`, strokeWidth 1.5, full opacity
-- String 2 (Pa): `--text-2`, strokeWidth 1.2, opacity 0.6
-- String 3: `--text-3`, strokeWidth 1, opacity 0.4
-- String 4 (highest partial): `--text-3`, strokeWidth 1, opacity 0.25
-- Open arc behind strings: 225-315 degrees (bottom semicircle), top quadrant missing -- the practice still to come
-- Sa convergence point: saffron circle, r=2.5 (shifts to gold `#D4AF37` at Guru level)
-- Strings originate from x: 20, 25, 39, 44 (top) and converge to x:32 (bottom)
+- Five horizontal strings at just-intonation vertical spacing (log2 scale)
+- Sa string (lowest, thickest): strokeWidth 2.2, opacity 0.85, carries a standing wave (fundamental mode: `sin(pi * t)`)
+- Pa string: strokeWidth 1.8, opacity 0.65, `--text-2` color (achala, visually anchored)
+- Re, Ga, Dha strings: strokeWidth 1.0, opacity 0.40-0.45, `--text` color
+- Sa terminus point: saffron `#E8871E`, r=2.8, with radial glow halo (shifts to gold `#D4AF37` at Guru level)
+- Pa terminus point: `--text-2`, r=1.5, opacity 0.6
+- Right edge: strings fade to transparent via linear gradient mask (no boundary -- practice continues)
+- Standing wave glow: saffron at 12% opacity behind the Sa wave, gaussian blur filter
+
+**Size behavior:**
+- 16-23px (compact): 3 strings only (Sa, Pa, Dha), no standing wave, Sa point only -- reduces to essential gesture
+- 24px+: all 5 strings with standing wave, glow, both terminus points
 
 **Variants:**
 - `icon`: mark only, viewBox 64x64
-- `full`: mark + "Sadhana" wordmark in Cormorant Garamond, viewBox 180x64
+- `full`: mark + wordmark, viewBox 240x64
+
+**Wordmark:**
+- "Sadhana" (with macrons: S&#x101;dhan&#x101;) in Cormorant Garamond 400, fontSize 21, letterSpacing 0.06em
+- A hairline string (strokeWidth 0.5, opacity 0.3) threads through the baseline, connecting icon to word
+- A small saffron echo point (r=1.5, opacity 0.5) bridges the icon strings to the wordmark
+- Text uses `var(--text)` for automatic Night/Day mode adaptation
 
 **Props:** `size` (px), `variant`, `className`, `style`.
+
+**Math:**
+- Bhoopali ratios: Sa=1, Re=9/8, Ga=5/4, Pa=3/2, Dha=5/3
+- Vertical position: `log2(ratio) / log2(5/3)` normalized to field height
+- Standing wave path: `y = amplitude * sin(pi * t)` where t in [0,1]
+- 48 segments for smooth SVG path rendering
 
 ---
 
