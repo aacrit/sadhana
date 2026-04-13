@@ -239,7 +239,7 @@ export default function PracticeSession({
   const arohaDisplay = raga.aroha.map((n) => n.swara).join(' ');
 
   return (
-    <div className={styles.session} role="main" aria-label={`Practice session: ${raga.name}`}>
+    <div className={styles.session} role="region" aria-label={`Practice session: ${raga.name}`}>
       {/* Ambient tanpura background */}
       <TanpuraViz
         active={phase !== 'preparing' && phase !== 'complete'}
