@@ -1,6 +1,6 @@
 # Design System -- Ragamala
 
-Last updated: 2026-04-11
+Last updated: 2026-04-13
 
 ---
 
@@ -326,7 +326,7 @@ Named after the Mughal metalwork technique of inlaying gold wire into steel. In 
 
 ## Logo -- Tantri Resonance Mark
 
-Source: `frontend/app/components/Logo.tsx`. Pure SVG, works 16px to 200px.
+Source: `frontend/app/components/Logo.tsx`. SVG + Framer Motion springs, works 16px to 200px.
 
 **Concept:**
 The logo IS Tantri. Five horizontal strings at just-intonation intervals -- the pentatonic field of Raga Bhoopali (Sa Re Ga Pa Dha). Spacing follows logarithmic frequency ratios (1:1, 9:8, 5:4, 3:2, 5:3), making the intervals acoustically truthful, not decorative. The Sa string carries a standing wave -- the fundamental vibration mode -- the shape of a human voice activating the instrument. A saffron terminus point anchors the tonic. Strings extend rightward without boundary: the practice continues.
@@ -341,26 +341,67 @@ The logo IS Tantri. Five horizontal strings at just-intonation intervals -- the 
 - Right edge: strings fade to transparent via linear gradient mask (no boundary -- practice continues)
 - Standing wave glow: saffron at 12% opacity behind the Sa wave, gaussian blur filter
 
-**Size behavior:**
-- 16-23px (compact): 3 strings only (Sa, Pa, Dha), no standing wave, Sa point only -- reduces to essential gesture
-- 24px+: all 5 strings with standing wave, glow, both terminus points
+**Size presets:**
+
+| Preset | Pixels | Detail level | Interactive | Use |
+|--------|--------|-------------|------------|-----|
+| `favicon` | 16px | 3 strings (Sa, Pa, Dha), Sa point only, no wave | No | Browser tab, PWA icon |
+| `nav` | 32px | 5 strings, standing wave, both terminus points | Yes | Navigation bar |
+| `header` | 48px | Full articulation, interactive | Yes | Page headers |
+| `hero` | 96px | Full articulation with enhanced glow | Yes | Landing page hero |
+| `splash` | 200px | Maximum detail, full wave articulation | Yes | Loading screen, about page |
+
+Usage: `<Logo size="nav" />` or `<Logo size={48} />` (both accepted).
 
 **Variants:**
 - `icon`: mark only, viewBox 64x64
 - `full`: mark + wordmark, viewBox 240x64
 
+**LogoMark:** Exported as `LogoMark` -- icon-only wrapper with `loading` prop. For tight spaces (favicons, tab icons, mobile status bar, loading spinners). Always non-interactive.
+
 **Wordmark:**
-- "Sadhana" (with macrons: S&#x101;dhan&#x101;) in Cormorant Garamond 400, fontSize 21, letterSpacing 0.06em
+- "Sadhana" (with macrons) in Cormorant Garamond 400, fontSize 21, letterSpacing 0.06em
 - A hairline string (strokeWidth 0.5, opacity 0.3) threads through the baseline, connecting icon to word
 - A small saffron echo point (r=1.5, opacity 0.5) bridges the icon strings to the wordmark
 - Text uses `var(--text)` for automatic Night/Day mode adaptation
 
-**Props:** `size` (px), `variant`, `className`, `style`.
+### Motion Physics
+
+The logo responds like a physical instrument. Every animation maps to a named spring preset from the Ragamala motion grammar. No ease-in-out, no CSS transitions -- springs only.
+
+| State | Behavior | Spring / Technique | Detail |
+|-------|----------|-------------------|--------|
+| **Idle** | Subtle vertical drift on Sa wave, ~0.5Hz | CSS `@keyframes`, 2s period | Barely perceptible breathing. The string vibrates at rest. No JS animation frame. |
+| **Loading** | Pronounced Sa wave oscillation | CSS `@keyframes`, 2s period, larger amplitude | Wave displacement is 50% of amplitude (vs 15% for idle). Saffron glow pulses in sync. |
+| **Hover** | All strings brighten (opacity x1.4), Sa glow intensifies and scales | Andolan (stiffness 120, damping 8) | The string field responds as if the student's voice approached. Gentle oscillation, organic settle. |
+| **Press/click** | Entire mark contracts to 96.5% scale | Kan (stiffness 1000, damping 30) | Instantaneous snap inward, like a string being plucked. No wind-up, no delay. |
+| **Release** | Mark returns to 100% scale | Kan spring naturally decays back | The high damping of the Kan preset ensures a single crisp snap with no oscillation. |
+
+**Loading prop:** `<Logo loading />` activates the loading wave animation. The Sa standing wave oscillates with greater amplitude, and the saffron glow behind it pulses. This is pure CSS `@keyframes` -- zero JavaScript animation frames, works even before React hydration.
+
+**Interactive prop:** `<Logo interactive />` or `<Logo interactive={false} />`. Defaults to `true` for sizes >= 24px, `false` for compact sizes. When false, the logo renders as a plain `<svg>` with no Framer Motion overhead.
+
+**Accessibility:**
+- Interactive logos receive `tabIndex={0}` for keyboard focus
+- `role="img"` and `aria-label="Sadhana"` on all variants
+- CSS animations respect `prefers-reduced-motion: reduce` (all durations collapse to 0ms via the token system)
+
+### Props
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `size` | `number \| LogoSizePreset` | `40` | Height in pixels, or a named preset (`'favicon'`, `'nav'`, `'header'`, `'hero'`, `'splash'`) |
+| `variant` | `'full' \| 'icon'` | `'icon'` | `'full'` shows mark + wordmark. `'icon'` shows mark only. |
+| `loading` | `boolean` | `false` | When true, Sa wave animates with pronounced oscillation |
+| `interactive` | `boolean` | auto | When true, hover/press spring physics are active. Auto-enabled for sizes >= 24px. |
+| `className` | `string` | -- | Additional CSS class |
+| `style` | `CSSProperties` | -- | Additional inline styles |
 
 **Math:**
 - Bhoopali ratios: Sa=1, Re=9/8, Ga=5/4, Pa=3/2, Dha=5/3
 - Vertical position: `log2(ratio) / log2(5/3)` normalized to field height
 - Standing wave path: `y = amplitude * sin(pi * t)` where t in [0,1]
+- Wave amplitude: `min(4.5, size * 0.08)` -- scales with logo size, capped at 4.5 SVG units
 - 48 segments for smooth SVG path rendering
 
 ---

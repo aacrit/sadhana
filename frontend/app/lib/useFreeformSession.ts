@@ -36,7 +36,7 @@ import type { Swara } from '@/engine/theory/types';
 const DEFAULT_SA_HZ = 261.6256;
 
 /** Minimum duration in ms a swara must be stable to emit a SwaraEvent. */
-const SWARA_DEBOUNCE_MS = 150;
+const SWARA_DEBOUNCE_MS = 60;
 
 /** Maximum time on same swara before emitting a new event. */
 const SAME_SWARA_REPEAT_MS = 2000;

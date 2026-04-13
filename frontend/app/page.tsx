@@ -66,8 +66,8 @@ const JOURNEYS: JourneyMeta[] = [
     nameEnglish: 'Scholar',
     description:
       'Full raga grammar. Shruti analysis. Deep theory. The engine speaks to you directly.',
-    accessible: false,
-    minLevel: 4,
+    accessible: true,
+    minLevel: 0,
     path: '/journeys/scholar',
   },
   {
@@ -77,8 +77,8 @@ const JOURNEYS: JourneyMeta[] = [
     nameEnglish: 'Master',
     description:
       'Composition. Phrase generation. Teaching tools. The engine becomes your instrument.',
-    accessible: false,
-    minLevel: 7,
+    accessible: true,
+    minLevel: 0,
     path: '/journeys/master',
   },
 ];

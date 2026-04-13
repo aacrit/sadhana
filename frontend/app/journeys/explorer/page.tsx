@@ -23,6 +23,7 @@ import {
 } from '@/engine/theory';
 import type { Raga, Prahara, Rasa, SwaraNote } from '@/engine/theory/types';
 import { useLessonAudio } from '../../lib/lesson-audio';
+import { useTimbreSelection } from '../../components/VoiceTimbreSelector';
 import { getRagaIcon } from '../../components/icons';
 import styles from '../../styles/explorer.module.css';
 
@@ -146,8 +147,11 @@ export default function ExplorerPage() {
   // Currently playing raga ID (for play button state)
   const [playingRagaId, setPlayingRagaId] = useState<string | null>(null);
 
+  // Timbre selection — persisted to localStorage
+  const [timbre] = useTimbreSelection();
+
   // Audio hook — default Sa and no specific raga for the landing page
-  const audio = useLessonAudio(261.63, 'bhoopali');
+  const audio = useLessonAudio(261.63, 'bhoopali', timbre);
   const playingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Cleanup on unmount

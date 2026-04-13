@@ -19,6 +19,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { getRagaForTimeOfDay, getRagaSwaras } from '@/engine/theory';
 import type { Raga, Swara } from '@/engine/theory/types';
 import { useLessonAudio } from '../../../lib/lesson-audio';
+import { useTimbreSelection } from '../../../components/VoiceTimbreSelector';
 import styles from '../../../styles/ear-training.module.css';
 
 // ---------------------------------------------------------------------------
@@ -147,8 +148,9 @@ export default function EarTrainingPage() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [sessionComplete, setSessionComplete] = useState(false);
 
-  // Audio
-  const audio = useLessonAudio(261.63, raga.id);
+  // Audio — uses timbre from user preference (harmonium / voice-male / voice-female)
+  const [timbre] = useTimbreSelection();
+  const audio = useLessonAudio(261.63, raga.id, timbre);
   const feedbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const playingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 

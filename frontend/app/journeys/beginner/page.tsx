@@ -51,6 +51,7 @@ import Tantri from '../../components/Tantri';
 import type { TantriPlayEvent } from '@/engine/interaction/tantri';
 import { playSwaraNote, ensureAudioReady } from '@/engine/synthesis/swara-voice';
 import { useLessonAudio } from '../../lib/lesson-audio';
+import { useTimbreSelection } from '../../components/VoiceTimbreSelector';
 import { useVoiceWave } from '../../lib/VoiceWaveContext';
 import homeStyles from '../../styles/beginner.module.css';
 import lessonStyles from '../../styles/beginner-lesson.module.css';
@@ -298,6 +299,71 @@ async function requestMicAccess(): Promise<boolean> {
 }
 
 // ---------------------------------------------------------------------------
+// Phase sub-components: auto-advancing phases
+// ---------------------------------------------------------------------------
+
+/** Listen phase: shows a tanpura pulse, auto-advances after durationMs. */
+function ListenPhase({ onAdvance, durationMs }: { onAdvance: () => void; durationMs: number }) {
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    const startTime = Date.now();
+    const interval = setInterval(() => {
+      const elapsed = Date.now() - startTime;
+      setProgress(Math.min(1, elapsed / durationMs));
+      if (elapsed >= durationMs) {
+        clearInterval(interval);
+        onAdvance();
+      }
+    }, 100);
+    return () => clearInterval(interval);
+  }, [onAdvance, durationMs]);
+
+  return (
+    <motion.div key="listen" {...phaseTransition} className={lessonStyles.centeredMessage}>
+      <div className={lessonStyles.listenPulse} aria-label="Tanpura playing" />
+      {/* Progress ring */}
+      <div style={{ marginTop: 'var(--space-4)', opacity: 0.4, fontSize: 'var(--text-xs)', fontFamily: 'var(--font-mono)', color: 'var(--text-3)' }}>
+        {Math.ceil((durationMs - progress * durationMs) / 1000)}s
+      </div>
+      <button
+        type="button"
+        className={lessonStyles.actionButton}
+        onClick={onAdvance}
+        style={{ marginTop: 'var(--space-4)' }}
+      >
+        Skip
+      </button>
+    </motion.div>
+  );
+}
+
+/** Sa calibration phase: waits for voice detection, falls back after timeoutMs. */
+function SaCalibrationPhase({ onAdvance, timeoutMs }: { onAdvance: () => void; timeoutMs: number }) {
+  useEffect(() => {
+    const timer = setTimeout(onAdvance, timeoutMs);
+    return () => clearTimeout(timer);
+  }, [onAdvance, timeoutMs]);
+
+  return (
+    <motion.div key="sa_calibration" {...phaseTransition} className={lessonStyles.centeredMessage}>
+      <p>Sing or hum a comfortable note.</p>
+      <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-3)', marginTop: 'var(--space-2)' }}>
+        Listening for your Sa...
+      </p>
+      <button
+        type="button"
+        className={lessonStyles.actionButton}
+        onClick={onAdvance}
+        style={{ marginTop: 'var(--space-8)' }}
+      >
+        Skip
+      </button>
+    </motion.div>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Page component
 // ---------------------------------------------------------------------------
 
@@ -335,7 +401,8 @@ export default function BeginnerPage() {
   const headphoneTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Audio hook — provides tanpura, swara playback, voice pipeline
-  const audio = useLessonAudio(saHz, 'bhoopali');
+  const [timbre] = useTimbreSelection();
+  const audio = useLessonAudio(saHz, 'bhoopali', timbre);
   const { setAnalyser, setSaHz: setWaveSaHz } = useVoiceWave();
 
   // Register analyser with VoiceWaveContext when pipeline is active
@@ -758,42 +825,14 @@ export default function BeginnerPage() {
         {/* Phase content */}
         <div className={lessonStyles.phaseContent}>
           <AnimatePresence mode="wait">
-            {/* LISTEN phase */}
+            {/* LISTEN phase — auto-advances after 8s, or tap to skip */}
             {phase === 'listen' && (
-              <motion.div
-                key="listen"
-                {...phaseTransition}
-                className={lessonStyles.centeredMessage}
-              >
-                <div className={lessonStyles.listenPulse} aria-label="Tanpura playing" />
-                <button
-                  type="button"
-                  className={lessonStyles.actionButton}
-                  onClick={advancePhase}
-                  style={{ marginTop: 'var(--space-8)' }}
-                >
-                  Continue
-                </button>
-              </motion.div>
+              <ListenPhase onAdvance={advancePhase} durationMs={8000} />
             )}
 
-            {/* SA CALIBRATION phase */}
+            {/* SA CALIBRATION phase — timeout after 15s if voice detection doesn't fire */}
             {phase === 'sa_calibration' && (
-              <motion.div
-                key="sa_calibration"
-                {...phaseTransition}
-                className={lessonStyles.centeredMessage}
-              >
-                <p>Sing or hum a comfortable note.</p>
-                <button
-                  type="button"
-                  className={lessonStyles.actionButton}
-                  onClick={advancePhase}
-                  style={{ marginTop: 'var(--space-8)' }}
-                >
-                  Continue
-                </button>
-              </motion.div>
+              <SaCalibrationPhase onAdvance={advancePhase} timeoutMs={15000} />
             )}
 
             {/* MEET BHOOPALI phase — swara introduction */}
