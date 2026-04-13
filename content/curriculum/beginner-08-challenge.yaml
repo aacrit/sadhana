@@ -1,0 +1,133 @@
+# Lesson B-08: Shishya Challenge — Gateway to Sadhaka
+# Journey: Beginner | Level: Shishya (1-3)
+# Presence Rule: you hear before you name.
+# This is an assessment, not a lesson. Must pass across 3 separate sessions.
+# NEW PHASE TYPE: mastery_challenge
+
+id: beginner-08-challenge
+journey: beginner
+level_range: [1, 3]          # Shishya
+raga_id: null                # multi-raga assessment
+duration_target_min: 10
+xp_award: 100
+
+meta:
+  title: "Shishya Challenge"
+  subtitle: "Gateway to Sadhaka"
+  time_of_day: null          # available any time
+  rasa: null
+
+# --- SESSION RULES ------------------------------------------------
+
+session_rules:
+  required_sessions: 3          # must pass across 3 separate sessions
+  session_cooldown_hours: 4     # minimum gap between attempts
+  progress_persists: true       # passed challenges carry across sessions
+  partial_credit: true          # individual challenges scored independently
+
+# --- PHASES -------------------------------------------------------
+
+phases:
+
+  # 1. LISTENING — brief centering
+  - id: listen
+    type: tanpura_drone
+    duration_s: 20
+    instruction: |
+      The tanpura is with you.
+      Today is a challenge. Not a test — a measure of how far you've come.
+      There is no failure. Only practice.
+    tanpura:
+      strings: [Pa, Sa, Sa, Sa_upper]
+      sa_hz: null
+
+  # 2. SA DETECTION
+  - id: sa_calibration
+    type: sa_detection
+    skip_if: sa_already_set
+    instruction: |
+      Confirm your Sa. Hold it steady.
+    attempts: 5
+    min_clarity: 0.85
+    fallback_hz: 261.6256
+
+  # 3. CHALLENGE 1: Sa and Pa accuracy
+  # Stricter than normal shishya tolerance: +-30 cents
+  - id: challenge_sa_pa
+    type: mastery_challenge          # NEW PHASE TYPE
+    challenge_id: sa_pa_accuracy
+    instruction: |
+      Sing Sa. Hold it steady.
+      Then sing Pa. Hold it steady.
+    targets:
+      - swara: Sa
+        hold_duration_s: 5
+        tolerance_cents: 30
+      - swara: Pa
+        hold_duration_s: 5
+        tolerance_cents: 30
+    min_accuracy: 0.85
+    attempts_allowed: 3
+
+  # 4. CHALLENGE 2: Aroha/Avaroha of 3 ragas (student chooses)
+  # Tolerance: +-40 cents for all swaras
+  - id: challenge_aroha_avaroha
+    type: mastery_challenge
+    challenge_id: aroha_avaroha
+    instruction: |
+      Sing the aroha and avaroha of three ragas.
+      Choose whichever three you feel most confident with.
+    raga_pool: [bhoopali, yaman, bhairav, bhimpalasi, bageshri]
+    student_chooses: 3               # student picks 3 from pool
+    exercise_per_raga:
+      - sing_aroha: true
+        guide_tone: false            # no guide — this is a challenge
+      - sing_avaroha: true
+        guide_tone: false
+    tolerance_cents: 40
+    min_accuracy: 0.75               # 75% of swaras within tolerance
+
+  # 5. CHALLENGE 3: Pakad singing — 2 different ragas
+  - id: challenge_pakad
+    type: mastery_challenge
+    challenge_id: pakad_singing
+    instruction: |
+      Sing the signature phrase of two different ragas.
+      The engine will listen for recognisable character.
+    raga_pool: [bhoopali, yaman, bhairav, bhimpalasi, bageshri]
+    student_chooses: 2
+    response_duration_s: 20          # per raga
+    evaluation: pakad_recognition    # engine checks if sung phrase matches raga pakad
+    min_match_confidence: 0.65       # pakad recognition threshold
+
+  # 6. COMPLETION / PROGRESS
+  - id: complete
+    type: session_summary
+    show_accuracy: true
+    show_streak: true
+    show_challenge_progress: true    # shows which challenges passed across sessions
+    message_in_progress: |
+      Progress saved. Come back tomorrow to continue.
+      The guru does not pass the shishya after one good day.
+    message_complete: |
+      You have completed the Shishya Challenge.
+      The ragas have settled into your voice.
+      A new level awaits.
+
+# --- ENGINE PARAMETERS --------------------------------------------
+
+engine:
+  raga_grammar_active: true      # switches per challenge
+  pakad_recognition: true
+  ornaments_shown: false
+  cents_display: hidden          # no help during challenge
+  accuracy_model: shishya_strict # +-30 to +-40 cents depending on challenge
+
+# --- UNLOCK CONDITION ---------------------------------------------
+
+unlock_next:
+  lesson_id: sadhaka-01-desh
+  requires:
+    min_sessions: 3              # MUST complete across 3 separate sessions
+    challenges_passed: [sa_pa_accuracy, aroha_avaroha, pakad_singing]
+    journey_transition: explorer # transitions to explorer journey
