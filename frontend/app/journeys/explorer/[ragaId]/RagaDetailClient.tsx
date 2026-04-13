@@ -17,6 +17,7 @@ import { motion } from 'framer-motion';
 import { getRagaById } from '@/engine/theory';
 import type { SwaraNote, Prahara, Rasa, RagaJati } from '@/engine/theory/types';
 import { useLessonAudio } from '../../../lib/lesson-audio';
+import { useTimbreSelection } from '../../../components/VoiceTimbreSelector';
 import styles from '../../../styles/explorer-detail.module.css';
 
 // ---------------------------------------------------------------------------
@@ -114,8 +115,9 @@ export default function RagaDetailClient({ ragaId }: RagaDetailClientProps) {
 
   const [playingId, setPlayingId] = useState<string | null>(null);
   const [westernOpen, setWesternOpen] = useState(false);
+  const [timbre] = useTimbreSelection();
 
-  const audio = useLessonAudio(261.63, ragaId);
+  const audio = useLessonAudio(261.63, ragaId, timbre);
   const playingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {

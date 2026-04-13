@@ -26,11 +26,16 @@ import {
   playSwaraNote as enginePlaySwaraNote,
   ensureAudioReady,
 } from '@/engine/synthesis/swara-voice';
+import {
+  playVocalSwaraNote,
+  ensureVocalAudioReady,
+} from '@/engine/synthesis/voice';
 import { VoicePipeline } from '@/engine/voice/pipeline';
 import type { VoiceEvent } from '@/engine/voice/pipeline';
 import type { PitchResult } from '@/engine/analysis/pitch-mapping';
 import type { PakadMatch } from '@/engine/analysis/phrase-recognition';
 import type { Swara, Octave } from '@/engine/theory/types';
+import type { TantriTimbre } from '@/engine/interaction/tantri';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -124,11 +129,13 @@ function sleep(ms: number): Promise<void> {
  *
  * @param sa_hz - The student's Sa frequency in Hz (default: C4 = 261.6256)
  * @param ragaId - The raga being practiced (e.g. 'bhoopali')
+ * @param timbre - Voice timbre: 'harmonium' (default), 'voice-male', or 'voice-female'
  * @returns LessonAudioControls for the lesson UI to drive
  */
 export function useLessonAudio(
   sa_hz: number = DEFAULT_SA_HZ,
   ragaId: string,
+  timbre: TantriTimbre = 'harmonium',
 ): LessonAudioControls {
   // -----------------------------------------------------------------------
   // State — only booleans the UI needs to render
@@ -182,23 +189,39 @@ export function useLessonAudio(
   // Swara playback
   // -----------------------------------------------------------------------
 
+  // Store timbre in a ref so callbacks always see the latest value
+  const timbreRef = useRef(timbre);
+  timbreRef.current = timbre;
+
   const playSwara = useCallback(
     async (swara: string, durationMs: number = 500): Promise<void> => {
       if (disposedRef.current) return;
 
-      await ensureAudioReady();
       const { swara: swaraSymbol, octave } = parseSwaraName(swara);
+      const currentTimbre = timbreRef.current;
 
-      // Use enginePlaySwaraNote which respects the octave register.
-      // This is critical for "Sa_upper" (taar octave) vs "Sa" (madhya).
-      await enginePlaySwaraNote(
-        { swara: swaraSymbol, octave },
-        saHzRef.current,
-        {
-          duration: durationMs / 1000,
-          volume: 0.5,
-        },
-      );
+      if (currentTimbre === 'voice-male' || currentTimbre === 'voice-female') {
+        await ensureVocalAudioReady();
+        await playVocalSwaraNote(
+          { swara: swaraSymbol, octave },
+          saHzRef.current,
+          {
+            duration: durationMs / 1000,
+            volume: 0.5,
+            voiceType: currentTimbre === 'voice-male' ? 'baritone' : 'soprano',
+          },
+        );
+      } else {
+        await ensureAudioReady();
+        await enginePlaySwaraNote(
+          { swara: swaraSymbol, octave },
+          saHzRef.current,
+          {
+            duration: durationMs / 1000,
+            volume: 0.5,
+          },
+        );
+      }
     },
     [],
   );
@@ -215,21 +238,40 @@ export function useLessonAudio(
       const abort = new AbortController();
       playbackAbortRef.current = abort;
 
-      await ensureAudioReady();
+      const currentTimbre = timbreRef.current;
+      const useVoice = currentTimbre === 'voice-male' || currentTimbre === 'voice-female';
+
+      if (useVoice) {
+        await ensureVocalAudioReady();
+      } else {
+        await ensureAudioReady();
+      }
 
       for (const swaraName of swaras) {
         if (abort.signal.aborted || disposedRef.current) break;
 
         const { swara: swaraSymbol, octave } = parseSwaraName(swaraName);
 
-        await enginePlaySwaraNote(
-          { swara: swaraSymbol, octave },
-          saHzRef.current,
-          {
-            duration: noteDurationMs / 1000,
-            volume: 0.5,
-          },
-        );
+        if (useVoice) {
+          await playVocalSwaraNote(
+            { swara: swaraSymbol, octave },
+            saHzRef.current,
+            {
+              duration: noteDurationMs / 1000,
+              volume: 0.5,
+              voiceType: currentTimbre === 'voice-male' ? 'baritone' : 'soprano',
+            },
+          );
+        } else {
+          await enginePlaySwaraNote(
+            { swara: swaraSymbol, octave },
+            saHzRef.current,
+            {
+              duration: noteDurationMs / 1000,
+              volume: 0.5,
+            },
+          );
+        }
 
         if (gapMs > 0 && !abort.signal.aborted && !disposedRef.current) {
           await sleep(gapMs);
