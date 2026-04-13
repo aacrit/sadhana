@@ -26,6 +26,7 @@ import { VoicePipeline } from '@/engine/voice/pipeline';
 import type { VoiceEvent } from '@/engine/voice/pipeline';
 import VoiceVisualization from './VoiceVisualization';
 import TanpuraViz from './TanpuraViz';
+import { useAuth } from '../lib/auth';
 import type { PracticePhase, VoiceFeedback, SessionData } from '../lib/types';
 import styles from '../styles/practice-session.module.css';
 
@@ -72,6 +73,8 @@ export default function PracticeSession({
   ragaId,
   onComplete,
 }: PracticeSessionProps) {
+  const { profile } = useAuth();
+  const saHz = profile?.saHz ?? 261.63;
   const raga: Raga | undefined = useMemo(() => getRagaById(ragaId), [ragaId]);
   const [phase, setPhase] = useState<PracticePhase>('preparing');
   const [elapsed, setElapsed] = useState(0);
@@ -188,7 +191,7 @@ export default function PracticeSession({
     }
 
     const pipeline = new VoicePipeline({
-      sa_hz: 261.63,
+      sa_hz: saHz,
       onPitch: (event: VoiceEvent) => {
         setFeedbackRef.current((prev) => ({
           ...prev,

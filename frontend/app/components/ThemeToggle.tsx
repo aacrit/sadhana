@@ -149,7 +149,7 @@ export default function ThemeToggle() {
         // var(--space-2) = 8px gap
         bottom: 'calc(var(--space-6) + var(--touch-min) + var(--space-2))',
         right: 'var(--space-4)',
-        zIndex: 'var(--z-sticky)' as unknown as number,
+        zIndex: 50,
         width: 'var(--touch-min)',
         height: 'var(--touch-min)',
         display: 'flex',

@@ -352,8 +352,11 @@ export default function FreeformPage() {
           animate="visible"
         >
           <Logo size={48} variant="icon" />
-          <h1 className={`${styles.startTitle} raga-name`}>{'\u0938\u094D\u0935\u0924\u0902\u0924\u094D\u0930 \u0930\u093F\u092F\u093E\u091C\u093C'}</h1>
-          <span className={styles.startEnglish}>Freeform Riyaz</span>
+          <h1 className={`${styles.startTitle} raga-name`}>
+            <span className="devanagari-only">{'\u0938\u094D\u0935\u0924\u0902\u0924\u094D\u0930 \u0930\u093F\u092F\u093E\u091C\u093C'}</span>
+            <span className="romanized-only">Swatantra Riyaz</span>
+          </h1>
+          <span className={styles.startEnglish}>Freeform</span>
           <p className={styles.startSubtitle}>
             No goals. No exercises. Just you and the raga.
           </p>
