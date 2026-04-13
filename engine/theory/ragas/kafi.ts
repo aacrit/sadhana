@@ -72,7 +72,7 @@ export const kafi: Raga = {
   },
 
   vadi: 'Pa',
-  samvadi: 'Sa',
+  samvadi: 'Re',
   anuvadi: ['Re', 'Ga_k', 'Ma', 'Dha', 'Ni_k'],
   varjit: ['Re_k', 'Ga', 'Ma_t', 'Dha_k', 'Ni'],
 

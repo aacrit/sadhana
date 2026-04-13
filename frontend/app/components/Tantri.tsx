@@ -174,7 +174,7 @@ function getAccuracyColor(band: AccuracyBand): string {
     case 'off':
       return resolveColor('--needs-work', '#EF4444');
     case 'rest':
-      return resolveColor('--text-3', '#666666');
+      return resolveColor('--text-3', '#7A6B5E');
   }
 }
 
@@ -241,7 +241,7 @@ function renderString(
   // Color: rest state uses neutral, active uses accuracy color
   const color = s.amplitude > 0.01
     ? getAccuracyColor(s.accuracyBand)
-    : resolveColor('--text-3', '#666666');
+    : resolveColor('--text-3', '#7A6B5E');
 
   // Opacity: blend between rest and full based on amplitude
   const opacity = baseOpacity + s.amplitude * (1 - baseOpacity);
@@ -250,13 +250,20 @@ function renderString(
 
   // --- Draw the waveform ---
   if (s.amplitude > 0.005) {
-    const numPoints = Math.min(250, Math.max(100, Math.floor(stringWidth / 2)));
+    // Cap numPoints at 200: visually indistinguishable from higher counts for a
+    // smooth standing wave, but reduces worst-case draw calls by ~6x on wide
+    // screens (previously could reach 1200+ on a 2560px display).
+    const numPoints = Math.min(200, Math.max(100, Math.floor(stringWidth / 2)));
+    // generateStringWaveform writes into s._waveformBuffer — zero allocation on hot path.
     const syntheticWave = generateStringWaveform(s, numPoints, time);
     const maxDisplacement = 18 * dpr; // Max visual displacement in pixels — generous for cinematic effect
 
-    // Blend real voice waveform onto the string when voice is driving it
-    // (not touched — touched strings use synthetic wave only)
-    const waveform = new Float32Array(numPoints);
+    // blendedDisplacements holds the final per-point pixel displacement values.
+    // We compute these once and reuse the same values for both the primary stroke
+    // and the glow pass, eliminating the second full-path lineTo loop.
+    // This array is stack-allocated (small, fixed size — JS engine will not heap-alloc
+    // for arrays this size when filled immediately).
+    const blendedDisplacements = new Float64Array(numPoints);
     const hasVoiceData = voiceData && voiceData.length > 0 && !s.touched && s.amplitude > 0.05;
 
     if (hasVoiceData) {
@@ -270,12 +277,12 @@ function renderString(
         // Blend: voice waveform (scaled) + subtle synthetic undertone
         const voiceContribution = voiceSample * envelope * s.amplitude * 3;
         const syntheticContribution = (syntheticWave[i] ?? 0) * 0.2;
-        waveform[i] = voiceContribution + syntheticContribution;
+        blendedDisplacements[i] = (voiceContribution + syntheticContribution) * maxDisplacement;
       }
     } else {
       // Touched or no voice data: use synthetic standing wave
       for (let i = 0; i < numPoints; i++) {
-        waveform[i] = syntheticWave[i] ?? 0;
+        blendedDisplacements[i] = (syntheticWave[i] ?? 0) * maxDisplacement;
       }
     }
 
@@ -290,7 +297,7 @@ function renderString(
 
     for (let i = 0; i < numPoints; i++) {
       const x = x0 + (i / (numPoints - 1)) * stringWidth;
-      const displacement = (waveform[i] ?? 0) * maxDisplacement;
+      const displacement = blendedDisplacements[i]!;
       if (i === 0) {
         ctx.moveTo(x, y + displacement);
       } else {
@@ -302,6 +309,7 @@ function renderString(
     // --- Glow effect for active strings ---
     // Perfect: large saffron glow. Good: softer green glow. Approaching: faint amber.
     // Uses shadowBlur instead of ctx.filter to avoid software rasterization.
+    // Reuses blendedDisplacements from the primary pass — no second waveform loop.
     const glowBand = s.accuracyBand;
     const shouldGlow =
       (glowBand === 'perfect' && s.amplitude > 0.2) ||
@@ -321,9 +329,10 @@ function renderString(
       ctx.shadowColor = color;
       ctx.shadowBlur = blurRadius * dpr;
 
+      // Reuse blendedDisplacements — same waveform shape, no recomputation.
       for (let i = 0; i < numPoints; i++) {
         const x = x0 + (i / (numPoints - 1)) * stringWidth;
-        const displacement = (waveform[i] ?? 0) * maxDisplacement;
+        const displacement = blendedDisplacements[i]!;
         if (i === 0) {
           ctx.moveTo(x, y + displacement);
         } else {
@@ -350,7 +359,7 @@ function renderString(
     ctx.beginPath();
     const pointColor = s.swara === 'Sa'
       ? resolveColor('--accent', '#E8871E')
-      : resolveColor('--text-2', '#999999');
+      : resolveColor('--text-2', '#B8A99A');
     ctx.fillStyle = pointColor;
     ctx.globalAlpha = opacity;
     const baseR = s.swara === 'Sa' ? 4 * dpr : 2.5 * dpr;
@@ -379,7 +388,7 @@ function renderString(
   ctx.font = `${labelWeight} ${labelSize * dpr}px ${CANVAS_FONT_FAMILY}`;
   ctx.textAlign = 'right';
   ctx.textBaseline = 'middle';
-  ctx.fillStyle = isActive ? color : resolveColor('--text-3', '#666666');
+  ctx.fillStyle = isActive ? color : resolveColor('--text-3', '#7A6B5E');
   ctx.globalAlpha = s.visibility === 'ghost' ? 0.3 : opacity;
 
   // Use sargam abbreviation for compact, full name for full

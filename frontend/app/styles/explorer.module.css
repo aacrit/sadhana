@@ -72,7 +72,7 @@
   font-weight: var(--weight-regular);
   color: var(--text-3);
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: var(--tracking-widest);
   margin-bottom: var(--space-3);
 }
 

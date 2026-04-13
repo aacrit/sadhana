@@ -32,6 +32,8 @@
 import type { Swara, SwaraNote, Raga, Ornament } from '../../theory/types';
 import type { VoiceType, Vowel } from './formants';
 import type { VocalNoteEvent } from './raga-voice';
+import { getRagaSwaraNotHz } from './raga-voice';
+import { getVocalOrnamentForSwara, getAndolanSpec, getKanSpec } from './ornament-voice';
 
 // ---------------------------------------------------------------------------
 // Types: Composition score format
@@ -182,10 +184,6 @@ export function resolveCompositionEvents(
   const sectionBoundaries: number[] = [];
   let totalDuration = 0;
 
-  // Import dynamically to avoid circular deps at module level
-  const { getRagaSwaraNotHz } = require('./raga-voice') as typeof import('./raga-voice');
-  const { getVocalOrnamentForSwara, getAndolanSpec, getKanSpec } = require('./ornament-voice') as typeof import('./ornament-voice');
-
   for (const section of composition.sections) {
     const repeatCount = section.repeat ?? 1;
     const sectionTempo = section.tempo ?? baseTempo;
@@ -195,7 +193,9 @@ export function resolveCompositionEvents(
       sectionBoundaries.push(totalDuration);
 
       for (const line of section.lines) {
-        for (const note of line.notes) {
+        const lineNotes = line.notes;
+        for (let ni = 0; ni < lineNotes.length; ni++) {
+          const note = lineNotes[ni]!;
           const duration = note.beats * beatDuration;
 
           if (note.rest) {
@@ -222,10 +222,19 @@ export function resolveCompositionEvents(
           if (isVadi) volumeMultiplier = 1.15;
           else if (isSamvadi) volumeMultiplier = 1.08;
 
+          // Resolve preceding/following context for ornament selection
+          const prevNote = ni > 0 ? lineNotes[ni - 1] : undefined;
+          const nextNote = ni < lineNotes.length - 1 ? lineNotes[ni + 1] : undefined;
+          const preceding = (prevNote && !prevNote.rest) ? prevNote.swara : undefined;
+          const following = (nextNote && !nextNote.rest) ? nextNote.swara : undefined;
+          const isAscending = prevNote && !prevNote.rest
+            ? hz > getRagaSwaraNotHz({ swara: prevNote.swara, octave: prevNote.octave }, saHz, raga.id)
+            : true;
+
           // Determine ornament (explicit or raga-derived)
           const ornament = note.ornament ?? getVocalOrnamentForSwara(
             note.swara, raga,
-            { preceding: undefined, following: undefined, isVadi, isAscending: true },
+            { preceding, following, isVadi, isAscending },
             section.ornamentLevel ?? 'natural',
           );
 

@@ -160,7 +160,7 @@ export default function RagaDetailClient({ ragaId }: RagaDetailClientProps) {
 
   if (!raga) {
     return (
-      <div className={styles.page} role="main">
+      <div className={styles.page} role="region">
         <Link href="/journeys/explorer" className={styles.backLink} aria-label="Back to Explorer">
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
             <path d="M10 12L6 8L10 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -182,7 +182,7 @@ export default function RagaDetailClient({ ragaId }: RagaDetailClientProps) {
       variants={stagger}
       initial="hidden"
       animate="visible"
-      role="main"
+      role="region"
       aria-label={`Raga ${raga.name}`}
     >
       <motion.div variants={fadeUp}>

@@ -50,6 +50,7 @@ import VoiceWave from '../../components/VoiceWave';
 import Tantri from '../../components/Tantri';
 import type { TantriPlayEvent } from '@/engine/interaction/tantri';
 import { playSwaraNote, ensureAudioReady } from '@/engine/synthesis/swara-voice';
+import { playVocalSwaraNote, ensureVocalAudioReady } from '@/engine/synthesis/voice';
 import { useLessonAudio } from '../../lib/lesson-audio';
 import { useTimbreSelection } from '../../components/VoiceTimbreSelector';
 import { useVoiceWave } from '../../lib/VoiceWaveContext';
@@ -400,6 +401,13 @@ export default function BeginnerPage() {
   const [headphoneCalloutDismissed, setHeadphoneCalloutDismissed] = useState(false);
   const headphoneTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Pitch tracking state for Tantri string coloring
+  const [currentPitchHz, setCurrentPitchHz] = useState<number | undefined>(undefined);
+  const [currentPitchClarity, setCurrentPitchClarity] = useState<number | undefined>(undefined);
+
+  // Cinematic defocus — surrounding UI fades when Tantri strings are active
+  const [tantriActive, setTantriActive] = useState(false);
+
   // Audio hook — provides tanpura, swara playback, voice pipeline
   const [timbre] = useTimbreSelection();
   const audio = useLessonAudio(saHz, 'bhoopali', timbre);
@@ -451,7 +459,7 @@ export default function BeginnerPage() {
   const isVoicePhase = phase === 'sing_sa' || phase === 'sing_aroha' || phase === 'pakad_watch';
 
   // Determine the target swara label for the current voice phase
-  const voiceTargetSwara = phase === 'sing_sa' ? 'Sa' : 'Sa';
+  const voiceTargetSwara = phase === 'sing_sa' ? 'Sa' : phase === 'sing_aroha' ? 'Ga' : 'Sa';
 
   // Show headphone callout on first voice phase, auto-dismiss after 6s
   const showHeadphoneCallout = isVoicePhase && !headphoneCalloutDismissed;
@@ -632,10 +640,12 @@ export default function BeginnerPage() {
             if (!ok && !skipMic) return; // mic gate active, wait for user action
           }
 
-          // Priority 3: Wire PitchResult to VoiceFeedback
+          // Priority 3: Wire PitchResult to VoiceFeedback + Tantri pitch tracking
           await safeStartVoicePipeline((result: PitchResult, pitchHistory?: readonly [number, number][]) => {
-            const target = phase === 'sing_sa' ? 'Sa' : 'Sa';
+            const target = phase === 'sing_sa' ? 'Sa' : result.nearestSwara;
             setVoiceFeedback(pitchResultToFeedback(result, target, pitchHistory));
+            setCurrentPitchHz(result.hz);
+            setCurrentPitchClarity(result.clarity);
           });
         };
         startVoice();
@@ -643,11 +653,13 @@ export default function BeginnerPage() {
       }
 
       case 'pakad_watch': {
-        // Priority 3: Wire PitchResult to VoiceFeedback + pakad detection
+        // Priority 3: Wire PitchResult to VoiceFeedback + pakad detection + Tantri pitch
         const startPakadVoice = async () => {
           await safeStartVoicePipeline(
             (result: PitchResult, pitchHistory?: readonly [number, number][]) => {
               setVoiceFeedback(pitchResultToFeedback(result, result.nearestSwara, pitchHistory));
+              setCurrentPitchHz(result.hz);
+              setCurrentPitchClarity(result.clarity);
             },
             () => {
               setPakadTriggered(true);
@@ -662,6 +674,8 @@ export default function BeginnerPage() {
         audio.stopVoicePipeline();
         audio.stopTanpura();
         setVoiceFeedback(IDLE_VOICE_FEEDBACK);
+        setCurrentPitchHz(undefined);
+        setCurrentPitchClarity(undefined);
         // Priority 4: Mark riyaz as complete (localStorage for guests)
         markRiyazComplete();
         setRiyazDone(true);
@@ -711,7 +725,7 @@ export default function BeginnerPage() {
         );
       } else {
         await safeStartVoicePipeline((result: PitchResult, pitchHistory?: readonly [number, number][]) => {
-          const target = phase === 'sing_sa' ? 'Sa' : 'Sa';
+          const target = phase === 'sing_sa' ? 'Sa' : result.nearestSwara;
           setVoiceFeedback(pitchResultToFeedback(result, target, pitchHistory));
         });
       }
@@ -751,7 +765,7 @@ export default function BeginnerPage() {
     const copy = PHASE_COPY[phase];
 
     return (
-      <div className={lessonStyles.lessonPage} data-raga={todayRaga.id} role="main" aria-label="Lesson: Your First Raga - Bhoopali">
+      <div className={lessonStyles.lessonPage} data-raga={todayRaga.id} aria-label="Lesson: Your First Raga - Bhoopali">
         {/* Tantri string instrument — background layer */}
         <Tantri
           saHz={saHz}
@@ -759,18 +773,32 @@ export default function BeginnerPage() {
           level="shishya"
           subLevel={currentPhaseIndex >= 2 ? 2 : 1}
           variant="full"
+          timbre={timbre}
+          pitchHz={currentPitchHz}
+          pitchClarity={currentPitchClarity}
           analyser={audio.pipelineActive ? audio.getAnalyserNode() : null}
+          onActivityChange={setTantriActive}
           onStringTrigger={async (event: TantriPlayEvent) => {
             try {
-              await ensureAudioReady();
-              await playSwaraNote(
-                { swara: event.swara, octave: event.octave },
-                saHz,
-                { duration: 0.8, volume: event.velocity * 0.6 },
-              );
+              const note = { swara: event.swara, octave: event.octave };
+              const vol = event.velocity * 0.6;
+              if (event.timbre === 'voice-male' || event.timbre === 'voice-female') {
+                await ensureVocalAudioReady();
+                await playVocalSwaraNote(note, saHz, {
+                  duration: 0.8, volume: vol,
+                  voiceType: event.timbre === 'voice-male' ? 'baritone' : 'soprano',
+                });
+              } else {
+                await ensureAudioReady();
+                await playSwaraNote(note, saHz, { duration: 0.8, volume: vol });
+              }
             } catch { /* audio not ready */ }
           }}
-          style={{ position: 'absolute', inset: 0, zIndex: 0, opacity: 0.2 }}
+          style={{
+            position: 'absolute', inset: 0, zIndex: 0,
+            opacity: tantriActive ? 0.5 : 0.2,
+            transition: 'opacity 0.3s ease-out',
+          }}
         />
 
         {/* Exit lesson */}
