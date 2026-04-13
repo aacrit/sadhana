@@ -30,6 +30,8 @@ import VoiceWave from '../../components/VoiceWave';
 import Tantri from '../../components/Tantri';
 import type { TantriPlayEvent } from '@/engine/interaction/tantri';
 import { playSwaraNote, ensureAudioReady } from '@/engine/synthesis/swara-voice';
+import { playVocalSwaraNote, ensureVocalAudioReady } from '@/engine/synthesis/voice';
+import VoiceTimbreSelector, { useTimbreSelection } from '../../components/VoiceTimbreSelector';
 import { useFreeformSession } from '../../lib/useFreeformSession';
 import type { SwaraEvent } from '../../lib/useFreeformSession';
 import { useAuth } from '../../lib/auth';
@@ -199,6 +201,9 @@ export default function FreeformPage() {
   const { setAnalyser, setSaHz } = useVoiceWave();
   const [hasStarted, setHasStarted] = useState(false);
   const [startError, setStartError] = useState<string | null>(null);
+  const [timbre, setTimbre] = useTimbreSelection();
+  // Cinematic defocus: true when Tantri strings are vibrating
+  const [tantriActive, setTantriActive] = useState(false);
 
   // Track the last few SwaraEvents for ghost display
   const [ghosts, setGhosts] = useState<(SwaraEvent & { key: number })[]>([]);
@@ -316,14 +321,23 @@ export default function FreeformPage() {
   }, [session, router]);
 
   // Tantri string trigger — touch a string to hear the swara
+  // Dispatches to harmonium or TantriVoice(TM) based on timbre selection
   const handleStringTrigger = useCallback(async (event: TantriPlayEvent) => {
     try {
-      await ensureAudioReady();
-      await playSwaraNote(
-        { swara: event.swara, octave: event.octave },
-        userSaHz,
-        { duration: 0.8, volume: event.velocity * 0.6 },
-      );
+      const note = { swara: event.swara, octave: event.octave };
+      const vol = event.velocity * 0.6;
+
+      if (event.timbre === 'voice-male' || event.timbre === 'voice-female') {
+        await ensureVocalAudioReady();
+        await playVocalSwaraNote(note, userSaHz, {
+          duration: 0.8,
+          volume: vol,
+          voiceType: event.timbre === 'voice-male' ? 'baritone' : 'soprano',
+        });
+      } else {
+        await ensureAudioReady();
+        await playSwaraNote(note, userSaHz, { duration: 0.8, volume: vol });
+      }
     } catch {
       // Audio not ready — silently fail
     }
@@ -359,6 +373,9 @@ export default function FreeformPage() {
           <span className={styles.startEnglish}>Freeform</span>
           <p className={styles.startSubtitle}>
             No goals. No exercises. Just you and the raga.
+          </p>
+          <p className={styles.headphoneHint}>
+            Headphones recommended to prevent tanpura feedback into the mic.
           </p>
 
           <button
@@ -438,11 +455,14 @@ export default function FreeformPage() {
         pitchHz={session.currentHz}
         pitchClarity={session.currentClarity}
         onStringTrigger={handleStringTrigger}
+        timbre={timbre}
+        onActivityChange={setTantriActive}
         style={{
           position: 'absolute',
           inset: 0,
           zIndex: 0,
-          opacity: 0.7,
+          opacity: tantriActive ? 1 : 0.7,
+          transition: 'opacity 0.6s ease-out',
         }}
       />
 
@@ -474,8 +494,15 @@ export default function FreeformPage() {
         )}
       </AnimatePresence>
 
-      {/* HUD — top overlay */}
-      <div className={styles.hud}>
+      {/* HUD — top overlay (defocuses when Tantri is active) */}
+      <div
+        className={styles.hud}
+        style={{
+          opacity: tantriActive ? 0.3 : 1,
+          filter: tantriActive ? 'blur(1px)' : 'none',
+          transition: 'opacity 0.6s ease-out, filter 0.6s ease-out',
+        }}
+      >
         <div className={styles.hudLeft}>
           <span className={styles.hudMono}>
             {formatDuration(session.sessionDurationS)}
@@ -488,8 +515,15 @@ export default function FreeformPage() {
         </div>
       </div>
 
-      {/* Layer 2 — Swara field */}
-      <div className={styles.swaraField}>
+      {/* Layer 2 — Swara field (subtle — Tantri is the visual center) */}
+      <div
+        className={styles.swaraField}
+        style={{
+          opacity: tantriActive ? 0.25 : 0.7,
+          filter: tantriActive ? 'blur(2px)' : 'none',
+          transition: 'opacity 0.8s ease-out, filter 0.8s ease-out',
+        }}
+      >
         {/* Ghost swaras — drifting upward */}
         <AnimatePresence>
           {ghosts.map((ghost, i) => (
@@ -525,13 +559,27 @@ export default function FreeformPage() {
         </AnimatePresence>
       </div>
 
-      {/* Cents needle */}
-      <div className={styles.centsContainer}>
+      {/* Cents needle (recedes when Tantri is active) */}
+      <div
+        className={styles.centsContainer}
+        style={{
+          opacity: tantriActive ? 0.35 : 1,
+          transition: 'opacity 0.6s ease-out',
+        }}
+      >
         <CentsNeedle centsDev={session.centsDev} />
       </div>
 
-      {/* Bottom controls */}
-      <div className={styles.bottomControls}>
+      {/* Bottom controls (recede when Tantri is active) */}
+      <div
+        className={styles.bottomControls}
+        style={{
+          opacity: tantriActive ? 0.4 : 1,
+          transition: 'opacity 0.6s ease-out',
+        }}
+      >
+        <VoiceTimbreSelector value={timbre} onChange={setTimbre} />
+
         <button
           className={`${styles.tanpuraToggle} ${session.tanpuraActive ? styles.tanpuraToggleActive : ''}`}
           onClick={session.toggleTanpura}

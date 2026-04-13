@@ -83,6 +83,15 @@
   margin: 0;
 }
 
+.headphoneHint {
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  color: var(--text-3);
+  opacity: 0.6;
+  margin: 0;
+  font-style: italic;
+}
+
 .beginButton {
   font-family: var(--font-sans);
   font-size: var(--text-md);
@@ -202,25 +211,26 @@
 
 .currentDevanagari {
   font-family: var(--font-devanagari);
-  font-size: var(--text-3xl);
+  font-size: var(--text-xl);
   font-weight: var(--weight-light);
   line-height: 1;
-  opacity: 0.7;
+  opacity: 0.5;
 }
 
 .currentSwaraName {
   font-family: var(--font-serif);
-  font-size: 4.5rem; /* 72px — cinematic */
+  font-size: var(--text-3xl); /* Subtle — Tantri strings are the visual center */
   font-weight: var(--weight-light);
   line-height: 1;
   letter-spacing: var(--tracking-tight);
+  opacity: 0.6;
 }
 
 .currentSwaraFull {
   font-family: var(--font-sans);
-  font-size: var(--text-xl);
+  font-size: var(--text-base);
   font-weight: var(--weight-regular);
-  opacity: 0.50;
+  opacity: 0.35;
   line-height: 1;
 }
 
@@ -322,8 +332,9 @@
   left: 0;
   right: 0;
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: flex-end;
+  gap: var(--space-3);
   padding: var(--space-6) var(--space-4);
   z-index: var(--z-overlay);
 }
@@ -384,15 +395,15 @@
 
 @media (max-width: 480px) {
   .currentSwaraName {
-    font-size: 3.5rem;
-  }
-
-  .currentDevanagari {
     font-size: var(--text-2xl);
   }
 
-  .currentSwaraFull {
+  .currentDevanagari {
     font-size: var(--text-lg);
+  }
+
+  .currentSwaraFull {
+    font-size: var(--text-sm);
   }
 
   .centsContainer {

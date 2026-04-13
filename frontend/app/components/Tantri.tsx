@@ -46,6 +46,7 @@ import type {
   TantriField,
   TantriStringState,
   TantriPlayEvent,
+  TantriTimbre,
   AccuracyBand,
   VoiceMapResult,
 } from '@/engine/interaction/tantri';
@@ -89,6 +90,20 @@ export interface TantriProps {
 
   /** Callback when a string is triggered by touch/click. */
   onStringTrigger?: (event: TantriPlayEvent) => void;
+
+  /**
+   * TantriVoice(TM) — Instrument timbre for string touch playback.
+   * 'harmonium' (default): existing harmonium synthesis
+   * 'voice-male' / 'voice-female': vocal formant synthesis
+   */
+  timbre?: TantriTimbre;
+
+  /**
+   * Callback: fires when Tantri's activity state changes.
+   * true = at least one string is vibrating (voice or touch).
+   * Use to defocus surrounding UI for cinematic immersion.
+   */
+  onActivityChange?: (active: boolean) => void;
 
   /** Additional className. */
   className?: string;
@@ -199,8 +214,8 @@ function renderString(
 
   if (stringWidth <= 0) return;
 
-  // String line width based on achala status
-  const baseWidth = s.achala ? 2 : 1;
+  // String line width: thicker for visual prominence
+  const baseWidth = s.achala ? 2.5 : 1.5;
 
   // Rest state opacity
   let baseOpacity: number;
@@ -209,7 +224,7 @@ function renderString(
   } else if (s.visibility === 'hidden') {
     return; // Don't render hidden strings
   } else {
-    baseOpacity = s.achala ? 0.15 : 0.5;
+    baseOpacity = s.achala ? 0.25 : 0.6;
   }
 
   // Color: rest state uses neutral, active uses accuracy color
@@ -226,12 +241,14 @@ function renderString(
   if (s.amplitude > 0.005) {
     const numPoints = Math.min(250, Math.max(100, Math.floor(stringWidth / 2)));
     const waveform = generateStringWaveform(s, numPoints, time);
-    const maxDisplacement = 12 * dpr; // Max visual displacement in pixels
+    const maxDisplacement = 18 * dpr; // Max visual displacement in pixels — generous for cinematic effect
 
     ctx.beginPath();
     ctx.strokeStyle = color;
     ctx.globalAlpha = opacity;
-    ctx.lineWidth = baseWidth * dpr * (1 + s.amplitude * 0.5);
+    // Touched strings pulse with a subtle shimmer (8Hz flicker)
+    const touchPulse = s.touched ? 1 + 0.15 * Math.sin(time * 8 * Math.PI * 2) : 0;
+    ctx.lineWidth = baseWidth * dpr * (1 + s.amplitude * 0.5 + touchPulse);
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
 
@@ -246,15 +263,27 @@ function renderString(
     }
     ctx.stroke();
 
-    // --- Glow effect for perfect pitch ---
+    // --- Glow effect for active strings ---
+    // Perfect: large saffron glow. Good: softer green glow. Approaching: faint amber.
     // Uses shadowBlur instead of ctx.filter to avoid software rasterization.
-    if (s.accuracyBand === 'perfect' && s.amplitude > 0.3) {
+    const glowBand = s.accuracyBand;
+    const shouldGlow =
+      (glowBand === 'perfect' && s.amplitude > 0.2) ||
+      (glowBand === 'good' && s.amplitude > 0.3) ||
+      (glowBand === 'approaching' && s.amplitude > 0.5);
+
+    if (shouldGlow) {
+      const glowIntensity = glowBand === 'perfect' ? 1.0
+        : glowBand === 'good' ? 0.6
+        : 0.3;
+      const blurRadius = glowBand === 'perfect' ? 14 : glowBand === 'good' ? 8 : 4;
+
       ctx.beginPath();
       ctx.strokeStyle = color;
-      ctx.globalAlpha = opacity * 0.4;
-      ctx.lineWidth = (baseWidth + 2) * dpr;
+      ctx.globalAlpha = opacity * 0.4 * glowIntensity;
+      ctx.lineWidth = (baseWidth + 3) * dpr;
       ctx.shadowColor = color;
-      ctx.shadowBlur = 8 * dpr;
+      ctx.shadowBlur = blurRadius * dpr;
 
       for (let i = 0; i < numPoints; i++) {
         const x = x0 + (i / (numPoints - 1)) * stringWidth;
@@ -288,19 +317,33 @@ function renderString(
       : resolveColor('--text-2', '#999999');
     ctx.fillStyle = pointColor;
     ctx.globalAlpha = opacity;
-    const r = s.swara === 'Sa' ? 3 * dpr : 2 * dpr;
-    ctx.arc(x0, y, r, 0, Math.PI * 2);
+    const baseR = s.swara === 'Sa' ? 4 * dpr : 2.5 * dpr;
+    // Subtle pulse when string is active
+    const pulseR = s.amplitude > 0.1 ? baseR * (1 + s.amplitude * 0.4) : baseR;
+    ctx.arc(x0, y, pulseR, 0, Math.PI * 2);
     ctx.fill();
+
+    // Saffron glow halo on Sa when active
+    if (s.swara === 'Sa' && s.amplitude > 0.2) {
+      ctx.beginPath();
+      ctx.fillStyle = pointColor;
+      ctx.globalAlpha = s.amplitude * 0.15;
+      ctx.arc(x0, y, pulseR * 2.5, 0, Math.PI * 2);
+      ctx.fill();
+    }
   }
 
   ctx.restore();
 
   // --- Swara label ---
   ctx.save();
-  ctx.font = `${11 * dpr}px ${CANVAS_FONT_FAMILY}`;
+  const isActive = s.amplitude > 0.01;
+  const labelSize = isActive ? 12.5 : 11;
+  const labelWeight = isActive ? '600' : '400';
+  ctx.font = `${labelWeight} ${labelSize * dpr}px ${CANVAS_FONT_FAMILY}`;
   ctx.textAlign = 'right';
   ctx.textBaseline = 'middle';
-  ctx.fillStyle = s.amplitude > 0.01 ? color : resolveColor('--text-3', '#666666');
+  ctx.fillStyle = isActive ? color : resolveColor('--text-3', '#666666');
   ctx.globalAlpha = s.visibility === 'ghost' ? 0.3 : opacity;
 
   // Use sargam abbreviation for compact, full name for full
@@ -323,6 +366,8 @@ const Tantri = memo(function Tantri({
   pitchHz = null,
   pitchClarity = 0,
   onStringTrigger,
+  timbre,
+  onActivityChange,
   className,
   style,
 }: TantriProps) {
@@ -342,6 +387,9 @@ const Tantri = memo(function Tantri({
 
   // Track visible string indices for hit testing
   const visibleIndicesRef = useRef<number[]>([]);
+
+  // Track activity state (any string vibrating)
+  const wasActiveRef = useRef(false);
 
   // -----------------------------------------------------------------------
   // Create / update field
@@ -423,6 +471,21 @@ const Tantri = memo(function Tantri({
 
     updateFieldFromVoice(field, voiceMap, voiceAmplitude);
 
+    // --- Activity detection for cinematic defocus ---
+    if (onActivityChange) {
+      let isActive = false;
+      for (let i = 0; i < field.strings.length; i++) {
+        if (field.strings[i]!.amplitude > 0.05) {
+          isActive = true;
+          break;
+        }
+      }
+      if (isActive !== wasActiveRef.current) {
+        wasActiveRef.current = isActive;
+        onActivityChange(isActive);
+      }
+    }
+
     // --- Clear and render ---
     ctx.clearRect(0, 0, w, h);
 
@@ -476,8 +539,8 @@ const Tantri = memo(function Tantri({
         }
       }
 
-      // Only trigger if within 24px of a string
-      if (closestDist > 24) return null;
+      // Generous touch target (32px) for responsive interaction
+      if (closestDist > 32) return null;
       return closestIdx;
     },
     [],
@@ -495,7 +558,7 @@ const Tantri = memo(function Tantri({
       const event = triggerString(idx, field);
 
       if (event && onStringTrigger) {
-        onStringTrigger(event);
+        onStringTrigger(timbre ? { ...event, timbre } : event);
       }
     },
     [getStringFromY, onStringTrigger],
