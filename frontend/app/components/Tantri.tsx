@@ -188,7 +188,11 @@ const PADDING_Y_TOP = 24;
 const PADDING_Y_BOTTOM = 24;
 const LABEL_WIDTH = 40;
 
-/** Get the Y position for a string based on its index among visible strings. */
+/**
+ * Get the Y position for a string based on its index among visible strings.
+ * Sa (index 0, lowest pitch) at the bottom, Ni (highest pitch) at the top.
+ * This matches natural musical intuition: low sounds low, high sounds high.
+ */
 function getStringY(
   visibleIndex: number,
   totalVisible: number,
@@ -196,10 +200,16 @@ function getStringY(
 ): number {
   if (totalVisible <= 1) return canvasHeight / 2;
   const usableHeight = canvasHeight - PADDING_Y_TOP - PADDING_Y_BOTTOM;
-  return PADDING_Y_TOP + (visibleIndex / (totalVisible - 1)) * usableHeight;
+  // Invert: index 0 (Sa) goes to the bottom, last index (Ni) goes to the top
+  const invertedIndex = totalVisible - 1 - visibleIndex;
+  return PADDING_Y_TOP + (invertedIndex / (totalVisible - 1)) * usableHeight;
 }
 
-/** Render a single string with its waveform. */
+/**
+ * Render a single string with its waveform.
+ * When voice data is available and the string is voice-active,
+ * the actual mic waveform is blended onto the string.
+ */
 function renderString(
   ctx: CanvasRenderingContext2D,
   s: TantriStringState,
@@ -207,6 +217,7 @@ function renderString(
   canvasWidth: number,
   time: number,
   dpr: number,
+  voiceData?: Float32Array | null,
 ): void {
   const x0 = PADDING_X + LABEL_WIDTH;
   const x1 = canvasWidth - PADDING_X;
@@ -240,8 +251,33 @@ function renderString(
   // --- Draw the waveform ---
   if (s.amplitude > 0.005) {
     const numPoints = Math.min(250, Math.max(100, Math.floor(stringWidth / 2)));
-    const waveform = generateStringWaveform(s, numPoints, time);
+    const syntheticWave = generateStringWaveform(s, numPoints, time);
     const maxDisplacement = 18 * dpr; // Max visual displacement in pixels — generous for cinematic effect
+
+    // Blend real voice waveform onto the string when voice is driving it
+    // (not touched — touched strings use synthetic wave only)
+    const waveform = new Float32Array(numPoints);
+    const hasVoiceData = voiceData && voiceData.length > 0 && !s.touched && s.amplitude > 0.05;
+
+    if (hasVoiceData) {
+      // Sample voice waveform data evenly across the string
+      const step = voiceData.length / numPoints;
+      for (let i = 0; i < numPoints; i++) {
+        const voiceSample = voiceData[Math.floor(i * step)] ?? 0;
+        // Standing-wave envelope: nodes at endpoints (physical correctness)
+        const x = i / (numPoints - 1);
+        const envelope = Math.sin(Math.PI * x);
+        // Blend: voice waveform (scaled) + subtle synthetic undertone
+        const voiceContribution = voiceSample * envelope * s.amplitude * 3;
+        const syntheticContribution = (syntheticWave[i] ?? 0) * 0.2;
+        waveform[i] = voiceContribution + syntheticContribution;
+      }
+    } else {
+      // Touched or no voice data: use synthetic standing wave
+      for (let i = 0; i < numPoints; i++) {
+        waveform[i] = syntheticWave[i] ?? 0;
+      }
+    }
 
     ctx.beginPath();
     ctx.strokeStyle = color;
@@ -492,11 +528,14 @@ const Tantri = memo(function Tantri({
     const visibleIndices = visibleIndicesRef.current;
     const totalVisible = visibleIndices.length;
 
+    // Pass voice time-domain data to renderString for real-time waveform
+    const voiceWaveData = analyserDataRef.current;
+
     for (let vi = 0; vi < totalVisible; vi++) {
       const idx = visibleIndices[vi]!;
       const s = field.strings[idx]!;
       const y = getStringY(vi, totalVisible, h / dpr) * dpr;
-      renderString(ctx, s, y, w / dpr, timeRef.current, dpr);
+      renderString(ctx, s, y, w / dpr, timeRef.current, dpr, voiceWaveData);
     }
 
     animFrameRef.current = requestAnimationFrame(render);
@@ -561,7 +600,7 @@ const Tantri = memo(function Tantri({
         onStringTrigger(timbre ? { ...event, timbre } : event);
       }
     },
-    [getStringFromY, onStringTrigger],
+    [getStringFromY, onStringTrigger, timbre],
   );
 
   const handlePointerUp = useCallback(() => {
