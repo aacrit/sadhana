@@ -495,7 +495,7 @@ Three depths plus accent glow and gold glow.
 
 - Focus: 2px solid `--accent`, 2px offset, `--radius-sm` border-radius
 - Selection: `--accent-dim` background
-- `prefers-reduced-motion`: all animation durations set to 0ms, spring functions fall back to `ease`
+- `prefers-reduced-motion`: all animation durations set to 0ms, spring functions fall back to `ease`. Enforced at two layers: (1) CSS token collapse via `[data-reduced-motion="true"]` (set by `ReducedMotionBridge` in `providers.tsx`), and (2) Framer Motion's global `<MotionConfig reducedMotion="user">` wrapper, which disables all spring animations app-wide when the OS preference is set.
 - Touch targets: minimum 44px (`--touch-min`)
 - Scrollbar: 6px wide, transparent track, `--border` thumb
 - Raga color worlds maintain WCAG AA contrast ratios for all text/background combinations

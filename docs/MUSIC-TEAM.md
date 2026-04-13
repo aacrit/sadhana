@@ -1,6 +1,6 @@
 # Music Team Standards
 
-Last updated: 2026-04-11
+Last updated: 2026-04-13
 
 Raga database standards, shruti science, and cultural guidelines for all musicological content in the engine.
 
@@ -53,15 +53,17 @@ Every raga file (`engine/theory/ragas/*.ts`) exports a single `Raga` object. All
 
 Sargam display: lowercase = komal or tivra, uppercase = shuddha. Octave marks: `.S` (mandra), `S` (madhya), `S'` (taar).
 
-### v1 Raga Set
+### v1 Raga Set (Journey-Active)
 
-Five ragas in pedagogical order:
+Five ragas wired to journeys, in pedagogical order:
 
 1. **Bhoopali** (Kalyan thaat) -- pentatonic, all shuddha. Entry point.
 2. **Yaman** (Kalyan thaat) -- sampoorna, one alteration (Ma_t). Evening devotion.
 3. **Bhimpalasi** (Kafi thaat) -- komal swaras (Ga_k, Ni_k), vakra movement. Afternoon longing.
 4. **Bhairav** (Bhairav thaat) -- andolan on Re_k and Dha_k. Dawn gravity.
 5. **Bageshri** (Kafi thaat) -- midnight depth, emotional complexity.
+
+The engine defines 11 additional ragas not yet wired to journeys: Bhairavi, Darbari Kanada, Desh, Hameer, Kafi, Kedar, Malkauns, Marwa, Puriya Dhanashri, Sohini, Todi. All pass `npm run test:engine`.
 
 ### Adding a New Raga
 

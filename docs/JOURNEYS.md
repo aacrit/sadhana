@@ -1,6 +1,6 @@
 # Journey UX Specs
 
-Last updated: 2026-04-11
+Last updated: 2026-04-13
 
 Four entry points to the same engine. Different interfaces, different depth, same musical truth.
 
@@ -16,12 +16,12 @@ The root page shows all four journeys as cards with Framer Motion stagger animat
 
 | Journey | Sanskrit | Accessible (v1) | Min Level | Description |
 |---------|----------|-----------------|-----------|-------------|
-| Beginner | Arambh | Yes | 0 | Guided daily riyaz. Discover your Sa, sing with the tanpura, learn to hear the swaras. |
-| Explorer | Anveshana | Yes | 0 | Browse ragas by time and emotion. Ear training exercises. Build your phrase library. |
-| Scholar | Vidvan | Locked | 4 | Full raga grammar. Shruti analysis. Deep theory. The engine speaks to you directly. |
-| Master | Acharya | Locked | 7 | Composition. Phrase generation. Teaching tools. The engine becomes your instrument. |
+| Beginner | Shishya | Yes | 0 | Guided daily riyaz. Discover your Sa, sing with the tanpura, learn to hear the swaras. |
+| Explorer | Sadhaka | Yes | 0 | Browse ragas by time and emotion. Ear training exercises. Build your phrase library. |
+| Scholar | Varistha | Yes | 0 | Full raga grammar. Shruti analysis. Deep theory. The engine speaks to you directly. |
+| Master | Guru | Yes | 0 | Composition. Phrase generation. Teaching tools. The engine becomes your instrument. |
 
-Locked journeys show "Coming soon -- reach Sadhaka level" message. Cards link to `/journeys/{id}`. Locked cards are not wrapped in links.
+All four journeys are accessible from day one (`accessible: true, minLevel: 0`). Scholar and Master pages show "being built" messaging. All cards link to `/journeys/{id}`.
 
 Today's raga (from `getRagaForTimeOfDay(hour)`) and streak count displayed above the grid.
 
@@ -172,11 +172,14 @@ Props: `partialFrequencies?`, `voiceAmplitude?`, `active?`, `className?`, `style
 
 | Component | File | Purpose |
 |-----------|------|---------|
-| `Logo` | components/Logo.tsx | SVG mark + optional wordmark |
+| `Logo` | components/Logo.tsx | SVG mark + optional wordmark. CSS wave animation, Framer Motion hover/press springs. |
 | `TanpuraViz` | components/TanpuraViz.tsx | Canvas tanpura waveform background |
 | `VoiceVisualization` | components/VoiceVisualization.tsx | 3-layer voice feedback |
 | `PracticeSession` | components/PracticeSession.tsx | Core practice session with phase machine |
 | `ScriptToggle` | components/ScriptToggle.tsx | Global Devanagari/romanized toggle (fixed bottom-right) |
+| `Tantri` | components/Tantri.tsx | 12-string swara field renderer. Canvas-based. Reads CSS tokens via `resolveNum()`. Wired to voice pipeline (pitchHz/pitchClarity) and synthesis via `onPlayString` / `timbre`. |
+| `VoiceTimbreSelector` | components/VoiceTimbreSelector.tsx | Harmonium / voice-male / voice-female selector. Drives `timbre` prop on `useLessonAudio`. |
+| `VoiceWave` | components/VoiceWave.tsx | Ambient voice waveform visualization. Uses VoiceWaveContext for cross-component pitch data. |
 
 ---
 
@@ -296,4 +299,4 @@ Source: `frontend/app/profile/page.tsx`
 
 ## Explorer, Scholar, Master
 
-v1 state: directory stubs exist at `frontend/app/journeys/{explorer,scholar,master}/` but contain no page files. Explorer is marked accessible but has no page. Scholar and Master are locked behind level gates.
+v1 state: Explorer has a full page at `frontend/app/journeys/explorer/page.tsx` with raga browser, ear training (`/ear-training`), and raga detail (`/[ragaId]`) routes. Scholar and Master have pages at `frontend/app/journeys/{scholar,master}/page.tsx` with "being built" messaging. All three are navigable from the home page.

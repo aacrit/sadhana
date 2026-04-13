@@ -1,6 +1,6 @@
 # Engine Reference
 
-Last updated: 2026-04-11
+Last updated: 2026-04-13
 
 The engine lives at `/engine/`. Pure TypeScript. Zero UI. Zero dependencies except Tone.js (synthesis only). Single barrel export from `engine/index.ts`.
 
@@ -129,9 +129,11 @@ All core type definitions.
 | `findThaat(swaras)` | fn | Match 7 swaras to a thaat |
 | `getRagasByThaat(thaatId)` | fn | Returns raga IDs for a thaat |
 
-### ragas/ (5 raga files)
+### ragas/ (16 raga files)
 
-v1 ships 5 ragas, ordered by pedagogical sequence:
+The engine defines 16 ragas. The 5 v1 pedagogy ragas are ordered first:
+
+v1 pedagogy ragas (fully used in journeys):
 
 | Raga | Thaat | Jati | Vadi/Samvadi | Prahara | Key swaras |
 |------|-------|------|-------------|---------|------------|
@@ -140,6 +142,8 @@ v1 ships 5 ragas, ordered by pedagogical sequence:
 | Bhimpalasi | Kafi | shadava/sampoorna | Ma / Sa | 3, 4 | Ga_k, Ni_k (komal) |
 | Bhairav | Bhairav | sampoorna/sampoorna | Dha_k / Re_k | 1, 8 | Re_k, Dha_k (andolan) |
 | Bageshri | Kafi | shadava/sampoorna | Ma / Sa | 6, 7 | Ga_k, Ni_k |
+
+Additional engine ragas (defined, not yet wired to journeys): Bhairavi, Darbari Kanada, Desh, Hameer, Kafi, Kedar, Malkauns, Marwa, Puriya Dhanashri, Sohini, Todi.
 
 Each raga file exports a complete `Raga` object with pakad phrases, ornaments, description, western bridge, gharana variations.
 
