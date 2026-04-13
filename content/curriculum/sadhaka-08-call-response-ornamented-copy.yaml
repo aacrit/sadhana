@@ -1,0 +1,110 @@
+# Copy layer for sadhaka-08-call-response-ornamented
+# lesson-writer owns this file. Do not merge into the lesson YAML.
+# Theory audit: PENDING
+
+lesson_id: sadhaka-08-call-response-ornamented
+
+# --- PHASE COPY ----------------------------------------------------
+
+phases:
+
+  listen:
+    screen_title: "Listen"
+    body: |
+      Close your eyes.
+      The tanpura is playing.
+      Today the engine sings. You answer.
+
+  sa_calibration:
+    screen_title: "Find Your Sa"
+    body: |
+      Confirm your Sa.
+    prompt: "Sing or hum a comfortable note."
+    calibrating_message: "Listening..."
+    success_message: "That's your Sa."
+
+  call_bhairav:
+    screen_title: "Bhairav"
+    body: |
+      Listen to the phrase. Sing it back.
+      Hear the andolan on Re komal.
+    feedback:
+      pitch_correct_ornament_correct: "Both the notes and the ornament are there."
+      pitch_correct_ornament_missing: "The notes are correct. But where is the andolan?"
+      pitch_incorrect: "Listen again. The phrase first, then the ornament."
+      silence: "Whenever you're ready."
+
+  call_yaman:
+    screen_title: "Yaman"
+    body: |
+      Listen and sing back. Hear the meend.
+    feedback:
+      pitch_correct_ornament_correct: "The glide is there."
+      pitch_correct_ornament_missing: "The notes are correct. Add the meend."
+      pitch_incorrect: "Listen again."
+
+  call_bhimpalasi:
+    screen_title: "Bhimpalasi"
+    body: |
+      The vadi swara shakes with gamak.
+    feedback:
+      pitch_correct_ornament_correct: "The gamak is present."
+      pitch_correct_ornament_missing: "Ma needs gamak here."
+      pitch_incorrect: "Listen again."
+
+  call_desh:
+    screen_title: "Desh"
+    body: |
+      Listen for the Ni. Which form is it?
+    feedback:
+      correct: "Correct."
+      wrong_ni: "Listen for which Ni — shuddha or komal."
+      pitch_incorrect: "Listen again."
+
+  call_bhairav_long:
+    screen_title: "Bhairav — Extended"
+    body: |
+      A longer phrase. Both andolan and meend.
+    feedback:
+      all_correct: "Both ornaments present. Beautiful."
+      partial: "Some ornaments are present. Listen for what is missing."
+      pitch_incorrect: "Get the notes first. Then the ornaments."
+
+  call_bageshri:
+    screen_title: "Bageshri"
+    body: |
+      The circling phrase. Midnight.
+    feedback:
+      correct: "The phrase is correct."
+      pitch_incorrect: "Listen again. The circle around Ma."
+
+  complete:
+    screen_title: "Session Complete"
+    xp_line: "+45 XP"
+    streak_line: null
+
+# --- THEORY NOTE ---------------------------------------------------
+
+theory_note:
+  title: "Call and Response"
+  body: |
+    The call-and-response format is the foundation of gurukul
+    teaching. The guru sings a phrase; the shishya imitates.
+    At the Sadhaka level, imitation includes not just the
+    correct swaras but the correct ornaments — andolan where
+    it belongs, meend where it belongs, gamak where it belongs.
+    This is how a musician develops: by absorbing the complete
+    musical gesture, not just the pitch sequence.
+
+# --- CULTURAL NOTE -------------------------------------------------
+
+cultural_note:
+  title: "The Guru's Voice"
+  body: |
+    In a traditional lesson, the guru does not explain ornaments
+    in words. The guru sings the phrase with the ornament, and
+    the student listens until the ornament becomes natural. The
+    engine plays the role of the guru here — presenting complete
+    musical gestures that the student absorbs through repetition.
+    Words like "andolan" and "gamak" come after the ear has already
+    learned what they sound like.

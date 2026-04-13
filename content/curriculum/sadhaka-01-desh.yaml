@@ -1,0 +1,218 @@
+# Lesson S-01: Raga Desh — The Monsoon Raga
+# Journey: Explorer | Level: Sadhaka (4-6)
+# Presence Rule: you hear before you name.
+# Engine source: engine/theory/ragas/desh.ts (needs creation)
+# Prahara: 5-6 (late evening, monsoon night)
+# KEY CONCEPT: Mixed swaras — shuddha Ni in aroha, komal Ni in avaroha
+
+id: sadhaka-01-desh
+journey: explorer
+level_range: [4, 6]          # Sadhaka
+raga_id: desh
+duration_target_min: 12
+xp_award: 45
+
+meta:
+  title: "The Monsoon Raga"
+  subtitle: "Raga Desh"
+  time_of_day: late_evening    # prahara 5-6, monsoon night
+  rasa: shringar               # romance, gentle pathos
+
+# --- PHASES -------------------------------------------------------
+
+phases:
+
+  # 1. LISTENING — tanpura drone, Desh context
+  - id: listen
+    type: tanpura_drone
+    duration_s: 30
+    instruction: |
+      Close your eyes. Listen.
+      The tanpura is with you. Rain on the window. Evening.
+    tanpura:
+      strings: [Pa, Sa, Sa, Sa_upper]
+      sa_hz: null
+
+  # 2. SA DETECTION
+  - id: sa_calibration
+    type: sa_detection
+    skip_if: sa_already_set
+    instruction: |
+      Confirm your Sa. Hold it steady.
+    attempts: 5
+    min_clarity: 0.85
+    fallback_hz: 261.6256
+
+  # 3. HEAR THE AROHA — S R G M P N S' (shuddha Ni in ascent)
+  - id: aroha_listen
+    type: phrase_playback
+    phrase: [Sa, Re, Ga, Ma, Pa, Ni, Sa_upper]
+    instruction: |
+      Listen to Desh climbing.
+      Seven notes. The seventh note — Ni — is shuddha. Bright.
+    repeat: 2
+    show_labels: false
+
+  - id: aroha_show
+    type: phrase_playback
+    phrase: [Sa, Re, Ga, Ma, Pa, Ni, Sa_upper]
+    instruction: |
+      Sa Re Ga Ma Pa Ni Sa.
+      All seven swaras. Ni is shuddha — the bright seventh.
+    repeat: 1
+    show_labels: true
+
+  # 4. HEAR THE AVAROHA — S' n D P M G R S (komal Ni in descent)
+  - id: avaroha_listen
+    type: phrase_playback
+    phrase: [Sa_upper, Ni_k, Dha, Pa, Ma, Ga, Re, Sa]
+    instruction: |
+      Now descending. Listen to the seventh note again.
+      It changed. The descent uses a different Ni.
+    repeat: 2
+    show_labels: false
+
+  - id: avaroha_show
+    type: phrase_playback
+    phrase: [Sa_upper, Ni_k, Dha, Pa, Ma, Ga, Re, Sa]
+    instruction: |
+      Sa Ni Dha Pa Ma Ga Re Sa.
+      Ni is komal now — the lowered seventh. Softer. Darker.
+      The same position in the scale. Two different colours.
+    repeat: 1
+    show_labels: true
+
+  # 5. SWARA COMPARISON — hear Ni shuddha vs Ni komal
+  # NEW PHASE TYPE: swara_comparison
+  - id: compare_ni
+    type: swara_comparison              # NEW PHASE TYPE
+    instruction: |
+      Listen to both forms of Ni, side by side.
+      One is bright. One is dark. A single raga uses both.
+    swara_a: Ni
+    swara_b: Ni_k
+    label_a: "Ni shuddha"
+    label_b: "Ni komal"
+    play_count: 3                       # alternates A-B-A-B-A-B
+    context_phrase_a: [Pa, Ni, Sa_upper]
+    context_phrase_b: [Sa_upper, Ni_k, Dha]
+
+  # 6. MEET THE SWARAS
+  - id: meet_desh
+    type: swara_introduction
+    instruction: |
+      Desh uses all seven swaras — plus a second form of Ni.
+      Eight sounds from seven positions.
+    swaras: [Sa, Re, Ga, Ma, Pa, Dha, Ni, Ni_k]
+    presentation: sequential
+    audio_first: true
+
+  # 7. SING SA
+  - id: sing_sa
+    type: pitch_exercise
+    target_swara: Sa
+    duration_s: 15
+    instruction: |
+      Sing Sa. Centre yourself.
+    feedback_layer: minimal
+    level_tolerance: sadhaka              # +-25 cents — tighter than Shishya
+
+  # 8. SING THE AROHA
+  - id: sing_aroha
+    type: phrase_exercise
+    phrase: [Sa, Re, Ga, Ma, Pa, Ni, Sa_upper]
+    instruction: |
+      Follow the guide tone up. Use shuddha Ni on the way up.
+    guide_tone: true
+    feedback_layer: standard
+
+  # 9. SING THE AVAROHA
+  - id: sing_avaroha
+    type: phrase_exercise
+    phrase: [Sa_upper, Ni_k, Dha, Pa, Ma, Ga, Re, Sa]
+    instruction: |
+      Now down. Switch to komal Ni on the way down.
+      The change should feel natural. Like rain cooling the evening.
+    guide_tone: true
+    feedback_layer: standard
+
+  # 10. FIRST ORNAMENT EXPOSURE — meend from Pa to Ga
+  - id: meend_listen
+    type: phrase_playback
+    phrase: [Pa, Ga]
+    instruction: |
+      Listen to this glide. Pa slides down to Ga.
+      Not two separate notes — one continuous motion.
+      This is meend. You will learn it fully in the next lesson.
+    repeat: 3
+    show_labels: true
+    ornament: meend
+    ornament_params:
+      from: Pa
+      to: Ga
+      duration_ratio: 0.7              # 70% of note duration is the glide
+
+  # 11. PAKAD PHRASES
+  - id: pakad_listen
+    type: phrase_playback
+    phrase: [Pa, Ma, Ga]
+    instruction: |
+      Listen to the signature descent. Pa Ma Ga.
+      Desh moves in gentle arcs.
+    repeat: 2
+    show_labels: false
+
+  - id: pakad_listen_2
+    type: phrase_playback
+    phrase: [Ni_k, Dha, Ni_k, Sa_upper]
+    instruction: |
+      And this phrase. Ni Dha Ni Sa.
+      Komal Ni swings back up to Sa. A monsoon evening.
+    repeat: 2
+    show_labels: false
+
+  # 12. PAKAD WATCH — free singing with recognition
+  - id: pakad_watch
+    type: passive_phrase_recognition
+    enabled: true
+    instruction: |
+      Sing freely in Desh. Use shuddha Ni going up, komal Ni coming down.
+      The tanpura is with you.
+    duration_s: 60
+    watch_for_pakad: true
+    pakad_reward:
+      xp_bonus: 15
+      ceremony: gsap_pakad_moment
+
+  # 13. COMPLETION
+  - id: complete
+    type: session_summary
+    show_accuracy: true
+    show_streak: true
+    message: |
+      You've met Desh.
+      A raga that uses two forms of the same swara.
+      When the monsoon arrives, this is the sound of the evening.
+
+# --- ENGINE PARAMETERS --------------------------------------------
+
+engine:
+  raga_grammar_active: true
+  pakad_recognition: true
+  ornaments_shown: true              # Sadhaka: ornament hints begin
+  cents_display: on_tap              # available but not default
+  accuracy_model: sadhaka            # +-25 cents tolerance
+
+# --- TANTRI CONFIGURATION -----------------------------------------
+# Strings visible: Sa, Re, Ga, Ma, Pa, Dha, Ni, Ni_k (8 strings)
+# Both forms of Ni visible simultaneously — first time student sees this
+# Interaction: voice + touch (touch for reference playback)
+# Ni string glows when aroha context, Ni_k string glows when avaroha context
+
+# --- UNLOCK CONDITION ---------------------------------------------
+
+unlock_next:
+  lesson_id: sadhaka-02-meend
+  requires:
+    min_sessions: 1
+    min_accuracy: 0.65

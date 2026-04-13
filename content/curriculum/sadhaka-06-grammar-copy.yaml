@@ -1,0 +1,123 @@
+# Copy layer for sadhaka-06-grammar
+# lesson-writer owns this file. Do not merge into the lesson YAML.
+# Theory audit: PENDING
+
+lesson_id: sadhaka-06-grammar
+
+# --- PHASE COPY ----------------------------------------------------
+
+phases:
+
+  listen:
+    screen_title: "Listen"
+    body: |
+      Close your eyes.
+      The tanpura is playing.
+      Today you learn the rules of movement.
+
+  sa_calibration:
+    screen_title: "Find Your Sa"
+    body: |
+      Confirm your Sa.
+    prompt: "Sing or hum a comfortable note."
+    calibrating_message: "Listening..."
+    success_message: "That's your Sa."
+
+  valid_bhimpalasi:
+    screen_title: "Valid Phrase"
+    body: |
+      Ni Sa Ga Ma Pa. This is Bhimpalasi.
+      Re is correctly omitted in the ascent.
+
+  invalid_bhimpalasi:
+    screen_title: "Invalid Phrase"
+    body: |
+      Sa Re Ga Ma Pa. Re appeared in the ascent.
+      This breaks Bhimpalasi's grammar.
+
+  valid_bageshri:
+    screen_title: "Valid Phrase"
+    body: |
+      Sa Ma Ga Ma Dha. This is Bageshri.
+      Circles Ma. Re omitted. Correct.
+
+  invalid_bageshri:
+    screen_title: "Invalid Phrase"
+    body: |
+      Sa Re Ga Ma Dha. Re in the ascent.
+      The notes are all Kafi thaat. But the phrase is not Bageshri.
+
+  grammar_round_1:
+    screen_title: "Bhimpalasi Grammar"
+    body: |
+      Listen to each phrase. Is it valid in Bhimpalasi?
+    feedback:
+      correct: "Correct."
+      incorrect: "Not quite. Listen to the explanation."
+
+  grammar_round_2:
+    screen_title: "Bageshri Grammar"
+    body: |
+      Now Bageshri. Valid or invalid?
+    feedback:
+      correct: "Correct."
+      incorrect: "Not quite. The rule is about which notes appear where."
+
+  grammar_round_3:
+    screen_title: "Mixed Ragas"
+    body: |
+      Different ragas. Listen to the phrase and the name.
+    feedback:
+      correct: "Correct."
+      incorrect: "Listen again. The grammar tells you why."
+
+  sing_valid:
+    screen_title: "Sing a Valid Phrase"
+    body: |
+      Bhimpalasi ascending. No Re.
+    feedback:
+      correct: "Valid phrase."
+      wrong_swara: "That note does not belong here."
+
+  complete:
+    screen_title: "Session Complete"
+    xp_line: "+40 XP"
+    streak_line: null
+
+# --- THEORY NOTE ---------------------------------------------------
+
+theory_note:
+  title: "Raga Grammar — Rules of Movement"
+  body: |
+    A raga is not just a set of notes. It is a set of rules about
+    how those notes move. The aroha (ascending pattern) and avaroha
+    (descending pattern) define which swaras appear in which direction.
+    Some ragas omit specific swaras in the aroha but include them in
+    the avaroha (like Bhimpalasi omitting Re and Dha going up).
+    Some ragas have vakra (oblique) movement — they skip forward
+    and then come back. Understanding these rules is the difference
+    between singing a scale and singing a raga.
+
+# --- WESTERN BRIDGE ------------------------------------------------
+
+western_bridge:
+  title: "Western Equivalent"
+  body: |
+    Western scales are typically symmetric — you can play a major
+    scale ascending and descending with the same notes in the same
+    order. Raga grammar is inherently asymmetric. The concept of
+    "valid" and "invalid" phrases within a scale has no direct
+    Western parallel, though voice-leading rules in counterpoint
+    share some conceptual DNA.
+
+# --- CULTURAL NOTE -------------------------------------------------
+
+cultural_note:
+  title: "The Guru's Correction"
+  body: |
+    In the gurukul tradition, a student who sings Re in the aroha
+    of Bhimpalasi would be gently corrected — not because the note
+    is wrong, but because the movement is wrong. The guru teaches
+    by example: singing the correct phrase, then having the student
+    imitate. Over time, the student internalises the grammar not as
+    rules but as instinct. This is the goal of these exercises.

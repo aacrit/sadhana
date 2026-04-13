@@ -39,6 +39,284 @@
       "prahara": [3, 4],
       "time_of_day": "afternoon",
       "unlock_requires": "beginner-04-bhairav"
+    },
+    {
+      "id": "beginner-06-bageshri",
+      "raga": "bageshri",
+      "order": 6,
+      "prahara": [7, 8],
+      "time_of_day": "night",
+      "unlock_requires": "beginner-05-bhimpalasi"
+    },
+    {
+      "id": "beginner-07-consolidation",
+      "raga": null,
+      "order": 7,
+      "prahara": null,
+      "time_of_day": null,
+      "unlock_requires": "beginner-06-bageshri"
+    },
+    {
+      "id": "beginner-08-challenge",
+      "raga": null,
+      "order": 8,
+      "prahara": null,
+      "time_of_day": null,
+      "unlock_requires": "beginner-07-consolidation"
+    }
+  ],
+  "explorer": [
+    {
+      "id": "sadhaka-01-desh",
+      "raga": "desh",
+      "order": 1,
+      "prahara": [5, 6],
+      "time_of_day": "late_evening",
+      "unlock_requires": "beginner-08-challenge"
+    },
+    {
+      "id": "sadhaka-02-meend",
+      "raga": "bhoopali",
+      "order": 2,
+      "prahara": null,
+      "time_of_day": null,
+      "unlock_requires": "sadhaka-01-desh"
+    },
+    {
+      "id": "sadhaka-03-andolan",
+      "raga": "bhairav",
+      "order": 3,
+      "prahara": [1],
+      "time_of_day": "dawn",
+      "unlock_requires": "sadhaka-02-meend"
+    },
+    {
+      "id": "sadhaka-04-kafi",
+      "raga": "kafi",
+      "order": 4,
+      "prahara": [5, 6],
+      "time_of_day": "late_evening",
+      "unlock_requires": "sadhaka-03-andolan"
+    },
+    {
+      "id": "sadhaka-05-teentaal",
+      "raga": null,
+      "order": 5,
+      "prahara": null,
+      "time_of_day": null,
+      "unlock_requires": "sadhaka-04-kafi"
+    },
+    {
+      "id": "sadhaka-06-grammar",
+      "raga": null,
+      "order": 6,
+      "prahara": null,
+      "time_of_day": null,
+      "unlock_requires": "sadhaka-05-teentaal"
+    },
+    {
+      "id": "sadhaka-07-gamak",
+      "raga": "bhimpalasi",
+      "order": 7,
+      "prahara": [3, 4],
+      "time_of_day": "afternoon",
+      "unlock_requires": "sadhaka-06-grammar"
+    },
+    {
+      "id": "sadhaka-08-call-response",
+      "raga": null,
+      "order": 8,
+      "prahara": null,
+      "time_of_day": null,
+      "unlock_requires": "sadhaka-07-gamak"
+    },
+    {
+      "id": "sadhaka-09-intervals",
+      "raga": null,
+      "order": 9,
+      "prahara": null,
+      "time_of_day": null,
+      "unlock_requires": "sadhaka-08-call-response"
+    },
+    {
+      "id": "sadhaka-10-challenge",
+      "raga": null,
+      "order": 10,
+      "prahara": null,
+      "time_of_day": null,
+      "unlock_requires": "sadhaka-09-intervals"
+    }
+  ],
+  "scholar": [
+    {
+      "id": "varistha-01-marwa",
+      "raga": "marwa",
+      "order": 1,
+      "prahara": [4],
+      "time_of_day": "sunset",
+      "unlock_requires": "sadhaka-10-challenge"
+    },
+    {
+      "id": "varistha-02-raga-comparison",
+      "raga": null,
+      "order": 2,
+      "prahara": null,
+      "time_of_day": null,
+      "unlock_requires": "varistha-01-marwa"
+    },
+    {
+      "id": "varistha-03-darbari",
+      "raga": "darbari_kanada",
+      "order": 3,
+      "prahara": [7, 8],
+      "time_of_day": "night",
+      "unlock_requires": "varistha-02-raga-comparison"
+    },
+    {
+      "id": "varistha-04-composition",
+      "raga": null,
+      "order": 4,
+      "prahara": null,
+      "time_of_day": null,
+      "unlock_requires": "varistha-03-darbari"
+    },
+    {
+      "id": "varistha-05-puriya-dhanashri",
+      "raga": "puriya_dhanashri",
+      "order": 5,
+      "prahara": [4, 5],
+      "time_of_day": "evening",
+      "unlock_requires": "varistha-04-composition"
+    },
+    {
+      "id": "varistha-06-ornament-mastery",
+      "raga": null,
+      "order": 6,
+      "prahara": null,
+      "time_of_day": null,
+      "unlock_requires": "varistha-05-puriya-dhanashri"
+    },
+    {
+      "id": "varistha-07-malkauns",
+      "raga": "malkauns",
+      "order": 7,
+      "prahara": [7, 8],
+      "time_of_day": "night",
+      "unlock_requires": "varistha-06-ornament-mastery"
+    },
+    {
+      "id": "varistha-08-shruti",
+      "raga": null,
+      "order": 8,
+      "prahara": null,
+      "time_of_day": null,
+      "unlock_requires": "varistha-07-malkauns"
+    },
+    {
+      "id": "varistha-09-todi",
+      "raga": "todi",
+      "order": 9,
+      "prahara": [2],
+      "time_of_day": "morning",
+      "unlock_requires": "varistha-08-shruti"
+    },
+    {
+      "id": "varistha-10-tala-integration",
+      "raga": null,
+      "order": 10,
+      "prahara": null,
+      "time_of_day": null,
+      "unlock_requires": "varistha-09-todi"
+    },
+    {
+      "id": "varistha-11-challenge",
+      "raga": null,
+      "order": 11,
+      "prahara": null,
+      "time_of_day": null,
+      "unlock_requires": "varistha-10-tala-integration"
+    }
+  ],
+  "master": [
+    {
+      "id": "guru-01-raga-id-advanced",
+      "raga": null,
+      "order": 1,
+      "prahara": null,
+      "time_of_day": null,
+      "unlock_requires": "varistha-11-challenge"
+    },
+    {
+      "id": "guru-02-bandish",
+      "raga": "yaman",
+      "order": 2,
+      "prahara": [5, 6],
+      "time_of_day": "evening",
+      "unlock_requires": "guru-01-raga-id-advanced"
+    },
+    {
+      "id": "guru-03-bhairavi",
+      "raga": "bhairavi",
+      "order": 3,
+      "prahara": null,
+      "time_of_day": null,
+      "unlock_requires": "guru-02-bandish"
+    },
+    {
+      "id": "guru-04-modulation",
+      "raga": null,
+      "order": 4,
+      "prahara": null,
+      "time_of_day": null,
+      "unlock_requires": "guru-03-bhairavi"
+    },
+    {
+      "id": "guru-05-taan",
+      "raga": "yaman",
+      "order": 5,
+      "prahara": [5, 6],
+      "time_of_day": "evening",
+      "unlock_requires": "guru-04-modulation"
+    },
+    {
+      "id": "guru-06-kedar-hameer",
+      "raga": null,
+      "order": 6,
+      "prahara": [5],
+      "time_of_day": "evening",
+      "unlock_requires": "guru-05-taan"
+    },
+    {
+      "id": "guru-07-sohini-marwa",
+      "raga": null,
+      "order": 7,
+      "prahara": [4, 5],
+      "time_of_day": "evening",
+      "unlock_requires": "guru-06-kedar-hameer"
+    },
+    {
+      "id": "guru-08-raga-rendering",
+      "raga": null,
+      "order": 8,
+      "prahara": null,
+      "time_of_day": null,
+      "unlock_requires": "guru-07-sohini-marwa"
+    },
+    {
+      "id": "guru-09-teaching",
+      "raga": null,
+      "order": 9,
+      "prahara": null,
+      "time_of_day": null,
+      "unlock_requires": "guru-08-raga-rendering"
+    },
+    {
+      "id": "guru-10-open-mastery",
+      "raga": null,
+      "order": 10,
+      "prahara": null,
+      "time_of_day": null,
+      "unlock_requires": "guru-09-teaching"
     }
   ]
 }

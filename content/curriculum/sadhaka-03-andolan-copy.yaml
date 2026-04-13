@@ -1,0 +1,128 @@
+# Copy layer for sadhaka-03-andolan
+# lesson-writer owns this file. Do not merge into the lesson YAML.
+# Theory audit: PENDING
+
+lesson_id: sadhaka-03-andolan
+
+# --- PHASE COPY ----------------------------------------------------
+
+phases:
+
+  listen:
+    screen_title: "Listen"
+    body: |
+      Close your eyes.
+      The tanpura is playing. Dawn.
+      You know Bhairav. Today you learn what makes it breathe.
+    audio_label: null
+
+  sa_calibration:
+    screen_title: "Find Your Sa"
+    body: |
+      Confirm your Sa. Hold it steady.
+    prompt: "Sing or hum a comfortable note."
+    calibrating_message: "Listening..."
+    success_message: "That's your Sa."
+
+  re_k_static:
+    screen_title: "Re Komal — Static"
+    body: |
+      Komal Re in Bhairav. Plain. Static.
+      Correct, but incomplete.
+
+  re_k_andolan:
+    screen_title: "Re Komal — Alive"
+    body: |
+      The same note with andolan. A gentle oscillation.
+      The note breathes. This is how a guru sings it.
+
+  dha_k_andolan:
+    screen_title: "Dha Komal — Alive"
+    body: |
+      Dha komal with the same gentle wave.
+      Both komal swaras in Bhairav receive this treatment.
+
+  practice_andolan_re_k:
+    screen_title: "Sing with Andolan"
+    body: |
+      Sing Re komal. Add a gentle wave.
+      Not a wide shake. Subtle. Like a candle flame.
+    feedback:
+      good_oscillation: "The wave is there."
+      too_fast: "Slower. Andolan is gentle, not vigorous."
+      too_slow: "A little more movement. Let the note breathe."
+      too_wide: "Narrower. Andolan is subtle — 15 to 40 cents."
+      too_narrow: "A little more width. The note should shimmer."
+      off_centre: "The wave is drifting. Keep it centred on Re komal."
+      silence: "Whenever you're ready."
+
+  practice_andolan_dha_k:
+    screen_title: "Dha Komal with Andolan"
+    body: |
+      Same gentle wave on Dha komal.
+    feedback:
+      good_oscillation: "The wave is there."
+      too_fast: "Slower."
+      too_wide: "Narrower."
+      off_centre: "Centre on Dha komal."
+
+  phrase_with_andolan:
+    screen_title: "Bhairav Phrase"
+    body: |
+      Sa Re Ga Ma. Add andolan on Re komal.
+
+  phrase_with_andolan_2:
+    screen_title: "Another Phrase"
+    body: |
+      Ma Pa Dha Pa. Add andolan on Dha komal.
+
+  free_bhairav:
+    screen_title: "Free Singing"
+    body: |
+      Sing freely in Bhairav. Let andolan come naturally.
+    pakad_found_headline: "Bhairav"
+    pakad_found_subtext: "Sa Re Ga Ma Pa"
+
+  complete:
+    screen_title: "Session Complete"
+    xp_line: "+40 XP"
+    streak_line: null
+    ornament_summary: "Andolan quality: {andolan_score}%"
+
+# --- THEORY NOTE ---------------------------------------------------
+
+theory_note:
+  title: "Andolan — The Gentle Wave"
+  body: |
+    Andolan is a slow, gentle oscillation around a target swara,
+    typically 2-4 Hz with an amplitude of 15-40 cents. It is not
+    vibrato in the Western sense — vibrato is a universal vocal
+    quality, while andolan is raga-specific. In Bhairav, komal Re
+    and komal Dha receive andolan because these swaras carry the
+    raga's gravity. A flat, static komal Re is technically correct
+    but musically incomplete. Andolan gives the note its life.
+
+# --- WESTERN BRIDGE ------------------------------------------------
+
+western_bridge:
+  title: "Western Equivalent"
+  body: |
+    Western vibrato is a universal quality applied to most notes.
+    Andolan is selective — applied only to specific swaras in
+    specific ragas. A singer who applies andolan to every note is
+    singing with vibrato, not andolan. The distinction matters
+    because andolan carries musical meaning: it tells the listener
+    which raga they are hearing. Andolan on komal Re and komal Dha
+    is a Bhairav signature.
+
+# --- CULTURAL NOTE -------------------------------------------------
+
+cultural_note:
+  title: "Bhairav at Dawn"
+  body: |
+    Bhairav is named after a fierce form of Shiva. Its gravity
+    comes from the komal swaras treated with andolan — they do
+    not sit still, they oscillate with a meditative intensity
+    that mirrors the pre-dawn stillness. When a musician adds
+    andolan to komal Re in Bhairav, they are not adding
+    decoration. They are invoking the raga's character.

@@ -1,0 +1,187 @@
+# Lesson V-10: Tala Integration — Bol Patterns with Melody
+# Journey: Scholar | Level: Varistha (7-9)
+# Presence Rule: you hear before you name.
+# NEW PHASE TYPE: tala_melody_exercise
+# Integration of melody and rhythm
+
+id: varistha-10-tala-integration
+journey: scholar
+level_range: [7, 9]
+raga_id: null                # multi-raga, tala-focused
+duration_target_min: 15
+xp_award: 50
+
+meta:
+  title: "Melody Meets Rhythm"
+  subtitle: "Tala Integration"
+  time_of_day: null
+  rasa: null
+
+phases:
+
+  - id: listen
+    type: tanpura_drone
+    duration_s: 15
+    instruction: |
+      The tanpura is with you. And today — the tabla.
+      Melody and rhythm have been separate until now.
+      Today they become one practice.
+    tanpura:
+      strings: [Pa, Sa, Sa, Sa_upper]
+      sa_hz: null
+
+  - id: sa_calibration
+    type: sa_detection
+    skip_if: sa_already_set
+    instruction: |
+      Confirm your Sa.
+    attempts: 5
+    min_clarity: 0.85
+    fallback_hz: 261.6256
+
+  # HEAR TEENTAAL — recap
+  - id: teentaal_recap
+    type: tala_exercise
+    tala_id: teentaal
+    instruction: |
+      Teentaal. Sixteen beats. You learned this.
+      Listen for sam — beat 1. The anchor of the cycle.
+    mode: listen_only
+    cycles: 2
+    tempo_bpm: 72
+    show_beat_markers: true
+    highlight_sam: true
+
+  # ROUND 1 — Sing aroha over one cycle, land Sa' on sam
+  - id: aroha_on_tala
+    type: tala_melody_exercise           # NEW PHASE TYPE
+    instruction: |
+      Sing the aroha of Bhoopali over one cycle of teentaal.
+      Start on beat 1. Arrive at upper Sa on the next sam.
+      Five notes. Sixteen beats. Pace yourself.
+    tala_id: teentaal
+    raga_id: bhoopali
+    phrase: [Sa, Re, Ga, Pa, Dha, Sa_upper]
+    landing_swara: Sa_upper              # must land on sam
+    cycles: 1
+    tempo_bpm: 72
+    evaluation:
+      landing_tolerance_ms: 200
+      pitch_tolerance_cents: 15
+    attempts: 3
+
+  # ROUND 2 — Sing pakad starting on sam
+  - id: pakad_on_sam
+    type: tala_melody_exercise
+    instruction: |
+      Sing Yaman's pakad. Start precisely on sam.
+      Ni Re Ga Re Sa. Begin on beat 1. The rhythm carries you.
+    tala_id: teentaal
+    raga_id: yaman
+    phrase: [Ni_mandra, Re, Ga, Re, Sa]
+    landing_swara: null                  # start on sam, not land
+    start_on_sam: true
+    cycles: 1
+    tempo_bpm: 72
+    evaluation:
+      start_tolerance_ms: 200
+      pitch_tolerance_cents: 15
+    attempts: 3
+
+  # ROUND 3 — Sing freely, land vadi on sam
+  - id: free_vadi_sam
+    type: tala_melody_exercise
+    instruction: |
+      Sing freely in Bhairav. But land on the vadi — Dha komal — on sam.
+      You choose the phrase. The engine checks:
+      did your most important swara arrive on the most important beat?
+    tala_id: teentaal
+    raga_id: bhairav
+    phrase: null                         # free
+    landing_swara: Dha_k                 # vadi must land on sam
+    cycles: 2
+    tempo_bpm: 72
+    evaluation:
+      landing_tolerance_ms: 250
+      pitch_tolerance_cents: 15
+    feedback_layer: standard
+    attempts: 3
+
+  # ROUND 4 — aroha-avaroha over two cycles
+  - id: full_cycle
+    type: tala_melody_exercise
+    instruction: |
+      Sing the aroha and avaroha of Desh over two cycles.
+      Ascend in the first cycle. Descend in the second.
+      Land on Sa at the final sam.
+    tala_id: teentaal
+    raga_id: desh
+    phrase: [Sa, Re, Ga, Ma, Pa, Ni, Sa_upper, Ni_k, Dha, Pa, Ma, Ga, Re, Sa]
+    landing_swara: Sa
+    cycles: 2
+    tempo_bpm: 72
+    evaluation:
+      landing_tolerance_ms: 200
+      pitch_tolerance_cents: 15
+    attempts: 3
+
+  # ROUND 5 — faster tempo
+  - id: fast_cycle
+    type: tala_melody_exercise
+    instruction: |
+      Faster. Same exercise. Bhoopali aroha over one cycle.
+      The rhythm compresses. Your voice must keep pace.
+    tala_id: teentaal
+    raga_id: bhoopali
+    phrase: [Sa, Re, Ga, Pa, Dha, Sa_upper]
+    landing_swara: Sa_upper
+    cycles: 1
+    tempo_bpm: 100
+    evaluation:
+      landing_tolerance_ms: 150
+      pitch_tolerance_cents: 15
+    attempts: 3
+
+  # ROUND 6 — free singing with tala awareness
+  - id: free_tala
+    type: tala_melody_exercise
+    instruction: |
+      Sing freely in any learned raga. The tabla plays teentaal.
+      Land important swaras on sam. Let the rhythm guide your phrasing.
+      This is how a musician thinks: melody shaped by rhythm.
+    tala_id: teentaal
+    raga_id: null
+    raga_pool: [bhoopali, yaman, bhairav, bhimpalasi, bageshri, desh, kafi]
+    student_chooses: 1
+    phrase: null                         # free
+    cycles: 4
+    tempo_bpm: 72
+    evaluation:
+      sam_awareness: true                # engine checks if student shows awareness of sam
+      pitch_tolerance_cents: 15
+    feedback_layer: standard
+
+  - id: complete
+    type: session_summary
+    show_accuracy: true
+    show_streak: true
+    message: |
+      Melody and rhythm. Two halves of one practice.
+      A musician who can place the right note on the right beat
+      has achieved something fundamental.
+      Sam is where melody and rhythm agree.
+
+engine:
+  raga_grammar_active: true
+  pakad_recognition: false
+  ornaments_shown: true
+  cents_display: on_tap
+  accuracy_model: varistha
+  tala_active: true
+  tala_id: teentaal
+
+unlock_next:
+  lesson_id: varistha-11-challenge
+  requires:
+    min_sessions: 1
+    min_accuracy: 0.55

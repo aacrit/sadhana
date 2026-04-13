@@ -1,0 +1,142 @@
+# Exercise G-04: Cross-Raga Modulation Awareness
+# Journey: Master | Level: Guru (10+)
+# NEW PHASE TYPE: modulation_awareness
+
+id: guru-04-modulation
+journey: master
+level_range: [10, 99]
+raga_id: null
+duration_target_min: 12
+xp_award: 55
+
+meta:
+  title: "Where One Raga Becomes Another"
+  subtitle: "Modulation Awareness"
+  time_of_day: null
+  rasa: null
+
+phases:
+
+  - id: listen
+    type: tanpura_drone
+    duration_s: 15
+    instruction: |
+      The tanpura is with you.
+      In concert, a master musician sometimes allows one raga
+      to shade into another — and returns.
+      Today you learn to hear the moment of transition.
+    tanpura:
+      strings: [Pa, Sa, Sa, Sa_upper]
+      sa_hz: null
+
+  - id: sa_calibration
+    type: sa_detection
+    skip_if: sa_already_set
+    instruction: |
+      Confirm your Sa.
+    attempts: 5
+    min_clarity: 0.85
+    fallback_hz: 261.6256
+
+  # ROUND 1 — Yaman to Yaman Kalyan (Ma_t → Ma shuddha)
+  - id: mod_round_1
+    type: modulation_awareness           # NEW PHASE TYPE
+    instruction: |
+      Listen. The phrase begins in one raga.
+      At some point, a single swara changes — and you are in another raga.
+      Identify the moment. Name both ragas.
+    phrase_raga_start: yaman
+    phrase_raga_end: yaman_kalyan        # introduces shuddha Ma
+    transition_swara: Ma                 # the swara that changes
+    phrase_duration_s: 20
+    student_identifies:
+      - transition_moment: true
+      - raga_start: true
+      - raga_end: true
+    response_duration_s: 10
+    feedback_layer: standard
+
+  # ROUND 2 — Bhairav to Ahir Bhairav (Re_k → Re shuddha)
+  - id: mod_round_2
+    type: modulation_awareness
+    instruction: |
+      Another transition. Which swara changes?
+    phrase_raga_start: bhairav
+    phrase_raga_end: ahir_bhairav
+    transition_swara: Re
+    phrase_duration_s: 20
+    student_identifies:
+      - transition_moment: true
+      - raga_start: true
+      - raga_end: true
+    response_duration_s: 10
+    feedback_layer: standard
+
+  # ROUND 3 — Bhoopali to Yaman (Ma absent → Ma_t appears)
+  - id: mod_round_3
+    type: modulation_awareness
+    instruction: |
+      Listen. A new swara enters. Which raga emerges?
+    phrase_raga_start: bhoopali
+    phrase_raga_end: yaman
+    transition_swara: Ma_t
+    phrase_duration_s: 20
+    student_identifies:
+      - transition_moment: true
+      - raga_start: true
+      - raga_end: true
+    response_duration_s: 10
+    feedback_layer: standard
+
+  # ROUND 4 — Kafi to Bhimpalasi (movement pattern changes)
+  - id: mod_round_4
+    type: modulation_awareness
+    instruction: |
+      Same swaras. But the movement changes.
+      The modulation here is not a new swara — it is a new grammar.
+    phrase_raga_start: kafi
+    phrase_raga_end: bhimpalasi
+    transition_swara: null               # grammar change, not swara change
+    phrase_duration_s: 20
+    student_identifies:
+      - transition_moment: true
+      - raga_start: true
+      - raga_end: true
+    response_duration_s: 10
+    feedback_layer: standard
+
+  # STUDENT DEMONSTRATES — sing a transition
+  - id: sing_transition
+    type: composition_exercise
+    instruction: |
+      Sing a phrase that begins in Yaman and transitions to Bhoopali.
+      How? Remove Ma tivra. Let it fade. The raga shifts.
+    raga_id: null
+    duration_s: 25
+    evaluation:
+      transition_check: true
+      pitch_tolerance_cents: 10
+    attempts: 3
+
+  - id: complete
+    type: session_summary
+    show_accuracy: true
+    show_streak: true
+    message: |
+      Modulation. The moment one raga becomes another.
+      A single swara. A shift in grammar.
+      The guru who hears this in concert
+      hears the musician's deepest intention.
+
+engine:
+  raga_grammar_active: true
+  pakad_recognition: true
+  ornaments_shown: true
+  cents_display: always
+  accuracy_model: guru
+
+unlock_next:
+  lesson_id: guru-05-taan
+  requires:
+    min_sessions: 1
+    min_accuracy: 0.50

@@ -1,0 +1,150 @@
+# Copy layer for sadhaka-04-kafi
+# lesson-writer owns this file. Do not merge into the lesson YAML.
+# Theory audit: PENDING
+
+lesson_id: sadhaka-04-kafi
+
+# --- PHASE COPY ----------------------------------------------------
+
+phases:
+
+  listen:
+    screen_title: "Listen"
+    body: |
+      Close your eyes.
+      The tanpura is playing.
+      You already know these swaras.
+    audio_label: null
+
+  sa_calibration:
+    screen_title: "Find Your Sa"
+    body: |
+      Confirm your Sa. Hold it steady.
+    prompt: "Sing or hum a comfortable note."
+    calibrating_message: "Listening..."
+    success_message: "That's your Sa."
+
+  compare_bhimpalasi:
+    screen_title: "Bhimpalasi"
+    body: |
+      You know this signature. Afternoon. An upward arc.
+
+  compare_kafi:
+    screen_title: "Kafi"
+    body: |
+      Same swaras. Straight, unhurried. The parent.
+
+  compare_bageshri:
+    screen_title: "Bageshri"
+    body: |
+      Same swaras again. Circling. Midnight.
+      Three ragas. One set of notes. Three worlds.
+
+  thaat_explanation:
+    screen_title: "The Kafi Thaat"
+    body: |
+      This scale is the Kafi thaat — a parent scale.
+      Bhimpalasi, Bageshri, and Kafi all live within it.
+      A thaat is not a raga. It is the raw material from
+      which ragas are made.
+
+  aroha_listen:
+    screen_title: "Climbing Up"
+    body: |
+      All seven swaras, straight up. No omissions.
+
+  avaroha_listen:
+    screen_title: "Coming Down"
+    body: |
+      All seven down. Straightforward.
+
+  aroha_avaroha_show:
+    body: |
+      Sampoorna both ways. Compare this to the asymmetric
+      movement of Bhimpalasi and Bageshri.
+
+  meet_kafi:
+    screen_title: "The Swaras"
+    body: |
+      You know every one of these. Komal Ga from Bhimpalasi.
+      Komal Ni from Bageshri. Here they move simply.
+    swara_reveal_delay_ms: 1200
+
+  sing_sa:
+    screen_title: "Sing Sa"
+    body: |
+      The anchor.
+    feedback:
+      correct: "That's Sa."
+      sharp: "A little high."
+      flat: "A little low."
+      silence: "Whenever you're ready."
+
+  sing_aroha:
+    screen_title: "Sing the Ascent"
+    body: |
+      All seven swaras up. Follow the guide tone.
+    feedback:
+      correct: "Correct."
+      wrong_swara: "Listen to the guide tone again."
+      guide_tone_label: "Guide"
+
+  sing_pakad:
+    screen_title: "Sing the Signature"
+    body: |
+      Ga Ma Pa Dha. An unhurried climb.
+    feedback:
+      correct: "Correct."
+      wrong_swara: "Listen to the guide tone."
+      guide_tone_label: "Guide"
+
+  pakad_watch:
+    screen_title: "Free Singing"
+    body: |
+      Sing freely in Kafi. Straight movement.
+      Feel the difference from its children.
+    pakad_found_headline: "Kafi"
+    pakad_found_subtext: "Ga Ma Pa Dha"
+
+  complete:
+    screen_title: "Session Complete"
+    xp_line: "+45 XP"
+    streak_line: null
+
+# --- THEORY NOTE ---------------------------------------------------
+
+theory_note:
+  title: "Raga Kafi and the Thaat System"
+  body: |
+    Kafi is both a raga and a thaat (parent scale). The Kafi thaat
+    uses komal Ga and komal Ni with all other swaras shuddha. Three
+    ragas you know — Bhimpalasi, Bageshri, and Kafi — share this
+    swara set but sound entirely different because of their aroha/
+    avaroha movement, vadi emphasis, and characteristic phrases.
+    The thaat system, codified by Bhatkhande, organises ragas into
+    ten parent scales. Kafi is one of the ten. Understanding thaats
+    helps you see relationships between ragas.
+
+# --- WESTERN BRIDGE ------------------------------------------------
+
+western_bridge:
+  title: "Western Equivalent"
+  body: |
+    The Kafi thaat roughly corresponds to the Dorian mode (D to D
+    on white keys), but the comparison is structural only. Western
+    modes are defined by interval patterns. Ragas within a thaat
+    are defined by movement, emphasis, and phrase grammar. Three
+    ragas can share a thaat and sound nothing alike — something
+    that has no parallel in Western modal theory.
+
+# --- CULTURAL NOTE -------------------------------------------------
+
+cultural_note:
+  title: "Kafi and Holi"
+  body: |
+    Kafi is traditionally associated with the spring festival of
+    Holi — a time of colour, celebration, and abandon. Its light,
+    direct character suits the festive mood. The thumri and dadra
+    forms (lighter classical genres) frequently use Kafi as their
+    foundation. Where Bhimpalasi is tender and Bageshri is achingly
+    romantic, Kafi is open, generous, and direct.

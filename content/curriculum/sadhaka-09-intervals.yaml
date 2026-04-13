@@ -1,0 +1,183 @@
+# Lesson S-09: Interval Recognition in Raga Context
+# Journey: Explorer | Level: Sadhaka (4-6)
+# Presence Rule: you hear before you name.
+# Not raga-specific. Hindustani interval naming.
+# NEW PHASE TYPE: interval_exercise
+
+id: sadhaka-09-intervals
+journey: explorer
+level_range: [4, 6]
+raga_id: null
+duration_target_min: 10
+xp_award: 40
+
+meta:
+  title: "Hearing Distance"
+  subtitle: "Interval Recognition"
+  time_of_day: null
+  rasa: null
+
+phases:
+
+  - id: listen
+    type: tanpura_drone
+    duration_s: 20
+    instruction: |
+      Close your eyes. Listen.
+      The tanpura is with you.
+      Today you learn to hear the distance between two swaras.
+      Not by counting — by feeling.
+    tanpura:
+      strings: [Pa, Sa, Sa, Sa_upper]
+      sa_hz: null
+
+  - id: sa_calibration
+    type: sa_detection
+    skip_if: sa_already_set
+    instruction: |
+      Confirm your Sa.
+    attempts: 5
+    min_clarity: 0.85
+    fallback_hz: 261.6256
+
+  # HEAR THE INTERVALS — most consonant to most tense
+  - id: hear_sa_pa
+    type: phrase_playback
+    phrase: [Sa, Pa]
+    instruction: |
+      Sa — Pa. The most consonant interval after the octave.
+      The tanpura sings this relationship constantly.
+      3:2 ratio. You know this sound deeply.
+    repeat: 3
+    show_labels: true
+
+  - id: hear_sa_ma
+    type: phrase_playback
+    phrase: [Sa, Ma]
+    instruction: |
+      Sa — Ma. The perfect fourth. Stable, warm, grounded.
+      4:3 ratio. The interval that defines many ragas.
+    repeat: 3
+    show_labels: true
+
+  - id: hear_sa_ga
+    type: phrase_playback
+    phrase: [Sa, Ga]
+    instruction: |
+      Sa — Ga. The major third. Bright, open.
+      You hear this in Bhoopali and Yaman.
+    repeat: 3
+    show_labels: true
+
+  - id: hear_sa_re
+    type: phrase_playback
+    phrase: [Sa, Re]
+    instruction: |
+      Sa — Re. A whole step. The smallest interval
+      you have sung with shuddha swaras.
+    repeat: 3
+    show_labels: true
+
+  - id: hear_sa_re_k
+    type: phrase_playback
+    phrase: [Sa, Re_k]
+    instruction: |
+      Sa — Re komal. A half step. The smallest interval
+      in the system. Tense. Close. Bhairav's signature.
+    repeat: 3
+    show_labels: true
+
+  - id: hear_sa_ga_k
+    type: phrase_playback
+    phrase: [Sa, Ga_k]
+    instruction: |
+      Sa — Ga komal. The minor third. Tender, dark.
+      You hear this in Bhimpalasi, Bageshri, and Kafi.
+    repeat: 3
+    show_labels: true
+
+  # INTERVAL IDENTIFICATION ROUNDS
+  # NEW PHASE TYPE: interval_exercise
+  - id: round_easy
+    type: interval_exercise
+    instruction: |
+      Listen to two swaras. Which interval is it?
+      Sa-Pa, Sa-Ma, or Sa-Ga?
+    interval_pool:
+      - [Sa, Pa]
+      - [Sa, Ma]
+      - [Sa, Ga]
+    rounds: 4
+    play_count: 2
+    answer_mode: listen_then_choose
+    feedback_layer: standard
+
+  - id: round_medium
+    type: interval_exercise
+    instruction: |
+      More intervals. Sa-Pa, Sa-Ma, Sa-Ga, Sa-Re, or Sa-Ga_k?
+    interval_pool:
+      - [Sa, Pa]
+      - [Sa, Ma]
+      - [Sa, Ga]
+      - [Sa, Re]
+      - [Sa, Ga_k]
+    rounds: 5
+    play_count: 2
+    answer_mode: listen_then_choose
+    feedback_layer: standard
+
+  - id: round_hard
+    type: interval_exercise
+    instruction: |
+      All intervals. Including Re komal.
+    interval_pool:
+      - [Sa, Pa]
+      - [Sa, Ma]
+      - [Sa, Ga]
+      - [Sa, Re]
+      - [Sa, Re_k]
+      - [Sa, Ga_k]
+    rounds: 6
+    play_count: 2
+    answer_mode: listen_then_choose
+    feedback_layer: standard
+
+  # SING THE INTERVAL
+  - id: sing_intervals
+    type: phrase_exercise
+    phrase: [Sa, Pa]
+    instruction: |
+      Sing Sa, then Pa. The engine names the interval.
+      Then Sa — Ma. Sa — Ga. Feel the distances.
+    guide_tone: true
+    feedback_layer: standard
+    interval_sequence:
+      - [Sa, Pa]
+      - [Sa, Ma]
+      - [Sa, Ga]
+      - [Sa, Re]
+
+  - id: complete
+    type: session_summary
+    show_accuracy: true
+    show_streak: true
+    show_interval_score: true
+    message: |
+      Intervals. The distance between swaras.
+      Sa-Pa is open. Sa-Re_k is tense. Sa-Ga_k is tender.
+      Your ear is learning to measure these distances instantly.
+      This is the foundation of raga recognition.
+
+engine:
+  raga_grammar_active: false
+  pakad_recognition: false
+  ornaments_shown: false
+  cents_display: on_tap
+  accuracy_model: sadhaka
+
+unlock_next:
+  lesson_id: sadhaka-10-challenge
+  requires:
+    min_sessions: 1
+    min_accuracy: 0.60

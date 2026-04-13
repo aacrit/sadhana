@@ -1,0 +1,173 @@
+# Lesson S-04: Raga Kafi — The Parent Raga
+# Journey: Explorer | Level: Sadhaka (4-6)
+# Presence Rule: you hear before you name.
+# Engine source: engine/theory/ragas/kafi.ts (needs creation)
+# Prahara: 5-6 (late evening, also spring/Holi)
+# KEY CONCEPT: Thaat — three ragas, same swara set, three worlds
+# NEW PHASE TYPE: raga_comparison
+
+id: sadhaka-04-kafi
+journey: explorer
+level_range: [4, 6]
+raga_id: kafi
+duration_target_min: 12
+xp_award: 45
+
+meta:
+  title: "The Parent Raga"
+  subtitle: "Raga Kafi"
+  time_of_day: late_evening
+  rasa: shringar
+
+phases:
+
+  - id: listen
+    type: tanpura_drone
+    duration_s: 25
+    instruction: |
+      Close your eyes. Listen.
+      The tanpura is with you.
+      You already know these swaras. You sang them in Bhimpalasi.
+      You sang them in Bageshri. Now hear their parent.
+    tanpura:
+      strings: [Pa, Sa, Sa, Sa_upper]
+      sa_hz: null
+
+  - id: sa_calibration
+    type: sa_detection
+    skip_if: sa_already_set
+    instruction: |
+      Confirm your Sa.
+    attempts: 5
+    min_clarity: 0.85
+    fallback_hz: 261.6256
+
+  # NEW PHASE TYPE: raga_comparison
+  - id: compare_bhimpalasi
+    type: raga_comparison
+    instruction: |
+      Listen to Bhimpalasi's signature.
+      An upward arc. Afternoon longing. You know this.
+    raga: bhimpalasi
+    pakad_phrase: [Ni_k_mandra, Sa, Ga_k, Ma]
+    repeat: 2
+    show_labels: true
+
+  - id: compare_kafi
+    type: raga_comparison
+    instruction: |
+      Now Kafi. Same swaras. Straight, unhurried.
+      The parent walks where the children dance.
+    raga: kafi
+    pakad_phrase: [Ga_k, Ma, Pa, Dha]
+    repeat: 2
+    show_labels: true
+
+  - id: compare_bageshri
+    type: raga_comparison
+    instruction: |
+      And Bageshri. Same swaras. Circling. Midnight.
+      Three ragas. One set of notes. Three worlds.
+    raga: bageshri
+    pakad_phrase: [Sa, Ma, Ga_k, Ma]
+    repeat: 2
+    show_labels: true
+
+  - id: thaat_explanation
+    type: phrase_playback
+    phrase: [Sa, Re, Ga_k, Ma, Pa, Dha, Ni_k, Sa_upper]
+    instruction: |
+      This scale is the Kafi thaat — a parent scale.
+      Sa Re Ga Ma Pa Dha Ni Sa.
+      Komal Ga. Komal Ni. Everything else shuddha.
+      Bhimpalasi, Bageshri, and Kafi all live within it.
+    repeat: 2
+    show_labels: true
+
+  - id: aroha_listen
+    type: phrase_playback
+    phrase: [Sa, Re, Ga_k, Ma, Pa, Dha, Ni_k, Sa_upper]
+    instruction: |
+      Kafi ascending. All seven notes, straight up.
+      No omissions. No twists. The simplest path.
+    repeat: 2
+    show_labels: false
+
+  - id: avaroha_listen
+    type: phrase_playback
+    phrase: [Sa_upper, Ni_k, Dha, Pa, Ma, Ga_k, Re, Sa]
+    instruction: |
+      And descending. Sampoorna down as well.
+      Compare this to Bhimpalasi: five up, seven down.
+      Kafi hides nothing.
+    repeat: 2
+    show_labels: false
+
+  - id: meet_kafi
+    type: swara_introduction
+    instruction: |
+      You know every one of these swaras.
+      Komal Ga from Bhimpalasi. Komal Ni from Bageshri.
+      In Kafi, they appear without the asymmetry.
+    swaras: [Sa, Re, Ga_k, Ma, Pa, Dha, Ni_k]
+    presentation: sequential
+    audio_first: true
+
+  - id: sing_sa
+    type: pitch_exercise
+    target_swara: Sa
+    duration_s: 15
+    instruction: |
+      Sing Sa.
+    feedback_layer: minimal
+    level_tolerance: sadhaka
+
+  - id: sing_aroha
+    type: phrase_exercise
+    phrase: [Sa, Re, Ga_k, Ma, Pa, Dha, Ni_k, Sa_upper]
+    instruction: |
+      Sing the aroha. All seven swaras, straight up.
+    guide_tone: true
+    feedback_layer: standard
+
+  - id: sing_pakad
+    type: phrase_exercise
+    phrase: [Ga_k, Ma, Pa, Dha]
+    instruction: |
+      Kafi's signature. Ga Ma Pa Dha. An unhurried climb.
+    guide_tone: true
+    feedback_layer: standard
+
+  - id: pakad_watch
+    type: passive_phrase_recognition
+    enabled: true
+    instruction: |
+      Sing freely in Kafi. Straight movement. No omissions.
+      Feel the difference from Bhimpalasi and Bageshri.
+    duration_s: 50
+    watch_for_pakad: true
+    pakad_reward:
+      xp_bonus: 10
+      ceremony: gsap_pakad_moment
+
+  - id: complete
+    type: session_summary
+    show_accuracy: true
+    show_streak: true
+    message: |
+      You've met Kafi — the parent raga.
+      Three ragas share its swaras. Three different worlds.
+      A raga is not a scale. It is a way of moving.
+
+engine:
+  raga_grammar_active: true
+  pakad_recognition: true
+  ornaments_shown: true
+  cents_display: on_tap
+  accuracy_model: sadhaka
+
+unlock_next:
+  lesson_id: sadhaka-05-teentaal
+  requires:
+    min_sessions: 1
+    min_accuracy: 0.65
