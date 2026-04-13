@@ -32,6 +32,13 @@
   letter-spacing: var(--tracking-tight);
 }
 
+.ragaDevanagari {
+  font-family: var(--font-devanagari);
+  font-size: var(--text-lg);
+  font-weight: var(--weight-regular);
+  color: var(--text-2);
+}
+
 .timer {
   font-family: var(--font-mono);
   font-size: var(--text-sm);
@@ -170,6 +177,14 @@
   font-weight: var(--weight-light);
   color: var(--text);
   letter-spacing: var(--tracking-tight);
+  text-align: center;
+}
+
+.pakadDevanagari {
+  font-family: var(--font-devanagari);
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-regular);
+  color: var(--text-2);
   text-align: center;
 }
 

@@ -24,6 +24,7 @@ import {
 } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import Logo from '../../components/Logo';
 import VoiceWave from '../../components/VoiceWave';
 import Tantri from '../../components/Tantri';
@@ -190,6 +191,7 @@ function CentsNeedle({ centsDev }: CentsNeedleProps) {
 // ---------------------------------------------------------------------------
 
 export default function FreeformPage() {
+  const router = useRouter();
   const { profile } = useAuth();
   const userSaHz = profile?.saHz ?? 261.63;
 
@@ -310,9 +312,8 @@ export default function FreeformPage() {
   const handleEnd = useCallback(() => {
     session.stopListening();
     session.dispose();
-    // Navigate back
-    window.history.back();
-  }, [session]);
+    router.push('/');
+  }, [session, router]);
 
   // Tantri string trigger — touch a string to hear the swara
   const handleStringTrigger = useCallback(async (event: TantriPlayEvent) => {
@@ -351,7 +352,8 @@ export default function FreeformPage() {
           animate="visible"
         >
           <Logo size={48} variant="icon" />
-          <h1 className={styles.startTitle}>Freeform Riyaz</h1>
+          <h1 className={`${styles.startTitle} raga-name`}>{'\u0938\u094D\u0935\u0924\u0902\u0924\u094D\u0930 \u0930\u093F\u092F\u093E\u091C\u093C'}</h1>
+          <span className={styles.startEnglish}>Freeform Riyaz</span>
           <p className={styles.startSubtitle}>
             No goals. No exercises. Just you and the raga.
           </p>

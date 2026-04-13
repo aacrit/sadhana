@@ -370,18 +370,26 @@
    SCRIPT TOGGLE (Devanagari / Romanized)
    ======================================================================= */
 
-/* Default: romanized -- musical terms use serif font */
+/* Romanized mode: Hindustani terms use serif font, Devanagari text hidden */
 [data-script="romanized"] .swara-text,
 [data-script="romanized"] .raga-name,
 [data-script="romanized"] .tala-name {
   font-family: var(--font-serif);
 }
 
-/* Devanagari: musical terms use Noto Serif Devanagari */
+[data-script="romanized"] .devanagari-only {
+  display: none;
+}
+
+/* Devanagari mode: Hindustani terms use Devanagari font, romanized labels hidden */
 [data-script="devanagari"] .swara-text,
 [data-script="devanagari"] .raga-name,
 [data-script="devanagari"] .tala-name {
   font-family: var(--font-devanagari);
+}
+
+[data-script="devanagari"] .romanized-only {
+  display: none;
 }
 
 /* =======================================================================

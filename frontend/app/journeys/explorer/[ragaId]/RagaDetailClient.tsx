@@ -165,7 +165,7 @@ export default function RagaDetailClient({ ragaId }: RagaDetailClientProps) {
           </svg>
           Explorer
         </Link>
-        <h1 className={styles.ragaName}>Raga not found</h1>
+        <h1 className={`${styles.ragaName} raga-name`}>Raga not found</h1>
         <p className={styles.description}>
           The raga &ldquo;{ragaId}&rdquo; is not in the current library.
         </p>
@@ -193,8 +193,8 @@ export default function RagaDetailClient({ ragaId }: RagaDetailClientProps) {
       </motion.div>
 
       <motion.header className={styles.ragaHeader} variants={fadeUp}>
-        <h1 className={styles.ragaName}>{raga.name}</h1>
-        <p className={styles.ragaDevanagari}>{raga.nameDevanagari}</p>
+        <h1 className={`${styles.ragaName} raga-name`}>{raga.name}</h1>
+        <p className={`${styles.ragaDevanagari} devanagari-only`}>{raga.nameDevanagari}</p>
       </motion.header>
 
       <motion.div className={styles.metaRow} variants={fadeUp}>

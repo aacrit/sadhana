@@ -65,6 +65,16 @@
   margin: 0;
 }
 
+.startEnglish {
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-regular);
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: 0;
+}
+
 .startSubtitle {
   font-family: var(--font-sans);
   font-size: var(--text-base);

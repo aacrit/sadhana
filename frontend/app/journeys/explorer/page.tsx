@@ -302,7 +302,9 @@ export default function ExplorerPage() {
 
       {/* Header */}
       <motion.header className={styles.header} variants={fadeUp}>
-        <h1 className={styles.title}>Explorer</h1>
+        <h1 className={`${styles.title} raga-name`}>Sadhaka</h1>
+        <span className={`${styles.titleDevanagari} swara-text devanagari-only`}>{'\u0938\u093E\u0927\u0915'}</span>
+        <span className={styles.titleEnglish}>Explorer</span>
         <p className={styles.subtitle}>
           Five ragas. Five moods. Five times of day.
         </p>
@@ -402,8 +404,8 @@ export default function ExplorerPage() {
                     <RagaIcon size={40} color="var(--text-2)" />
                   </div>
                 )}
-                <h2 className={styles.ragaName}>{raga.name}</h2>
-                <span className={styles.ragaDevanagari}>
+                <h2 className={`${styles.ragaName} raga-name`}>{raga.name}</h2>
+                <span className={`${styles.ragaDevanagari} devanagari-only`}>
                   {raga.nameDevanagari}
                 </span>
 
@@ -511,7 +513,7 @@ export default function ExplorerPage() {
         variants={fadeUp}
         aria-label="Ear training"
       >
-        <h2 className={styles.earTrainingTitle}>Ear Training</h2>
+        <h2 className={`${styles.earTrainingTitle} raga-name`}>Ear Training</h2>
         <p className={styles.earTrainingDescription}>
           Can you recognise a swara by its sound alone? Test yourself with 10
           rounds of swara identification.

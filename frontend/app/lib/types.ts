@@ -19,7 +19,8 @@ export type JourneyId = 'beginner' | 'explorer' | 'scholar' | 'master' | 'freefo
 export interface JourneyMeta {
   readonly id: JourneyId;
   readonly name: string;
-  readonly nameSanskrit: string;
+  readonly nameDevanagari: string;
+  readonly nameEnglish: string;
   readonly description: string;
   /** Whether the journey is accessible to the current user. */
   readonly accessible: boolean;
