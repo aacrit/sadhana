@@ -149,55 +149,17 @@ export default function ScholarPage() {
         ))}
       </motion.section>
 
-      {/* Gate panel — lock message + CTA */}
-      <motion.div className={styles.gatePanel} variants={fadeUp} role="region" aria-label="Access gate">
-        {/* Lock icon — SVG, no filled shapes */}
-        <svg
-          className={styles.gateLockIcon}
-          width="32"
-          height="32"
-          viewBox="0 0 32 32"
-          fill="none"
-          aria-hidden="true"
-        >
-          <rect
-            x="7"
-            y="14"
-            width="18"
-            height="13"
-            rx="2"
-            stroke="currentColor"
-            strokeWidth="1"
-          />
-          <path
-            d="M11 14V10a5 5 0 0 1 10 0v4"
-            stroke="currentColor"
-            strokeWidth="1"
-            strokeLinecap="round"
-          />
-          <circle
-            cx="16"
-            cy="20.5"
-            r="1.5"
-            stroke="currentColor"
-            strokeWidth="1"
-          />
-        </svg>
-
+      {/* Horizon panel — what this journey will contain */}
+      <motion.div className={styles.gatePanel} variants={fadeUp} role="region" aria-label="Journey status">
         <p className={styles.gateTitle}>
-          Continue your practice to unlock this journey.
+          This journey is being built.
         </p>
 
         <p className={styles.gateDescription}>
-          The Scholar journey opens when the engine recognises you as Varistha —
-          a practitioner who has sung correctly across multiple ragas, returned
-          consistently, and begun to hear the shrutis as distinct. There is no
-          shortcut. The practice itself is the key.
+          The Scholar journey will contain full raga grammar analysis, shruti-level
+          pitch exploration, and deep theory rendered directly from the engine.
+          Content is arriving with each update.
         </p>
-
-        <span className={styles.gateLevel} aria-label="Minimum level required: 4">
-          min_level: 4 / Varistha
-        </span>
 
         <Link href="/" className={styles.practiceLink}>
           Return to practice

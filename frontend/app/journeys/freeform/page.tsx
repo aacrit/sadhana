@@ -56,7 +56,7 @@ const fadeIn = {
   },
   exit: {
     opacity: 0,
-    transition: { duration: 0.4 },
+    transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] as const },
   },
 };
 
