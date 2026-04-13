@@ -1,0 +1,196 @@
+# Lesson S-07: Ornament Introduction — Gamak (The Shake)
+# Journey: Explorer | Level: Sadhaka (4-6)
+# Presence Rule: you hear before you name.
+# Bhimpalasi context — gamak is vigorous, contrasts with andolan.
+# Uses ornament_exercise phase type
+
+id: sadhaka-07-gamak
+journey: explorer
+level_range: [4, 6]
+raga_id: bhimpalasi
+duration_target_min: 10
+xp_award: 40
+
+meta:
+  title: "The Shake"
+  subtitle: "Gamak"
+  time_of_day: afternoon
+  rasa: karuna
+
+phases:
+
+  - id: listen
+    type: tanpura_drone
+    duration_s: 20
+    instruction: |
+      Close your eyes. Listen.
+      The tanpura is with you. Afternoon.
+      You learned the gentle wave — andolan.
+      Today you learn its vigorous cousin.
+    tanpura:
+      strings: [Pa, Sa, Sa, Sa_upper]
+      sa_hz: null
+
+  - id: sa_calibration
+    type: sa_detection
+    skip_if: sa_already_set
+    instruction: |
+      Confirm your Sa.
+    attempts: 5
+    min_clarity: 0.85
+    fallback_hz: 261.6256
+
+  # COMPARE: andolan vs gamak
+  - id: hear_andolan
+    type: phrase_playback
+    phrase: [Sa, Re_k, Sa]
+    instruction: |
+      Remember andolan. Gentle. 2-4 waves per second.
+      A candle flame.
+    repeat: 2
+    show_labels: true
+    ornament: andolan
+    ornament_params:
+      on_swara: Re_k
+      oscillation_hz: 3
+      amplitude_cents: 25
+
+  - id: hear_gamak
+    type: phrase_playback
+    phrase: [Ga_k, Ma, Ga_k]
+    instruction: |
+      Now listen to gamak. Faster. Wider. More energy.
+      This is not a gentle wave — this is a shake.
+      4-8 waves per second. The voice surges.
+    repeat: 3
+    show_labels: true
+    ornament: gamak
+    ornament_params:
+      on_swara: Ma
+      oscillation_hz: 6
+      amplitude_cents: 80
+
+  # HEAR GAMAK ON Ma IN BHIMPALASI
+  - id: hear_gamak_ma
+    type: phrase_playback
+    phrase: [Ni_k_mandra, Sa, Ga_k, Ma]
+    instruction: |
+      In Bhimpalasi, Ma receives gamak. The vadi swara shakes
+      with intensity. The raga's heart vibrates.
+    repeat: 3
+    show_labels: true
+    ornament: gamak
+    ornament_params:
+      on_swara: Ma
+      oscillation_hz: 5
+      amplitude_cents: 70
+
+  # PRACTICE GAMAK ON Ma
+  - id: practice_gamak_ma
+    type: ornament_exercise
+    ornament_type: gamak
+    instruction: |
+      Sing Ma with gamak. Faster and wider than andolan.
+      4-8 waves per second. The voice shakes with energy.
+      Think of it as vigorous — not violent, not gentle.
+    target_swara: Ma
+    guide_tone: true
+    duration_s: 20
+    attempts: 4
+    evaluation:
+      oscillation_rate_hz: [4, 8]
+      amplitude_cents: [50, 150]
+      centre_accuracy_cents: 30
+    level_tolerance: sadhaka
+
+  # PRACTICE GAMAK ON Pa
+  - id: practice_gamak_pa
+    type: ornament_exercise
+    ornament_type: gamak
+    instruction: |
+      Now Pa with gamak.
+      Same vigorous shake. 4-8 waves per second.
+    target_swara: Pa
+    guide_tone: true
+    duration_s: 20
+    attempts: 4
+    evaluation:
+      oscillation_rate_hz: [4, 8]
+      amplitude_cents: [50, 150]
+      centre_accuracy_cents: 30
+    level_tolerance: sadhaka
+
+  # CONTRAST EXERCISE: andolan on Re_k vs gamak on Ma
+  - id: contrast_exercise
+    type: ornament_exercise
+    ornament_type: andolan
+    instruction: |
+      For contrast: sing Re komal with andolan. Gentle.
+      Then immediately sing Ma with gamak. Vigorous.
+      The difference in energy IS the difference between the two ornaments.
+    target_swara: Re_k
+    guide_tone: true
+    duration_s: 15
+    attempts: 2
+    evaluation:
+      oscillation_rate_hz: [2, 4]
+      amplitude_cents: [15, 40]
+      centre_accuracy_cents: 25
+    level_tolerance: sadhaka
+    followed_by:
+      ornament_type: gamak
+      target_swara: Ma
+      evaluation:
+        oscillation_rate_hz: [4, 8]
+        amplitude_cents: [50, 150]
+
+  # SING BHIMPALASI PHRASE WITH GAMAK
+  - id: phrase_with_gamak
+    type: phrase_exercise
+    phrase: [Ni_k_mandra, Sa, Ga_k, Ma, Pa]
+    instruction: |
+      Sing the Bhimpalasi ascending phrase.
+      Add gamak on Ma. Let the vadi swara shake.
+    guide_tone: false
+    feedback_layer: standard
+    ornaments_expected: [gamak_on_Ma]
+
+  # FREE PRACTICE
+  - id: free_gamak
+    type: passive_phrase_recognition
+    enabled: true
+    instruction: |
+      Sing freely in Bhimpalasi.
+      Use gamak on Ma. Use andolan where it belongs.
+      The tanpura is with you.
+    duration_s: 45
+    watch_for_pakad: true
+    ornament_detection: [gamak, andolan]
+    pakad_reward:
+      xp_bonus: 10
+      ceremony: gsap_pakad_moment
+
+  - id: complete
+    type: session_summary
+    show_accuracy: true
+    show_streak: true
+    show_ornament_score: true
+    message: |
+      Gamak. The vigorous shake.
+      You now know three ornaments: meend, andolan, gamak.
+      The glide. The gentle wave. The shake.
+      Each belongs to specific swaras in specific ragas.
+
+engine:
+  raga_grammar_active: true
+  pakad_recognition: true
+  ornaments_shown: true
+  ornament_detection: [gamak, andolan, meend]
+  cents_display: on_tap
+  accuracy_model: sadhaka
+
+unlock_next:
+  lesson_id: sadhaka-08-call-response
+  requires:
+    min_sessions: 1
+    min_accuracy: 0.60

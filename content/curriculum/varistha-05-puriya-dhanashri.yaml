@@ -1,0 +1,187 @@
+# Lesson V-05: Raga Puriya Dhanashri — Evening Tension
+# Journey: Scholar | Level: Varistha (7-9)
+# Presence Rule: you hear before you name.
+# Engine source: engine/theory/ragas/puriya_dhanashri.ts (needs creation)
+# Prahara: 4-5 (evening, sunset)
+# KEY CONCEPT: Poorvi thaat — 3 altered swaras. Distinction from Marwa.
+
+id: varistha-05-puriya-dhanashri
+journey: scholar
+level_range: [7, 9]
+raga_id: puriya_dhanashri
+duration_target_min: 15
+xp_award: 55
+
+meta:
+  title: "Evening Tension"
+  subtitle: "Raga Puriya Dhanashri"
+  time_of_day: evening
+  rasa: shringar               # devotion, yearning
+
+phases:
+
+  - id: listen
+    type: tanpura_drone
+    duration_s: 30
+    instruction: |
+      Close your eyes. Evening.
+      This raga shares the sunset with Marwa.
+      But where Marwa removes Pa, this raga keeps it — barely.
+    tanpura:
+      strings: [Pa, Sa, Sa, Sa_upper]
+      sa_hz: null
+
+  - id: sa_calibration
+    type: sa_detection
+    skip_if: sa_already_set
+    instruction: |
+      Confirm your Sa.
+    attempts: 5
+    min_clarity: 0.85
+    fallback_hz: 261.6256
+
+  # HEAR THE AROHA — .N r G M' D N S'
+  - id: aroha_listen
+    type: phrase_playback
+    phrase: [Ni_mandra, Re_k, Ga, Ma_t, Dha_k, Ni, Sa_upper]
+    instruction: |
+      Listen to Puriya Dhanashri climbing.
+      It begins from Ni below, like Marwa.
+      Three altered swaras: Re komal, Ma tivra, Dha komal.
+    repeat: 2
+    show_labels: false
+
+  - id: aroha_show
+    type: phrase_playback
+    phrase: [Ni_mandra, Re_k, Ga, Ma_t, Dha_k, Ni, Sa_upper]
+    instruction: |
+      Ni Re Ga Ma Dha Ni Sa.
+      Poorvi thaat. Three alterations.
+      Re komal. Ma tivra. Dha komal.
+    repeat: 1
+    show_labels: true
+
+  # HEAR THE AVAROHA — S' N D M' G M' r S (vakra)
+  - id: avaroha_listen
+    type: phrase_playback
+    phrase: [Sa_upper, Ni, Dha_k, Ma_t, Ga, Ma_t, Re_k, Sa]
+    instruction: |
+      The descent is not straight. It turns back through Ma tivra.
+      Ga to Ma to Re to Sa. Vakra movement — the path curves.
+    repeat: 2
+    show_labels: false
+
+  - id: avaroha_show
+    type: phrase_playback
+    phrase: [Sa_upper, Ni, Dha_k, Ma_t, Ga, Ma_t, Re_k, Sa]
+    instruction: |
+      Sa Ni Dha Ma Ga Ma Re Sa.
+      Ma tivra is revisited in descent. The raga insists on it.
+    repeat: 1
+    show_labels: true
+
+  # COMPARE WITH MARWA — same altered swaras, different raga
+  - id: compare_marwa_intro
+    type: phrase_playback
+    phrase: [Ni_mandra, Re_k, Ga, Ma_t, Dha, Ni, Sa_upper]
+    instruction: |
+      Remember Marwa? Similar swaras. But Marwa has shuddha Dha.
+      And Marwa has no Pa. This raga keeps Pa — though it barely uses it.
+    repeat: 1
+    show_labels: true
+
+  - id: compare_side_by_side
+    type: raga_comparison_advanced
+    instruction: |
+      Marwa and Puriya Dhanashri. Both begin from Ni below.
+      Both use Re komal and Ma tivra. But listen:
+    comparison_set:
+      - raga_id: marwa
+        pakad: [Ni_mandra, Re_k, Sa, Re_k, Ni_mandra]
+        label: "Marwa — tense, heroic"
+        character: "No Pa. Shuddha Dha. Unbearable yearning."
+      - raga_id: puriya_dhanashri
+        pakad: [Ga, Ma_t, Re_k, Ga, Re_k, Sa]
+        label: "Puriya Dhanashri — devotional, intense"
+        character: "Dha komal. Pa exists. Deep evening devotion."
+    play_count: 2
+    show_analysis: true
+
+  # MEET THE SWARAS
+  - id: meet_puriya_dhanashri
+    type: swara_introduction
+    instruction: |
+      Ma tivra is the vadi. Ni is the samvadi.
+      Three altered swaras — the most you have encountered in one raga
+      outside of Darbari.
+    swaras: [Sa, Re_k, Ga, Ma_t, Pa, Dha_k, Ni]
+    presentation: sequential
+    audio_first: true
+    highlight_vadi: Ma_t
+    highlight_samvadi: Ni
+
+  # SING
+  - id: sing_aroha
+    type: phrase_exercise
+    phrase: [Re_k, Ga, Ma_t, Dha_k, Ni, Sa_upper]
+    instruction: |
+      Sing the ascent. Three altered swaras in sequence.
+      Re komal → Ga shuddha → Ma tivra.
+      The lower tetrachord is dense. Navigate it precisely.
+    guide_tone: true
+    feedback_layer: standard
+
+  - id: sing_avaroha
+    type: phrase_exercise
+    phrase: [Sa_upper, Ni, Dha_k, Ma_t, Ga, Ma_t, Re_k, Sa]
+    instruction: |
+      Descend with the vakra turn. Ga back to Ma to Re.
+    guide_tone: true
+    feedback_layer: standard
+
+  # PAKAD
+  - id: pakad_listen
+    type: phrase_playback
+    phrase: [Ga, Ma_t, Re_k, Ga, Re_k, Sa]
+    instruction: |
+      The signature phrase. Ga Ma Re Ga Re Sa.
+      The circling of Ga and Re komal with Ma tivra above.
+      Evening tension. Devotion that does not rest.
+    repeat: 2
+    show_labels: true
+
+  # FREE SINGING
+  - id: pakad_watch
+    type: passive_phrase_recognition
+    enabled: true
+    instruction: |
+      Sing freely in Puriya Dhanashri. Evening.
+      Three altered swaras. Dense. Intense.
+      The tanpura is with you.
+    duration_s: 60
+    watch_for_pakad: true
+    pakad_reward:
+      xp_bonus: 20
+      ceremony: gsap_pakad_moment
+
+  - id: complete
+    type: session_summary
+    show_accuracy: true
+    show_streak: true
+    message: |
+      Puriya Dhanashri.
+      Where Marwa yearns without resolution,
+      this raga yearns with devotion. Same sunset. Different prayer.
+
+engine:
+  raga_grammar_active: true
+  pakad_recognition: true
+  ornaments_shown: true
+  cents_display: on_tap
+  accuracy_model: varistha
+
+unlock_next:
+  lesson_id: varistha-06-ornament-mastery
+  requires:
+    min_sessions: 1
+    min_accuracy: 0.60

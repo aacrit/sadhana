@@ -1,0 +1,155 @@
+# Copy layer for sadhaka-01-desh
+# lesson-writer owns this file. Do not merge into the lesson YAML.
+# Theory audit: PENDING
+
+lesson_id: sadhaka-01-desh
+
+# --- PHASE COPY ----------------------------------------------------
+
+phases:
+
+  listen:
+    screen_title: "Listen"
+    body: |
+      Close your eyes.
+      The tanpura is playing. Rain on the window.
+    audio_label: null
+
+  sa_calibration:
+    screen_title: "Find Your Sa"
+    body: |
+      Confirm your Sa. Hold it steady.
+    prompt: "Sing or hum a comfortable note."
+    calibrating_message: "Listening..."
+    success_message: "That's your Sa."
+
+  aroha_listen:
+    screen_title: "Climbing Up"
+    body: |
+      Listen to Desh ascending. All seven swaras.
+      Pay attention to the seventh note.
+
+  aroha_show:
+    body: |
+      Sa Re Ga Ma Pa Ni Sa.
+      Ni is shuddha — the bright seventh.
+
+  avaroha_listen:
+    screen_title: "Coming Down"
+    body: |
+      Now descending. The seventh note changes.
+      Listen for the shift.
+
+  avaroha_show:
+    body: |
+      Sa Ni Dha Pa Ma Ga Re Sa.
+      Ni is komal now. Same position. Different colour.
+
+  compare_ni:
+    screen_title: "Two Forms of Ni"
+    body: |
+      One bright. One dark. Both belong to this raga.
+      This is the first time you hear a raga use two forms
+      of the same swara.
+    label_a: "Ni shuddha (bright)"
+    label_b: "Ni komal (dark)"
+
+  meet_desh:
+    screen_title: "The Swaras of Desh"
+    body: |
+      Seven positions. Eight sounds. Listen to each one.
+    swara_reveal_delay_ms: 1200
+
+  sing_sa:
+    screen_title: "Sing Sa"
+    body: |
+      Centre yourself.
+    feedback:
+      correct: "That's Sa."
+      sharp: "A little high. Settle into the tanpura."
+      flat: "A little low. Rise to meet the drone."
+      silence: "Whenever you're ready."
+
+  sing_aroha:
+    screen_title: "Sing the Ascent"
+    body: |
+      Follow the guide tone up. Shuddha Ni on the way up.
+    feedback:
+      correct: "Correct."
+      wrong_swara: "Listen to the guide tone again."
+      guide_tone_label: "Guide"
+
+  sing_avaroha:
+    screen_title: "Sing the Descent"
+    body: |
+      Now down. Switch to komal Ni.
+      The change should feel natural.
+    feedback:
+      correct: "Correct."
+      wrong_ni: "That was shuddha Ni. In the descent, use komal Ni."
+      guide_tone_label: "Guide"
+
+  meend_listen:
+    screen_title: "First Ornament"
+    body: |
+      Pa slides down to Ga. One continuous motion.
+      This is meend — the glide. You will learn it next.
+
+  pakad_listen:
+    screen_title: "The Signature"
+    body: |
+      Pa Ma Ga. Desh descends in gentle arcs.
+
+  pakad_listen_2:
+    body: |
+      Ni Dha Ni Sa. Komal Ni swings back to Sa.
+
+  pakad_watch:
+    screen_title: "Free Singing"
+    body: |
+      Sing freely in Desh. Shuddha Ni up, komal Ni down.
+    pakad_found_headline: "Desh"
+    pakad_found_subtext: "Pa Ma Ga"
+
+  complete:
+    screen_title: "Session Complete"
+    xp_line: "+45 XP"
+    streak_line: null
+
+# --- THEORY NOTE ---------------------------------------------------
+
+theory_note:
+  title: "Raga Desh"
+  body: |
+    Desh is a raga of the Khamaj thaat, associated with the monsoon
+    season and late evening. Its defining feature is the use of both
+    shuddha Ni (in the aroha) and komal Ni (in the avaroha). This
+    is the first time you encounter a raga that uses two forms of the
+    same swara — a concept called "mixed swaras" that is common in
+    many ragas. The vadi is Re; the samvadi is Pa. Desh's rasa is
+    shringar — romantic, with gentle pathos. Its folk-flavoured
+    character makes it one of the most beloved ragas.
+
+# --- WESTERN BRIDGE ------------------------------------------------
+
+western_bridge:
+  title: "Western Equivalent"
+  body: |
+    Western listeners may notice the quality shift when the seventh
+    note changes between ascent and descent. Western modes use a
+    fixed set of notes — a Mixolydian scale does not become Dorian
+    halfway through. This fluid use of a swara in two forms is
+    characteristic of many Hindustani ragas and has no standard
+    Western equivalent.
+
+# --- CULTURAL NOTE -------------------------------------------------
+
+cultural_note:
+  title: "The Monsoon Raga"
+  body: |
+    Desh is inseparable from the Indian monsoon. When the rains
+    arrive after months of scorching heat, there is a quality of
+    relief, romance, and melancholy that Desh captures perfectly.
+    The national song "Vande Mataram" uses Desh's swaras. Many
+    film songs in Desh evoke the monsoon. The raga carries the
+    scent of wet earth and the sound of rain.

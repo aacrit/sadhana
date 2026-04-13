@@ -1,0 +1,177 @@
+# Exercise G-01: Advanced Raga Identification
+# Journey: Master | Level: Guru (10+)
+# NEW PHASE TYPE: raga_identification_advanced
+# Identify raga from extended phrases with ornaments
+
+id: guru-01-raga-id-advanced
+journey: master
+level_range: [10, 99]
+raga_id: null
+duration_target_min: 15
+xp_award: 60
+
+meta:
+  title: "The Listening Guru"
+  subtitle: "Advanced Raga Identification"
+  time_of_day: null
+  rasa: null
+
+phases:
+
+  - id: listen
+    type: tanpura_drone
+    duration_s: 15
+    instruction: |
+      The tanpura is with you.
+      At this level, the engine no longer teaches.
+      It challenges. It tests. It respects.
+    tanpura:
+      strings: [Pa, Sa, Sa, Sa_upper]
+      sa_hz: null
+
+  - id: sa_calibration
+    type: sa_detection
+    skip_if: sa_already_set
+    instruction: |
+      Confirm your Sa.
+    attempts: 5
+    min_clarity: 0.85
+    fallback_hz: 261.6256
+
+  # 8 rounds of advanced identification
+  - id: round_1
+    type: raga_identification_advanced    # NEW PHASE TYPE
+    instruction: |
+      An extended phrase. Not just a pakad — an alap-like exploration.
+      Which raga? Name the vadi. Name the time of day.
+    raga_pool: [bhoopali, yaman, bhairav, bhimpalasi, bageshri, desh, kafi, marwa, darbari_kanada, puriya_dhanashri, malkauns, todi]
+    selection: random_no_repeat
+    phrase_type: extended_alap           # longer than pakad, includes ornaments
+    phrase_duration_s: 15
+    student_response: sing_and_identify
+    response_duration_s: 15
+    identify_vadi: true
+    identify_time: true
+    feedback_layer: standard
+    level_tolerance: guru                # +-10 cents
+
+  - id: round_2
+    type: raga_identification_advanced
+    instruction: |
+      Another. Listen to the ornaments — they tell you which raga.
+    raga_pool: [bhoopali, yaman, bhairav, bhimpalasi, bageshri, desh, kafi, marwa, darbari_kanada, puriya_dhanashri, malkauns, todi]
+    selection: random_no_repeat
+    phrase_type: extended_alap
+    phrase_duration_s: 15
+    student_response: sing_and_identify
+    response_duration_s: 15
+    identify_vadi: true
+    identify_time: true
+    feedback_layer: standard
+    level_tolerance: guru
+
+  - id: round_3
+    type: raga_identification_advanced
+    instruction: |
+      Listen.
+    raga_pool: [bhoopali, yaman, bhairav, bhimpalasi, bageshri, desh, kafi, marwa, darbari_kanada, puriya_dhanashri, malkauns, todi]
+    selection: random_no_repeat
+    phrase_type: extended_alap
+    phrase_duration_s: 15
+    student_response: sing_and_identify
+    response_duration_s: 15
+    identify_vadi: true
+    feedback_layer: standard
+    level_tolerance: guru
+
+  - id: round_4
+    type: raga_identification_advanced
+    instruction: |
+      Listen.
+    raga_pool: [bhoopali, yaman, bhairav, bhimpalasi, bageshri, desh, kafi, marwa, darbari_kanada, puriya_dhanashri, malkauns, todi]
+    selection: random_no_repeat
+    phrase_type: extended_alap
+    phrase_duration_s: 15
+    student_response: sing_and_identify
+    response_duration_s: 15
+    identify_vadi: true
+    feedback_layer: standard
+    level_tolerance: guru
+
+  - id: round_5
+    type: raga_identification_advanced
+    instruction: |
+      Listen.
+    raga_pool: [bhoopali, yaman, bhairav, bhimpalasi, bageshri, desh, kafi, marwa, darbari_kanada, puriya_dhanashri, malkauns, todi]
+    selection: random_no_repeat
+    phrase_type: extended_alap
+    phrase_duration_s: 15
+    student_response: sing_and_identify
+    response_duration_s: 15
+    identify_vadi: true
+    feedback_layer: standard
+    level_tolerance: guru
+
+  - id: round_6
+    type: raga_identification_advanced
+    instruction: |
+      Listen.
+    raga_pool: [bhoopali, yaman, bhairav, bhimpalasi, bageshri, desh, kafi, marwa, darbari_kanada, puriya_dhanashri, malkauns, todi]
+    selection: random_no_repeat
+    phrase_type: extended_alap
+    phrase_duration_s: 15
+    student_response: sing_and_identify
+    response_duration_s: 15
+    identify_vadi: true
+    feedback_layer: standard
+    level_tolerance: guru
+
+  - id: round_7
+    type: raga_identification_advanced
+    instruction: |
+      Listen.
+    raga_pool: [bhoopali, yaman, bhairav, bhimpalasi, bageshri, desh, kafi, marwa, darbari_kanada, puriya_dhanashri, malkauns, todi]
+    selection: random_no_repeat
+    phrase_type: extended_alap
+    phrase_duration_s: 15
+    student_response: sing_and_identify
+    response_duration_s: 15
+    identify_vadi: true
+    feedback_layer: standard
+    level_tolerance: guru
+
+  - id: round_8
+    type: raga_identification_advanced
+    instruction: |
+      Final round.
+    raga_pool: [bhoopali, yaman, bhairav, bhimpalasi, bageshri, desh, kafi, marwa, darbari_kanada, puriya_dhanashri, malkauns, todi]
+    selection: random_no_repeat
+    phrase_type: extended_alap
+    phrase_duration_s: 15
+    student_response: sing_and_identify
+    response_duration_s: 15
+    identify_vadi: true
+    feedback_layer: standard
+    level_tolerance: guru
+
+  - id: complete
+    type: session_summary
+    show_accuracy: true
+    show_streak: true
+    show_raga_scores: true
+    message: |
+      The guru who can name the raga from a single phrase
+      carries the tradition in their ear.
+
+engine:
+  raga_grammar_active: true
+  pakad_recognition: true
+  ornaments_shown: true
+  cents_display: always
+  accuracy_model: guru               # +-10 cents
+
+unlock_next:
+  lesson_id: guru-02-bandish
+  requires:
+    min_sessions: 1
+    min_accuracy: 0.60

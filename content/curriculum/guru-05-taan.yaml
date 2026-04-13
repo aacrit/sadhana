@@ -1,0 +1,157 @@
+# Exercise G-05: Taan Patterns — Fast Ornamental Runs
+# Journey: Master | Level: Guru (10+)
+# NEW PHASE TYPE: taan_exercise
+
+id: guru-05-taan
+journey: master
+level_range: [10, 99]
+raga_id: yaman
+duration_target_min: 12
+xp_award: 55
+
+meta:
+  title: "The Fast Run"
+  subtitle: "Taan Patterns"
+  time_of_day: evening
+  rasa: veer
+
+phases:
+
+  - id: listen
+    type: tanpura_drone
+    duration_s: 15
+    instruction: |
+      The tanpura is with you.
+      Taan — the rapid ornamental run through the raga.
+      Speed. Accuracy. Grammar. All at once.
+      The pinnacle of vocal technique.
+    tanpura:
+      strings: [Pa, Sa, Sa, Sa_upper]
+      sa_hz: null
+
+  - id: sa_calibration
+    type: sa_detection
+    skip_if: sa_already_set
+    instruction: |
+      Confirm your Sa.
+    attempts: 5
+    min_clarity: 0.85
+    fallback_hz: 261.6256
+
+  # HEAR A TAAN — slow
+  - id: taan_slow
+    type: taan_exercise                  # NEW PHASE TYPE
+    instruction: |
+      A taan in Yaman. Slow first. Hear every note.
+    raga_id: yaman
+    phrase: [Sa, Re, Ga, Ma_t, Pa, Dha, Ni, Sa_upper, Ni, Dha, Pa, Ma_t, Ga, Re, Sa]
+    tempo_bpm: 60                        # per note
+    mode: listen
+    repeat: 2
+
+  # HEAR THE SAME TAAN — medium
+  - id: taan_medium
+    type: taan_exercise
+    instruction: |
+      Faster. The same taan. Every note must still be clear.
+    raga_id: yaman
+    phrase: [Sa, Re, Ga, Ma_t, Pa, Dha, Ni, Sa_upper, Ni, Dha, Pa, Ma_t, Ga, Re, Sa]
+    tempo_bpm: 90
+    mode: listen
+    repeat: 2
+
+  # HEAR THE SAME TAAN — fast
+  - id: taan_fast
+    type: taan_exercise
+    instruction: |
+      Full speed. This is taan.
+      The notes blur into a cascade — but each one is distinct.
+    raga_id: yaman
+    phrase: [Sa, Re, Ga, Ma_t, Pa, Dha, Ni, Sa_upper, Ni, Dha, Pa, Ma_t, Ga, Re, Sa]
+    tempo_bpm: 120
+    mode: listen
+    repeat: 2
+
+  # SING — progressive speed
+  - id: sing_slow
+    type: taan_exercise
+    instruction: |
+      Sing. Start slow. Hit every note.
+    raga_id: yaman
+    phrase: [Sa, Re, Ga, Ma_t, Pa, Dha, Ni, Sa_upper]
+    tempo_bpm: 60
+    mode: sing
+    guide_tone: true
+    evaluation:
+      every_note_hit: true
+      pitch_tolerance_cents: 15
+    attempts: 3
+
+  - id: sing_medium
+    type: taan_exercise
+    instruction: |
+      Faster. Maintain accuracy.
+    raga_id: yaman
+    phrase: [Sa, Re, Ga, Ma_t, Pa, Dha, Ni, Sa_upper]
+    tempo_bpm: 90
+    mode: sing
+    guide_tone: false
+    evaluation:
+      every_note_hit: true
+      pitch_tolerance_cents: 15
+    attempts: 3
+
+  - id: sing_fast
+    type: taan_exercise
+    instruction: |
+      Full speed. No guide. Every note.
+      This is where accuracy meets speed.
+    raga_id: yaman
+    phrase: [Sa, Re, Ga, Ma_t, Pa, Dha, Ni, Sa_upper, Ni, Dha, Pa, Ma_t, Ga, Re, Sa]
+    tempo_bpm: 120
+    mode: sing
+    guide_tone: false
+    evaluation:
+      every_note_hit: true
+      pitch_tolerance_cents: 20          # slightly relaxed at speed
+    attempts: 5
+
+  # TAAN IN DIFFERENT RAGAS
+  - id: taan_bhairav
+    type: taan_exercise
+    instruction: |
+      Taan in Bhairav. The komal swaras must land precisely,
+      even at speed.
+    raga_id: bhairav
+    phrase: [Sa, Re_k, Ga, Ma, Pa, Dha_k, Ni, Sa_upper, Ni, Dha_k, Pa, Ma, Ga, Re_k, Sa]
+    tempo_bpm: 90
+    mode: sing
+    guide_tone: false
+    evaluation:
+      every_note_hit: true
+      pitch_tolerance_cents: 15
+    attempts: 3
+
+  - id: complete
+    type: session_summary
+    show_accuracy: true
+    show_streak: true
+    message: |
+      Taan. Speed without sacrifice.
+      Every note hit. Every note in grammar.
+      The cascade that sounds effortless
+      is the result of years of practice.
+      This is sādhanā.
+
+engine:
+  raga_grammar_active: true
+  pakad_recognition: false
+  ornaments_shown: false
+  cents_display: always
+  accuracy_model: guru
+
+unlock_next:
+  lesson_id: guru-06-kedar-hameer
+  requires:
+    min_sessions: 1
+    min_accuracy: 0.50

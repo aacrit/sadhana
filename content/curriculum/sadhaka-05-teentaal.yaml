@@ -1,0 +1,155 @@
+# Lesson S-05: Tala Awareness — Teentaal (The First Rhythm)
+# Journey: Explorer | Level: Sadhaka (4-6)
+# Presence Rule: you hear before you name.
+# Standalone rhythm lesson. Not raga-specific.
+# NEW PHASE TYPE: tala_exercise
+# Engine source: engine/theory/talas/teentaal.ts
+
+id: sadhaka-05-teentaal
+journey: explorer
+level_range: [4, 6]
+raga_id: null
+duration_target_min: 10
+xp_award: 35
+
+meta:
+  title: "The First Rhythm"
+  subtitle: "Teentaal"
+  time_of_day: null
+  rasa: null
+
+phases:
+
+  - id: listen_tala
+    type: tanpura_drone
+    duration_s: 20
+    instruction: |
+      Close your eyes. Listen.
+      The tanpura is with you. And now — the tabla.
+      A pulse. A cycle. Count if you want, or just feel it.
+    tanpura:
+      strings: [Pa, Sa, Sa, Sa_upper]
+      sa_hz: null
+    tala_accompaniment: teentaal
+    tala_tempo_bpm: 60
+
+  - id: sa_calibration
+    type: sa_detection
+    skip_if: sa_already_set
+    instruction: |
+      Confirm your Sa.
+    attempts: 5
+    min_clarity: 0.85
+    fallback_hz: 261.6256
+
+  - id: hear_structure
+    type: phrase_playback
+    instruction: |
+      Teentaal has 16 beats, divided into four groups of four.
+      Listen to the theka — the basic pattern.
+      Dha Dhin Dhin Dha | Dha Dhin Dhin Dha |
+      Dha Tin Tin Ta   | Ta Dhin Dhin Dha
+    repeat: 2
+    show_labels: true
+    tala: teentaal
+    tempo_bpm: 60
+    highlight_beats:
+      sam: [1]
+      khali: [9]
+
+  - id: hear_sam
+    type: phrase_playback
+    instruction: |
+      Sam — the first beat. The anchor. Everything returns here.
+      The tabla says "Dha" on sam. Full resonance.
+    repeat: 3
+    tala: teentaal
+    tempo_bpm: 60
+    highlight_beats:
+      sam: [1]
+
+  - id: hear_khali
+    type: phrase_playback
+    instruction: |
+      Khali — the empty beat. Beat 9.
+      The bayan goes silent. "Ta" instead of "Dha."
+      Listen for the absence.
+    repeat: 3
+    tala: teentaal
+    tempo_bpm: 60
+    highlight_beats:
+      khali: [9]
+
+  # NEW PHASE TYPE: tala_exercise
+  - id: clap_sam
+    type: tala_exercise
+    instruction: |
+      The tabla is playing. Find sam — the first beat.
+      Clap on sam. Only sam. One clap per cycle.
+    tala: teentaal
+    tempo_bpm: 60
+    exercise: clap_sam
+    cycles: 4
+    timing_tolerance_ms: 200
+    feedback_layer: standard
+
+  - id: clap_sam_khali
+    type: tala_exercise
+    instruction: |
+      Now find both sam and khali.
+      Clap on beat 1. Wave on beat 9.
+      The wave is an open palm — the visual of "empty."
+    tala: teentaal
+    tempo_bpm: 65
+    exercise: clap_sam_khali
+    cycles: 4
+    timing_tolerance_ms: 200
+    feedback_layer: standard
+
+  - id: sing_sa_on_sam
+    type: tala_exercise
+    instruction: |
+      Sing Sa on sam. Hold it through the cycle.
+      When sam returns, renew Sa. Fresh. Present.
+    tala: teentaal
+    tempo_bpm: 65
+    exercise: sing_on_sam
+    target_swara: Sa
+    cycles: 4
+    timing_tolerance_ms: 250
+    pitch_tolerance: sadhaka
+    feedback_layer: standard
+
+  - id: free_tala
+    type: tala_exercise
+    instruction: |
+      The tabla is playing. Clap sam and khali.
+      Sing Sa when you like. Feel the cycle.
+    tala: teentaal
+    tempo_bpm: 70
+    exercise: free_clap
+    cycles: 8
+    feedback_layer: minimal
+
+  - id: complete
+    type: session_summary
+    show_accuracy: true
+    show_streak: true
+    show_tala_score: true
+    message: |
+      Teentaal. Sixteen beats. Four plus four plus four plus four.
+      Sam is the anchor. Khali is the breath.
+      You have begun to hear in cycles.
+
+engine:
+  raga_grammar_active: false
+  pakad_recognition: false
+  ornaments_shown: false
+  cents_display: hidden
+  accuracy_model: timing
+
+unlock_next:
+  lesson_id: sadhaka-06-grammar
+  requires:
+    min_sessions: 1
+    min_accuracy: 0.55

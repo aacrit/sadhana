@@ -1,0 +1,159 @@
+# Lesson S-03: Andolan — The Gentle Wave
+# Journey: Explorer | Level: Sadhaka (4-6)
+# Presence Rule: you hear before you name.
+# Bhairav context — andolan on Re_k and Dha_k IS Bhairav.
+# Uses ornament_exercise phase type
+
+id: sadhaka-03-andolan
+journey: explorer
+level_range: [4, 6]
+raga_id: bhairav
+duration_target_min: 10
+xp_award: 40
+
+meta:
+  title: "The Gentle Wave"
+  subtitle: "Andolan"
+  time_of_day: dawn
+  rasa: karuna
+
+phases:
+
+  - id: listen
+    type: tanpura_drone
+    duration_s: 25
+    instruction: |
+      Close your eyes. Listen.
+      The tanpura is with you. Dawn.
+      You know Bhairav. Today you learn to sing it properly.
+    tanpura:
+      strings: [Pa, Sa, Sa, Sa_upper]
+      sa_hz: null
+
+  - id: sa_calibration
+    type: sa_detection
+    skip_if: sa_already_set
+    instruction: |
+      Confirm your Sa.
+    attempts: 5
+    min_clarity: 0.85
+    fallback_hz: 261.6256
+
+  - id: hear_flat_re_k
+    type: phrase_playback
+    phrase: [Sa, Re_k, Sa]
+    instruction: |
+      Listen to komal Re in Bhairav. Flat. Without ornament.
+      This is correct. But it is not yet Bhairav.
+    repeat: 2
+    show_labels: true
+
+  - id: hear_andolan_re_k
+    type: phrase_playback
+    phrase: [Sa, Re_k, Sa]
+    instruction: |
+      Now listen again. The same phrase, but komal Re oscillates.
+      A gentle wave. Touching the note below, returning.
+      This is andolan. This IS Bhairav.
+    repeat: 3
+    show_labels: true
+    ornament: andolan
+    ornament_params:
+      on_swara: Re_k
+      oscillation_hz: 3
+      amplitude_cents: 25
+      touches_below: Sa
+
+  - id: hear_andolan_dha_k
+    type: phrase_playback
+    phrase: [Pa, Dha_k, Pa]
+    instruction: |
+      Komal Dha receives the same treatment.
+      A gentle oscillation. Pa — Dha with andolan — Pa.
+      The two komal swaras of Bhairav breathe.
+    repeat: 3
+    show_labels: true
+    ornament: andolan
+    ornament_params:
+      on_swara: Dha_k
+      oscillation_hz: 3
+      amplitude_cents: 25
+      touches_below: Pa
+
+  - id: sing_andolan_re_k
+    type: ornament_exercise
+    ornament_type: andolan
+    instruction: |
+      Now you. Sing komal Re and add the oscillation.
+      Gentle. 2-4 waves per second. Not fast — not gamak.
+      Andolan is a breath, not a shake.
+    target_swara: Re_k
+    guide_tone: true
+    duration_s: 20
+    attempts: 3
+    evaluation:
+      oscillation_rate_hz: [2, 4]
+      amplitude_cents: [15, 40]
+      centre_accuracy_cents: 25
+    level_tolerance: sadhaka
+
+  - id: sing_andolan_dha_k
+    type: ornament_exercise
+    ornament_type: andolan
+    instruction: |
+      Now on komal Dha. Same gentle oscillation.
+      The mirror of komal Re in the upper register.
+    target_swara: Dha_k
+    guide_tone: true
+    duration_s: 20
+    attempts: 3
+    evaluation:
+      oscillation_rate_hz: [2, 4]
+      amplitude_cents: [15, 40]
+      centre_accuracy_cents: 25
+    level_tolerance: sadhaka
+
+  - id: sing_bhairav_phrase
+    type: phrase_exercise
+    phrase: [Sa, Re_k, Ga, Re_k, Sa]
+    instruction: |
+      Sing the opening phrase of Bhairav.
+      Add andolan on komal Re. Let it breathe.
+    guide_tone: false
+    feedback_layer: standard
+    ornaments_expected: [andolan_on_Re_k]
+
+  - id: pakad_watch
+    type: passive_phrase_recognition
+    enabled: true
+    instruction: |
+      Sing freely in Bhairav. Use andolan on komal Re and komal Dha.
+      The tanpura is with you. Dawn.
+    duration_s: 60
+    watch_for_pakad: true
+    pakad_reward:
+      xp_bonus: 15
+      ceremony: gsap_pakad_moment
+
+  - id: complete
+    type: session_summary
+    show_accuracy: true
+    show_streak: true
+    message: |
+      Andolan. The gentle oscillation.
+      In Bhairav, it is not decoration — it is the raga itself.
+      A komal Re without andolan is not Bhairav. It is just a flat note.
+
+engine:
+  raga_grammar_active: true
+  pakad_recognition: true
+  ornaments_shown: true
+  ornament_detection: [andolan]
+  cents_display: on_tap
+  accuracy_model: sadhaka
+
+unlock_next:
+  lesson_id: sadhaka-04-kafi
+  requires:
+    min_sessions: 1
+    min_accuracy: 0.60

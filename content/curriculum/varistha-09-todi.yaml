@@ -1,0 +1,221 @@
+# Lesson V-09: Raga Todi — Chromatic Density
+# Journey: Scholar | Level: Varistha (7-9)
+# Presence Rule: you hear before you name.
+# Engine source: engine/theory/ragas/todi.ts (needs creation)
+# Prahara: 2 (late morning)
+# KEY CONCEPT: Maximum chromatic density — 4 altered swaras
+
+id: varistha-09-todi
+journey: scholar
+level_range: [7, 9]
+raga_id: todi
+duration_target_min: 15
+xp_award: 60
+
+meta:
+  title: "Chromatic Density"
+  subtitle: "Raga Todi"
+  time_of_day: morning
+  rasa: karuna                 # pathos, intellectual depth
+
+phases:
+
+  - id: listen
+    type: tanpura_drone
+    duration_s: 30
+    instruction: |
+      Close your eyes. Late morning.
+      What you are about to hear is the most chromatically dense raga
+      in the entire curriculum. Four altered swaras.
+      The scale is compressed. Every note is close to its neighbour.
+    tanpura:
+      strings: [Pa, Sa, Sa, Sa_upper]
+      sa_hz: null
+
+  - id: sa_calibration
+    type: sa_detection
+    skip_if: sa_already_set
+    instruction: |
+      Confirm your Sa.
+    attempts: 5
+    min_clarity: 0.85
+    fallback_hz: 261.6256
+
+  # HEAR THE AROHA — S r g M' P d N S'
+  - id: aroha_listen
+    type: phrase_playback
+    phrase: [Sa, Re_k, Ga_k, Ma_t, Pa, Dha_k, Ni, Sa_upper]
+    instruction: |
+      Listen to Todi ascending.
+      Re komal. Ga komal. Ma tivra. Dha komal.
+      Four alterations. The lower tetrachord —
+      Sa to Re_k to Ga_k to Ma_t — spans barely 500 cents.
+      Compressed. Dense. Every note is close.
+    repeat: 2
+    show_labels: false
+
+  - id: aroha_show
+    type: phrase_playback
+    phrase: [Sa, Re_k, Ga_k, Ma_t, Pa, Dha_k, Ni, Sa_upper]
+    instruction: |
+      Sa Re Ga Ma Pa Dha Ni Sa.
+      Re komal. Ga komal. Ma tivra. Dha komal. Ni shuddha.
+      Only Sa, Pa, and Ni are unaltered.
+    repeat: 1
+    show_labels: true
+
+  # HEAR THE AVAROHA
+  - id: avaroha_listen
+    type: phrase_playback
+    phrase: [Sa_upper, Ni, Dha_k, Pa, Ma_t, Ga_k, Re_k, Sa]
+    instruction: |
+      Descending. The density remains.
+      The compressed lower tetrachord is even more apparent in descent.
+    repeat: 2
+    show_labels: false
+
+  - id: avaroha_show
+    type: phrase_playback
+    phrase: [Sa_upper, Ni, Dha_k, Pa, Ma_t, Ga_k, Re_k, Sa]
+    instruction: |
+      Sa Ni Dha Pa Ma Ga Re Sa.
+      Four altered swaras. The descent navigates them carefully.
+    repeat: 1
+    show_labels: true
+
+  # THE COMPRESSED LOWER TETRACHORD
+  - id: lower_tetrachord
+    type: phrase_playback
+    phrase: [Sa, Re_k, Ga_k, Ma_t]
+    instruction: |
+      Focus on the lower four swaras.
+      Sa — Re komal (90 cents) — Ga komal (294 cents) — Ma tivra (590 cents).
+      In Yaman, the same span: Sa (0) — Re (204) — Ga (386) — Ma tivra (590).
+      Todi's lower tetrachord is compressed. The notes crowd together.
+    repeat: 3
+    show_labels: true
+
+  # COMPARE — Yaman vs Todi lower tetrachord
+  - id: compare_yaman
+    type: phrase_playback
+    phrase: [Sa, Re, Ga, Ma_t]
+    instruction: |
+      Yaman's lower tetrachord. Sa Re Ga Ma.
+      Wide intervals. Open. Bright.
+    repeat: 1
+    show_labels: true
+
+  - id: compare_todi
+    type: phrase_playback
+    phrase: [Sa, Re_k, Ga_k, Ma_t]
+    instruction: |
+      Now Todi. Sa Re Ga Ma.
+      Compressed. Dense. Every swara presses against the next.
+      Same endpoint — Ma tivra. Entirely different journey.
+    repeat: 1
+    show_labels: true
+
+  # MEET THE SWARAS
+  - id: meet_todi
+    type: swara_introduction
+    instruction: |
+      Dha komal is the vadi. Ga komal is the samvadi.
+      Both are komal. The raga's weight sits in its altered swaras.
+    swaras: [Sa, Re_k, Ga_k, Ma_t, Pa, Dha_k, Ni]
+    presentation: sequential
+    audio_first: true
+    highlight_vadi: Dha_k
+    highlight_samvadi: Ga_k
+
+  # SING — carefully navigate the density
+  - id: sing_aroha
+    type: phrase_exercise
+    phrase: [Sa, Re_k, Ga_k, Ma_t, Pa]
+    instruction: |
+      Sing the lower half. Each komal swara must be precisely placed.
+      Re komal. Ga komal. They are close together.
+      Distinguish them clearly.
+    guide_tone: true
+    feedback_layer: standard
+
+  - id: sing_avaroha
+    type: phrase_exercise
+    phrase: [Sa_upper, Ni, Dha_k, Pa, Ma_t, Ga_k, Re_k, Sa]
+    instruction: |
+      Full descent. The chromatic density is the test.
+      Each swara distinct. No blurring.
+    guide_tone: true
+    feedback_layer: standard
+
+  # CHARACTERISTIC MEEND — Ga_k to Re_k
+  - id: meend_todi
+    type: phrase_playback
+    phrase: [Ga_k, Re_k]
+    instruction: |
+      Todi's characteristic meend: Ga komal gliding to Re komal.
+      The smallest meend in the curriculum. The swaras are so close
+      that the glide is almost a whisper.
+    repeat: 2
+    show_labels: true
+    ornament: meend
+    ornament_params:
+      from: Ga_k
+      to: Re_k
+      duration_ratio: 0.6
+
+  # PAKAD
+  - id: pakad_listen
+    type: phrase_playback
+    phrase: [Dha_k, Ni, Sa_upper, Re_k_upper, Sa_upper]
+    instruction: |
+      The upper register phrase. Dha Ni Sa Re Sa.
+      Dha komal — the vadi — anchors the upper octave.
+    repeat: 2
+    show_labels: true
+
+  - id: pakad_listen_2
+    type: phrase_playback
+    phrase: [Re_k, Ga_k, Ma_t, Re_k, Sa]
+    instruction: |
+      And the lower phrase. Re Ga Ma Re Sa.
+      The compressed tetrachord, alive with movement.
+    repeat: 2
+    show_labels: true
+
+  # FREE SINGING
+  - id: pakad_watch
+    type: passive_phrase_recognition
+    enabled: true
+    instruction: |
+      Sing freely in Todi. Late morning.
+      Navigate the density. Place each komal swara precisely.
+      This is the ultimate intonation test.
+    duration_s: 60
+    watch_for_pakad: true
+    pakad_reward:
+      xp_bonus: 25
+      ceremony: gsap_pakad_moment
+
+  - id: complete
+    type: session_summary
+    show_accuracy: true
+    show_streak: true
+    message: |
+      Todi. One of the six great ragas.
+      Four altered swaras. Maximum density.
+      The student who can sing Todi correctly
+      has mastered intonation. The compressed landscape
+      leaves no room for imprecision.
+
+engine:
+  raga_grammar_active: true
+  pakad_recognition: true
+  ornaments_shown: true
+  cents_display: always               # precision is the point
+  accuracy_model: varistha
+
+unlock_next:
+  lesson_id: varistha-10-tala-integration
+  requires:
+    min_sessions: 2                   # Todi needs repetition
+    min_accuracy: 0.60

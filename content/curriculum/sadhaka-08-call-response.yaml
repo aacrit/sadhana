@@ -1,0 +1,215 @@
+# Lesson S-08: Call and Response — Ornamented Phrases
+# Journey: Explorer | Level: Sadhaka (4-6)
+# Presence Rule: you hear before you name.
+# Phase type: call_response with ornament detection
+# Multi-raga: cycles through learned ragas with ornament contexts
+
+id: sadhaka-08-call-response
+journey: explorer
+level_range: [4, 6]          # Sadhaka
+raga_id: null                # multi-raga call-response
+duration_target_min: 12
+xp_award: 40
+
+meta:
+  title: "Call and Response"
+  subtitle: "Ornamented Phrases"
+  time_of_day: null
+  rasa: null
+
+# --- PHASES -------------------------------------------------------
+
+phases:
+
+  # 1. LISTENING
+  - id: listen
+    type: tanpura_drone
+    duration_s: 20
+    instruction: |
+      The tanpura is with you.
+      Today the engine sings. You answer.
+      Listen for the ornament. Sing it back.
+    tanpura:
+      strings: [Pa, Sa, Sa, Sa_upper]
+      sa_hz: null
+
+  # 2. SA DETECTION
+  - id: sa_calibration
+    type: sa_detection
+    skip_if: sa_already_set
+    instruction: |
+      Confirm your Sa.
+    attempts: 5
+    min_clarity: 0.85
+    fallback_hz: 261.6256
+
+  # 3. ROUND 1 — Plain phrase (warm-up)
+  - id: round_1_plain
+    type: call_response
+    instruction: |
+      Sing this phrase back. No ornament yet. Just the notes.
+    raga_id: bhoopali
+    call_phrase: [Sa, Re, Ga, Pa]
+    ornament: none
+    response_duration_s: 10
+    guide_tone: false
+    feedback_layer: standard
+    evaluation:
+      pitch_tolerance_cents: 25
+      ornament_detection: false
+
+  # 4. ROUND 2 — Meend in Yaman
+  - id: round_2_meend
+    type: call_response
+    instruction: |
+      Listen. There is a glide — meend — from Ga to Re.
+      Sing the phrase back. Include the glide.
+    raga_id: yaman
+    call_phrase: [Ni_mandra, Re, Ga, Re, Sa]
+    ornament: meend
+    ornament_params:
+      from: Ga
+      to: Re
+      duration_ratio: 0.5
+    response_duration_s: 12
+    guide_tone: false
+    feedback_layer: standard
+    evaluation:
+      pitch_tolerance_cents: 25
+      ornament_detection: true
+      expected_ornament: meend
+
+  # 5. ROUND 3 — Andolan in Bhairav
+  - id: round_3_andolan
+    type: call_response
+    instruction: |
+      Bhairav. Listen to Re komal — it has andolan. A gentle wave.
+      Sing it back with the wave.
+    raga_id: bhairav
+    call_phrase: [Sa, Re_k, Ga, Re_k, Sa]
+    ornament: andolan
+    ornament_params:
+      swara: Re_k
+      rate_hz: 3
+      amplitude_cents: 25
+    response_duration_s: 12
+    guide_tone: false
+    feedback_layer: standard
+    evaluation:
+      pitch_tolerance_cents: 25
+      ornament_detection: true
+      expected_ornament: andolan
+
+  # 6. ROUND 4 — Gamak in Bhimpalasi
+  - id: round_4_gamak
+    type: call_response
+    instruction: |
+      Bhimpalasi. Gamak on Ma — the shake.
+      Sing the phrase. Shake Ma.
+    raga_id: bhimpalasi
+    call_phrase: [Ga_k, Ma, Pa, Ma, Ga_k]
+    ornament: gamak
+    ornament_params:
+      swara: Ma
+      rate_hz: 5
+      amplitude_cents: 80
+    response_duration_s: 12
+    guide_tone: false
+    feedback_layer: standard
+    evaluation:
+      pitch_tolerance_cents: 25
+      ornament_detection: true
+      expected_ornament: gamak
+
+  # 7. ROUND 5 — Meend in Desh (longer glide)
+  - id: round_5_meend_desh
+    type: call_response
+    instruction: |
+      Desh. A long meend from Pa down to Ga.
+      Continuous glide. No steps.
+    raga_id: desh
+    call_phrase: [Pa, Ga, Re, Sa]
+    ornament: meend
+    ornament_params:
+      from: Pa
+      to: Ga
+      duration_ratio: 0.7
+    response_duration_s: 12
+    guide_tone: false
+    feedback_layer: standard
+    evaluation:
+      pitch_tolerance_cents: 25
+      ornament_detection: true
+      expected_ornament: meend
+
+  # 8. ROUND 6 — Combined: Andolan + Meend in Bhairav
+  - id: round_6_combined
+    type: call_response
+    instruction: |
+      A longer phrase. Andolan on Re komal. Then meend from Ga to Re.
+      Two ornaments in one phrase. Listen carefully.
+    raga_id: bhairav
+    call_phrase: [Sa, Re_k, Ga, Re_k, Sa]
+    ornament: mixed
+    ornament_sequence:
+      - swara: Re_k
+        type: andolan
+        rate_hz: 3
+        amplitude_cents: 25
+      - from: Ga
+        to: Re_k
+        type: meend
+        duration_ratio: 0.5
+    response_duration_s: 15
+    guide_tone: false
+    feedback_layer: standard
+    evaluation:
+      pitch_tolerance_cents: 25
+      ornament_detection: true
+      expected_ornaments: [andolan, meend]
+
+  # 9. ROUND 7 — Free response (student chooses ornament)
+  - id: round_7_free
+    type: call_response
+    instruction: |
+      The engine sings a plain phrase. You add the ornament.
+      Choose what feels right. Meend, andolan, or gamak.
+      The raga will guide you.
+    raga_id: kafi
+    call_phrase: [Sa, Re, Ga_k, Ma, Pa]
+    ornament: none                      # engine sings plain
+    student_adds_ornament: true         # student's choice
+    response_duration_s: 15
+    guide_tone: false
+    feedback_layer: standard
+    evaluation:
+      pitch_tolerance_cents: 25
+      ornament_detection: true          # detect what student adds
+
+  # 10. COMPLETION
+  - id: complete
+    type: session_summary
+    show_accuracy: true
+    show_streak: true
+    show_ornament_accuracy: true
+    message: |
+      Call and response. The oldest form of musical learning.
+      The guru sings. The shishya listens. The shishya sings.
+      Now your phrases carry ornaments — the music breathes.
+
+# --- ENGINE PARAMETERS --------------------------------------------
+
+engine:
+  raga_grammar_active: true
+  pakad_recognition: false
+  ornaments_shown: true
+  cents_display: on_tap
+  accuracy_model: sadhaka
+
+# --- UNLOCK CONDITION ---------------------------------------------
+
+unlock_next:
+  lesson_id: sadhaka-09-intervals
+  requires:
+    min_sessions: 1
+    min_accuracy: 0.60

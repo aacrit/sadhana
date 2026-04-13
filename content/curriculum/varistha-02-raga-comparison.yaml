@@ -1,0 +1,193 @@
+# Lesson V-02: Raga Comparison — Same Thaat, Different Worlds
+# Journey: Scholar | Level: Varistha (7-9)
+# Presence Rule: you hear before you name.
+# NEW PHASE TYPE: raga_comparison_advanced
+# Deeper analysis of related ragas
+
+id: varistha-02-raga-comparison
+journey: scholar
+level_range: [7, 9]
+raga_id: null                # multi-raga comparison
+duration_target_min: 15
+xp_award: 50
+
+meta:
+  title: "Same Thaat, Different Worlds"
+  subtitle: "Raga Comparison"
+  time_of_day: null
+  rasa: null
+
+# --- PHASES -------------------------------------------------------
+
+phases:
+
+  - id: listen
+    type: tanpura_drone
+    duration_s: 20
+    instruction: |
+      The tanpura is with you.
+      You know seven ragas now. Some share the same swaras.
+      Today you learn why shared swaras do not make shared ragas.
+    tanpura:
+      strings: [Pa, Sa, Sa, Sa_upper]
+      sa_hz: null
+
+  - id: sa_calibration
+    type: sa_detection
+    skip_if: sa_already_set
+    instruction: |
+      Confirm your Sa.
+    attempts: 5
+    min_clarity: 0.85
+    fallback_hz: 261.6256
+
+  # KAFI THAAT COMPARISON: Bhimpalasi vs Bageshri vs Kafi
+  - id: kafi_thaat_intro
+    type: phrase_playback
+    phrase: [Sa, Re, Ga_k, Ma, Pa, Dha, Ni_k, Sa_upper]
+    instruction: |
+      These are the swaras of Kafi thaat.
+      Three ragas you know — Bhimpalasi, Bageshri, Kafi —
+      all use these exact swaras. Listen to how different they sound.
+    repeat: 1
+    show_labels: true
+
+  - id: compare_kafi_1
+    type: raga_comparison_advanced       # NEW PHASE TYPE
+    instruction: |
+      Three ragas. Same swaras. Three worlds.
+      Listen to each pakad. Hear the personality.
+    comparison_set:
+      - raga_id: bhimpalasi
+        pakad: [Ni_k_mandra, Sa, Ga_k, Ma, Pa]
+        label: "Bhimpalasi — the rising arc"
+        vadi: Ma
+        character: "Yearning upward. Afternoon longing."
+      - raga_id: bageshri
+        pakad: [Sa, Ma, Ga_k, Ma, Dha]
+        label: "Bageshri — the circling orbit"
+        vadi: Ma
+        character: "Circling Ma. Midnight obsession."
+      - raga_id: kafi
+        pakad: [Sa, Re, Ga_k, Ma, Pa]
+        label: "Kafi — the direct path"
+        vadi: Pa
+        character: "Straightforward. Folk lightness."
+    play_count: 2                       # each pakad played twice
+    show_analysis: true                 # show vadi, movement direction
+
+  - id: kafi_distinction
+    type: raga_comparison_advanced
+    instruction: |
+      What makes them different?
+      Movement. Emphasis. The same Ma in three different roles.
+      In Bhimpalasi: Ma is the destination.
+      In Bageshri: Ma is the centre of orbit.
+      In Kafi: Ma is a waypoint.
+    comparison_set:
+      - raga_id: bhimpalasi
+        pakad: [Ga_k, Ma, Pa, Dha, Ni_k]
+        label: "Bhimpalasi ascent"
+      - raga_id: bageshri
+        pakad: [Ma, Ga_k, Ma, Dha, Ni_k]
+        label: "Bageshri orbit"
+      - raga_id: kafi
+        pakad: [Ga_k, Ma, Pa, Dha, Ni_k, Sa_upper]
+        label: "Kafi climb"
+    play_count: 1
+
+  # KALYAN THAAT COMPARISON: Yaman vs Bhoopali
+  - id: kalyan_thaat_intro
+    type: phrase_playback
+    phrase: [Sa, Re, Ga, Ma_t, Pa, Dha, Ni, Sa_upper]
+    instruction: |
+      Kalyan thaat. Ma tivra is the only alteration.
+      Yaman uses all seven swaras. Bhoopali uses five — a subset.
+    repeat: 1
+    show_labels: true
+
+  - id: compare_kalyan
+    type: raga_comparison_advanced
+    instruction: |
+      Yaman and Bhoopali. The full set and the essential five.
+      Bhoopali is inside Yaman — but they are not the same raga.
+    comparison_set:
+      - raga_id: yaman
+        pakad: [Ni_mandra, Re, Ga, Re, Sa]
+        label: "Yaman — the evening majesty"
+        character: "Ma tivra colours everything. Ni-Re-Ga is the soul."
+      - raga_id: bhoopali
+        pakad: [Sa, Re, Ga, Pa, Dha]
+        label: "Bhoopali — the pure five"
+        character: "No Ma, no Ni. Open. Clear. Dusk."
+    play_count: 2
+    show_analysis: true
+
+  # STUDENT DISTINGUISHES — sing the difference
+  - id: sing_bhimpalasi_phrase
+    type: phrase_exercise
+    phrase: [Ni_k_mandra, Sa, Ga_k, Ma, Pa]
+    instruction: |
+      Sing a Bhimpalasi phrase. Rising. Yearning.
+    guide_tone: false                   # Varistha: no guide
+    feedback_layer: standard
+
+  - id: sing_bageshri_phrase
+    type: phrase_exercise
+    phrase: [Sa, Ma, Ga_k, Ma, Dha]
+    instruction: |
+      Now Bageshri. Same swaras. Different movement.
+      Circle Ma. Do not rise through it — orbit it.
+    guide_tone: false
+    feedback_layer: standard
+
+  - id: sing_kafi_phrase
+    type: phrase_exercise
+    phrase: [Sa, Re, Ga_k, Ma, Pa, Dha]
+    instruction: |
+      Now Kafi. Direct. Straightforward. The parent.
+    guide_tone: false
+    feedback_layer: standard
+
+  # RAGA IDENTIFICATION — which one is playing?
+  - id: raga_id_rounds
+    type: raga_identification
+    instruction: |
+      The engine plays a phrase. Which raga?
+      The swaras are the same. The movement tells you.
+    raga_pool: [bhimpalasi, bageshri, kafi, yaman, bhoopali]
+    selection: random_no_repeat
+    pakad_plays: 2
+    student_response: sing
+    response_duration_s: 12
+    feedback_layer: standard
+    level_tolerance: varistha
+    rounds: 5                          # 5 identification rounds
+
+  - id: complete
+    type: session_summary
+    show_accuracy: true
+    show_streak: true
+    show_raga_scores: true
+    message: |
+      Thaat gives the swaras. Raga gives the life.
+      You can now hear three ragas in the same seven notes.
+      This is the heart of Hindustani music:
+      identity is not the note set. It is the movement.
+
+# --- ENGINE PARAMETERS --------------------------------------------
+
+engine:
+  raga_grammar_active: true
+  pakad_recognition: true
+  ornaments_shown: true
+  cents_display: on_tap
+  accuracy_model: varistha
+
+# --- UNLOCK CONDITION ---------------------------------------------
+
+unlock_next:
+  lesson_id: varistha-03-darbari
+  requires:
+    min_sessions: 1
+    min_accuracy: 0.65
