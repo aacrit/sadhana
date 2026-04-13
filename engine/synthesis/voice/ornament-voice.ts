@@ -399,7 +399,7 @@ export function getAndolanSpec(ragaId: string, swara: Swara): AndolanSpec | null
 /**
  * Per-raga intonation offset in cents from the standard JI position.
  * Re_k in Bhairav sits ~8 cents sharp of 16/15.
- * Ga_k in Darbari sits ~35 cents flat of 6/5.
+ * Ga_k in Darbari sits ~22 cents flat of 6/5 (targeting 32/27 = 294 cents per Daniélou/Jairazbhoy).
  */
 const RAGA_INTONATION_MAP: Record<string, Partial<Record<Swara, number>>> = {
   bhairav: {
@@ -407,7 +407,7 @@ const RAGA_INTONATION_MAP: Record<string, Partial<Record<Swara, number>>> = {
     Dha_k: 0,
   },
   darbari_kanada: {
-    Ga_k: -35,  // 280 cents total (vs standard 316) — the famous Darbari Ga
+    Ga_k: -22,  // 294 cents total (vs standard 316) — the famous Darbari Ga at 32/27
     Dha_k: -10, // slightly flat
   },
   bageshri: {

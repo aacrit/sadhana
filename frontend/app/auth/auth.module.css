@@ -68,7 +68,7 @@
 
 .heading {
   font-family: var(--font-serif);
-  font-size: 28px;
+  font-size: var(--text-2xl);
   font-weight: var(--weight-light);
   color: #ffffff;
   text-align: center;
@@ -79,7 +79,7 @@
 
 .subheading {
   font-family: var(--font-sans);
-  font-size: 13px;
+  font-size: var(--text-sm);
   color: rgba(255, 255, 255, 0.35);
   text-align: center;
   margin-bottom: var(--space-10);
@@ -97,7 +97,7 @@
   height: 52px;
   padding: 0 var(--space-6);
   border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   background: rgba(255, 255, 255, 0.06);
   color: #ffffff;
   font-family: var(--font-sans);
@@ -105,9 +105,9 @@
   font-weight: var(--weight-medium);
   cursor: pointer;
   transition:
-    background 150ms ease-out,
-    border-color 150ms ease-out,
-    box-shadow 150ms ease-out;
+    background var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out);
 }
 
 .googleButton:hover {
@@ -159,7 +159,7 @@
   font-family: var(--font-sans);
   font-size: var(--text-sm);
   cursor: pointer;
-  transition: color 150ms ease-out;
+  transition: color var(--dur-fast) var(--ease-out);
 }
 
 .emailToggle:hover {
@@ -177,7 +177,7 @@
   width: 100%;
   max-height: 0;
   overflow: hidden;
-  transition: max-height 0.3s ease;
+  transition: max-height var(--dur-normal) var(--ease-out);
 }
 
 .emailFormWrap.emailFormOpen {
@@ -208,12 +208,12 @@
   min-height: var(--touch-min);
   padding: var(--space-3) var(--space-4);
   border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   background: rgba(255, 255, 255, 0.04);
   color: #ffffff;
   font-family: var(--font-sans);
   font-size: var(--text-base);
-  transition: border-color 150ms ease-out;
+  transition: border-color var(--dur-fast) var(--ease-out);
 }
 
 .input::placeholder {
@@ -251,7 +251,7 @@
   padding: 0 var(--space-6);
   margin-top: var(--space-4);
   border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   background: rgba(255, 255, 255, 0.06);
   color: #ffffff;
   font-family: var(--font-sans);
@@ -260,8 +260,8 @@
   letter-spacing: var(--tracking-wide);
   cursor: pointer;
   transition:
-    background 150ms ease-out,
-    border-color 150ms ease-out;
+    background var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out);
 }
 
 .submitButton:hover:not(:disabled) {
@@ -292,7 +292,7 @@
   font-family: var(--font-sans);
   font-size: var(--text-sm);
   cursor: pointer;
-  transition: color 150ms ease-out;
+  transition: color var(--dur-fast) var(--ease-out);
 }
 
 .toggleLink:hover {
@@ -312,7 +312,7 @@
   font-family: var(--font-sans);
   font-size: var(--text-sm);
   text-decoration: none;
-  transition: color 150ms ease-out;
+  transition: color var(--dur-fast) var(--ease-out);
 }
 
 .guestLink:hover {

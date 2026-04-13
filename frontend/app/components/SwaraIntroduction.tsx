@@ -56,9 +56,8 @@ const swaraVariants = {
     scale: 1,
     transition: {
       type: 'spring' as const,
-      stiffness: 260,
-      damping: 20,
-      duration: 0.5,
+      stiffness: 400,
+      damping: 15,
     },
   },
 };

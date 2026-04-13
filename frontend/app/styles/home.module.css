@@ -217,7 +217,7 @@
   font-weight: var(--weight-regular);
   color: var(--text-3);
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: var(--tracking-widest);
   position: relative;
   z-index: 1;
 }
@@ -316,7 +316,7 @@
 }
 
 .cardScholar .journeyName {
-  color: #D8DEE8;
+  color: var(--card-scholar-text, #D8DEE8);
 }
 
 .cardScholar .journeyDevanagari {
@@ -349,7 +349,7 @@
 }
 
 .cardMaster .journeyName {
-  color: #E8DCC8;
+  color: var(--card-master-text, #E8DCC8);
 }
 
 .cardMaster .journeyDevanagari {
@@ -478,7 +478,7 @@
   font-weight: var(--weight-regular);
   color: var(--text-3);
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: var(--tracking-widest);
   position: relative;
   z-index: 1;
 }
@@ -488,7 +488,7 @@
   font-size: var(--text-sm);
   color: var(--text-3);
   line-height: var(--leading-relaxed);
-  animation: freeformBreathe 6s ease-in-out infinite;
+  animation: freeformBreathe 6s var(--ease-in-out) infinite;
   position: relative;
   z-index: 1;
 }
@@ -521,7 +521,7 @@
   width: 12px;
   height: 12px;
   border-radius: var(--radius-full);
-  background: var(--accent);
+  background: var(--text-3);
   animation: homePulse 1.5s var(--ease-in-out) infinite;
 }
 

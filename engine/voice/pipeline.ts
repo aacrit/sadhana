@@ -144,6 +144,11 @@ export class VoicePipeline {
   // Pitchy detector — lazy loaded because it's an ES module
   private pitchDetector: PitchyDetector | null = null;
 
+  // Pre-allocated time-domain buffer for Pitchy — reused every detect() frame.
+  // Allocated once in start() after the AnalyserNode is created; sized to fftSize.
+  // Eliminates one `new Float32Array(2048)` allocation per animation frame (~60/s).
+  private detectBuffer: Float32Array<ArrayBuffer> | null = null;
+
   // Rolling buffer of recent swaras for pakad detection
   private swaraBuffer: Swara[] = [];
   private lastSilenceTime: number = 0;
@@ -232,6 +237,9 @@ export class VoicePipeline {
     this.analyserNode.fftSize = this.config.fftSize ?? 2048;
     this.sourceNode.connect(this.analyserNode);
 
+    // Pre-allocate the time-domain buffer for Pitchy — reused every detect() frame.
+    this.detectBuffer = new Float32Array(this.analyserNode.fftSize) as Float32Array<ArrayBuffer>;
+
     // Initialise Pitchy pitch detector
     await this.initPitchDetector();
 
@@ -275,6 +283,7 @@ export class VoicePipeline {
     }
 
     this.pitchDetector = null;
+    this.detectBuffer = null;
     this.swaraBuffer = [];
     this.pitchHistory = [];
   }
@@ -369,8 +378,8 @@ export class VoicePipeline {
       return;
     }
 
-    const bufferSize = this.analyserNode.fftSize;
-    const buffer = new Float32Array(bufferSize);
+    // Reuse the pre-allocated buffer — no allocation on the hot path.
+    const buffer = this.detectBuffer!;
     this.analyserNode.getFloatTimeDomainData(buffer);
 
     // Check if there is any significant audio signal

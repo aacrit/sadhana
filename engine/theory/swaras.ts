@@ -244,10 +244,10 @@ export const NI_K: SwaraDefinition = {
   shuddha: false,
   achala: false,
   alternateNames: ['Komal Ni', 'Kaisiki Nishad'],
-  ratioNumerator: 9,
-  ratioDenominator: 5,
-  centsFromSa: 1017.60,
-  centsDeviationFromET: 17.60, // ET minor 7th = 1000 cents
+  ratioNumerator: 16,
+  ratioDenominator: 9,
+  centsFromSa: 996.09,
+  centsDeviationFromET: -3.91, // ET minor 7th = 1000 cents
   westernNote: 'Bb (approx.)',
   semitonesFromSa: 10,
 };

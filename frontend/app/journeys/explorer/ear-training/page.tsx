@@ -280,7 +280,7 @@ export default function EarTrainingPage() {
     const accuracy = Math.round((score / TOTAL_ROUNDS) * 100);
 
     return (
-      <div className={styles.page} role="main" aria-label="Ear training results">
+      <div className={styles.page} role="region" aria-label="Ear training results">
         <Link
           href="/journeys/explorer"
           className={styles.backLink}
@@ -357,7 +357,7 @@ export default function EarTrainingPage() {
   const progress = currentRound / TOTAL_ROUNDS;
 
   return (
-    <div className={styles.page} role="main" aria-label="Ear training exercise">
+    <div className={styles.page} role="region" aria-label="Ear training exercise">
       {/* Back navigation */}
       <Link
         href="/journeys/explorer"

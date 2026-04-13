@@ -268,7 +268,7 @@ function playVocalNote(
       case 'gamak':
         applyVocalGamak(
           source, tract,
-          hz, 80, 5.5, duration * 0.8, startTime + 0.1,
+          hz, 50, 5.5, duration * 0.8, startTime + 0.1,
         );
         break;
       case 'andolan':
@@ -571,6 +571,12 @@ async function playEventSequence(
 ): Promise<void> {
   for (const event of events) {
     if (isDisposed()) break;
+
+    // Skip rest events (hz=0 or silent volume) — just wait for the duration
+    if (event.hz <= 0 || event.volumeMultiplier <= 0) {
+      await new Promise(resolve => setTimeout(resolve, event.duration * 1000));
+      continue;
+    }
 
     const formants = getFormantSetForSwara(event.swara, voiceType);
     const nasalCoupling = getSwaraVowel(event.swara).nasalCoupling;

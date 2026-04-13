@@ -219,8 +219,10 @@
   --card-explorer-accent: #5C9E6E;
   --card-explorer-border: rgba(45, 106, 79, 0.25);
   --card-scholar-bg: #142235;
+  --card-scholar-text: #D8DEE8;
   --card-scholar-border: rgba(212, 175, 55, 0.15);
   --card-master-bg: #1A1608;
+  --card-master-text: #E8DCC8;
   --card-master-border: rgba(212, 175, 55, 0.2);
 
   /* -- Freeform card --------------------------------------------------- */

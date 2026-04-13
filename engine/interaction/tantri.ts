@@ -131,6 +131,17 @@ export interface TantriStringState {
 
   /** Whether this is the samvadi (minister swara) of the current raga. */
   isSamvadi: boolean;
+
+  /**
+   * Pre-allocated waveform buffer for generateStringWaveform().
+   * Reused across frames to eliminate per-frame Float32Array allocation.
+   * Resized only when numPoints changes (rare — tied to canvas width).
+   * Internal use by the renderer. Do not read outside renderString().
+   */
+  _waveformBuffer: Float32Array | null;
+
+  /** Number of points the _waveformBuffer was last allocated for. */
+  _waveformBufferSize: number;
 }
 
 /**
@@ -324,6 +335,8 @@ export function createTantriField(
       inRaga,
       isVadi: raga ? raga.vadi === def.symbol : false,
       isSamvadi: raga ? raga.samvadi === def.symbol : false,
+      _waveformBuffer: null,
+      _waveformBufferSize: 0,
     };
   });
 
@@ -777,6 +790,14 @@ export function stringDisplacement(
  * the string's horizontal extent. The waveform frequency is proportional
  * to the swara's actual frequency ratio (higher swaras vibrate faster visually).
  *
+ * When called with a mutable TantriStringState, the result is written into
+ * `stringState._waveformBuffer` and returned — zero allocation on the hot path.
+ * The buffer is re-allocated only when `numPoints` changes (tied to canvas width,
+ * which only changes on resize — rare).
+ *
+ * When called with a plain object (e.g. in tests), a new array is allocated as
+ * before, preserving backward compatibility.
+ *
  * @param stringState - The string to generate the waveform for
  * @param numPoints - Number of sample points along the string
  * @param time - Current animation time in seconds (for phase)
@@ -787,9 +808,19 @@ export function generateStringWaveform(
   numPoints: number,
   time: number,
 ): Float32Array {
-  const waveform = new Float32Array(numPoints);
+  // Reuse per-string pre-allocated buffer when available.
+  // Re-allocate only when numPoints changes (canvas resize — infrequent).
+  let waveform: Float32Array;
+  if (stringState._waveformBufferSize === numPoints && stringState._waveformBuffer !== null) {
+    waveform = stringState._waveformBuffer;
+  } else {
+    waveform = new Float32Array(numPoints);
+    stringState._waveformBuffer = waveform;
+    stringState._waveformBufferSize = numPoints;
+  }
 
   if (stringState.amplitude < REST_THRESHOLD) {
+    waveform.fill(0);
     return waveform; // All zeros — string at rest
   }
 
