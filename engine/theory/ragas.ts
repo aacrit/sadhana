@@ -16,6 +16,17 @@ import { bhairav } from './ragas/bhairav';
 import { bhoopali } from './ragas/bhoopali';
 import { bhimpalasi } from './ragas/bhimpalasi';
 import { bageshri } from './ragas/bageshri';
+import { desh } from './ragas/desh';
+import { kafi } from './ragas/kafi';
+import { marwa } from './ragas/marwa';
+import { darbari_kanada } from './ragas/darbari_kanada';
+import { puriya_dhanashri } from './ragas/puriya_dhanashri';
+import { malkauns } from './ragas/malkauns';
+import { todi } from './ragas/todi';
+import { bhairavi } from './ragas/bhairavi';
+import { kedar } from './ragas/kedar';
+import { hameer } from './ragas/hameer';
+import { sohini } from './ragas/sohini';
 
 // ---------------------------------------------------------------------------
 // Registry
@@ -33,6 +44,17 @@ export const RAGAS: Readonly<Record<string, Raga>> = {
   bhoopali,
   bhimpalasi,
   bageshri,
+  desh,
+  kafi,
+  marwa,
+  darbari_kanada,
+  puriya_dhanashri,
+  malkauns,
+  todi,
+  bhairavi,
+  kedar,
+  hameer,
+  sohini,
 };
 
 /**
@@ -40,11 +62,26 @@ export const RAGAS: Readonly<Record<string, Raga>> = {
  * (simplest to most complex).
  */
 export const RAGA_LIST: readonly Raga[] = [
+  // --- Shishya (Beginner) ---
   bhoopali,    // Level 1 — pentatonic, all shuddha
   yaman,       // Level 2 — sampoorna, one alteration (Ma_t)
   bhimpalasi,  // Level 3 — komal swaras, vakra movement
   bhairav,     // Level 4 — andolan, dawn gravity
   bageshri,    // Level 5 — midnight longing, emotional depth
+  // --- Sadhaka (Intermediate) ---
+  desh,        // Level 6 — Khamaj thaat, dual Ni treatment
+  kafi,        // Level 7 — parent of Kafi thaat, komal Ga/Ni
+  // --- Varistha (Advanced) ---
+  marwa,       // Level 8 — no Pa, sunset tension, Marwa thaat
+  darbari_kanada, // Level 9 — andolan on Ga_k, vakra avaroha
+  puriya_dhanashri, // Level 10 — Poorvi thaat, 3 altered swaras
+  malkauns,    // Level 11 — pentatonic, no Re/Pa, all komal
+  todi,        // Level 12 — maximum chromaticism, 4 altered swaras
+  // --- Guru (Master) ---
+  bhairavi,    // Level 13 — all komal, allows all 12 passing tones
+  kedar,       // Level 14 — dual Ma, Kalyan thaat
+  hameer,      // Level 15 — dual Ma, distinct from Kedar, regal
+  sohini,      // Level 16 — Marwa thaat, no Pa, light contrast to Marwa
 ] as const;
 
 // ---------------------------------------------------------------------------
@@ -56,6 +93,17 @@ export { bhairav } from './ragas/bhairav';
 export { bhoopali } from './ragas/bhoopali';
 export { bhimpalasi } from './ragas/bhimpalasi';
 export { bageshri } from './ragas/bageshri';
+export { desh } from './ragas/desh';
+export { kafi } from './ragas/kafi';
+export { marwa } from './ragas/marwa';
+export { darbari_kanada } from './ragas/darbari_kanada';
+export { puriya_dhanashri } from './ragas/puriya_dhanashri';
+export { malkauns } from './ragas/malkauns';
+export { todi } from './ragas/todi';
+export { bhairavi } from './ragas/bhairavi';
+export { kedar } from './ragas/kedar';
+export { hameer } from './ragas/hameer';
+export { sohini } from './ragas/sohini';
 
 // ---------------------------------------------------------------------------
 // Query functions
