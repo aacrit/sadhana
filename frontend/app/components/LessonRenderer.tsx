@@ -433,7 +433,7 @@ export default function LessonRenderer({
     <div
       className={styles.lessonPage}
       data-raga={ragaId ?? lesson.raga_id}
-      role="main"
+      role="region"
       aria-label={`Lesson: ${lesson.meta.title}`}
     >
       {/* Voice waveform background */}
