@@ -60,12 +60,16 @@ export default function TanpuraViz({
   const timeRef = useRef(0);
   const reducedMotionRef = useRef(false);
 
-  // Check theme from DOM
-  const getColors = useCallback(() => {
-    if (typeof document === 'undefined') return STRING_COLORS_NIGHT;
+  // Check theme from DOM — re-reads on data-theme attribute change
+  const colorsRef = useRef(STRING_COLORS_NIGHT);
+
+  const refreshColors = useCallback(() => {
+    if (typeof document === 'undefined') return;
     const theme = document.documentElement.getAttribute('data-theme');
-    return theme === 'day' ? STRING_COLORS_DAY : STRING_COLORS_NIGHT;
+    colorsRef.current = theme === 'day' ? STRING_COLORS_DAY : STRING_COLORS_NIGHT;
   }, []);
+
+  const getColors = useCallback(() => colorsRef.current, []);
 
   // Compute how "in tune" the voice is (0 = silent/off, 1 = perfectly aligned)
   const getAlignment = useCallback(() => {
@@ -89,6 +93,14 @@ export default function TanpuraViz({
       reducedMotionRef.current = e.matches;
     };
     motionQuery.addEventListener('change', handleMotionChange);
+
+    // Watch for theme changes to refresh colors
+    refreshColors();
+    const themeObserver = new MutationObserver(() => refreshColors());
+    themeObserver.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['data-theme'],
+    });
 
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -190,8 +202,9 @@ export default function TanpuraViz({
       cancelAnimationFrame(animationRef.current);
       resizeObserver.disconnect();
       motionQuery.removeEventListener('change', handleMotionChange);
+      themeObserver.disconnect();
     };
-  }, [active, voiceAmplitude, partialFrequencies, getColors, getAlignment]);
+  }, [active, voiceAmplitude, partialFrequencies, getColors, getAlignment, refreshColors]);
 
   return (
     <canvas

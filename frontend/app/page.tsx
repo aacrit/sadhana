@@ -5,7 +5,7 @@
  * grid, the Freeform void portal below, the current time-of-day raga,
  * the user's streak, and the tanpura waveform as an ambient background.
  *
- * Auth state is handled by the persistent Navbar (layout.tsx).
+ * Auth state is handled by the AuthPill (layout.tsx).
  * No inline auth banner.
  *
  * Per-card color worlds: Beginner (saffron), Explorer (green),
@@ -201,8 +201,8 @@ export default function HomePage() {
   const streak = profile?.streak ?? 0;
   const xp = profile?.xp ?? 0;
 
-  // Suppress unused variable warnings — isGuest and loading are
-  // consumed by the Navbar (via layout.tsx), not on the page directly.
+  // Suppress unused variable warnings — isGuest is consumed
+  // by the AuthPill (via layout.tsx), not on the page directly.
   void isGuest;
 
   // Loading state
@@ -318,7 +318,7 @@ export default function HomePage() {
               </p>
               {isLocked && (
                 <span className={styles.journeyLockMessage}>
-                  Coming soon — reach Sadhaka level
+                  Coming soon — reach {journey.minLevel <= 4 ? 'Sadhaka' : 'Varistha'} level
                 </span>
               )}
             </>
@@ -328,13 +328,16 @@ export default function HomePage() {
             return (
               <motion.div
                 key={journey.id}
-                className={`${styles.journeyCard} ${styles.journeyCardLocked} ${cardClass}`}
                 variants={cardVariants}
                 role="listitem"
-                aria-disabled="true"
-                tabIndex={0}
               >
-                {cardContent}
+                <Link
+                  href={journey.path}
+                  className={`${styles.journeyCard} ${styles.journeyCardLocked} ${cardClass}`}
+                  style={{ textDecoration: 'none', color: 'inherit' }}
+                >
+                  {cardContent}
+                </Link>
               </motion.div>
             );
           }

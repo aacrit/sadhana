@@ -18,6 +18,7 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
+import { usePathname } from 'next/navigation';
 import { useAuth } from '../lib/auth';
 import { supabase } from '../lib/supabase';
 
@@ -35,8 +36,12 @@ type ScriptMode = 'devanagari' | 'romanized';
 // ---------------------------------------------------------------------------
 
 export default function ScriptToggle() {
+  const pathname = usePathname();
   const { user } = useAuth();
   const [script, setScript] = useState<ScriptMode>(DEFAULT_SCRIPT);
+
+  // Hide on auth pages
+  if (pathname.startsWith('/auth')) return null;
 
   // On mount: read from localStorage and apply to documentElement
   useEffect(() => {
@@ -104,7 +109,7 @@ export default function ScriptToggle() {
         position: 'fixed',
         bottom: 'var(--space-6)',
         right: 'var(--space-4)',
-        zIndex: 'var(--z-sticky)',
+        zIndex: 50,
         minWidth: 'var(--touch-min)',
         minHeight: 'var(--touch-min)',
         display: 'flex',
@@ -118,7 +123,7 @@ export default function ScriptToggle() {
           ? 'var(--font-devanagari)'
           : 'var(--font-sans)',
         fontSize: script === 'romanized' ? 'var(--text-lg)' : 'var(--text-base)',
-        fontWeight: 'var(--weight-medium)' as unknown as number,
+        fontWeight: 500,
         cursor: 'pointer',
         transition: `border-color var(--dur-fast) var(--ease-out),
                      color var(--dur-fast) var(--ease-out),
