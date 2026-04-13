@@ -1,6 +1,6 @@
 # Audio Engine
 
-Last updated: 2026-04-11
+Last updated: 2026-04-13
 
 Voice capture, pitch detection, tanpura synthesis, and swara playback. Everything runs in the browser. $0 operational cost.
 
@@ -369,7 +369,7 @@ Echo cancellation modifies the frequency spectrum, which corrupts pitch detectio
 | Ni_k | 16/9 | 996.09 | 465.12 | -3.91 |
 | Ni | 15/8 | 1088.27 | 490.55 | -11.73 |
 
-Note: Ni_k in `swaras.ts` uses ratio 9/5 (1017.60 cents) while `just-intonation.ts` uses 16/9 (996.09 cents). The shruti system accounts for both variants; raga context determines which is used.
+Note: Ni_k in `swaras.ts` uses ratio 16/9 (996.09 cents), matching `just-intonation.ts`. Both files agree. The 9/5 variant (1017.60 cents) exists in the shruti system for raga contexts that require it (e.g., some Bhairavi traditions), but the principal swara definition uses 16/9.
 
 ---
 
@@ -469,7 +469,7 @@ interface SwaraEvent {
 
 ### Swara Event Detection
 
-A swara must be stable for >= 300ms (`SWARA_DEBOUNCE_MS`) before emitting a SwaraEvent. If the student holds the same swara for > 2000ms (`SAME_SWARA_REPEAT_MS`), a repeat event is emitted. On silence, any pending swara that met the debounce threshold is emitted.
+A swara must be stable for >= 60ms (`SWARA_DEBOUNCE_MS`) before emitting a SwaraEvent. If the student holds the same swara for > 2000ms (`SAME_SWARA_REPEAT_MS`), a repeat event is emitted. On silence, any pending swara that met the debounce threshold is emitted.
 
 ### Harmony Strength
 
@@ -597,7 +597,9 @@ Same tiered pattern for tabla. Tier 1 is the existing synthesised tabla (always 
 
 ### lesson-audio.ts Integration
 
-The `useLessonAudio` hook creates a `HarmoniumPlayer` instance on first swara playback request. `loadHigherTiers()` is called immediately after construction (non-blocking). All `playSwara` and `playPhrase` calls delegate to the HarmoniumPlayer, which uses the highest available tier. If HarmoniumPlayer construction fails (e.g. no AudioContext), the hook falls back to direct `swara-voice.ts` calls.
+The `useLessonAudio` hook accepts a `timbre: TantriTimbre` parameter (`'harmonium'` | `'voice-male'` | `'voice-female'`, default `'harmonium'`). When `timbre` is `'voice-male'` or `'voice-female'`, playback routes to `engine/synthesis/voice` (`playVocalSwaraNote`) with the matching `voiceType`. When `timbre` is `'harmonium'`, the hook creates a `HarmoniumPlayer` instance on first swara playback request. `loadHigherTiers()` is called immediately after construction (non-blocking). All `playSwara` and `playPhrase` calls delegate to the HarmoniumPlayer, which uses the highest available tier. If HarmoniumPlayer construction fails (e.g. no AudioContext), the hook falls back to direct `swara-voice.ts` calls.
+
+Signature: `useLessonAudio(sa_hz?, ragaId, timbre?): LessonAudioControls`. All journey pages pass `timbre` from `useTimbreSelection()`.
 
 ### PWA Offline Caching
 
