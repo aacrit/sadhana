@@ -22,6 +22,8 @@ import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getRagaById } from '@/engine/theory';
 import type { Raga } from '@/engine/theory/types';
+import { VoicePipeline } from '@/engine/voice/pipeline';
+import type { VoiceEvent } from '@/engine/voice/pipeline';
 import VoiceVisualization from './VoiceVisualization';
 import TanpuraViz from './TanpuraViz';
 import type { PracticePhase, VoiceFeedback, SessionData } from '../lib/types';
@@ -171,10 +173,52 @@ export default function PracticeSession({
     }
   }, [phase, completeSession]);
 
-  // Expose triggerPakadMoment for voice pipeline integration
-  // (In production, the voice pipeline would call this via a ref or context)
-  void triggerPakadMoment;
-  void setFeedback;
+  // Voice pipeline — starts when active, stops otherwise
+  const pipelineRef = useRef<VoicePipeline | null>(null);
+  const triggerPakadRef = useRef(triggerPakadMoment);
+  triggerPakadRef.current = triggerPakadMoment;
+  const setFeedbackRef = useRef(setFeedback);
+  setFeedbackRef.current = setFeedback;
+
+  useEffect(() => {
+    if (phase !== 'active') {
+      pipelineRef.current?.stop();
+      pipelineRef.current = null;
+      return;
+    }
+
+    const pipeline = new VoicePipeline({
+      sa_hz: 261.63,
+      onPitch: (event: VoiceEvent) => {
+        setFeedbackRef.current((prev) => ({
+          ...prev,
+          hz: event.hz ?? null,
+          centsDeviation: event.deviationCents ?? 0,
+          detectedSwara: event.swara ?? null,
+          confidence: event.clarity ?? 0,
+          pitchHistory: event.pitchHistory ?? prev.pitchHistory,
+        }));
+      },
+      onSilence: () => {
+        setFeedbackRef.current((prev) => ({
+          ...prev,
+          hz: null,
+          confidence: 0,
+        }));
+      },
+      onPakadDetected: (match) => {
+        triggerPakadRef.current(match.sargamNotation);
+      },
+    });
+
+    pipeline.start().catch(() => {});
+    pipelineRef.current = pipeline;
+
+    return () => {
+      pipeline.stop();
+      pipelineRef.current = null;
+    };
+  }, [phase]);
 
   // -- Fallback for unknown raga --
   if (!raga) {
@@ -213,7 +257,12 @@ export default function PracticeSession({
         <>
           {/* Header: raga name + timer */}
           <header className={styles.sessionHeader}>
-            <h1 className={styles.ragaName}>{raga.name}</h1>
+            <div>
+              <h1 className={`${styles.ragaName} raga-name`}>{raga.name}</h1>
+              {raga.nameDevanagari && (
+                <span className={`${styles.ragaDevanagari} devanagari-only`}>{raga.nameDevanagari}</span>
+              )}
+            </div>
             <time className={styles.timer} aria-label="Session timer">
               {formatTime(elapsed)}
             </time>
@@ -306,13 +355,23 @@ export default function PracticeSession({
             aria-live="polite"
           >
             <motion.h2
-              className={styles.pakadRaga}
+              className={`${styles.pakadRaga} raga-name`}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 1, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
             >
               {raga.name}
             </motion.h2>
+            {raga.nameDevanagari && (
+              <motion.span
+                className={`${styles.pakadDevanagari} devanagari-only`}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.8, delay: 0.5 }}
+              >
+                {raga.nameDevanagari}
+              </motion.span>
+            )}
             <motion.p
               className={styles.pakadSargam}
               initial={{ opacity: 0 }}

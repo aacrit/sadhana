@@ -1,0 +1,271 @@
+/**
+ * scholar.module.css — Scholar (Varistha) journey locked placeholder
+ *
+ * Varistha palette: deep lapis ground, gold zarr-kashi hairlines.
+ * --level-varistha: #1E3A5F
+ * --gold:           #D4AF37 (zarr-kashi only — hairlines, single-point accents)
+ *
+ * This page is aspirational, not functional.
+ * No buttons. No actions. One destination: return to practice.
+ */
+
+/* -- Page layout ------------------------------------------------------- */
+
+.page {
+  position: relative;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--space-6) var(--space-4) var(--space-16);
+  max-width: var(--max-width);
+  margin: 0 auto;
+}
+
+/* -- Back navigation --------------------------------------------------- */
+
+.backLink {
+  align-self: flex-start;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  color: var(--text-3);
+  text-decoration: none;
+  padding: var(--space-2);
+  margin-bottom: var(--space-8);
+  border-radius: var(--radius-sm);
+  min-height: var(--touch-min);
+  min-width: var(--touch-min);
+  transition: color var(--dur-fast) var(--ease-out);
+}
+
+.backLink:hover {
+  color: var(--text-2);
+}
+
+.backLink:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* -- Header ------------------------------------------------------------ */
+
+.header {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-12);
+}
+
+/* Level badge — "Varistha / वरिष्ठ" label above the name */
+.levelBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  color: rgba(212, 175, 55, 0.6);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-widest);
+  border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+  padding-bottom: var(--space-2);
+}
+
+/* Journey name — Cormorant Garamond, lapis-tinted white */
+.journeyName {
+  font-family: var(--font-serif);
+  font-size: var(--text-3xl);
+  font-weight: var(--weight-light);
+  color: #D8DEE8;
+  letter-spacing: var(--tracking-tight);
+  line-height: var(--leading-tight);
+}
+
+/* Devanagari secondary label */
+.journeyDevanagari {
+  font-family: var(--font-devanagari);
+  font-size: var(--text-lg);
+  font-weight: var(--weight-regular);
+  color: rgba(212, 175, 55, 0.45);
+}
+
+/* English tertiary label */
+.journeyEnglish {
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-widest);
+}
+
+/* -- Feature list ------------------------------------------------------ */
+
+.featureList {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-px);
+  margin-bottom: var(--space-12);
+  border-top: 1px solid rgba(212, 175, 55, 0.1);
+  border-bottom: 1px solid rgba(212, 175, 55, 0.1);
+}
+
+.featureItem {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-4);
+  padding: var(--space-5) var(--space-2);
+  border-bottom: 1px solid rgba(212, 175, 55, 0.06);
+}
+
+.featureItem:last-child {
+  border-bottom: none;
+}
+
+/* Gold hairline marker — zarr-kashi, single point */
+.featureMark {
+  flex-shrink: 0;
+  margin-top: 6px;
+  width: 4px;
+  height: 4px;
+  border-radius: var(--radius-full);
+  background: transparent;
+  border: 1px solid rgba(212, 175, 55, 0.5);
+}
+
+.featureText {
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  color: var(--text-2);
+  line-height: var(--leading-relaxed);
+}
+
+/* -- Gate panel -------------------------------------------------------- */
+
+.gatePanel {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-8) var(--space-6);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(170deg, #0D1520 0%, #142235 60%, #1E3A5F 100%);
+  border: 1px solid rgba(212, 175, 55, 0.15);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Jali lattice — lapis-tinted, barely visible */
+.gatePanel::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cpath d='M24 0L30 6L48 6L42 12L48 18L42 18L48 24L42 30L48 42L42 42L36 48L30 42L24 48L18 42L12 48L6 42L0 48L0 42L6 36L0 30L0 24L6 18L0 12L6 6L0 6L6 0L12 6L18 0L24 6L30 0Z' fill='none' stroke='%237A9EC8' stroke-width='0.5'/%3E%3Cpath d='M24 12L30 18L36 12L42 18L36 24L42 30L36 36L30 30L24 36L18 30L12 36L6 30L12 24L6 18L12 12L18 18Z' fill='none' stroke='%237A9EC8' stroke-width='0.5'/%3E%3C/svg%3E");
+  background-size: var(--jali-size);
+  background-repeat: repeat;
+  z-index: 0;
+}
+
+/* Gold zarr-kashi hairline top rule */
+.gatePanel::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 10%;
+  right: 10%;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(212, 175, 55, 0.4) 30%,
+    rgba(212, 175, 55, 0.4) 70%,
+    transparent
+  );
+  z-index: 1;
+}
+
+.gateLockIcon {
+  position: relative;
+  z-index: 1;
+  color: rgba(212, 175, 55, 0.35);
+}
+
+.gateTitle {
+  position: relative;
+  z-index: 1;
+  font-family: var(--font-serif);
+  font-size: var(--text-md);
+  font-weight: var(--weight-light);
+  color: #D8DEE8;
+  letter-spacing: var(--tracking-wide);
+}
+
+.gateDescription {
+  position: relative;
+  z-index: 1;
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  color: var(--text-3);
+  line-height: var(--leading-relaxed);
+  max-width: 360px;
+}
+
+/* Mono level requirement */
+.gateLevel {
+  position: relative;
+  z-index: 1;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: rgba(212, 175, 55, 0.5);
+  letter-spacing: var(--tracking-wide);
+}
+
+/* Back to practice CTA */
+.practiceLink {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+  padding: var(--space-3) var(--space-6);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: transparent;
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  color: var(--text-2);
+  text-decoration: none;
+  min-height: var(--touch-min);
+  transition: border-color var(--dur-fast) var(--ease-out),
+              color var(--dur-fast) var(--ease-out);
+}
+
+.practiceLink:hover {
+  border-color: rgba(212, 175, 55, 0.3);
+  color: var(--text);
+}
+
+.practiceLink:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* -- Reduced motion ---------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .backLink,
+  .practiceLink {
+    transition: none;
+  }
+}

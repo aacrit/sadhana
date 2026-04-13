@@ -186,9 +186,11 @@ export default function VoiceVisualization({
 
     const dpr = typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1;
     const rect = canvas.getBoundingClientRect();
-    canvas.width = rect.width * dpr;
-    canvas.height = rect.height * dpr;
-    ctx.scale(dpr, dpr);
+    if (canvas.width !== rect.width * dpr || canvas.height !== rect.height * dpr) {
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      ctx.scale(dpr, dpr);
+    }
 
     const w = rect.width;
     const h = rect.height;

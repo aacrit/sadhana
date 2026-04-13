@@ -1096,16 +1096,22 @@ export default function BeginnerPage() {
       </motion.div>
 
       {/* Page title */}
-      <motion.h1 className={homeStyles.title} variants={fadeUp}>
-        Daily Riyaz
+      <motion.h1 className={`${homeStyles.title} raga-name`} variants={fadeUp}>
+        Shishya
       </motion.h1>
+      <motion.span className={`${homeStyles.titleDevanagari} swara-text devanagari-only`} variants={fadeUp}>
+        {'\u0936\u093F\u0937\u094D\u092F'}
+      </motion.span>
+      <motion.span className={homeStyles.titleEnglish} variants={fadeUp}>
+        Daily Riyaz
+      </motion.span>
 
       {/* Today's riyaz card */}
       <motion.section className={homeStyles.riyazCard} variants={fadeUp} aria-label="Today's practice">
         <span className={homeStyles.riyazLabel}>
           {riyazDone ? 'Riyaz complete' : `Today\u2019s riyaz`}
         </span>
-        <h2 className={homeStyles.riyazRaga}>{todayRaga.name}</h2>
+        <h2 className={`${homeStyles.riyazRaga} raga-name`}>{todayRaga.name}</h2>
         <p className={homeStyles.riyazDescription}>
           {timeLabel} raga &middot; Prahara {todayRaga.prahara.join(', ')}
         </p>

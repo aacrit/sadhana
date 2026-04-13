@@ -104,6 +104,35 @@ export interface TantriProps {
 /** CSS variable name → resolved hex color (cached per render). */
 const COLOR_CACHE: Record<string, string> = {};
 
+/**
+ * Resolved value of --font-sans (read once from computed style, cached).
+ * Canvas cannot consume CSS variables directly; we read it once and store it.
+ * Falls back to system-ui when the document is unavailable (SSR).
+ */
+let CANVAS_FONT_FAMILY = 'system-ui, sans-serif';
+
+if (typeof document !== 'undefined') {
+  const observer = new MutationObserver(() => {
+    for (const key of Object.keys(COLOR_CACHE)) {
+      delete COLOR_CACHE[key];
+    }
+    // Re-resolve font on theme/class change (Next.js may swap the variable)
+    CANVAS_FONT_FAMILY =
+      getComputedStyle(document.documentElement)
+        .getPropertyValue('--font-sans')
+        .trim() || 'system-ui, sans-serif';
+  });
+  observer.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ['data-theme', 'data-raga', 'class'],
+  });
+  // Initial read (executes after module load, before first render)
+  CANVAS_FONT_FAMILY =
+    getComputedStyle(document.documentElement)
+      .getPropertyValue('--font-sans')
+      .trim() || 'system-ui, sans-serif';
+}
+
 function resolveColor(cssVar: string, fallback: string): string {
   if (COLOR_CACHE[cssVar]) return COLOR_CACHE[cssVar]!;
 
@@ -195,7 +224,7 @@ function renderString(
 
   // --- Draw the waveform ---
   if (s.amplitude > 0.005) {
-    const numPoints = Math.max(100, Math.floor(stringWidth / 2));
+    const numPoints = Math.min(250, Math.max(100, Math.floor(stringWidth / 2)));
     const waveform = generateStringWaveform(s, numPoints, time);
     const maxDisplacement = 12 * dpr; // Max visual displacement in pixels
 
@@ -218,12 +247,14 @@ function renderString(
     ctx.stroke();
 
     // --- Glow effect for perfect pitch ---
+    // Uses shadowBlur instead of ctx.filter to avoid software rasterization.
     if (s.accuracyBand === 'perfect' && s.amplitude > 0.3) {
       ctx.beginPath();
       ctx.strokeStyle = color;
-      ctx.globalAlpha = opacity * 0.3;
-      ctx.lineWidth = (baseWidth + 4) * dpr;
-      ctx.filter = `blur(${4 * dpr}px)`;
+      ctx.globalAlpha = opacity * 0.4;
+      ctx.lineWidth = (baseWidth + 2) * dpr;
+      ctx.shadowColor = color;
+      ctx.shadowBlur = 8 * dpr;
 
       for (let i = 0; i < numPoints; i++) {
         const x = x0 + (i / (numPoints - 1)) * stringWidth;
@@ -235,7 +266,8 @@ function renderString(
         }
       }
       ctx.stroke();
-      ctx.filter = 'none';
+      ctx.shadowBlur = 0;
+      ctx.shadowColor = 'transparent';
     }
   } else {
     // Resting string — simple horizontal line
@@ -265,7 +297,7 @@ function renderString(
 
   // --- Swara label ---
   ctx.save();
-  ctx.font = `${11 * dpr}px Inter, sans-serif`;
+  ctx.font = `${11 * dpr}px ${CANVAS_FONT_FAMILY}`;
   ctx.textAlign = 'right';
   ctx.textBaseline = 'middle';
   ctx.fillStyle = s.amplitude > 0.01 ? color : resolveColor('--text-3', '#666666');

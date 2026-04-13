@@ -39,8 +39,9 @@ import styles from './styles/home.module.css';
 const JOURNEYS: JourneyMeta[] = [
   {
     id: 'beginner',
-    name: 'Beginner',
-    nameSanskrit: 'Arambh',
+    name: 'Shishya',
+    nameDevanagari: '\u0936\u093F\u0937\u094D\u092F',
+    nameEnglish: 'Beginner',
     description:
       'Guided daily riyaz. Discover your Sa, sing with the tanpura, learn to hear the swaras.',
     accessible: true,
@@ -49,8 +50,9 @@ const JOURNEYS: JourneyMeta[] = [
   },
   {
     id: 'explorer',
-    name: 'Explorer',
-    nameSanskrit: 'Anveshana',
+    name: 'Sadhaka',
+    nameDevanagari: '\u0938\u093E\u0927\u0915',
+    nameEnglish: 'Explorer',
     description:
       'Browse ragas by time and emotion. Ear training exercises. Build your phrase library.',
     accessible: true,
@@ -59,8 +61,9 @@ const JOURNEYS: JourneyMeta[] = [
   },
   {
     id: 'scholar',
-    name: 'Scholar',
-    nameSanskrit: 'Vidvan',
+    name: 'Varistha',
+    nameDevanagari: '\u0935\u0930\u093F\u0937\u094D\u0920',
+    nameEnglish: 'Scholar',
     description:
       'Full raga grammar. Shruti analysis. Deep theory. The engine speaks to you directly.',
     accessible: false,
@@ -69,8 +72,9 @@ const JOURNEYS: JourneyMeta[] = [
   },
   {
     id: 'master',
-    name: 'Master',
-    nameSanskrit: 'Acharya',
+    name: 'Guru',
+    nameDevanagari: '\u0917\u0941\u0930\u0941',
+    nameEnglish: 'Master',
     description:
       'Composition. Phrase generation. Teaching tools. The engine becomes your instrument.',
     accessible: false,
@@ -243,7 +247,10 @@ export default function HomePage() {
       {/* Today's raga */}
       <div className={styles.todayRaga}>
         <span className={styles.todayLabel}>Today&rsquo;s raga</span>
-        <h2 className={styles.todayName}>{todayRaga.name}</h2>
+        <h2 className={`${styles.todayName} raga-name`}>{todayRaga.name}</h2>
+        {todayRaga.nameDevanagari && (
+          <span className={`${styles.todayDevanagari} devanagari-only`}>{todayRaga.nameDevanagari}</span>
+        )}
       </div>
 
       {/* XP display (only if signed in and has XP) */}
@@ -299,9 +306,12 @@ export default function HomePage() {
                   />
                 </motion.div>
               )}
-              <span className={styles.journeyName}>{journey.name}</span>
-              <span className={styles.journeySanskrit}>
-                {journey.nameSanskrit}
+              <span className={`${styles.journeyName} raga-name`}>{journey.name}</span>
+              <span className={`${styles.journeyDevanagari} swara-text devanagari-only`}>
+                {journey.nameDevanagari}
+              </span>
+              <span className={styles.journeyEnglish}>
+                {journey.nameEnglish}
               </span>
               <p className={styles.journeyDescription}>
                 {journey.description}
@@ -400,8 +410,9 @@ export default function HomePage() {
           >
             <FreeformIcon size={40} color="var(--text-3)" />
           </motion.div>
-          <span className={styles.freeformName}>Freeform Riyaz</span>
-          <span className={styles.freeformSanskrit}>Swatantra</span>
+          <span className={`${styles.freeformName} raga-name`}>Swatantra Riyaz</span>
+          <span className={`${styles.freeformDevanagari} swara-text devanagari-only`}>{'\u0938\u094D\u0935\u0924\u0902\u0924\u094D\u0930 \u0930\u093F\u092F\u093E\u091C\u093C'}</span>
+          <span className={styles.freeformEnglish}>Freeform</span>
           <p className={styles.freeformDescription}>
             No goals. No exercises. Just you and the raga.
           </p>
