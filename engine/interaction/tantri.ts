@@ -160,11 +160,19 @@ export interface TantriField {
  * Event produced when a string is triggered by touch/click.
  * The synthesis layer consumes this to produce sound.
  */
+/**
+ * Instrument timbre for synthesis selection.
+ * Controls which synthesis engine responds to the play event.
+ */
+export type TantriTimbre = 'harmonium' | 'voice-male' | 'voice-female';
+
 export interface TantriPlayEvent {
   readonly swara: Swara;
   readonly octave: Octave;
   readonly hz: number;
   readonly velocity: number; // 0–1, maps to volume
+  /** Timbre selection — determines which synthesis engine plays the note */
+  readonly timbre?: TantriTimbre;
 }
 
 /**
