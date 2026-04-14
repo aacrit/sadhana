@@ -1,0 +1,1246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sādhanā — Comprehensive Product Overview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600&family=Noto+Serif+Devanagari:wght@400;600&display=swap" rel="stylesheet">
+<style>
+/* ================================================================
+   Sadhana Investor Document — Comprehensive Edition
+   Print to PDF from browser for sharing.
+   Target: 25-30 pages at A4.
+   ================================================================ */
+
+@page { size: A4; margin: 2cm 2.5cm; }
+@media print {
+  body { font-size: 10pt; }
+  .page-break { page-break-before: always; }
+  .no-break { page-break-inside: avoid; }
+  h2 { page-break-after: avoid; }
+  table { page-break-inside: avoid; }
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Inter', -apple-system, sans-serif;
+  font-size: 11pt;
+  line-height: 1.65;
+  color: #1a1a1a;
+  max-width: 210mm;
+  margin: 0 auto;
+  padding: 2cm 2.5cm;
+  background: #fff;
+}
+
+/* -- Cover -------------------------------------------------------- */
+.cover {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 92vh;
+  text-align: center;
+  padding: 3rem 0;
+}
+.cover-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 4.2rem;
+  font-weight: 300;
+  color: #0A1A14;
+  letter-spacing: 0.06em;
+  margin-bottom: 0.4rem;
+}
+.cover-devanagari {
+  font-family: 'Noto Serif Devanagari', serif;
+  font-size: 2rem;
+  color: #4a4a4a;
+  margin-bottom: 1.2rem;
+}
+.cover-tagline {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.35rem;
+  font-weight: 300;
+  font-style: italic;
+  color: #4a4a4a;
+  margin-bottom: 2.5rem;
+}
+.cover-strings {
+  width: 280px;
+  height: 40px;
+  margin: 0 auto 2.5rem;
+}
+.cover-subtitle {
+  font-size: 0.95rem;
+  color: #6a6a6a;
+  max-width: 500px;
+  line-height: 1.75;
+  margin-bottom: 2rem;
+}
+.cover-meta {
+  font-size: 0.82rem;
+  color: #999;
+  font-family: 'IBM Plex Mono', monospace;
+}
+.cover-meta span { margin: 0 0.75rem; }
+
+/* -- Headings ----------------------------------------------------- */
+h2 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.65rem;
+  font-weight: 400;
+  color: #0A1A14;
+  margin-top: 2.5rem;
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.3rem;
+  border-bottom: 1px solid #e0e0e0;
+}
+.accent-bar {
+  width: 40px;
+  height: 3px;
+  background: #E8871E;
+  margin: 0.4rem 0 1rem;
+  border-radius: 2px;
+}
+h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-top: 1.6rem;
+  margin-bottom: 0.5rem;
+}
+h4 {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #2a2a2a;
+  margin-top: 1.2rem;
+  margin-bottom: 0.3rem;
+}
+
+/* -- Text --------------------------------------------------------- */
+p { margin-bottom: 0.8rem; color: #3a3a3a; }
+ul, ol { margin: 0.5rem 0 1rem 1.5rem; color: #3a3a3a; }
+li { margin-bottom: 0.3rem; }
+strong { color: #1a1a1a; }
+em { font-style: italic; }
+.devanagari { font-family: 'Noto Serif Devanagari', serif; }
+.mono { font-family: 'IBM Plex Mono', monospace; font-size: 0.88em; }
+.raga-name { font-family: 'Cormorant Garamond', serif; font-style: italic; }
+.saffron { color: #E8871E; }
+.muted { color: #8a8a8a; font-size: 0.85rem; }
+
+/* -- Metrics ------------------------------------------------------ */
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.8rem;
+  margin: 1.2rem 0 1.5rem;
+}
+.metric {
+  text-align: center;
+  padding: 0.9rem 0.5rem;
+  background: linear-gradient(135deg, #f8f8f8, #fff);
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+}
+.metric-value {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 1.5rem;
+  color: #0A1A14;
+  display: block;
+}
+.metric-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #8a8a8a;
+  margin-top: 0.2rem;
+  display: block;
+}
+
+/* -- Tables ------------------------------------------------------- */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.8rem 0 1.2rem;
+  font-size: 0.88rem;
+}
+th {
+  background: #0A1A14;
+  color: #fff;
+  font-weight: 500;
+  text-align: left;
+  padding: 0.45rem 0.7rem;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+td {
+  padding: 0.4rem 0.7rem;
+  border-bottom: 1px solid #e8e8e8;
+  color: #3a3a3a;
+  vertical-align: top;
+}
+tr:nth-child(even) td { background: #fafafa; }
+
+/* -- Architecture diagram ----------------------------------------- */
+.arch-diagram {
+  background: #0A1A14;
+  color: #fff;
+  padding: 1.5rem;
+  border-radius: 6px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.72rem;
+  line-height: 1.7;
+  margin: 1rem 0;
+}
+.arch-layer {
+  padding: 0.55rem 0.9rem;
+  margin: 0.35rem 0;
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 4px;
+}
+.arch-engine { border-color: #E8871E; }
+.arch-journey { border-color: #2D6A4F; }
+.arch-presentation { border-color: #D4AF37; }
+.arch-data { border-color: #1E3A5F; }
+.arch-label {
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  opacity: 0.7;
+}
+.arch-arrow {
+  text-align: center;
+  font-size: 0.75rem;
+  opacity: 0.5;
+  padding: 0.1rem 0;
+}
+
+/* -- Flow diagram ------------------------------------------------- */
+.flow {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  margin: 0.8rem 0;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.72rem;
+  color: #3a3a3a;
+}
+.flow-step {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.7rem;
+  background: #f5f5f5;
+  border-radius: 4px;
+  border-left: 3px solid #2D6A4F;
+}
+.flow-arrow { text-align: center; color: #aaa; font-size: 0.8rem; }
+
+/* -- Raga level grid ---------------------------------------------- */
+.level-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.7rem;
+  margin: 0.8rem 0;
+}
+.level-card {
+  padding: 0.7rem 0.9rem;
+  border-radius: 4px;
+  border: 1px solid #e0e0e0;
+}
+.level-card h4 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin: 0 0 0.2rem;
+}
+.level-card p {
+  font-size: 0.78rem;
+  margin: 0;
+  color: #6a6a6a;
+}
+.level-shishya { border-left: 3px solid #0A1A14; }
+.level-sadhaka { border-left: 3px solid #2D6A4F; }
+.level-varistha { border-left: 3px solid #1E3A5F; }
+.level-guru { border-left: 3px solid #D4AF37; }
+
+/* -- Pre blocks --------------------------------------------------- */
+pre {
+  background: #f5f5f5;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  padding: 0.9rem 1rem;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.76rem;
+  line-height: 1.55;
+  overflow-x: auto;
+  margin: 0.8rem 0;
+  color: #1a1a1a;
+}
+
+/* -- Callout boxes ------------------------------------------------ */
+.callout {
+  background: #FFF8F0;
+  border-left: 3px solid #E8871E;
+  padding: 0.8rem 1rem;
+  margin: 1rem 0;
+  font-size: 0.9rem;
+  border-radius: 0 4px 4px 0;
+}
+.callout-blue {
+  background: #F0F4FF;
+  border-left: 3px solid #1E3A5F;
+  padding: 0.8rem 1rem;
+  margin: 1rem 0;
+  font-size: 0.9rem;
+  border-radius: 0 4px 4px 0;
+}
+
+/* -- Footer ------------------------------------------------------- */
+.footer {
+  margin-top: 3rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e0e0e0;
+  text-align: center;
+  font-size: 0.8rem;
+  color: #8a8a8a;
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+}
+
+/* -- TOC ---------------------------------------------------------- */
+.toc {
+  margin: 1rem 0 2rem;
+  padding: 0;
+  list-style: none;
+  font-size: 0.92rem;
+}
+.toc li {
+  padding: 0.2rem 0;
+  border-bottom: 1px dotted #ddd;
+  display: flex;
+  justify-content: space-between;
+}
+.toc li span:last-child {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.8rem;
+  color: #999;
+}
+
+/* -- Page break utility ------------------------------------------- */
+.page-break { height: 1px; }
+@media print { .page-break { page-break-before: always; } }
+</style>
+</head>
+<body>
+
+<!-- ================================================================
+     COVER
+     ================================================================ -->
+<div class="cover">
+  <div class="cover-title">S&#x101;dhan&#x101;</div>
+  <div class="cover-devanagari">&#x0938;&#x093E;&#x0927;&#x0928;&#x093E;</div>
+  <div class="cover-tagline">Disciplined practice toward mastery</div>
+
+  <!-- Tantri string accent -->
+  <svg class="cover-strings" width="280" height="40" viewBox="0 0 280 40" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <radialGradient id="sg" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="#E8871E" stop-opacity="0.5"/>
+        <stop offset="100%" stop-color="#E8871E" stop-opacity="0"/>
+      </radialGradient>
+      <linearGradient id="sf" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0%" stop-opacity="1"/>
+        <stop offset="72%" stop-opacity="1"/>
+        <stop offset="100%" stop-opacity="0"/>
+      </linearGradient>
+      <mask id="sm"><rect x="10" y="0" width="262" height="40" fill="url(#sf)"/></mask>
+    </defs>
+    <g mask="url(#sm)">
+      <line x1="10" y1="6" x2="270" y2="6" stroke="#0A1A14" stroke-width="0.6" opacity="0.20"/>
+      <line x1="10" y1="11" x2="270" y2="11" stroke="#0A1A14" stroke-width="0.6" opacity="0.20"/>
+      <line x1="10" y1="17" x2="270" y2="17" stroke="#0A1A14" stroke-width="0.7" opacity="0.25"/>
+      <line x1="10" y1="25" x2="270" y2="25" stroke="#0A1A14" stroke-width="1.0" opacity="0.30"/>
+      <path d="M 10 35 Q 75 29, 140 35 Q 205 41, 270 35" stroke="#E8871E" stroke-width="1.5" fill="none" opacity="0.35"/>
+      <line x1="10" y1="35" x2="270" y2="35" stroke="#0A1A14" stroke-width="1.5" opacity="0.50"/>
+    </g>
+    <circle cx="10" cy="35" r="5" fill="url(#sg)"/>
+    <circle cx="10" cy="35" r="2" fill="#E8871E"/>
+  </svg>
+
+  <div class="cover-subtitle">
+    A music physics engine for Hindustani classical vocal training.<br>
+    Real-time voice feedback. 30 ragas. 39 structured lessons.<br>
+    Zero operational cost. The world's first browser-based<br>
+    Indian classical music learning platform.
+  </div>
+  <div class="cover-meta">
+    <span>April 2026</span> | <span>Confidential</span> | <span>Comprehensive Product Overview</span>
+  </div>
+</div>
+
+<!-- ================================================================
+     TABLE OF CONTENTS
+     ================================================================ -->
+<div class="page-break"></div>
+<h2>Table of Contents</h2>
+<div class="accent-bar"></div>
+<ol class="toc">
+  <li><span>Executive Summary</span><span>3</span></li>
+  <li><span>The Problem &amp; Market Opportunity</span><span>4</span></li>
+  <li><span>Product Vision &amp; Philosophy</span><span>5</span></li>
+  <li><span>System Architecture</span><span>6</span></li>
+  <li><span>The Music Engine &mdash; Deep Dive</span><span>7</span></li>
+  <li><span>The Voice Pipeline &mdash; The Technical Moat</span><span>11</span></li>
+  <li><span>Tantri &mdash; The Instrument Layer</span><span>13</span></li>
+  <li><span>User Lifecycle: Onboarding to Mastery</span><span>14</span></li>
+  <li><span>Curriculum Architecture &mdash; Complete Lesson Catalog</span><span>16</span></li>
+  <li><span>The 30-Raga Catalog</span><span>21</span></li>
+  <li><span>Design System &mdash; Ragamala</span><span>22</span></li>
+  <li><span>Technical Stack &amp; $0 Architecture</span><span>24</span></li>
+  <li><span>Data Model &amp; Schema</span><span>25</span></li>
+  <li><span>Pedagogical Framework &amp; References</span><span>26</span></li>
+  <li><span>Roadmap &amp; Go-to-Market</span><span>27</span></li>
+</ol>
+
+<!-- ================================================================
+     1. EXECUTIVE SUMMARY
+     ================================================================ -->
+<div class="page-break"></div>
+<h2>1. Executive Summary</h2>
+<div class="accent-bar"></div>
+
+<p><strong>S&#x101;dhan&#x101;</strong> (Sanskrit: <span class="devanagari">&#x0938;&#x093E;&#x0927;&#x0928;&#x093E;</span> &mdash; disciplined practice toward mastery) is the world's first browser-based Hindustani classical music training application built on a comprehensive music physics engine. It transforms the student's device into an interactive instrument that listens, responds, and teaches &mdash; all at <strong>$0 operational cost</strong>.</p>
+
+<p><strong>The core insight:</strong> Existing music apps teach Western music theory or treat Indian music as a subset of Western frameworks. S&#x101;dhan&#x101; builds from first principles: 22 shrutis (microtonal intervals from the Natya Shastra), just intonation frequency ratios, raga grammar rules, and the oral-tradition pedagogy of Hindustani classical music. A musicologist opening the source code should find it as complete and rigorous as a textbook.</p>
+
+<div class="metrics">
+  <div class="metric"><span class="metric-value">19,106</span><span class="metric-label">Lines of Engine Code</span></div>
+  <div class="metric"><span class="metric-value">30</span><span class="metric-label">Ragas in Catalog</span></div>
+  <div class="metric"><span class="metric-value">39</span><span class="metric-label">Structured Lessons</span></div>
+  <div class="metric"><span class="metric-value">318</span><span class="metric-label">Unit Tests Passing</span></div>
+  <div class="metric"><span class="metric-value">&lt;50ms</span><span class="metric-label">Voice-to-Visual Latency</span></div>
+  <div class="metric"><span class="metric-value">$0/mo</span><span class="metric-label">Operational Cost</span></div>
+</div>
+
+<div class="callout">
+  <strong>What makes this defensible:</strong> The engine is not a wrapper around music APIs. It IS music &mdash; 19,106 lines of TypeScript encoding harmonic physics, 22 microtonal positions, raga grammar rules for 30 ragas, real-time pakad (characteristic phrase) recognition, and a voice pipeline that runs entirely in the browser using WebAssembly neural denoising and McLeod pitch detection. This is years of musicological knowledge encoded as executable code.
+</div>
+
+<!-- ================================================================
+     2. THE PROBLEM & MARKET OPPORTUNITY
+     ================================================================ -->
+<div class="page-break"></div>
+<h2>2. The Problem &amp; Market Opportunity</h2>
+<div class="accent-bar"></div>
+
+<h3>The Gap</h3>
+<p>Hindustani classical music (HCM) has an estimated <strong>300+ million practitioners</strong> across South Asia, with a global Indian diaspora of <strong>32 million</strong> seeking cultural connection. Yet the digital tools available to them are fundamentally broken:</p>
+
+<ul>
+  <li><strong>No digital tool teaches raga grammar</strong> &mdash; the rules of melodic movement (aroha/avaroha, vakra phrases, varjit swaras) that define a raga's identity. Existing apps treat ragas as scales.</li>
+  <li><strong>No app uses just intonation</strong> &mdash; the mathematically correct tuning system where intervals are exact frequency ratios (3:2 for Pa, 5:4 for Ga). Every music app on the market uses equal temperament, which is a compromise designed for keyboard instruments and is fundamentally wrong for Indian music.</li>
+  <li><strong>No platform provides context-aware pitch feedback</strong> &mdash; understanding that komal Re in Bhairav (where it carries andolan) is a different musical object from komal Re in Kafi (where it's a passing note).</li>
+  <li><strong>Western music apps</strong> (Yousician, Simply Piano, Smule) serve 50M+ users but cannot teach Indian music correctly because their engines are built on 12-tone equal temperament.</li>
+</ul>
+
+<h3>The Opportunity</h3>
+<table>
+  <thead><tr><th>Segment</th><th>Size</th><th>Need</th></tr></thead>
+  <tbody>
+    <tr><td>South Asian music learners</td><td>300M+</td><td>Quality, affordable instruction outside guru-shishya parampara</td></tr>
+    <tr><td>Global Indian diaspora</td><td>32M</td><td>Cultural connection, heritage language of music</td></tr>
+    <tr><td>Mindfulness &amp; wellness</td><td>$1.5B market</td><td>HCM is inherently meditative; raga practice is structured meditation</td></tr>
+    <tr><td>Music education technology</td><td>$5.5B by 2027</td><td>No serious competitor in the Indian music vertical</td></tr>
+    <tr><td>Yoga/meditation practitioners</td><td>300M globally</td><td>Natural adjacent interest &mdash; sound as spiritual practice</td></tr>
+  </tbody>
+</table>
+
+<h3>Competitive Landscape</h3>
+<table>
+  <thead><tr><th>Competitor</th><th>What They Do</th><th>What They Cannot Do</th></tr></thead>
+  <tbody>
+    <tr><td>Yousician</td><td>Guitar/piano with pitch detection</td><td>No Indian music, no just intonation, no raga grammar</td></tr>
+    <tr><td>Simply Piano</td><td>Piano learning with note recognition</td><td>Western-only, no voice, no microtonal awareness</td></tr>
+    <tr><td>Riyaz (app)</td><td>Basic tanpura + scale practice</td><td>No voice feedback, no raga grammar, no lesson structure</td></tr>
+    <tr><td>SwarShala</td><td>Indian instrument samples</td><td>No learning system, no voice detection, no curriculum</td></tr>
+    <tr><td><strong>S&#x101;dhan&#x101;</strong></td><td colspan="2"><strong>Full music physics engine + voice pipeline + 39-lesson curriculum + $0 cost</strong></td></tr>
+  </tbody>
+</table>
+
+<!-- ================================================================
+     3. PRODUCT VISION & PHILOSOPHY
+     ================================================================ -->
+<div class="page-break"></div>
+<h2>3. Product Vision &amp; Philosophy</h2>
+<div class="accent-bar"></div>
+
+<div class="callout">
+  <strong>THE ENGINE IS MUSIC. MUSIC IS THE ENGINE.</strong><br>
+  This is not a music learning app that uses audio. This is a music physics engine &mdash; the equivalent of NVIDIA PhysX, but for sound. The engine does not imitate music. It does not simulate music. It IS music.
+</div>
+
+<h3>Core Principles</h3>
+<ol>
+  <li><strong>Audio Before Everything (The Presence Rule)</strong>: Every concept is heard before it is named. Every time. The student meets a raga through its sound, not its theory. Labels arrive only after the ear has already formed an impression.</li>
+  <li><strong>Hindustani-First</strong>: Rooted in HCM tradition. Western equivalents are bridges for context, never the frame. Sa is not "C" &mdash; it is whatever the performer's voice naturally settles on.</li>
+  <li><strong>$0 End-to-End</strong>: No paid APIs. No paid services. No paid inference. Everything that requires compute runs in the browser (AudioWorklet, WebAssembly, Tone.js). Everything that requires storage uses Supabase free tier.</li>
+  <li><strong>Journeys Serve the Engine</strong>: The four journey interfaces adapt to the student. The engine never compromises its musical accuracy.</li>
+  <li><strong>The S&#x101;dhan&#x101; Principle</strong>: 5&ndash;15 minute daily sessions. One new musical capability per session. Mastery through consistency, not cramming.</li>
+</ol>
+
+<h3>The Three-Layer Architecture Philosophy</h3>
+<pre>
+Engine  (/engine/)           &mdash; Pure music: frequencies, ratios, ragas, shrutis
+  &darr;
+Tantri  (engine/interaction/) &mdash; The instrument: 12 strings, voice mapping, spring physics
+  &darr;
+Application  (/frontend/)    &mdash; Lessons, freeform, exercises &mdash; rendered THROUGH Tantri
+</pre>
+<p>Every lesson, every exercise, every practice session uses <strong>Tantri</strong> (the 12-string interactive swara field) as its primary visual and interactive surface. When Tantri is active, everything else gives way &mdash; the student's attention is on the instrument and nothing else.</p>
+
+<!-- ================================================================
+     4. SYSTEM ARCHITECTURE
+     ================================================================ -->
+<div class="page-break"></div>
+<h2>4. System Architecture</h2>
+<div class="accent-bar"></div>
+
+<div class="arch-diagram">
+  <div class="arch-layer arch-engine">
+    <div class="arch-label">THE ENGINE &mdash; /engine/ &mdash; 19,106 lines TypeScript, zero UI</div>
+    physics/ &rarr; theory/ &rarr; analysis/ &rarr; synthesis/ &rarr; voice/ &rarr; interaction/ (Tantri)
+  </div>
+  <div class="arch-arrow">&darr; engine exposes typed API</div>
+  <div class="arch-layer arch-journey">
+    <div class="arch-label">JOURNEYS &mdash; /frontend/app/journeys/</div>
+    Beginner (Shishya) &bull; Explorer (Sadhaka) &bull; Scholar (Varistha) &bull; Master (Guru) &bull; Freeform
+  </div>
+  <div class="arch-arrow">&darr; React components</div>
+  <div class="arch-layer arch-presentation">
+    <div class="arch-label">PRESENTATION &mdash; Next.js 15 / React 19 / TypeScript strict</div>
+    Framer Motion v12 &bull; GSAP 3 &bull; Three.js r170 &bull; Ragamala Design System
+  </div>
+  <div class="arch-arrow">&darr; Supabase JS client</div>
+  <div class="arch-layer arch-data">
+    <div class="arch-label">DATA &mdash; Supabase (free tier, $0)</div>
+    profiles &bull; sessions &bull; exercise_attempts &bull; lesson_progress &bull; streaks &bull; raga_encounters
+  </div>
+</div>
+
+<h3>Engine Module Inventory</h3>
+<table>
+  <thead><tr><th>Module</th><th>Purpose</th><th>Key Contents</th></tr></thead>
+  <tbody>
+    <tr><td><strong>physics/harmonics</strong></td><td>Harmonic series mathematics</td><td>Overtone ratios, string vibration modes, partial amplitudes, tanpura jivari model (12 partials)</td></tr>
+    <tr><td><strong>physics/resonance</strong></td><td>Acoustic consonance theory</td><td>Helmholtz consonance, critical band roughness, Euler gradus function</td></tr>
+    <tr><td><strong>physics/just-intonation</strong></td><td>22 shrutis from Natya Shastra</td><td>All 22 microtonal positions with exact p/q ratios, cents, ET deviation</td></tr>
+    <tr><td><strong>theory/swaras</strong></td><td>12 principal swaras</td><td>Frequency ratios, Devanagari names, alternate names, harmonic positions</td></tr>
+    <tr><td><strong>theory/ragas/</strong></td><td>30 raga definitions</td><td>Aroha, avaroha, pakad, vadi/samvadi, jati, thaat, prahara, rasa, ornamentMap, vakra</td></tr>
+    <tr><td><strong>theory/thaats</strong></td><td>10 Bhatkhande thaats</td><td>Parent scales, swara sets, common ragas per thaat</td></tr>
+    <tr><td><strong>theory/talas/</strong></td><td>4 tala definitions</td><td>Beat structures, vibhag, sam/khali positions, theka bols</td></tr>
+    <tr><td><strong>theory/ornaments</strong></td><td>8 ornament definitions</td><td>Mathematical parameters: trajectory, duration, oscillation rate, amplitude</td></tr>
+    <tr><td><strong>analysis/pitch-mapping</strong></td><td>Hz &rarr; swara mapping</td><td>Context-aware: knows komal Re in Bhairav differs from komal Re in Kafi</td></tr>
+    <tr><td><strong>analysis/raga-grammar</strong></td><td>Phrase validation</td><td>Aroha/avaroha rules, forbidden swaras, vakra detection, vadi emphasis</td></tr>
+    <tr><td><strong>analysis/phrase-recognition</strong></td><td>Pakad detection</td><td>Sliding window + subsequence matching, confidence scoring</td></tr>
+    <tr><td><strong>synthesis/tanpura</strong></td><td>Drone synthesis</td><td>4-string model with jivari overtones, pluck cycle, Sa detuning</td></tr>
+    <tr><td><strong>synthesis/swara-voice</strong></td><td>Swara playback</td><td>12-partial harmonium synthesis tuned to just intonation</td></tr>
+    <tr><td><strong>synthesis/tala-engine</strong></td><td>Rhythmic pulse</td><td>Tabla events at correct beat positions per tala structure</td></tr>
+    <tr><td><strong>interaction/tantri</strong></td><td>The instrument</td><td>12-string field, voice mapping, spring physics, sympathetic vibration</td></tr>
+    <tr><td><strong>voice/pipeline</strong></td><td>Real-time voice chain</td><td>Mic &rarr; AnalyserNode &rarr; Pitchy McLeod &rarr; pitch mapping &rarr; events</td></tr>
+    <tr><td><strong>voice/accuracy</strong></td><td>Session scoring</td><td>Weighted: pitch accuracy + raga compliance + pakad bonus</td></tr>
+    <tr><td><strong>voice/feedback</strong></td><td>Student feedback</td><td>Instant, beautiful, correct: what to show and when</td></tr>
+  </tbody>
+</table>
+
+<!-- ================================================================
+     5. THE MUSIC ENGINE — DEEP DIVE
+     ================================================================ -->
+<div class="page-break"></div>
+<h2>5. The Music Engine &mdash; Deep Dive</h2>
+<div class="accent-bar"></div>
+
+<h3>5.1 The 22 Shrutis &mdash; Microtonal Foundation</h3>
+<p>The Natya Shastra (c. 200 BCE &ndash; 200 CE) codified 22 microtonal intervals within the octave. These are not arbitrary cultural choices &mdash; they emerge from the harmonic series. Every shruti is a ratio of small integers, and its musical character is a direct consequence of how its partials align with Sa's partials.</p>
+
+<table>
+  <thead><tr><th>Swara</th><th>Name</th><th class="devanagari">Devanagari</th><th>Ratio</th><th>Cents</th><th>ET Dev.</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Sa</strong></td><td>Shadja</td><td class="devanagari">षड्ज</td><td class="mono">1/1</td><td class="mono">0.00</td><td class="mono">0.00</td></tr>
+    <tr><td><strong>Re&#x2082;</strong></td><td>Komal Rishabh</td><td class="devanagari">कोमल ऋषभ</td><td class="mono">16/15</td><td class="mono">111.73</td><td class="mono">+11.73</td></tr>
+    <tr><td><strong>Re</strong></td><td>Shuddha Rishabh</td><td class="devanagari">शुद्ध ऋषभ</td><td class="mono">9/8</td><td class="mono">203.91</td><td class="mono">+3.91</td></tr>
+    <tr><td><strong>Ga&#x2082;</strong></td><td>Komal Gandhar</td><td class="devanagari">कोमल गान्धार</td><td class="mono">6/5</td><td class="mono">315.64</td><td class="mono">+15.64</td></tr>
+    <tr><td><strong>Ga</strong></td><td>Shuddha Gandhar</td><td class="devanagari">शुद्ध गान्धार</td><td class="mono">5/4</td><td class="mono">386.31</td><td class="mono">-13.69</td></tr>
+    <tr><td><strong>Ma</strong></td><td>Shuddha Madhyam</td><td class="devanagari">शुद्ध मध्यम</td><td class="mono">4/3</td><td class="mono">498.04</td><td class="mono">-1.96</td></tr>
+    <tr><td><strong>Ma&#x2020;</strong></td><td>Tivra Madhyam</td><td class="devanagari">तीव्र मध्यम</td><td class="mono">45/32</td><td class="mono">590.22</td><td class="mono">-9.78</td></tr>
+    <tr><td><strong>Pa</strong></td><td>Pancham</td><td class="devanagari">पञ्चम</td><td class="mono">3/2</td><td class="mono">701.96</td><td class="mono">+1.96</td></tr>
+    <tr><td><strong>Dha&#x2082;</strong></td><td>Komal Dhaivat</td><td class="devanagari">कोमल धैवत</td><td class="mono">8/5</td><td class="mono">813.69</td><td class="mono">+13.69</td></tr>
+    <tr><td><strong>Dha</strong></td><td>Shuddha Dhaivat</td><td class="devanagari">शुद्ध धैवत</td><td class="mono">5/3</td><td class="mono">884.36</td><td class="mono">-15.64</td></tr>
+    <tr><td><strong>Ni&#x2082;</strong></td><td>Komal Nishad</td><td class="devanagari">कोमल निषाद</td><td class="mono">9/5</td><td class="mono">1017.60</td><td class="mono">+17.60</td></tr>
+    <tr><td><strong>Ni</strong></td><td>Shuddha Nishad</td><td class="devanagari">शुद्ध निषाद</td><td class="mono">15/8</td><td class="mono">1088.27</td><td class="mono">-11.73</td></tr>
+  </tbody>
+</table>
+<p class="muted">Cents deviation from equal temperament ranges from -15.64 to +17.60 &mdash; musically significant differences that every serious musician can hear.</p>
+
+<h3>5.2 The 10 Bhatkhande Thaats</h3>
+<p>Vishnu Narayan Bhatkhande (1860&ndash;1936) organised the vast universe of Hindustani ragas under 10 parent scales (<em>thaats</em>), each defined by a unique combination of seven swaras:</p>
+
+<table>
+  <thead><tr><th>Thaat</th><th class="devanagari">Devanagari</th><th>Swara Set</th><th>Western Approx.</th><th>Key Ragas</th></tr></thead>
+  <tbody>
+    <tr><td>Kalyan</td><td class="devanagari">कल्याण</td><td class="mono">S R G M&#x2020; P D N</td><td>Lydian</td><td>Yaman, Bhoopali, Hameer, Kedar</td></tr>
+    <tr><td>Bilawal</td><td class="devanagari">बिलावल</td><td class="mono">S R G M P D N</td><td>Ionian</td><td>Bilawal, Alhaiya Bilawal</td></tr>
+    <tr><td>Khamaj</td><td class="devanagari">खमाज</td><td class="mono">S R G M P D n</td><td>Mixolydian</td><td>Khamaj, Desh, Tilak Kamod</td></tr>
+    <tr><td>Bhairav</td><td class="devanagari">भैरव</td><td class="mono">S r G M P d N</td><td>&mdash;</td><td>Bhairav</td></tr>
+    <tr><td>Poorvi</td><td class="devanagari">पूर्वी</td><td class="mono">S r G M&#x2020; P d N</td><td>&mdash;</td><td>Puriya Dhanashri, Puriya</td></tr>
+    <tr><td>Marwa</td><td class="devanagari">मारवा</td><td class="mono">S r G M&#x2020; P D N</td><td>&mdash;</td><td>Marwa, Sohini</td></tr>
+    <tr><td>Kafi</td><td class="devanagari">काफ़ी</td><td class="mono">S R g M P D n</td><td>Dorian</td><td>Kafi, Bhimpalasi, Bageshri</td></tr>
+    <tr><td>Asavari</td><td class="devanagari">आसावरी</td><td class="mono">S R g M P d n</td><td>Aeolian</td><td>Asavari, Darbari Kanada, Jaunpuri</td></tr>
+    <tr><td>Bhairavi</td><td class="devanagari">भैरवी</td><td class="mono">S r g M P d n</td><td>Phrygian</td><td>Bhairavi, Malkauns</td></tr>
+    <tr><td>Todi</td><td class="devanagari">तोड़ी</td><td class="mono">S r g M&#x2020; P d N</td><td>&mdash;</td><td>Todi, Multani, Madhuvanti</td></tr>
+  </tbody>
+</table>
+<p class="muted">Lowercase = komal (flat); &#x2020; = tivra (sharp). Sa and Pa are achala (immovable).</p>
+
+<div class="page-break"></div>
+
+<h3>5.3 Ornaments &mdash; The Soul of Expression</h3>
+<p>In Hindustani music, ornaments are not decoration &mdash; they are the raga's breath. Each ornament is defined by mathematical parameters that the engine uses for both synthesis and detection:</p>
+
+<table>
+  <thead><tr><th>Ornament</th><th class="devanagari">Devanagari</th><th>Trajectory</th><th>Duration (ms)</th><th>Rate (Hz)</th><th>Amplitude</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Meend</strong></td><td class="devanagari">मींड</td><td>Logarithmic glide</td><td>300&ndash;3000</td><td>&mdash;</td><td>Full interval</td></tr>
+    <tr><td><strong>Gamak</strong></td><td class="devanagari">गमक</td><td>Sinusoidal</td><td>200&ndash;1500</td><td>4&ndash;8</td><td>50&ndash;150 cents</td></tr>
+    <tr><td><strong>Andolan</strong></td><td class="devanagari">आंदोलन</td><td>Sinusoidal (gentle)</td><td>500&ndash;5000</td><td>2&ndash;4</td><td>15&ndash;40 cents</td></tr>
+    <tr><td><strong>Murki</strong></td><td class="devanagari">मुर्की</td><td>Sequence (fast)</td><td>100&ndash;400</td><td>&mdash;</td><td>2&ndash;4 notes</td></tr>
+    <tr><td><strong>Khatka</strong></td><td class="devanagari">खटका</td><td>Impulse</td><td>50&ndash;200</td><td>&mdash;</td><td>1&ndash;3 notes</td></tr>
+    <tr><td><strong>Zamzama</strong></td><td class="devanagari">ज़मज़मा</td><td>Sequence (extended)</td><td>200&ndash;800</td><td>&mdash;</td><td>4&ndash;8 notes</td></tr>
+    <tr><td><strong>Kan</strong></td><td class="devanagari">कण</td><td>Impulse (grace)</td><td>30&ndash;100</td><td>&mdash;</td><td>1 note</td></tr>
+    <tr><td><strong>Sparsh</strong></td><td class="devanagari">स्पर्श</td><td>Impulse (touch)</td><td>30&ndash;80</td><td>&mdash;</td><td>1 note</td></tr>
+  </tbody>
+</table>
+
+<h3>5.4 Tala System</h3>
+<p>Four talas are implemented with complete beat structures, theka (rhythmic pattern), sam (first beat) and khali (empty beat) positions:</p>
+
+<table>
+  <thead><tr><th>Tala</th><th>Beats</th><th>Vibhag Structure</th><th>Sam</th><th>Khali</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Teentaal</strong> <span class="devanagari">तीनताल</span></td><td>16</td><td>4+4+4+4</td><td>Beat 1</td><td>Beat 9</td></tr>
+    <tr><td><strong>Ektaal</strong> <span class="devanagari">एकताल</span></td><td>12</td><td>2+2+2+2+2+2</td><td>Beat 1</td><td>Beats 3, 7</td></tr>
+    <tr><td><strong>Jhaptaal</strong> <span class="devanagari">झपताल</span></td><td>10</td><td>2+3+2+3</td><td>Beat 1</td><td>Beat 6</td></tr>
+    <tr><td><strong>Rupak</strong> <span class="devanagari">रूपक</span></td><td>7</td><td>3+2+2</td><td>Beat 1 (= khali)</td><td>Beat 1</td></tr>
+  </tbody>
+</table>
+<p class="muted">Rupak is unique: sam and khali coincide on beat 1, creating a distinctive feel of weightlessness at the cycle's start.</p>
+
+<h3>5.5 Tanpura Synthesis</h3>
+<p>The tanpura is not a sample &mdash; it is synthesised from first principles. A mathematical model of four vibrating strings, each producing a fundamental and a series of overtones shaped by the <em>jivari</em> (curved bridge):</p>
+<ul>
+  <li><strong>4 strings</strong>: Pa(low), Sa, Sa, Sa(lower octave). Alternative tuning: Ma replaces Pa for Ma-dominant ragas.</li>
+  <li><strong>12 partials per string</strong>: Amplitudes derived from jivari bridge coupling model.</li>
+  <li><strong>Characteristic shimmer</strong> from: (a) rich overtone content, (b) 2-cent detuning between the two Sa strings, (c) natural beating between overlapping partials.</li>
+  <li><strong>Pluck cycle</strong>: 4-second cycle (1.0s per string), configurable tempo.</li>
+</ul>
+
+<!-- ================================================================
+     6. THE VOICE PIPELINE — THE TECHNICAL MOAT
+     ================================================================ -->
+<div class="page-break"></div>
+<h2>6. The Voice Pipeline &mdash; The Technical Moat</h2>
+<div class="accent-bar"></div>
+
+<p>The voice pipeline is S&#x101;dhan&#x101;'s deepest competitive advantage. It runs <strong>entirely in the browser</strong> at <strong>$0 cost</strong>, achieving <strong>&lt;50ms mic-to-visual latency</strong>.</p>
+
+<div class="flow">
+  <div class="flow-step"><strong>1. Microphone</strong> &mdash; browser getUserMedia API, permission-gated</div>
+  <div class="flow-arrow">&darr;</div>
+  <div class="flow-step"><strong>2. AnalyserNode</strong> &mdash; 2048-sample FFT window at 48kHz, overlapping updates</div>
+  <div class="flow-arrow">&darr;</div>
+  <div class="flow-step"><strong>3. RNNoise WASM</strong> &mdash; neural noise suppression, compiled to WebAssembly ($0)</div>
+  <div class="flow-arrow">&darr;</div>
+  <div class="flow-step"><strong>4. Pitchy McLeod</strong> &mdash; pitch detection: Hz + clarity score, &lt;5ms per frame</div>
+  <div class="flow-arrow">&darr;</div>
+  <div class="flow-step"><strong>5. Pitch Mapping</strong> &mdash; Hz &rarr; cents &rarr; nearest swara (raga-context-aware)</div>
+  <div class="flow-arrow">&darr;</div>
+  <div class="flow-step"><strong>6. Raga Grammar</strong> &mdash; aroha/avaroha/vakra/varjit validation in real time</div>
+  <div class="flow-arrow">&darr;</div>
+  <div class="flow-step"><strong>7. Pakad Recognition</strong> &mdash; sliding window + subsequence matching across 30 ragas</div>
+  <div class="flow-arrow">&darr;</div>
+  <div class="flow-step"><strong>8. Accuracy Scoring</strong> &mdash; Gaussian model: exp(-(dev&sup2;) / (2&sigma;&sup2;)), level-adaptive</div>
+  <div class="flow-arrow">&darr;</div>
+  <div class="flow-step"><strong>9. Tantri + Canvas</strong> &mdash; 60fps string vibration, pitch trail, colour-coded feedback</div>
+</div>
+
+<h3>Latency Budget</h3>
+<table>
+  <thead><tr><th>Stage</th><th>Latency</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr><td>getUserMedia streaming</td><td>~0ms</td><td>Already buffered</td></tr>
+    <tr><td>AnalyserNode FFT</td><td>~10ms</td><td>2048 samples at 48kHz = 42ms window, overlapping</td></tr>
+    <tr><td>Pitchy McLeod detection</td><td>&lt;5ms</td><td>Runs on main thread, fast enough to avoid jank</td></tr>
+    <tr><td>Pitch mapping + raga grammar</td><td>&lt;0.5ms</td><td>Pure math, no allocation</td></tr>
+    <tr><td>React state + render</td><td>~10&ndash;20ms</td><td>Concurrent mode, batched updates</td></tr>
+    <tr><td><strong>Total</strong></td><td><strong>~25&ndash;35ms</strong></td><td><strong>Well within 50ms target</strong></td></tr>
+  </tbody>
+</table>
+
+<h3>Pitch Mapping &mdash; 7-Step Process</h3>
+<ol>
+  <li>Receive Hz from Pitchy with clarity confidence (0&ndash;1)</li>
+  <li>Filter low-clarity detections (&lt;0.85 threshold)</li>
+  <li>Normalise Hz to Sa octave using student's stored Sa reference</li>
+  <li>Compute cents deviation from each of the 12 swaras</li>
+  <li>Select nearest swara with smallest absolute cents deviation</li>
+  <li>Apply raga context: validate swara against current raga's aroha/avaroha</li>
+  <li>Return <span class="mono">PitchResult</span>: swara, cents deviation, accuracy score, raga compliance</li>
+</ol>
+
+<h3>Accuracy Scoring</h3>
+<p>Session scores combine multiple dimensions with level-adaptive tolerance:</p>
+<table>
+  <thead><tr><th>Component</th><th>Weight</th><th>What It Measures</th></tr></thead>
+  <tbody>
+    <tr><td>Pitch accuracy</td><td>Primary</td><td>Gaussian scoring: exp(-(dev&sup2;)/(2&sigma;&sup2;)), &sigma; varies by level</td></tr>
+    <tr><td>Raga compliance</td><td>Secondary</td><td>Were correct swaras used? Were forbidden swaras avoided?</td></tr>
+    <tr><td>Pakad bonus</td><td>Additive</td><td>Recognised characteristic phrases boost score</td></tr>
+    <tr><td>Singing percentage</td><td>Contextual</td><td>Active singing time vs. silence/noise</td></tr>
+  </tbody>
+</table>
+
+<table>
+  <thead><tr><th>Level</th><th>Tolerance (&sigma;)</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td>Shishya (Beginner)</td><td>&plusmn;50 cents</td><td>Generous &mdash; encourages exploration</td></tr>
+    <tr><td>Sadhaka (Explorer)</td><td>&plusmn;25 cents</td><td>Tightening &mdash; precision matters</td></tr>
+    <tr><td>Varistha (Scholar)</td><td>&plusmn;15 cents</td><td>Demanding &mdash; approaching shruti precision</td></tr>
+    <tr><td>Guru (Master)</td><td>&plusmn;10 cents</td><td>Near-perfect &mdash; microtonal awareness required</td></tr>
+  </tbody>
+</table>
+
+<!-- ================================================================
+     7. TANTRI — THE INSTRUMENT LAYER
+     ================================================================ -->
+<div class="page-break"></div>
+<h2>7. Tantri &mdash; The Instrument Layer</h2>
+<div class="accent-bar"></div>
+
+<p><strong>Tantri</strong> (<span class="devanagari">तन्त्री</span> &mdash; string of a veena) is the bridge between the music engine's mathematics and the human ear. It is not a component. It is the instrument itself.</p>
+
+<h3>Architecture</h3>
+<p>12 horizontal strings, one per chromatic swara, positioned by just-intonation frequency ratio on a logarithmic scale. Each string is simultaneously:</p>
+
+<ul>
+  <li><strong>INPUT</strong>: Vibrates when the student's voice is near that swara's frequency. Colour encodes accuracy (saffron = perfect, green = good, amber = approaching). Amplitude encodes vocal intensity.</li>
+  <li><strong>OUTPUT</strong>: Touch/click triggers harmonium synthesis. Kan snap on contact, Andolan sustain, Tanpura Release on release.</li>
+</ul>
+
+<h3>Spring Physics (Ragamala Motion Grammar)</h3>
+<table>
+  <thead><tr><th>Preset</th><th>Stiffness</th><th>Damping</th><th>Use Case</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Tanpura Release</strong></td><td>400</td><td>15</td><td>Natural decay after pluck (~800ms), page load stagger</td></tr>
+    <tr><td><strong>Andolan</strong></td><td>120</td><td>8</td><td>Sustained gentle oscillation, hover states</td></tr>
+    <tr><td><strong>Kan</strong></td><td>1000</td><td>30</td><td>Instant snap on contact, press/tap feedback</td></tr>
+    <tr><td><strong>Meend</strong></td><td>80</td><td>20</td><td>Slow glide between states, modal transitions</td></tr>
+  </tbody>
+</table>
+
+<h3>Sympathetic Vibration</h3>
+<p>When Sa is sung, Pa vibrates sympathetically &mdash; just as a real tanpura string would. This is real physics: the 3:2 ratio creates natural resonance. The engine calculates sympathetic amplitudes for all consonant intervals.</p>
+
+<h3>Progressive Disclosure</h3>
+<table>
+  <thead><tr><th>Level</th><th>Visible Strings</th><th>Behaviour</th></tr></thead>
+  <tbody>
+    <tr><td>Shishya</td><td>1 (Sa only), then raga's aroha strings emerge</td><td>Strings appear when earned through musical acts</td></tr>
+    <tr><td>Sadhaka</td><td>Full thaat (7 swaras)</td><td>All swaras in the parent scale visible</td></tr>
+    <tr><td>Varistha</td><td>All 12 chromatic swaras</td><td>Full instrument revealed</td></tr>
+    <tr><td>Guru</td><td>All 12 + precision overlay</td><td>Cents needle visible by default</td></tr>
+  </tbody>
+</table>
+
+<div class="callout-blue">
+  <strong>Design principle:</strong> No announcements when new strings appear. The instrument grows as the student grows. The student notices one day that something has changed &mdash; that discovery IS the ceremony.
+</div>
+
+<!-- ================================================================
+     8. USER LIFECYCLE
+     ================================================================ -->
+<div class="page-break"></div>
+<h2>8. User Lifecycle: Onboarding to Mastery</h2>
+<div class="accent-bar"></div>
+
+<h3>8.1 Onboarding (2 minutes)</h3>
+<ol>
+  <li><strong>Sa Detection</strong>: The app asks the student to hum or sing "Sa" 3&ndash;5 times. The engine averages Pitchy detections and proposes: "Your Sa is G3 (196 Hz) &mdash; does that feel right?" Student confirms or adjusts. If skipped: defaults to C4 (261.63 Hz). Sa is stored in user profile and used as the root for all frequency calculations across the entire engine.</li>
+  <li><strong>Journey Selection</strong>: Four paths are visible immediately. The full vision is apparent from day one. The student sees Shishya through Guru &mdash; they know where they're going.</li>
+  <li><strong>First Riyaz</strong>: Within 90 seconds of opening the app, the tanpura is playing and the student is singing. Zero configuration required.</li>
+</ol>
+
+<h3>8.2 Daily Session Loop</h3>
+<ol>
+  <li><strong>On open</strong>: The app has already prepared today's riyaz. Raga is chosen by time of day:
+    <ul>
+      <li>Dawn (6&ndash;9am) &rarr; <span class="raga-name">Bhairav</span></li>
+      <li>Morning (9am&ndash;12pm) &rarr; <span class="raga-name">Bhoopali</span></li>
+      <li>Afternoon (12&ndash;4pm) &rarr; <span class="raga-name">Bhimpalasi</span></li>
+      <li>Evening (4&ndash;7pm) &rarr; <span class="raga-name">Yaman</span></li>
+      <li>Night (7pm&ndash;6am) &rarr; <span class="raga-name">Bageshri</span></li>
+    </ul>
+  </li>
+  <li><strong>Tanpura begins</strong>. Student sings. ~10 minutes. Zero decisions required.</li>
+  <li><strong>On completion</strong>: Transitions to free practice. Daily goal ring updates on home page.</li>
+  <li><strong>If already done</strong>: Goes straight to free practice. No friction between ritual and freedom.</li>
+</ol>
+
+<h3>8.3 Progression System</h3>
+<p>Levels are unlocked by <strong>specific musical acts</strong>, not XP. XP tracks consistency (streak maintenance, sessions completed) &mdash; it is the practice log, not the grade.</p>
+
+<div class="level-grid">
+  <div class="level-card level-shishya">
+    <h4>Shishya <span class="devanagari">शिष्य</span></h4>
+    <p>Levels 1&ndash;3 &bull; 8 lessons &bull; 355 XP &bull; 5 ragas &bull; Tolerance: &plusmn;50 cents<br>
+    <strong>Gate</strong>: Sa/Pa accuracy &plusmn;30 cents, aroha/avaroha of 3 ragas &plusmn;40 cents, pakad singing of 2 ragas &mdash; across 3 separate sessions with 4-hour cooldown</p>
+  </div>
+  <div class="level-card level-sadhaka">
+    <h4>Sadhaka <span class="devanagari">साधक</span></h4>
+    <p>Levels 4&ndash;6 &bull; 10 lessons &bull; 420 XP &bull; 7 ragas &bull; Tolerance: &plusmn;25 cents<br>
+    <strong>Gate</strong>: 5 challenges including ornament execution, raga identification (4/5), Teentaal clapping &mdash; across 3 sessions</p>
+  </div>
+  <div class="level-card level-varistha">
+    <h4>Varistha <span class="devanagari">वरिष्ठ</span></h4>
+    <p>Levels 7&ndash;9 &bull; 11 lessons &bull; 645 XP &bull; 12+ ragas &bull; Tolerance: &plusmn;15 cents<br>
+    <strong>Gate</strong>: 5-session gate with 6-hour cooldown, unlocks Guru journey</p>
+  </div>
+  <div class="level-card level-guru">
+    <h4>Guru <span class="devanagari">गुरु</span></h4>
+    <p>Levels 10+ &bull; 10 exercises &bull; 510+ XP &bull; All 30 ragas &bull; Tolerance: &plusmn;10 cents<br>
+    <strong>Capstone</strong>: Open mastery &mdash; infinite exercise, app becomes practice partner, no upper bound</p>
+  </div>
+</div>
+
+<h3>8.4 The Pakad Recognition Moment</h3>
+<p>When the engine detects that the student has sung a raga's characteristic phrase (pakad), a <strong>2-layer cinematic moment</strong> unfolds:</p>
+<ol>
+  <li><strong>Layer 1 &mdash; Cinematic pause (~4s)</strong>: Tanpura continues uninterrupted. Background deepens. Jali pattern reveals fully. Raga name appears large in Cormorant Garamond, center screen. Below it: the phrase in sargam notation (e.g., "Ni Re Ga Ma Ga Re Sa"). Fades slowly via GSAP timeline.</li>
+  <li><strong>Layer 2 &mdash; Settles</strong>: "You just sang the pakad of Yaman" remains at the bottom as a quiet record. Fades to 40% opacity. Stays for the rest of the session.</li>
+</ol>
+<p class="muted">The tanpura never stops. Practice continues through it. This moment is unrepeatable in its first-time impact.</p>
+
+<!-- ================================================================
+     9. CURRICULUM ARCHITECTURE
+     ================================================================ -->
+<div class="page-break"></div>
+<h2>9. Curriculum Architecture &mdash; Complete Lesson Catalog</h2>
+<div class="accent-bar"></div>
+
+<p>The curriculum consists of <strong>39 lessons</strong> across 4 levels, structured as YAML definitions that drive the lesson engine. Each lesson specifies phases, exercises, ragas, duration, and XP. The pedagogical arc follows: <strong>listen before naming, hear before singing, sing before analysing, analyse before creating</strong>.</p>
+
+<h3>9.1 Shishya Level (Beginner) &mdash; 8 Lessons, 355 XP</h3>
+<table>
+  <thead><tr><th>#</th><th>Title</th><th>Raga</th><th>Duration</th><th>XP</th><th>Key Concepts</th></tr></thead>
+  <tbody>
+    <tr><td>B-01</td><td><strong>Your First Raga</strong></td><td>Bhoopali</td><td>10 min</td><td>30</td><td>5-note pentatonic, first singing, Sa detection, passive pakad recognition</td></tr>
+    <tr><td>B-02</td><td><strong>Sa and Pa</strong></td><td>Pre-raga</td><td>8 min</td><td>25</td><td>Sa-Pa interval (3:2 ratio), call-and-response, complement singing</td></tr>
+    <tr><td>B-03</td><td><strong>The Evening Raga</strong></td><td>Yaman</td><td>12 min</td><td>35</td><td>Tivra Ma, 7-note full scale, iconic Ni-Re-Ga opening phrase</td></tr>
+    <tr><td>B-04</td><td><strong>The Dawn Raga</strong></td><td>Bhairav</td><td>12 min</td><td>35</td><td>Komal Re + komal Dha, andolan preview, symmetric dawn scale</td></tr>
+    <tr><td>B-05</td><td><strong>The Afternoon Raga</strong></td><td>Bhimpalasi</td><td>12 min</td><td>40</td><td>Asymmetric aroha/avaroha (5 up, 7 down), komal Ga + Ni</td></tr>
+    <tr><td>B-06</td><td><strong>The Midnight Raga</strong></td><td>Bageshri</td><td>12 min</td><td>40</td><td>Same swaras as Bhimpalasi yet different raga, circling around Ma</td></tr>
+    <tr><td>B-07</td><td><strong>The Five Ragas</strong></td><td>Multi-raga</td><td>10 min</td><td>50</td><td>Consolidation: engine plays pakad, student identifies raga, 5 rounds</td></tr>
+    <tr><td>B-08</td><td><strong>Shishya Challenge</strong></td><td>Multi-raga</td><td>10 min</td><td>100</td><td>3-session gate: Sa/Pa &plusmn;30 cents, aroha/avaroha &plusmn;40 cents, pakad of 2 ragas</td></tr>
+  </tbody>
+</table>
+
+<div class="callout">
+  <strong>Phase types introduced at Shishya level:</strong> tanpura_drone, sa_detection, swara_introduction, phrase_playback, pitch_exercise, phrase_exercise, passive_phrase_recognition, call_response, raga_identification, mastery_challenge, session_summary
+</div>
+
+<h3>9.2 Sadhaka Level (Explorer) &mdash; 10 Lessons, 420 XP</h3>
+<table>
+  <thead><tr><th>#</th><th>Title</th><th>Raga</th><th>Duration</th><th>XP</th><th>Key Concepts</th></tr></thead>
+  <tbody>
+    <tr><td>S-01</td><td><strong>The Monsoon Raga</strong></td><td>Desh</td><td>12 min</td><td>45</td><td>Mixed swaras (shuddha Ni ascending, komal Ni descending), meend preview</td></tr>
+    <tr><td>S-02</td><td><strong>The Glide</strong></td><td>Bhoopali</td><td>10 min</td><td>40</td><td>Ornament exercise: meend Sa-Re, Sa-Ga, Sa-Pa, trajectory smoothness</td></tr>
+    <tr><td>S-03</td><td><strong>The Gentle Wave</strong></td><td>Bhairav</td><td>10 min</td><td>40</td><td>Andolan on Re_komal and Dha_komal, 2&ndash;4 Hz oscillation, 15&ndash;40 cents</td></tr>
+    <tr><td>S-04</td><td><strong>The Parent Raga</strong></td><td>Kafi</td><td>12 min</td><td>45</td><td>Raga comparison: Bhimpalasi vs Kafi vs Bageshri. Thaat concept introduced</td></tr>
+    <tr><td>S-05</td><td><strong>The First Rhythm</strong></td><td>None</td><td>10 min</td><td>35</td><td>Teentaal: 16-beat cycle, sam clapping, khali waving, singing Sa on sam</td></tr>
+    <tr><td>S-06</td><td><strong>The Rules of Movement</strong></td><td>Multi-raga</td><td>12 min</td><td>40</td><td>Raga grammar: valid/invalid phrase identification, jati concept</td></tr>
+    <tr><td>S-07</td><td><strong>The Shake</strong></td><td>Bhimpalasi</td><td>10 min</td><td>40</td><td>Gamak: 4&ndash;8 Hz, 50&ndash;150 cents amplitude, contrast with andolan</td></tr>
+    <tr><td>S-08</td><td><strong>Call and Response</strong></td><td>Multi-raga</td><td>12 min</td><td>40</td><td>Ornamented call-response: plain, meend, andolan, gamak, combined</td></tr>
+    <tr><td>S-09</td><td><strong>Hearing Distance</strong></td><td>None</td><td>10 min</td><td>40</td><td>Interval recognition: Sa-Pa, Sa-Ma, Sa-Ga, Sa-Re, Sa-Re_k, Sa-Ga_k</td></tr>
+    <tr><td>S-10</td><td><strong>Sadhaka Challenge</strong></td><td>Multi-raga</td><td>12 min</td><td>150</td><td>3-session gate: 5 challenges including ornament execution, 4/5 raga ID</td></tr>
+  </tbody>
+</table>
+
+<div class="callout">
+  <strong>New phase types at Sadhaka:</strong> swara_comparison, ornament_exercise, raga_comparison, tala_exercise, grammar_exercise, interval_exercise
+</div>
+
+<div class="page-break"></div>
+
+<h3>9.3 Varistha Level (Scholar) &mdash; 11 Lessons, 645 XP</h3>
+<table>
+  <thead><tr><th>#</th><th>Title</th><th>Raga</th><th>XP</th><th>Key Concepts</th></tr></thead>
+  <tbody>
+    <tr><td>V-01</td><td><strong>The Absent Fifth</strong></td><td>Marwa</td><td>60</td><td>Pa omitted entirely &mdash; fundamental instability, sunset raga</td></tr>
+    <tr><td>V-02</td><td><strong>Same Thaat, Different Worlds</strong></td><td>Multi-raga</td><td>50</td><td>Advanced raga comparison: deep analysis of related ragas</td></tr>
+    <tr><td>V-03</td><td><strong>The Profound Andolan</strong></td><td>Darbari Kanada</td><td>60</td><td>Ornament as structure: andolan on Ga_komal IS the raga. Vakra avaroha</td></tr>
+    <tr><td>V-04</td><td><strong>Creating Valid Phrases</strong></td><td>Multi-raga</td><td>50</td><td>Composition exercise: student creates phrases, engine validates grammar</td></tr>
+    <tr><td>V-05</td><td><strong>Evening Tension</strong></td><td>Puriya Dhanashri</td><td>55</td><td>Poorvi thaat, 3 altered swaras, distinction from Marwa</td></tr>
+    <tr><td>V-06</td><td><strong>Where Ornaments Belong</strong></td><td>Multi-raga</td><td>50</td><td>Ornament context: which ornament on which swara in which raga</td></tr>
+    <tr><td>V-07</td><td><strong>Power in Five Notes</strong></td><td>Malkauns</td><td>55</td><td>Pentatonic komal &mdash; mirror of Bhoopali, heroic intensity</td></tr>
+    <tr><td>V-08</td><td><strong>The 22 Positions</strong></td><td>Multi-raga</td><td>55</td><td>Shruti exercise: the 22-shruti system becomes real and audible</td></tr>
+    <tr><td>V-09</td><td><strong>Chromatic Density</strong></td><td>Todi</td><td>60</td><td>Maximum chromatic density: 4 altered swaras (Re_k, Ga_k, Ma_t, Dha_k)</td></tr>
+    <tr><td>V-10</td><td><strong>Melody Meets Rhythm</strong></td><td>Multi-raga</td><td>50</td><td>Tala-melody integration: singing with rhythmic awareness</td></tr>
+    <tr><td>V-11</td><td><strong>Varistha Challenge</strong></td><td>Multi-raga</td><td>250</td><td>5-session gate (6-hour cooldown), unlocks Guru journey</td></tr>
+  </tbody>
+</table>
+
+<div class="callout">
+  <strong>New phase types at Varistha:</strong> raga_comparison_advanced, composition_exercise, ornament_context_exercise, shruti_exercise, tala_melody_exercise
+</div>
+
+<h3>9.4 Guru Level (Master) &mdash; 10 Exercises, 510+ XP</h3>
+<table>
+  <thead><tr><th>#</th><th>Title</th><th>Raga</th><th>XP</th><th>Key Concepts</th></tr></thead>
+  <tbody>
+    <tr><td>G-01</td><td><strong>The Listening Guru</strong></td><td>Multi-raga</td><td>60</td><td>Advanced raga identification from extended ornamented phrases</td></tr>
+    <tr><td>G-02</td><td><strong>The Fixed Composition</strong></td><td>Yaman</td><td>60</td><td>Bandish: structured composition form (mukhda and antara)</td></tr>
+    <tr><td>G-03</td><td><strong>The Flexible Raga</strong></td><td>Bhairavi</td><td>65</td><td>Controlled deviation: chhayanat &mdash; shading with foreign swaras</td></tr>
+    <tr><td>G-04</td><td><strong>Where One Raga Becomes Another</strong></td><td>Multi-raga</td><td>55</td><td>Modulation awareness: cross-raga transitions</td></tr>
+    <tr><td>G-05</td><td><strong>The Fast Run</strong></td><td>Yaman</td><td>55</td><td>Taan patterns: rapid ornamental runs at speed</td></tr>
+    <tr><td>G-06</td><td><strong>The Two Mas</strong></td><td>Kedar/Hameer</td><td>60</td><td>Both shuddha Ma AND tivra Ma in one raga simultaneously</td></tr>
+    <tr><td>G-07</td><td><strong>Same Constraint, Different Worlds</strong></td><td>Sohini/Marwa</td><td>60</td><td>Both omit Pa, same thaat, entirely different identities</td></tr>
+    <tr><td>G-08</td><td><strong>The Complete Rendering</strong></td><td>Student choice</td><td>80</td><td>Capstone: Alap &rarr; Jod &rarr; Jhala &mdash; complete performance structure</td></tr>
+    <tr><td>G-09</td><td><strong>The Guru Teaches</strong></td><td>Student choice</td><td>70</td><td>Teaching exercise: explain to demonstrate understanding</td></tr>
+    <tr><td>G-10</td><td><strong>No Ceiling</strong></td><td>Student choice</td><td>0</td><td>Infinite open mastery. App becomes practice partner. No upper bound.</td></tr>
+  </tbody>
+</table>
+
+<div class="callout">
+  <strong>New phase types at Guru:</strong> raga_identification_advanced, bandish_exercise, controlled_deviation, modulation_awareness, taan_exercise, raga_rendering, teaching_exercise
+</div>
+
+<h3>Curriculum Summary</h3>
+<table>
+  <thead><tr><th>Level</th><th>Lessons</th><th>Total XP</th><th>Ragas Taught</th><th>Pitch Tolerance</th><th>Gate Type</th></tr></thead>
+  <tbody>
+    <tr><td>Shishya</td><td>8</td><td>355</td><td>5</td><td>&plusmn;50 cents</td><td>3-session, 4hr cooldown</td></tr>
+    <tr><td>Sadhaka</td><td>10</td><td>420</td><td>7 (cumulative)</td><td>&plusmn;25 cents</td><td>3-session, multi-challenge</td></tr>
+    <tr><td>Varistha</td><td>11</td><td>645</td><td>12+ (cumulative)</td><td>&plusmn;15 cents</td><td>5-session, 6hr cooldown</td></tr>
+    <tr><td>Guru</td><td>10</td><td>510+</td><td>All 30</td><td>&plusmn;10 cents</td><td>Open mastery</td></tr>
+    <tr><td><strong>Total</strong></td><td><strong>39</strong></td><td><strong>~1,930</strong></td><td><strong>30</strong></td><td>&mdash;</td><td>&mdash;</td></tr>
+  </tbody>
+</table>
+
+<p><strong>20 unique phase types</strong> are introduced progressively across levels, with 15 new types appearing after the first level.</p>
+
+<!-- ================================================================
+     10. THE 30-RAGA CATALOG
+     ================================================================ -->
+<div class="page-break"></div>
+<h2>10. The 30-Raga Catalog</h2>
+<div class="accent-bar"></div>
+
+<p>Each raga is a complete TypeScript object encoding: aroha (ascending phrase), avaroha (descending phrase), pakad (characteristic phrases), vadi/samvadi (dominant/subdominant swaras), jati (note count classification), thaat, prahara (time of performance), rasa (emotional quality), ornamentMap, vakra (non-linear movements), gharana variations, and related ragas.</p>
+
+<table>
+  <thead><tr><th>Raga</th><th class="devanagari">Devanagari</th><th>Thaat</th><th>Time</th><th>Jati</th><th>Level</th></tr></thead>
+  <tbody>
+    <tr><td>Bhoopali</td><td class="devanagari">भूपाली</td><td>Kalyan</td><td>Dusk</td><td>Audava-Audava</td><td>Shishya</td></tr>
+    <tr><td>Yaman</td><td class="devanagari">यमन</td><td>Kalyan</td><td>Evening</td><td>Sampoorna-Sampoorna</td><td>Shishya</td></tr>
+    <tr><td>Bhairav</td><td class="devanagari">भैरव</td><td>Bhairav</td><td>Dawn</td><td>Sampoorna-Sampoorna</td><td>Shishya</td></tr>
+    <tr><td>Bhimpalasi</td><td class="devanagari">भीमपलासी</td><td>Kafi</td><td>Afternoon</td><td>Audava-Sampoorna</td><td>Shishya</td></tr>
+    <tr><td>Bageshri</td><td class="devanagari">बागेश्री</td><td>Kafi</td><td>Night</td><td>Audava-Sampoorna</td><td>Shishya</td></tr>
+    <tr><td>Desh</td><td class="devanagari">देश</td><td>Khamaj</td><td>Night</td><td>Audava-Sampoorna</td><td>Sadhaka</td></tr>
+    <tr><td>Kafi</td><td class="devanagari">काफ़ी</td><td>Kafi</td><td>Night</td><td>Sampoorna-Sampoorna</td><td>Sadhaka</td></tr>
+    <tr><td>Pahadi</td><td class="devanagari">पहाड़ी</td><td>Bilawal</td><td>Night</td><td>Audava-Audava</td><td>Sadhaka</td></tr>
+    <tr><td>Durga</td><td class="devanagari">दुर्गा</td><td>Bilawal</td><td>Night</td><td>Audava-Audava</td><td>Sadhaka</td></tr>
+    <tr><td>Hamsadhwani</td><td class="devanagari">हंसध्वनि</td><td>Bilawal</td><td>Night</td><td>Audava-Audava</td><td>Sadhaka</td></tr>
+    <tr><td>Bilawal</td><td class="devanagari">बिलावल</td><td>Bilawal</td><td>Morning</td><td>Sampoorna-Sampoorna</td><td>Sadhaka</td></tr>
+    <tr><td>Asavari</td><td class="devanagari">आसावरी</td><td>Asavari</td><td>Morning</td><td>Sampoorna-Sampoorna</td><td>Sadhaka</td></tr>
+    <tr><td>Khamaj</td><td class="devanagari">खमाज</td><td>Khamaj</td><td>Night</td><td>Sampoorna-Sampoorna</td><td>Sadhaka</td></tr>
+    <tr><td>Jog</td><td class="devanagari">जोग</td><td>Khamaj</td><td>Night</td><td>Shadava-Sampoorna</td><td>Sadhaka</td></tr>
+    <tr><td>Tilak Kamod</td><td class="devanagari">तिलक कामोद</td><td>Khamaj</td><td>Night</td><td>Shadava-Sampoorna</td><td>Sadhaka</td></tr>
+    <tr><td>Marwa</td><td class="devanagari">मारवा</td><td>Marwa</td><td>Sunset</td><td>Shadava-Shadava</td><td>Varistha</td></tr>
+    <tr><td>Darbari Kanada</td><td class="devanagari">दरबारी कानड़ा</td><td>Asavari</td><td>Night</td><td>Sampoorna-Sampoorna</td><td>Varistha</td></tr>
+    <tr><td>Puriya Dhanashri</td><td class="devanagari">पूरिया धनाश्री</td><td>Poorvi</td><td>Sunset</td><td>Sampoorna-Sampoorna</td><td>Varistha</td></tr>
+    <tr><td>Malkauns</td><td class="devanagari">मालकौंस</td><td>Bhairavi</td><td>Night</td><td>Audava-Audava</td><td>Varistha</td></tr>
+    <tr><td>Todi</td><td class="devanagari">तोड़ी</td><td>Todi</td><td>Morning</td><td>Sampoorna-Sampoorna</td><td>Varistha</td></tr>
+    <tr><td>Kedar</td><td class="devanagari">केदार</td><td>Kalyan</td><td>Night</td><td>Shadava-Sampoorna</td><td>Varistha</td></tr>
+    <tr><td>Hameer</td><td class="devanagari">हमीर</td><td>Kalyan</td><td>Night</td><td>Sampoorna-Sampoorna</td><td>Varistha</td></tr>
+    <tr><td>Puriya</td><td class="devanagari">पूरिया</td><td>Marwa</td><td>Sunset</td><td>Sampoorna-Sampoorna</td><td>Varistha</td></tr>
+    <tr><td>Lalit</td><td class="devanagari">ललित</td><td>Marwa</td><td>Dawn</td><td>Sampoorna-Sampoorna</td><td>Varistha</td></tr>
+    <tr><td>Multani</td><td class="devanagari">मुल्तानी</td><td>Todi</td><td>Afternoon</td><td>Shadava-Sampoorna</td><td>Varistha</td></tr>
+    <tr><td>Madhuvanti</td><td class="devanagari">मधुवंती</td><td>Todi</td><td>Afternoon</td><td>Shadava-Sampoorna</td><td>Varistha</td></tr>
+    <tr><td>Bhairavi</td><td class="devanagari">भैरवी</td><td>Bhairavi</td><td>Morning</td><td>Sampoorna-Sampoorna</td><td>Guru</td></tr>
+    <tr><td>Sohini</td><td class="devanagari">सोहिनी</td><td>Marwa</td><td>Night</td><td>Audava-Audava</td><td>Guru</td></tr>
+    <tr><td>Shree</td><td class="devanagari">श्री</td><td>Poorvi</td><td>Sunset</td><td>Sampoorna-Sampoorna</td><td>Guru</td></tr>
+    <tr><td>Jaunpuri</td><td class="devanagari">जौनपुरी</td><td>Asavari</td><td>Morning</td><td>Sampoorna-Sampoorna</td><td>Guru</td></tr>
+  </tbody>
+</table>
+
+<h3>Raga Deep Dive: Darbari Kanada</h3>
+<p>One of the most complex ragas in the catalog, attributed to Tansen (court musician of Akbar). Demonstrates the engine's depth:</p>
+<ul>
+  <li><strong>Vakra avaroha</strong> (non-linear descent): S' d n d P m P g m R S &mdash; the avaroha does not simply descend, it weaves</li>
+  <li><strong>Andolan on Ga_komal</strong> IS the raga's identity &mdash; a slow, profound oscillation that defines Darbari</li>
+  <li><strong>5 pakad phrases</strong> encoded with swara-level precision</li>
+  <li><strong>4 gharana variations</strong>: Kirana (sustained andolan), Agra (gamak-heavy), Jaipur-Atrauli (geometric phrases), Gwalior (balanced)</li>
+</ul>
+
+<!-- ================================================================
+     11. DESIGN SYSTEM — RAGAMALA
+     ================================================================ -->
+<div class="page-break"></div>
+<h2>11. Design System &mdash; Ragamala</h2>
+<div class="accent-bar"></div>
+
+<p>Named after the Ragamala tradition of Indian miniature painting: a garland of ragas, each given a visual world of colour, mood, season, and time of day. The foundation is Dhrupad &mdash; austere, geometric, meditative, precise.</p>
+
+<h3>Visual Identity</h3>
+<table>
+  <thead><tr><th>Element</th><th>Choice</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Layout</strong></td><td>Single-column practice. One thing at a time. No split attention.</td></tr>
+    <tr><td><strong>Typography</strong></td><td>Cormorant Garamond (raga names, titles) / Noto Serif Devanagari (script toggle) / Inter (UI) / IBM Plex Mono (Hz, cents, ratios)</td></tr>
+    <tr><td><strong>Accent</strong></td><td>Saffron <span class="mono">#E8871E</span> &mdash; earned only. Correct pitch. Active streak. Never decorative.</td></tr>
+    <tr><td><strong>Mastery</strong></td><td>Gold <span class="mono">#D4AF37</span> &mdash; above Saffron. Guru level. Zarr-kashi: hairline rules, single-point accents, never filled.</td></tr>
+    <tr><td><strong>Night mode</strong></td><td>Deep Malachite <span class="mono">#0A1A14</span></td></tr>
+    <tr><td><strong>Day mode</strong></td><td>Ivory <span class="mono">#F5F0E8</span></td></tr>
+    <tr><td><strong>RAG indicators</strong></td><td>Correct <span class="mono">#22C55E</span> / In-progress <span class="mono">#F59E0B</span> / Needs-work <span class="mono">#EF4444</span></td></tr>
+  </tbody>
+</table>
+
+<h3>Logo</h3>
+<p>The <strong>Tantri Resonance Mark</strong>: text-dominant brand with "S&#x101;dhan&#x101;" in Cormorant Garamond commanding the space. Devanagari as equal partner beneath. Five horizontal Tantri strings at just-intonation intervals (Bhoopali pentatonic), Sa string carrying a standing wave (fundamental mode). Saffron Sa terminus point with glow halo. Strings fade rightward (practice continues). SVG, scalable from 16px to 400px.</p>
+
+<h3>Motion Grammar</h3>
+<p>All animation uses physically grounded spring presets named after Hindustani ornaments:</p>
+<ul>
+  <li><strong>Tanpura Release</strong> (stiffness: 400, damping: 15) &mdash; natural decay, page-load card stagger</li>
+  <li><strong>Meend</strong> (80/20) &mdash; slow glide between states, smooth transitions</li>
+  <li><strong>Gamak</strong> (200/10) &mdash; celebrations, emphasis moments</li>
+  <li><strong>Andolan</strong> (120/8) &mdash; gentle hover, sustained interaction</li>
+  <li><strong>Kan</strong> (1000/30) &mdash; instant snap, press/tap, immediate feedback</li>
+</ul>
+
+<h3>Raga Colour Worlds</h3>
+<p>5 raga-responsive colour environments that shift with the raga being practised, grounded in the Mewar/Bundi-Kota Ragamala painting tradition. Transitions use 2400ms ink-diffusion animation via <span class="mono">data-raga</span> CSS attribute:</p>
+<table>
+  <thead><tr><th>Raga</th><th>Palette Inspiration</th><th>Time</th></tr></thead>
+  <tbody>
+    <tr><td>Bhairav</td><td>Pre-dawn grey, temple ochre, ash</td><td>Dawn</td></tr>
+    <tr><td>Yaman</td><td>Deep indigo, lamp gold, sandalwood</td><td>Evening</td></tr>
+    <tr><td>Bhoopali</td><td>Sunset amber, warm ivory</td><td>Dusk</td></tr>
+    <tr><td>Bhimpalasi</td><td>Monsoon green, rain grey</td><td>Afternoon</td></tr>
+    <tr><td>Bageshri</td><td>Midnight blue, moonlight silver</td><td>Night</td></tr>
+  </tbody>
+</table>
+
+<h3>Voice Feedback Visualisation (3 Layers)</h3>
+<ol>
+  <li><strong>Layer 1 (ambient)</strong>: Live voice waveform alongside tanpura waveform. In tune = waves align. Off pitch = divergence. Three.js, real-time.</li>
+  <li><strong>Layer 2 (primary)</strong>: Target swara as glowing circle. Student's pitch as moving dot with trail. Dot reaches circle = correct.</li>
+  <li><strong>Layer 3 (precision, tap to reveal)</strong>: Cents needle (&minus;50 to +50). Exact deviation. Varistha/Guru see this by default; Beginner/Explorer on-demand.</li>
+</ol>
+
+<!-- ================================================================
+     12. TECHNICAL STACK & $0 ARCHITECTURE
+     ================================================================ -->
+<div class="page-break"></div>
+<h2>12. Technical Stack &amp; $0 Architecture</h2>
+<div class="accent-bar"></div>
+
+<p>S&#x101;dhan&#x101; operates at <strong>$0 monthly cost</strong>. Every computational task runs in the user's browser. Every storage need uses free-tier services. This is not a limitation &mdash; it is a design decision that makes the product infinitely scalable without marginal cost per user.</p>
+
+<table>
+  <thead><tr><th>Layer</th><th>Technology</th><th>Purpose</th><th>Cost</th></tr></thead>
+  <tbody>
+    <tr><td>Frontend</td><td>Next.js 15, React 19, TypeScript strict</td><td>Application shell, routing, SSR</td><td>$0</td></tr>
+    <tr><td>Animation</td><td>Framer Motion v12</td><td>Spring physics, gesture handling</td><td>$0</td></tr>
+    <tr><td>Cinematic</td><td>GSAP 3</td><td>Timeline sequences (pakad moment, ceremonies)</td><td>$0</td></tr>
+    <tr><td>3D/Waveform</td><td>Three.js r170</td><td>Tanpura waveform visualisation</td><td>$0</td></tr>
+    <tr><td>Synthesis</td><td>Tone.js 15, Web Audio API</td><td>Tanpura drone, swara playback, tala pulse</td><td>$0</td></tr>
+    <tr><td>Denoising</td><td>RNNoise WASM</td><td>Neural noise suppression in browser</td><td>$0</td></tr>
+    <tr><td>Pitch Detection</td><td>Pitchy (McLeod Pitch Method)</td><td>Real-time Hz + clarity, &lt;5ms/frame</td><td>$0</td></tr>
+    <tr><td>Data</td><td>Supabase (free tier)</td><td>Auth, profiles, sessions, streaks, progress</td><td>$0</td></tr>
+    <tr><td>Hosting</td><td>Vercel (free tier)</td><td>Static export, 52 pages, CDN delivery</td><td>$0</td></tr>
+    <tr><td>Fonts</td><td>Google Fonts</td><td>Cormorant Garamond, Noto Serif Devanagari, Inter, IBM Plex Mono</td><td>$0</td></tr>
+    <tr><td colspan="3"><strong>Total monthly operational cost</strong></td><td><strong>$0</strong></td></tr>
+  </tbody>
+</table>
+
+<h3>Why $0 Is Defensible</h3>
+<ul>
+  <li><strong>Pitch detection</strong>: McLeod Pitch Method runs on the main thread in &lt;5ms. No cloud inference needed.</li>
+  <li><strong>Noise suppression</strong>: RNNoise compiled to WASM runs locally. No speech-to-text API costs.</li>
+  <li><strong>Synthesis</strong>: Tanpura, harmonium, and tabla sounds are generated mathematically, not streamed from a server.</li>
+  <li><strong>All music theory</strong>: 19,106 lines of TypeScript execute in the browser. Zero server-side computation.</li>
+  <li><strong>Storage</strong>: Supabase free tier (500MB database, 1GB storage, 50K monthly active users) is far beyond current needs.</li>
+  <li><strong>Hosting</strong>: Vercel free tier serves the static export globally via CDN.</li>
+</ul>
+
+<div class="callout-blue">
+  <strong>Scaling implication:</strong> Cost per user is effectively $0. The 1,000th user costs the same as the 1st. Revenue is 100% margin from the first dollar.
+</div>
+
+<!-- ================================================================
+     13. DATA MODEL & SCHEMA
+     ================================================================ -->
+<div class="page-break"></div>
+<h2>13. Data Model &amp; Schema</h2>
+<div class="accent-bar"></div>
+
+<p>6 tables in Supabase PostgreSQL, all with Row Level Security (RLS) enabled. Users can only read/write their own data.</p>
+
+<table>
+  <thead><tr><th>Table</th><th>Purpose</th><th>Key Columns</th></tr></thead>
+  <tbody>
+    <tr><td><strong>profiles</strong></td><td>User identity &amp; settings</td><td>id (uuid, FK to auth.users), display_name, journey, level (shishya/sadhaka/varistha/guru), xp, sa_hz (default 261.63), current_raga</td></tr>
+    <tr><td><strong>sessions</strong></td><td>Practice sessions</td><td>user_id, raga_id, sa_hz, duration_s, xp_earned, avg_accuracy (0&ndash;1), pakad_found, journey, started_at, ended_at</td></tr>
+    <tr><td><strong>exercise_attempts</strong></td><td>Individual attempts</td><td>session_id, exercise_type (pitch/phrase/pakad/swara_id/tala), swara_target, raga_id, hz_sung, cents_dev, accuracy, ornament_hint</td></tr>
+    <tr><td><strong>lesson_progress</strong></td><td>Lesson completion</td><td>user_id, lesson_id (matches YAML), journey, status (not_started/in_progress/complete), best_accuracy, attempt_count</td></tr>
+    <tr><td><strong>streaks</strong></td><td>Daily riyaz streaks</td><td>user_id, current_streak, longest_streak, last_riyaz_date</td></tr>
+    <tr><td><strong>raga_encounters</strong></td><td>Per-raga depth</td><td>user_id, raga_id, session_count, total_minutes, pakad_found, best_accuracy, first_practiced, last_practiced</td></tr>
+  </tbody>
+</table>
+
+<pre>
+profiles                 -- created automatically on auth signup
+  +-- sessions           -- one row per practice session
+  |     +-- exercise_attempts  -- granular: each pitch/phrase/pakad attempt
+  +-- lesson_progress    -- tracks lesson completion across curriculum
+  +-- streaks            -- current/longest streak, last riyaz date
+  +-- raga_encounters    -- per-raga: sessions, minutes, accuracy, pakad found
+</pre>
+
+<h3>Key Queries</h3>
+<ul>
+  <li><strong>getRecentRagas(userId, limit)</strong> &mdash; Most recently practiced ragas with best accuracy</li>
+  <li><strong>getPracticeHistory(userId, days)</strong> &mdash; Daily practice minutes for heatmap visualisation</li>
+  <li><strong>getRagaEncounters(userId)</strong> &mdash; Per-raga depth for curriculum progression</li>
+</ul>
+
+<!-- ================================================================
+     14. PEDAGOGICAL FRAMEWORK & REFERENCES
+     ================================================================ -->
+<div class="page-break"></div>
+<h2>14. Pedagogical Framework &amp; References</h2>
+<div class="accent-bar"></div>
+
+<h3>The Oral Tradition, Digitised</h3>
+<p>Hindustani classical music has been transmitted through the <em>guru-shishya parampara</em> (teacher-student tradition) for centuries. S&#x101;dhan&#x101; does not replace the guru &mdash; it provides the daily structured practice that makes guru sessions more productive.</p>
+
+<h3>Pedagogical Principles</h3>
+<ol>
+  <li><strong>The Presence Rule</strong>: Hear before label. Every new musical concept is experienced through sound before it receives a name or explanation. The student's ear forms an impression; only then does the theory arrive to confirm what they already feel.</li>
+  <li><strong>Progressive Disclosure</strong>: The interface reveals complexity only as the student earns it through musical acts. Strings appear on Tantri without announcement. The cents needle becomes available. New ragas surface. The student notices one day &mdash; that discovery is the ceremony.</li>
+  <li><strong>Spaced Consistency</strong>: Mastery gates require passing challenges across multiple sessions with cooldown periods (4&ndash;6 hours). This prevents cramming and enforces the S&#x101;dhan&#x101; principle: mastery comes from daily practice, not marathon sessions.</li>
+  <li><strong>Raga as Teacher</strong>: Each raga teaches a specific musical concept through its own nature. Bhoopali teaches pentatonic simplicity. Bhairav teaches komal swaras. Darbari teaches that ornament IS structure. The curriculum follows the ragas' natural teaching order.</li>
+  <li><strong>Error as Exploration</strong>: The system never says "wrong." It shows where you are relative to where the raga lives. Deviation is information, not failure.</li>
+</ol>
+
+<h3>Academic References</h3>
+<table>
+  <thead><tr><th>Author</th><th>Work</th><th>Contribution to S&#x101;dhan&#x101;</th></tr></thead>
+  <tbody>
+    <tr><td>Bharata Muni</td><td><em>Natya Shastra</em> (c. 200 BCE&ndash;200 CE)</td><td>22-shruti system, foundation of all frequency calculations</td></tr>
+    <tr><td>Bhatkhande, V.N.</td><td><em>Hindustani Sangeet Paddhati</em> (1910&ndash;1932)</td><td>10-thaat classification system, raga organisation framework</td></tr>
+    <tr><td>Jairazbhoy, N.A.</td><td><em>The Rags of North Indian Music</em> (1971)</td><td>Raga structure, melodic movement rules, performance practice</td></tr>
+    <tr><td>Deva, B.C.</td><td><em>The Music of India: A Scientific Study</em> (1981)</td><td>Acoustic analysis of Indian instruments, frequency measurements</td></tr>
+    <tr><td>Raja, Deepak</td><td><em>Hindustani Music: A Tradition in Transition</em> (2012)</td><td>Contemporary raga practice, gharana variations</td></tr>
+    <tr><td>Dani&eacute;lou, Alain</td><td><em>Music and the Power of Sound</em> (1943)</td><td>Just intonation ratios, consonance theory</td></tr>
+    <tr><td>Levy &amp; Reinhard</td><td><em>Comprehensive Just Intonation</em></td><td>Extended just intonation mathematics</td></tr>
+    <tr><td>Helmholtz, H.L.F.</td><td><em>On the Sensations of Tone</em> (1863)</td><td>Consonance theory, critical band roughness</td></tr>
+    <tr><td>McLeod, P. &amp; Wyvill, G.</td><td>"A smarter way to find pitch" (2005)</td><td>McLeod Pitch Method algorithm used in voice pipeline</td></tr>
+    <tr><td>Valin, J-M.</td><td>RNNoise (2018)</td><td>Recurrent neural network noise suppression used for denoising</td></tr>
+  </tbody>
+</table>
+
+<!-- ================================================================
+     15. ROADMAP & GO-TO-MARKET
+     ================================================================ -->
+<div class="page-break"></div>
+<h2>15. Roadmap &amp; Go-to-Market</h2>
+<div class="accent-bar"></div>
+
+<h3>Product Roadmap</h3>
+<table>
+  <thead><tr><th>Version</th><th>Scope</th><th>Status</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><strong>v1.0</strong></td>
+      <td>Full engine (19,106 lines), 30 ragas, 4 journeys + freeform, voice pipeline, Tantri instrument, 39-lesson curriculum, 318 unit tests, practice heatmap, binaural ear training, PWA, day/night modes</td>
+      <td class="saffron"><strong>Built</strong></td>
+    </tr>
+    <tr>
+      <td><strong>v1.1</strong></td>
+      <td>Mastery gates enforced (D-layer), expanded tala sessions, bandish library, Hindi/Marathi interface localisation</td>
+      <td>Planned</td>
+    </tr>
+    <tr>
+      <td><strong>v1.5</strong></td>
+      <td>Offline PWA (service worker + IndexedDB), session sync when online, expanded raga catalog to 50</td>
+      <td>Planned</td>
+    </tr>
+    <tr>
+      <td><strong>v2.0</strong></td>
+      <td>Social features (practice groups, shared sessions), gharana variation exploration, AI-powered phrase suggestions, community bandish library</td>
+      <td>Planned</td>
+    </tr>
+    <tr>
+      <td><strong>v3.0</strong></td>
+      <td>Mobile native (React Native), live lesson marketplace (guru-student), advanced analytics dashboard, institutional licensing</td>
+      <td>Vision</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>Go-to-Market Strategy</h3>
+<ol>
+  <li><strong>Phase 1 &mdash; Community</strong>: Launch on Reddit (r/icm, r/indianclassicalmusic), YouTube (demo videos showing real-time voice feedback), Twitter/X (Indian music community). Target: 1,000 early adopters.</li>
+  <li><strong>Phase 2 &mdash; Content</strong>: Partner with 5&ndash;10 Hindustani classical musicians for content validation and endorsement. Create "Learn Yaman in 7 Days" viral campaign.</li>
+  <li><strong>Phase 3 &mdash; Institutional</strong>: Approach music schools (Gandharva Mahavidyalaya, Lalit Kala Kendra, university music departments) for institutional licensing.</li>
+  <li><strong>Phase 4 &mdash; Monetisation</strong>: Freemium model. Free: Shishya level (8 lessons, 5 ragas). Premium: Sadhaka+ (ornaments, advanced ragas, full curriculum). Target: $4.99/month or $39.99/year.</li>
+</ol>
+
+<h3>Revenue Model</h3>
+<table>
+  <thead><tr><th>Tier</th><th>Price</th><th>Access</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Free</strong></td><td>$0</td><td>Shishya level (8 lessons, 5 ragas), freeform practice, daily riyaz</td></tr>
+    <tr><td><strong>Sadhaka</strong></td><td>$4.99/mo</td><td>+ Explorer journey (10 lessons, ornaments, ear training, 7 ragas)</td></tr>
+    <tr><td><strong>Guru</strong></td><td>$9.99/mo</td><td>Full access: all 39 lessons, all 30 ragas, all journeys, advanced analytics</td></tr>
+    <tr><td><strong>Institutional</strong></td><td>Custom</td><td>Bulk licensing for music schools, analytics dashboard, student management</td></tr>
+  </tbody>
+</table>
+
+<h3>Why Now</h3>
+<ol>
+  <li><strong>Web Audio maturity</strong>: Real-time pitch detection is now reliable in modern browsers.</li>
+  <li><strong>WASM performance</strong>: Neural denoising without cloud compute is possible since 2020.</li>
+  <li><strong>32M+ diaspora</strong> seeking cultural connection through music &mdash; and willing to pay.</li>
+  <li><strong>$0 infrastructure</strong>: Browser compute + free tiers eliminate the cost barrier to scaling.</li>
+  <li><strong>No competition</strong>: Zero products exist at this intersection of technology and tradition.</li>
+  <li><strong>Post-pandemic music learning</strong>: Remote/self-directed music education is a permanent shift.</li>
+</ol>
+
+<!-- ================================================================
+     FOOTER
+     ================================================================ -->
+<div class="footer">
+  <em>S&#x101;dhan&#x101;: not learning about music. Becoming it.</em>
+  <br><br>
+  Contact: aacrit@gmail.com | April 2026 | Confidential
+</div>
+
+</body>
+</html>

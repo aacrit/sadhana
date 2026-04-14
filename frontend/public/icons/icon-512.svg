@@ -1,31 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  Sadhana PWA Icon — 512x512
-  Tantri Resonance Mark: Five horizontal strings at just-intonation
-  intervals (Bhoopali pentatonic: Sa Re Ga Pa Dha). Sa string carries
-  a standing wave (fundamental mode). Saffron Sa terminus point with
-  glow halo. Strings fade rightward. Background: Deep Malachite.
+  Sadhana PWA Icon -- 512x512
+  Text-dominant brand mark: "Sadhana" wordmark in Cormorant Garamond
+  commands the space. Devanagari as equal partner beneath. Tantri string
+  accent band with standing wave and saffron Sa terminus.
+  Maximum detail at this size: full wave articulation, enhanced glow.
 -->
 <svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
   <defs>
-    <!-- Sa terminus glow: radial saffron halo -->
     <radialGradient id="sa-glow" cx="50%" cy="50%" r="50%">
       <stop offset="0%" stop-color="#E8871E" stop-opacity="0.50"/>
       <stop offset="50%" stop-color="#E8871E" stop-opacity="0.20"/>
       <stop offset="100%" stop-color="#E8871E" stop-opacity="0"/>
     </radialGradient>
-    <!-- Rightward fade: strings dissolve into malachite -->
     <linearGradient id="string-fade" x1="0" y1="0" x2="1" y2="0">
       <stop offset="0%" stop-opacity="1"/>
       <stop offset="72%" stop-opacity="1"/>
       <stop offset="100%" stop-opacity="0"/>
     </linearGradient>
     <mask id="fade-mask">
-      <rect x="96" y="0" width="400" height="512" fill="url(#string-fade)"/>
+      <rect x="44" y="0" width="440" height="512" fill="url(#string-fade)"/>
     </mask>
-    <!-- Wave glow blur -->
     <filter id="wave-glow" x="-20%" y="-200%" width="140%" height="500%">
-      <feGaussianBlur stdDeviation="5" result="blur"/>
+      <feGaussianBlur stdDeviation="4" result="blur"/>
       <feMerge>
         <feMergeNode in="blur"/>
         <feMergeNode in="SourceGraphic"/>
@@ -36,53 +33,53 @@
   <!-- Background: Deep Malachite -->
   <rect width="512" height="512" rx="64" fill="#0A1A14"/>
 
-  <!--
-    String field (safe area ~80%):
-    fieldLeft=96, fieldRight=496, fieldLength=400
-    fieldTop=80, fieldBottom=432, fieldHeight=352
+  <!-- Primary wordmark: "Sadhana" -- large, commanding, the hero -->
+  <text x="256" y="210" font-family="'Cormorant Garamond', Georgia, serif"
+        font-size="108" font-weight="400" letter-spacing="0.08em"
+        fill="#F0E6D3" text-anchor="middle">
+    S&#x101;dhan&#x101;
+  </text>
 
-    Bhoopali Y positions (log2-normalized, Sa at bottom, Dha at top):
-      Dha:  80.0
-      Pa:  152.6
-      Ga:  278.2
-      Re:  350.8
-      Sa:  432.0
-  -->
+  <!-- Saffron accent dot beside the S -->
+  <circle cx="82" cy="216" r="4.5" fill="#E8871E" opacity="0.55"/>
 
+  <!-- Devanagari -- treated as equal partner, not subtitle -->
+  <text x="256" y="268" font-family="'Noto Serif Devanagari', serif"
+        font-size="42" font-weight="400" letter-spacing="0.12em"
+        fill="#B8A99A" text-anchor="middle" opacity="0.75">&#x0938;&#x093E;&#x0927;&#x0928;&#x093E;</text>
+
+  <!-- Tantri string accent band -->
   <g mask="url(#fade-mask)">
-    <!-- Dha string (highest, thinnest) -->
-    <line x1="96" y1="80" x2="496" y2="80"
-          stroke="#F0E6D3" stroke-width="8" stroke-linecap="round" opacity="0.40"/>
+    <!-- Dha -->
+    <line x1="44" y1="316" x2="468" y2="316"
+          stroke="#F0E6D3" stroke-width="2.5" stroke-linecap="round" opacity="0.20"/>
+    <!-- Pa -->
+    <line x1="44" y1="334" x2="468" y2="334"
+          stroke="#B8A99A" stroke-width="4.5" stroke-linecap="round" opacity="0.35"/>
+    <!-- Ga -->
+    <line x1="44" y1="360" x2="468" y2="360"
+          stroke="#F0E6D3" stroke-width="2.5" stroke-linecap="round" opacity="0.20"/>
+    <!-- Re -->
+    <line x1="44" y1="382" x2="468" y2="382"
+          stroke="#F0E6D3" stroke-width="2.5" stroke-linecap="round" opacity="0.20"/>
 
-    <!-- Pa string (fifth degree, slightly thicker) -->
-    <line x1="96" y1="152.6" x2="496" y2="152.6"
-          stroke="#B8A99A" stroke-width="14.4" stroke-linecap="round" opacity="0.65"/>
-
-    <!-- Ga string -->
-    <line x1="96" y1="278.2" x2="496" y2="278.2"
-          stroke="#F0E6D3" stroke-width="8" stroke-linecap="round" opacity="0.45"/>
-
-    <!-- Re string -->
-    <line x1="96" y1="350.8" x2="496" y2="350.8"
-          stroke="#F0E6D3" stroke-width="8" stroke-linecap="round" opacity="0.45"/>
-
-    <!-- Sa string: standing wave (fundamental mode, sin(pi*t) * 12px) -->
+    <!-- Sa string: standing wave (fundamental mode) -->
     <!-- Saffron glow behind wave -->
-    <path d="M 96.00 432.00 L 104.33 431.22 L 112.67 430.43 L 121.00 429.66 L 129.33 428.89 L 137.67 428.14 L 146.00 427.41 L 154.33 426.69 L 162.67 426.00 L 171.00 425.33 L 179.33 424.69 L 187.67 424.09 L 196.00 423.51 L 204.33 422.98 L 212.67 422.48 L 221.00 422.02 L 229.33 421.61 L 237.67 421.24 L 246.00 420.91 L 254.33 420.64 L 262.67 420.41 L 271.00 420.23 L 279.33 420.10 L 287.67 420.03 L 296.00 420.00 L 304.33 420.03 L 312.67 420.10 L 321.00 420.23 L 329.33 420.41 L 337.67 420.64 L 346.00 420.91 L 354.33 421.24 L 362.67 421.61 L 371.00 422.02 L 379.33 422.48 L 387.67 422.98 L 396.00 423.51 L 404.33 424.09 L 412.67 424.69 L 421.00 425.33 L 429.33 426.00 L 437.67 426.69 L 446.00 427.41 L 454.33 428.14 L 462.67 428.89 L 471.00 429.66 L 479.33 430.43 L 487.67 431.22 L 496.00 432.00"
-          stroke="#E8871E" stroke-width="26" stroke-linecap="round" fill="none"
+    <path d="M 44.00 416.00 L 52.83 415.02 L 61.67 414.06 L 70.50 413.14 L 79.33 412.26 L 88.17 411.43 L 97.00 410.66 L 105.83 409.95 L 114.67 409.31 L 123.50 408.74 L 132.33 408.25 L 141.17 407.83 L 150.00 407.50 L 158.83 407.26 L 167.67 407.10 L 176.50 407.03 L 185.33 407.05 L 194.17 407.16 L 203.00 407.35 L 211.83 407.63 L 220.67 407.99 L 229.50 408.43 L 238.33 408.95 L 247.17 409.54 L 256.00 410.20 L 264.83 410.92 L 273.67 411.70 L 282.50 412.53 L 291.33 413.41 L 300.17 414.32 L 309.00 415.26 L 317.83 416.21 L 326.67 417.17 L 335.50 418.12 L 344.33 419.05 L 353.17 419.95 L 362.00 420.80 L 370.83 421.60 L 379.67 422.33 L 388.50 422.98 L 397.33 423.54 L 406.17 424.00 L 415.00 424.36 L 423.83 424.60 L 432.67 424.73 L 441.50 424.74 L 450.33 424.63 L 459.17 424.40 L 468.00 424.06"
+          stroke="#E8871E" stroke-width="12" stroke-linecap="round" fill="none"
           opacity="0.12" filter="url(#wave-glow)"/>
     <!-- Main Sa wave -->
-    <path d="M 96.00 432.00 L 104.33 431.22 L 112.67 430.43 L 121.00 429.66 L 129.33 428.89 L 137.67 428.14 L 146.00 427.41 L 154.33 426.69 L 162.67 426.00 L 171.00 425.33 L 179.33 424.69 L 187.67 424.09 L 196.00 423.51 L 204.33 422.98 L 212.67 422.48 L 221.00 422.02 L 229.33 421.61 L 237.67 421.24 L 246.00 420.91 L 254.33 420.64 L 262.67 420.41 L 271.00 420.23 L 279.33 420.10 L 287.67 420.03 L 296.00 420.00 L 304.33 420.03 L 312.67 420.10 L 321.00 420.23 L 329.33 420.41 L 337.67 420.64 L 346.00 420.91 L 354.33 421.24 L 362.67 421.61 L 371.00 422.02 L 379.33 422.48 L 387.67 422.98 L 396.00 423.51 L 404.33 424.09 L 412.67 424.69 L 421.00 425.33 L 429.33 426.00 L 437.67 426.69 L 446.00 427.41 L 454.33 428.14 L 462.67 428.89 L 471.00 429.66 L 479.33 430.43 L 487.67 431.22 L 496.00 432.00"
-          stroke="#F0E6D3" stroke-width="17.6" stroke-linecap="round" fill="none"
-          opacity="0.85"/>
+    <path d="M 44.00 416.00 L 52.83 415.02 L 61.67 414.06 L 70.50 413.14 L 79.33 412.26 L 88.17 411.43 L 97.00 410.66 L 105.83 409.95 L 114.67 409.31 L 123.50 408.74 L 132.33 408.25 L 141.17 407.83 L 150.00 407.50 L 158.83 407.26 L 167.67 407.10 L 176.50 407.03 L 185.33 407.05 L 194.17 407.16 L 203.00 407.35 L 211.83 407.63 L 220.67 407.99 L 229.50 408.43 L 238.33 408.95 L 247.17 409.54 L 256.00 410.20 L 264.83 410.92 L 273.67 411.70 L 282.50 412.53 L 291.33 413.41 L 300.17 414.32 L 309.00 415.26 L 317.83 416.21 L 326.67 417.17 L 335.50 418.12 L 344.33 419.05 L 353.17 419.95 L 362.00 420.80 L 370.83 421.60 L 379.67 422.33 L 388.50 422.98 L 397.33 423.54 L 406.17 424.00 L 415.00 424.36 L 423.83 424.60 L 432.67 424.73 L 441.50 424.74 L 450.33 424.63 L 459.17 424.40 L 468.00 424.06"
+          stroke="#F0E6D3" stroke-width="7" stroke-linecap="round" fill="none"
+          opacity="0.70"/>
   </g>
 
   <!-- Sa terminus glow halo -->
-  <circle cx="96" cy="432" r="56" fill="url(#sa-glow)"/>
+  <circle cx="44" cy="416" r="30" fill="url(#sa-glow)"/>
 
   <!-- Solid saffron Sa terminus point -->
-  <circle cx="96" cy="432" r="22.4" fill="#E8871E"/>
+  <circle cx="44" cy="416" r="10" fill="#E8871E"/>
 
-  <!-- Pa terminus point (subtle anchor) -->
-  <circle cx="96" cy="152.6" r="12" fill="#B8A99A" opacity="0.6"/>
+  <!-- Pa terminus point -->
+  <circle cx="44" cy="334" r="4" fill="#B8A99A" opacity="0.5"/>
 </svg>
