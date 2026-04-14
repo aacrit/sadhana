@@ -36,7 +36,8 @@ import { useFreeformSession } from '../../lib/useFreeformSession';
 import type { SwaraEvent } from '../../lib/useFreeformSession';
 import { useAuth } from '../../lib/auth';
 import { useVoiceWave } from '../../lib/VoiceWaveContext';
-import { getRagaForTimeOfDay } from '@/engine/theory/ragas';
+import { getRagaForTimeOfDay, RAGA_LIST, getRagaById } from '@/engine/theory/ragas';
+import type { Raga } from '@/engine/theory/types';
 import styles from './freeform.module.css';
 
 // ---------------------------------------------------------------------------
@@ -215,6 +216,16 @@ export default function FreeformPage() {
   const [timbre, setTimbre] = useTimbreSelection();
   // Cinematic defocus: true when Tantri strings are vibrating
   const [tantriActive, setTantriActive] = useState(false);
+
+  // Raga selection — defaults to time-of-day, user can override
+  const [selectedRagaId, setSelectedRagaId] = useState<string | null>(todayRaga.id);
+  const selectedRaga: Raga | null = useMemo(
+    () => (selectedRagaId ? getRagaById(selectedRagaId) ?? null : null),
+    [selectedRagaId],
+  );
+
+  // Guided mode: show aroha suggestion
+  const [showGuide, setShowGuide] = useState(false);
 
   // Track the last few SwaraEvents for ghost display
   const [ghosts, setGhosts] = useState<(SwaraEvent & { key: number })[]>([]);
@@ -418,6 +429,38 @@ export default function FreeformPage() {
           <p className={styles.startSubtitle}>
             No goals. No exercises. Just you and the raga.
           </p>
+
+          {/* Raga selector */}
+          <div className={styles.ragaSelector}>
+            <label className={styles.ragaSelectorLabel}>
+              Raga
+            </label>
+            <div className={styles.ragaChips}>
+              <button
+                type="button"
+                className={`${styles.ragaChip} ${selectedRagaId === null ? styles.ragaChipActive : ''}`}
+                onClick={() => setSelectedRagaId(null)}
+              >
+                Open
+              </button>
+              {RAGA_LIST.map((r) => (
+                <button
+                  key={r.id}
+                  type="button"
+                  className={`${styles.ragaChip} ${selectedRagaId === r.id ? styles.ragaChipActive : ''}`}
+                  onClick={() => setSelectedRagaId(r.id)}
+                >
+                  <span className="raga-name">{r.name}</span>
+                </button>
+              ))}
+            </div>
+            {selectedRaga && (
+              <p className={styles.ragaHint}>
+                {selectedRaga.description?.split('.')[0]}.
+              </p>
+            )}
+          </div>
+
           <p className={styles.headphoneHint}>
             Headphones recommended to prevent tanpura feedback into the mic.
           </p>
@@ -487,11 +530,11 @@ export default function FreeformPage() {
     : null;
 
   return (
-    <div className={styles.page} data-raga={todayRaga.id}>
+    <div className={styles.page} data-raga={selectedRagaId ?? todayRaga.id}>
       {/* Tantri portal — centered guitar-like band with strings + pitch trail */}
       <Tantri
         saHz={userSaHz}
-        ragaId={null}
+        ragaId={selectedRagaId}
         level="varistha"
         subLevel={1}
         variant="portal"
@@ -612,6 +655,24 @@ export default function FreeformPage() {
       >
         <CentsNeedle centsDev={session.centsDev} />
       </div>
+
+      {/* Guided mode: aroha/avaroha suggestion bar */}
+      {selectedRaga && (
+        <div
+          className={styles.guideBar}
+          style={{
+            opacity: tantriActive ? 0.3 : 0.7,
+            transition: 'opacity 0.6s ease-out',
+          }}
+        >
+          <span className={styles.guideLabel}>
+            <span className="raga-name">{selectedRaga.name}</span>
+          </span>
+          <span className={styles.guideSwaras}>
+            {selectedRaga.aroha.map((n) => n.swara).join(' ')}
+          </span>
+        </div>
+      )}
 
       {/* Bottom controls (recede when Tantri is active) */}
       <div

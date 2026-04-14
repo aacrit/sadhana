@@ -655,14 +655,14 @@ When raga deactivates: all 12 strings return to chromatic layout over 600ms.
 --tantri-string-sa-width: 2px;
 --tantri-string-pa-width: 2px;
 --tantri-string-default-width: 1px;
---tantri-string-rest-opacity: 0.5;
+--tantri-string-rest-opacity: 0.35;
 --tantri-string-ghost-opacity: 0.08;
 --tantri-string-achala-opacity: 0.15;
 --tantri-ripple-duration: 400ms;
 --tantri-ripple-opacity: 0.15;
 --tantri-ripple-scale: 2;
 --tantri-compact-height: 120px;
---tantri-raga-transition: var(--dur-slow);
+--tantri-raga-transition: var(--dur-cinematic);
 ```
 
 ### Integration with Ragamala

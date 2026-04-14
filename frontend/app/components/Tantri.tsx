@@ -130,6 +130,24 @@ const COLOR_CACHE: Record<string, string> = {};
  */
 let CANVAS_FONT_FAMILY = 'system-ui, sans-serif';
 
+/**
+ * Cached font strings for canvas label rendering.
+ * Two variants (active / inactive) × DPR. Rebuilt on font/DPR change.
+ * Eliminates template literal concatenation per string per frame.
+ */
+let _fontCacheDpr = 0;
+let _fontActive = '';
+let _fontInactive = '';
+
+function getLabelFont(isActive: boolean, dpr: number): string {
+  if (dpr !== _fontCacheDpr) {
+    _fontCacheDpr = dpr;
+    _fontActive = `600 ${12.5 * dpr}px ${CANVAS_FONT_FAMILY}`;
+    _fontInactive = `400 ${11 * dpr}px ${CANVAS_FONT_FAMILY}`;
+  }
+  return isActive ? _fontActive : _fontInactive;
+}
+
 if (typeof document !== 'undefined') {
   const observer = new MutationObserver(() => {
     for (const key of Object.keys(COLOR_CACHE)) {
@@ -140,6 +158,8 @@ if (typeof document !== 'undefined') {
       getComputedStyle(document.documentElement)
         .getPropertyValue('--font-sans')
         .trim() || 'system-ui, sans-serif';
+    // Invalidate font cache so it rebuilds with new family
+    _fontCacheDpr = 0;
   });
   observer.observe(document.documentElement, {
     attributes: true,
@@ -391,9 +411,16 @@ function renderString(
     // blendedDisplacements holds the final per-point pixel displacement values.
     // We compute these once and reuse the same values for both the primary stroke
     // and the glow pass, eliminating the second full-path lineTo loop.
-    // This array is stack-allocated (small, fixed size — JS engine will not heap-alloc
-    // for arrays this size when filled immediately).
-    const blendedDisplacements = new Float64Array(numPoints);
+    // Pre-allocated on the string state — resized only when numPoints changes
+    // (canvas resize, infrequent). Eliminates per-frame Float64Array allocation.
+    let blendedDisplacements: Float64Array;
+    if (s._blendBufferSize === numPoints && s._blendBuffer !== null) {
+      blendedDisplacements = s._blendBuffer;
+    } else {
+      blendedDisplacements = new Float64Array(numPoints);
+      s._blendBuffer = blendedDisplacements;
+      s._blendBufferSize = numPoints;
+    }
     const hasVoiceData = voiceData && voiceData.length > 0 && !s.touched && s.amplitude > 0.05;
 
     if (hasVoiceData) {
@@ -522,9 +549,7 @@ function renderString(
   // --- Swara label ---
   ctx.save();
   const isActive = s.amplitude > 0.01;
-  const labelSize = isActive ? 12.5 : 11;
-  const labelWeight = isActive ? '600' : '400';
-  ctx.font = `${labelWeight} ${labelSize * dpr}px ${CANVAS_FONT_FAMILY}`;
+  ctx.font = getLabelFont(isActive, dpr);
   ctx.textAlign = 'right';
   ctx.textBaseline = 'middle';
   ctx.fillStyle = isActive ? color : resolveColor('--text-3', '#7A6B5E');
@@ -701,9 +726,10 @@ const Tantri = memo(function Tantri({
           band: voiceMap.accuracyBand,
           amp: voiceAmplitude,
         });
-        // Trim trail to max length
-        if (pitchTrailRef.current.length > PITCH_TRAIL_MAX) {
-          pitchTrailRef.current = pitchTrailRef.current.slice(-PITCH_TRAIL_MAX);
+        // Trim trail to max length — splice in place instead of slice + allocate
+        const excess = pitchTrailRef.current.length - PITCH_TRAIL_MAX;
+        if (excess > 0) {
+          pitchTrailRef.current.splice(0, excess);
         }
       }
     } else if (variant === 'portal') {

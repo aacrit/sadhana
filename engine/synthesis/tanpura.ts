@@ -48,6 +48,12 @@ export interface TanpuraConfig {
   readonly useMa?: boolean;
   /** Slight detuning in cents between the two Sa strings (default: 2). */
   readonly saDetuningCents?: number;
+  /**
+   * Full cycle duration in seconds for all 4 plucks.
+   * Each string gets cycleDuration/4 seconds between plucks.
+   * Default: 4.0 (1.0s per string — medium tempo riyaz pace).
+   */
+  readonly cycleDuration?: number;
 }
 
 /**
@@ -59,6 +65,7 @@ export const DEFAULT_TANPURA_CONFIG: TanpuraConfig = {
   strings: 4,
   useMa: false,
   saDetuningCents: 2,
+  cycleDuration: 4.0,
 };
 
 // ---------------------------------------------------------------------------
@@ -66,12 +73,26 @@ export const DEFAULT_TANPURA_CONFIG: TanpuraConfig = {
 // ---------------------------------------------------------------------------
 
 /**
- * The TanpuraDrone class synthesises a continuous drone using Tone.js.
+ * Per-string gain nodes, grouped for pluck envelope scheduling.
+ */
+interface StringVoice {
+  oscillators: OscillatorNode[];
+  gains: GainNode[];
+  /** Peak amplitude per partial (partial.amplitude * stringVolume * 0.15). */
+  peaks: number[];
+}
+
+/**
+ * The TanpuraDrone class synthesises a tanpura drone using Web Audio.
  *
  * Each of the four strings is rendered as a set of additive sine oscillators
- * (one per partial), with amplitudes from the jivari model. The result is
- * a rich, shimmering harmonic field — not a looped sample, but a living
- * mathematical model.
+ * (one per partial), with amplitudes from the jivari model. Strings are
+ * plucked sequentially in a repeating cycle (Pa → Sa → Sa → Sa(low) → ...),
+ * each with an attack/sustain/decay envelope per partial.
+ *
+ * The jivari bridge causes higher partials to sustain longer than lower ones —
+ * this produces the tanpura's signature shimmering timbre as different partials
+ * wax and wane throughout each pluck cycle.
  *
  * Usage:
  *   const tanpura = new TanpuraDrone({ sa_hz: 261.63, volume: 0.3, strings: 4 });
@@ -80,22 +101,22 @@ export const DEFAULT_TANPURA_CONFIG: TanpuraConfig = {
  *   // Later:
  *   tanpura.stop();
  *
- * The drone is designed to be computationally lightweight: 4 strings x 10
- * partials = 40 oscillators, which is well within the capacity of any
- * modern browser's AudioContext.
+ * The drone is computationally lightweight: 4 strings x 10 partials = 40
+ * oscillators, well within any modern browser's AudioContext capacity.
  */
 export class TanpuraDrone {
   private config: TanpuraConfig;
   private profiles: ReadonlyArray<TanpuraStringProfile>;
   private running: boolean = false;
 
-  // Tone.js objects — typed as any because Tone.js may not be available
-  // at module load time (server-side rendering). We lazy-load Tone.js
-  // only when start() is called.
-  private oscillators: OscillatorNode[] = [];
-  private gains: GainNode[] = [];
+  private voices: StringVoice[] = [];
   private masterGain: GainNode | null = null;
   private audioContext: AudioContext | null = null;
+
+  /** Handle for the pluck cycle scheduler. */
+  private cycleTimer: ReturnType<typeof setTimeout> | null = null;
+  /** Current string index in the pluck cycle (0–3). */
+  private cycleIndex: number = 0;
 
   constructor(config: Partial<TanpuraConfig> = {}) {
     this.config = { ...DEFAULT_TANPURA_CONFIG, ...config, strings: 4 };
@@ -109,7 +130,7 @@ export class TanpuraDrone {
    * Starts the tanpura drone.
    *
    * Creates a Web Audio AudioContext (requires user gesture on iOS Safari),
-   * builds the oscillator graph, and starts all oscillators.
+   * builds the oscillator graph, and begins the pluck cycle.
    *
    * @throws {Error} if AudioContext is not available (server-side)
    */
@@ -131,6 +152,10 @@ export class TanpuraDrone {
 
     this.buildOscillators();
     this.running = true;
+
+    // Begin pluck cycle — first pluck immediately
+    this.cycleIndex = 0;
+    this.schedulePluckCycle();
   }
 
   /**
@@ -139,6 +164,12 @@ export class TanpuraDrone {
    */
   stop(): void {
     if (!this.running || !this.audioContext || !this.masterGain) return;
+
+    // Cancel pluck cycle
+    if (this.cycleTimer !== null) {
+      clearTimeout(this.cycleTimer);
+      this.cycleTimer = null;
+    }
 
     const now = this.audioContext.currentTime;
 
@@ -231,6 +262,10 @@ export class TanpuraDrone {
   // Private: oscillator graph construction
   // -------------------------------------------------------------------------
 
+  /**
+   * Build the oscillator graph. All oscillators start running but at gain 0 —
+   * the pluck cycle scheduler shapes the envelopes.
+   */
   private buildOscillators(): void {
     if (!this.audioContext || !this.masterGain) return;
 
@@ -238,6 +273,13 @@ export class TanpuraDrone {
 
     for (let stringIdx = 0; stringIdx < this.profiles.length; stringIdx++) {
       const profile = this.profiles[stringIdx]!;
+      const voice: StringVoice = { oscillators: [], gains: [], peaks: [] };
+
+      // String volume balancing
+      const stringVolume =
+        stringIdx === 0 ? 0.7 :   // Pa or Ma string — slightly lower
+        stringIdx === 3 ? 0.6 :   // Low Sa — subdued
+        1.0;                       // Middle Sa strings — full
 
       for (const partial of profile.partials) {
         const osc = this.audioContext.createOscillator();
@@ -245,69 +287,153 @@ export class TanpuraDrone {
         osc.frequency.value = partial.frequency;
 
         // Apply slight detuning to the third string (second Sa)
-        // to create the characteristic beating/shimmering effect
         if (stringIdx === 2) {
           const detuneRatio = Math.pow(2, detuningCents / 1200);
           osc.frequency.value = partial.frequency * detuneRatio;
         }
 
         const gain = this.audioContext.createGain();
-        // Scale amplitude: per-partial amplitude * string volume balancing
-        // The two middle Sa strings are slightly louder
-        const stringVolume =
-          stringIdx === 0 ? 0.7 : // Pa or Ma string — slightly lower
-          stringIdx === 3 ? 0.6 : // Low Sa — subdued
-          1.0;                     // Middle Sa strings — full
+        // Start silent — pluck cycle will shape the envelope
+        gain.gain.value = 0;
 
-        gain.gain.value = partial.amplitude * stringVolume * 0.15;
+        const peak = partial.amplitude * stringVolume * 0.15;
+        voice.peaks.push(peak);
 
         osc.connect(gain);
         gain.connect(this.masterGain);
         osc.start();
 
-        this.oscillators.push(osc);
-        this.gains.push(gain);
+        voice.oscillators.push(osc);
+        voice.gains.push(gain);
       }
+
+      this.voices.push(voice);
     }
   }
 
+  // -------------------------------------------------------------------------
+  // Private: pluck envelope
+  // -------------------------------------------------------------------------
+
+  /**
+   * Schedule a pluck on a single string.
+   *
+   * The jivari envelope model:
+   *   - Attack: ~15ms sharp rise (string contact with jivari bridge)
+   *   - Sustain: partials 2-5 stay louder longer (jivari re-excitation)
+   *   - Decay: fundamental decays over ~800ms; higher partials sustain
+   *     to ~1200ms due to repeated bridge contact
+   *
+   * The string interval (cycleDuration / 4) determines how long each
+   * string rings before the next pluck. Partials decay naturally
+   * within this window.
+   */
+  private pluckString(stringIdx: number): void {
+    if (!this.audioContext) return;
+    const voice = this.voices[stringIdx];
+    if (!voice) return;
+
+    const now = this.audioContext.currentTime;
+    const interval = (this.config.cycleDuration ?? 4.0) / 4;
+
+    for (let p = 0; p < voice.gains.length; p++) {
+      const gainNode = voice.gains[p]!;
+      const peak = voice.peaks[p]!;
+      const partialNum = p + 1; // 1-indexed
+
+      // Jivari model: higher partials (2-5) have slower decay because
+      // the bridge re-excites them. The fundamental decays fastest.
+      // Beyond partial 5, decay speeds up again.
+      const jivariSustainFactor =
+        partialNum === 1 ? 1.0 :
+        partialNum <= 3 ? 1.4 :
+        partialNum <= 5 ? 1.2 :
+        0.8;
+
+      // Base decay time: scales with the pluck interval so the string
+      // rings for most of its window
+      const decayTime = interval * 0.85 * jivariSustainFactor;
+
+      // Attack: sharp 15ms rise
+      const attackEnd = now + 0.015;
+
+      // Cancel any scheduled values from a previous pluck
+      gainNode.gain.cancelScheduledValues(now);
+      gainNode.gain.setValueAtTime(0, now);
+      gainNode.gain.linearRampToValueAtTime(peak, attackEnd);
+
+      // Decay: exponential decay to near-silence
+      // Use setTargetAtTime for natural exponential envelope
+      // Time constant = decayTime / 3 (reaches ~5% at 3 time constants)
+      gainNode.gain.setTargetAtTime(0, attackEnd, decayTime / 3);
+    }
+  }
+
+  /**
+   * Schedule the repeating pluck cycle.
+   * Pa → Sa → Sa → Sa(low), then repeat.
+   */
+  private schedulePluckCycle(): void {
+    if (!this.running) return;
+
+    this.pluckString(this.cycleIndex);
+
+    // Advance to next string
+    this.cycleIndex = (this.cycleIndex + 1) % 4;
+
+    // Schedule next pluck
+    const interval = ((this.config.cycleDuration ?? 4.0) / 4) * 1000; // ms
+    this.cycleTimer = setTimeout(() => {
+      this.schedulePluckCycle();
+    }, interval);
+  }
+
   private rebuildOscillators(): void {
-    // Smoothly transition: build new oscillators, then remove old ones
-    const oldOscillators = [...this.oscillators];
-    const oldGains = [...this.gains];
+    // Smoothly transition: build new voices, then remove old ones
+    const oldVoices = [...this.voices];
 
-    this.oscillators = [];
-    this.gains = [];
-
+    this.voices = [];
     this.buildOscillators();
 
     // Fade out old oscillators
     if (this.audioContext) {
       const now = this.audioContext.currentTime;
-      for (const gain of oldGains) {
-        gain.gain.setValueAtTime(gain.gain.value, now);
-        gain.gain.linearRampToValueAtTime(0, now + 0.3);
+      for (const voice of oldVoices) {
+        for (const gain of voice.gains) {
+          gain.gain.cancelScheduledValues(now);
+          gain.gain.setValueAtTime(gain.gain.value, now);
+          gain.gain.linearRampToValueAtTime(0, now + 0.3);
+        }
       }
 
       setTimeout(() => {
-        for (const osc of oldOscillators) {
-          try { osc.stop(); } catch { /* already stopped */ }
-          osc.disconnect();
-        }
-        for (const gain of oldGains) {
-          gain.disconnect();
+        for (const voice of oldVoices) {
+          for (const osc of voice.oscillators) {
+            try { osc.stop(); } catch { /* already stopped */ }
+            osc.disconnect();
+          }
+          for (const gain of voice.gains) {
+            gain.disconnect();
+          }
         }
       }, 400);
     }
   }
 
   private cleanup(): void {
-    for (const osc of this.oscillators) {
-      try { osc.stop(); } catch { /* already stopped */ }
-      osc.disconnect();
+    if (this.cycleTimer !== null) {
+      clearTimeout(this.cycleTimer);
+      this.cycleTimer = null;
     }
-    for (const gain of this.gains) {
-      gain.disconnect();
+
+    for (const voice of this.voices) {
+      for (const osc of voice.oscillators) {
+        try { osc.stop(); } catch { /* already stopped */ }
+        osc.disconnect();
+      }
+      for (const gain of voice.gains) {
+        gain.disconnect();
+      }
     }
     if (this.masterGain) {
       this.masterGain.disconnect();
@@ -316,8 +442,7 @@ export class TanpuraDrone {
       this.audioContext.close().catch(() => { /* ignore */ });
     }
 
-    this.oscillators = [];
-    this.gains = [];
+    this.voices = [];
     this.masterGain = null;
     this.audioContext = null;
   }

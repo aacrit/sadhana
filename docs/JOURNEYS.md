@@ -177,7 +177,7 @@ Props: `partialFrequencies?`, `voiceAmplitude?`, `active?`, `className?`, `style
 | `VoiceVisualization` | components/VoiceVisualization.tsx | 3-layer voice feedback |
 | `PracticeSession` | components/PracticeSession.tsx | Core practice session with phase machine |
 | `ScriptToggle` | components/ScriptToggle.tsx | Global Devanagari/romanized toggle (fixed bottom-right) |
-| `Tantri` | components/Tantri.tsx | 12-string swara field renderer. Canvas-based. Reads CSS tokens via `resolveNum()`. Wired to voice pipeline (pitchHz/pitchClarity) and synthesis via `onPlayString` / `timbre`. |
+| `Tantri` | components/Tantri.tsx | 12-string swara field renderer. Canvas-based. Reads CSS tokens via `resolveNum()`. Wired to voice pipeline (pitchHz/pitchClarity) and synthesis via `onPlayString` / `timbre`. Three display variants: `full` (default, all 12 strings), `portal` (centered ~40vh band, guitar-like, with integrated pitch trail), `compact`. |
 | `VoiceTimbreSelector` | components/VoiceTimbreSelector.tsx | Harmonium / voice-male / voice-female selector. Drives `timbre` prop on `useLessonAudio`. |
 | `VoiceWave` | components/VoiceWave.tsx | Ambient voice waveform visualization. Uses VoiceWaveContext for cross-component pitch data. |
 
@@ -223,8 +223,8 @@ No goals. No exercises. No scoring. Just the tanpura and the student's voice. Th
 
 ### Visual Layers
 
-1. **Ambient tanpura waveform** (TanpuraViz, background, 15% opacity)
-2. **Swara field** -- current swara appears large and centered (Devanagari + romanized + full name). Previous swaras drift upward as "ghosts" (max 8), fading over 6s. In-tune swaras render in `--text`; off-pitch swaras render at 30% opacity.
+1. **Ambient voice waveform** (VoiceWave, background, 15% opacity) -- replaced TanpuraViz as of commit 5bb2983.
+2. **Tantri portal** -- Tantri component in `variant="portal"`, a centered ~40vh horizontal band of 12 strings with an integrated pitch trail rendered behind the strings. The pitch trail is a flowing line of recent voice pitch positions. Strings glow on voice detection per accuracy color.
 3. **Harmony pulse** -- radial gradient that fires when the student sings a consonant interval with Sa. Strong consonance (>0.80, e.g., Pa) triggers gold; moderate consonance triggers saffron. Fades over 1.2s.
 
 ### HUD
