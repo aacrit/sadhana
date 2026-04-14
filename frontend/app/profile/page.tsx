@@ -17,7 +17,7 @@ import { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '../lib/auth';
-import { getRecentRagas } from '../lib/supabase';
+import { getRecentRagas, getPracticeHistory } from '../lib/supabase';
 import { getLevelTitle } from '../lib/types';
 import type { LevelTitle, RecentRaga } from '../lib/types';
 import { getLevelIcon } from '../components/icons';
@@ -103,11 +103,15 @@ export default function ProfilePage() {
   const { user, profile, loading, isGuest, signOut } = useAuth();
 
   const [recentRagas, setRecentRagas] = useState<RecentRaga[]>([]);
+  const [practiceHistory, setPracticeHistory] = useState<
+    { date: string; minutes: number; sessions: number }[]
+  >([]);
 
-  // Fetch recent ragas for signed-in users
+  // Fetch recent ragas and practice history for signed-in users
   useEffect(() => {
     if (user) {
       getRecentRagas(user.id, 3).then(setRecentRagas);
+      getPracticeHistory(user.id, 90).then(setPracticeHistory);
     }
   }, [user]);
 
@@ -336,7 +340,70 @@ export default function ProfilePage() {
           )}
         </section>
 
-        {/* Section 5: Level progression */}
+        {/* Section 5: Practice heatmap */}
+        {practiceHistory.length > 0 && (
+          <section
+            className={styles.heatmapSection}
+            aria-label="Practice history"
+          >
+            <span className={styles.sectionLabel}>Last 90 days</span>
+            <div className={styles.heatmapGrid} role="img" aria-label="Practice heatmap showing activity over the last 90 days">
+              {(() => {
+                // Build 91-day grid (13 weeks)
+                const today = new Date();
+                const cells: { date: string; minutes: number; sessions: number }[] = [];
+                const historyMap = new Map(
+                  practiceHistory.map((h) => [h.date, h]),
+                );
+
+                for (let i = 90; i >= 0; i--) {
+                  const d = new Date(today);
+                  d.setDate(d.getDate() - i);
+                  const key = d.toISOString().slice(0, 10);
+                  const entry = historyMap.get(key);
+                  cells.push({
+                    date: key,
+                    minutes: entry?.minutes ?? 0,
+                    sessions: entry?.sessions ?? 0,
+                  });
+                }
+
+                return cells.map((cell) => {
+                  let level = 0;
+                  if (cell.minutes >= 30) level = 4;
+                  else if (cell.minutes >= 15) level = 3;
+                  else if (cell.minutes >= 5) level = 2;
+                  else if (cell.minutes > 0) level = 1;
+
+                  return (
+                    <div
+                      key={cell.date}
+                      className={styles.heatmapCell}
+                      data-level={level}
+                      title={`${cell.date}: ${cell.minutes} min, ${cell.sessions} session${cell.sessions !== 1 ? 's' : ''}`}
+                    />
+                  );
+                });
+              })()}
+            </div>
+            <div className={styles.heatmapMeta}>
+              <span className={styles.heatmapTotal}>
+                {practiceHistory.reduce((sum, h) => sum + h.sessions, 0)} sessions
+              </span>
+              <div className={styles.heatmapLegend}>
+                <span className={styles.heatmapLegendLabel}>Less</span>
+                <div className={styles.heatmapLegendCell} data-level={0} />
+                <div className={styles.heatmapLegendCell} data-level={1} />
+                <div className={styles.heatmapLegendCell} data-level={2} />
+                <div className={styles.heatmapLegendCell} data-level={3} />
+                <div className={styles.heatmapLegendCell} data-level={4} />
+                <span className={styles.heatmapLegendLabel}>More</span>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* Section 6: Level progression */}
         <section
           className={styles.levelSection}
           aria-label="Level progression"
@@ -406,7 +473,7 @@ export default function ProfilePage() {
           </div>
         </section>
 
-        {/* Section 6: Sign out */}
+        {/* Section 7: Sign out */}
         <button
           type="button"
           className={styles.signOutButton}

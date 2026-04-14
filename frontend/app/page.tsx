@@ -200,6 +200,7 @@ export default function HomePage() {
   // Use profile data if available, otherwise fall back to defaults
   const streak = profile?.streak ?? 0;
   const xp = profile?.xp ?? 0;
+  const riyazDone = profile?.riyazDone ?? false;
 
   // Suppress unused variable warnings — isGuest is consumed
   // by the AuthPill (via layout.tsx), not on the page directly.
@@ -243,6 +244,30 @@ export default function HomePage() {
         </span>
         <span className={styles.streakLabel}>day streak</span>
       </div>
+
+      {/* Daily goal ring */}
+      {user && (
+        <div className={styles.dailyGoal}>
+          <svg className={styles.goalRing} width="36" height="36" viewBox="0 0 36 36" aria-hidden="true">
+            <circle className={styles.goalRingBg} cx="18" cy="18" r="15" />
+            <circle
+              className={`${styles.goalRingFill} ${riyazDone ? styles.goalRingDone : ''}`}
+              cx="18"
+              cy="18"
+              r="15"
+              strokeDasharray={2 * Math.PI * 15}
+              strokeDashoffset={riyazDone ? 0 : 2 * Math.PI * 15 * 0.75}
+              transform="rotate(-90 18 18)"
+            />
+          </svg>
+          <div className={styles.goalText}>
+            <span className={styles.goalLabel}>Today&rsquo;s riyaz</span>
+            <span className={`${styles.goalStatus} ${riyazDone ? styles.goalStatusDone : ''}`}>
+              {riyazDone ? 'Complete' : 'Not yet — begin when ready'}
+            </span>
+          </div>
+        </div>
+      )}
 
       {/* Today's raga */}
       <div className={styles.todayRaga}>
