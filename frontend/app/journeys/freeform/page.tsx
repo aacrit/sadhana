@@ -44,6 +44,9 @@ import styles from './freeform.module.css';
 
 const MAX_GHOSTS = 8;
 
+/** Minimum note duration in ms — prevents inaudible clicks on quick taps. */
+const MIN_NOTE_MS = 400;
+
 // ---------------------------------------------------------------------------
 // Animation variants
 // ---------------------------------------------------------------------------
@@ -320,10 +323,22 @@ export default function FreeformPage() {
     router.push('/');
   }, [session, router]);
 
+  // Track when the current note started (for minimum duration on release)
+  const noteStartRef = useRef<number>(0);
+  const releaseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   // Tantri string trigger — touch a string to hear the swara.
   // Uses long duration for sustained (long-press) playback.
   // Dispatches to harmonium or TantriVoice(TM) based on timbre selection.
   const handleStringTrigger = useCallback(async (event: TantriPlayEvent) => {
+    // Clear any pending delayed release from a previous tap
+    if (releaseTimerRef.current) {
+      clearTimeout(releaseTimerRef.current);
+      releaseTimerRef.current = null;
+    }
+
+    noteStartRef.current = Date.now();
+
     try {
       const note = { swara: event.swara, octave: event.octave };
       const vol = event.velocity * 0.6;
@@ -346,10 +361,21 @@ export default function FreeformPage() {
     }
   }, [userSaHz]);
 
-  // Tantri string release — stop the sustained note immediately
+  // Tantri string release — stop the sustained note.
+  // Enforces minimum note duration so quick taps are still audible.
   const handleStringRelease = useCallback(() => {
-    stopVocalPlayback();
-    stopHarmoniumPlayback();
+    const elapsed = Date.now() - noteStartRef.current;
+    const doStop = () => {
+      stopVocalPlayback();
+      stopHarmoniumPlayback();
+    };
+
+    if (elapsed >= MIN_NOTE_MS) {
+      doStop();
+    } else {
+      // Let the note play for at least MIN_NOTE_MS
+      releaseTimerRef.current = setTimeout(doStop, MIN_NOTE_MS - elapsed);
+    }
   }, []);
 
   // -----------------------------------------------------------------------
@@ -453,13 +479,13 @@ export default function FreeformPage() {
 
   return (
     <div className={styles.page}>
-      {/* Layer 0 — Tantri: interactive swara string instrument */}
+      {/* Tantri portal — centered guitar-like band with strings + pitch trail */}
       <Tantri
         saHz={userSaHz}
         ragaId={null}
         level="varistha"
         subLevel={1}
-        variant="full"
+        variant="portal"
         analyser={session.getAnalyserNode()}
         pitchHz={session.currentHz}
         pitchClarity={session.currentClarity}
@@ -467,22 +493,9 @@ export default function FreeformPage() {
         onStringRelease={handleStringRelease}
         timbre={timbre}
         onActivityChange={setTantriActive}
+        className={styles.tantriPortal}
         style={{
-          position: 'absolute',
-          inset: 0,
-          zIndex: 0,
-          opacity: tantriActive ? 1 : 0.7,
-          transition: 'opacity 0.6s ease-out',
-        }}
-      />
-
-      {/* Voice frequency waveform with swara markers — above Tantri */}
-      <VoiceWave
-        variant="full"
-        saHz={userSaHz}
-        className={styles.voiceWaveOverlay}
-        style={{
-          opacity: session.isListening ? 0.7 : 0.15,
+          opacity: tantriActive ? 1 : 0.75,
           transition: 'opacity 0.6s ease-out',
         }}
       />
