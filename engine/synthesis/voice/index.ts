@@ -191,6 +191,7 @@ interface ActiveVocalNote {
   source: GlottalSource;
   tract: VocalTract;
   envelope: GainNode;
+  limiter: DynamicsCompressorNode;
   stopTimeout: ReturnType<typeof setTimeout> | null;
 }
 
@@ -220,10 +221,21 @@ function playVocalNote(
   // Apply formant tuning for high pitches (soprano F1 tracking)
   const tunedFormants = applyFormantTuning(formants, hz);
 
+  // Soft limiter — prevents clipping when formant peaks stack up.
+  // Configured as a transparent brick-wall at -1 dBFS; it never
+  // compresses below that, so the timbral envelope stays intact.
+  const limiter = ctx.createDynamicsCompressor();
+  limiter.threshold.value = -3;
+  limiter.knee.value = 6;
+  limiter.ratio.value = 20;
+  limiter.attack.value = 0.002;
+  limiter.release.value = 0.05;
+  limiter.connect(ctx.destination);
+
   // ADSR envelope
   const envelope = ctx.createGain();
   envelope.gain.value = 0;
-  envelope.connect(ctx.destination);
+  envelope.connect(limiter);
 
   const peakVolume = volume;
   const sustainVolume = volume * preset.envelope.sustain;
@@ -336,9 +348,10 @@ function playVocalNote(
     source.dispose();
     tract.dispose();
     envelope.disconnect();
+    limiter.disconnect();
   }, (duration + 0.5) * 1000);
 
-  return { source, tract, envelope, stopTimeout };
+  return { source, tract, envelope, limiter, stopTimeout };
 }
 
 // ---------------------------------------------------------------------------
@@ -369,6 +382,7 @@ export async function createVocalSynth(voiceType: VoiceType = 'tenor'): Promise<
       activeNote.source.dispose();
       activeNote.tract.dispose();
       activeNote.envelope.disconnect();
+      activeNote.limiter.disconnect();
       activeNote = null;
     }
   }
@@ -605,6 +619,7 @@ async function playEventSequence(
       note.source.dispose();
       note.tract.dispose();
       note.envelope.disconnect();
+      note.limiter.disconnect();
     } catch {
       // Already cleaned
     }

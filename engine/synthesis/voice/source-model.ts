@@ -205,8 +205,12 @@ export function createGlottalSource(
   oscillator.connect(merger);
 
   // Output gain (master volume)
+  // Higher gain compensates for PeriodicWave normalization: 48 aligned
+  // harmonics create a high crest-factor waveform whose RMS is only
+  // ~0.25 despite a peak of 1.0.  A gain of 2.0 brings the perceptual
+  // level into a comfortable range after formant filtering + envelope.
   const output = ctx.createGain();
-  output.gain.value = 0.5;
+  output.gain.value = 2.0;
   merger.connect(output);
   output.connect(destination);
 

@@ -117,48 +117,54 @@ export type Vowel = 'aa' | 'ee' | 'oo' | 'eh' | 'oh' | 'uh';
  * Values from Peterson & Barney (1952), adjusted for singing voice
  * per Sundberg (1977): F1 raised ~50Hz, singer's formant cluster.
  */
+/**
+ * Gains scaled for SERIES peaking filters.  Speech-spectroscopy values
+ * (20+ dB) describe the total spectral envelope; in a series chain each
+ * filter's gainDb must be moderate (6-12 dB) to avoid peaky over-boost
+ * at individual harmonics while keeping the overall signal audible.
+ */
 const MALE_FORMANTS: Record<Vowel, FormantSet> = {
   aa: {
-    f1: { frequency: 730, bandwidth: 80, gainDb: 20 },
-    f2: { frequency: 1090, bandwidth: 90, gainDb: 15 },
-    f3: { frequency: 2440, bandwidth: 120, gainDb: 12 },
-    f4: { frequency: 3400, bandwidth: 130, gainDb: 8 },
-    f5: { frequency: 4500, bandwidth: 140, gainDb: 5 },
+    f1: { frequency: 730, bandwidth: 80, gainDb: 10 },
+    f2: { frequency: 1090, bandwidth: 90, gainDb: 8 },
+    f3: { frequency: 2440, bandwidth: 120, gainDb: 6 },
+    f4: { frequency: 3400, bandwidth: 130, gainDb: 4 },
+    f5: { frequency: 4500, bandwidth: 140, gainDb: 2 },
   },
   ee: {
-    f1: { frequency: 270, bandwidth: 60, gainDb: 22 },
-    f2: { frequency: 2290, bandwidth: 100, gainDb: 10 },
-    f3: { frequency: 3010, bandwidth: 130, gainDb: 8 },
-    f4: { frequency: 3300, bandwidth: 140, gainDb: 8 },
-    f5: { frequency: 4500, bandwidth: 140, gainDb: 5 },
+    f1: { frequency: 270, bandwidth: 60, gainDb: 12 },
+    f2: { frequency: 2290, bandwidth: 100, gainDb: 6 },
+    f3: { frequency: 3010, bandwidth: 130, gainDb: 4 },
+    f4: { frequency: 3300, bandwidth: 140, gainDb: 4 },
+    f5: { frequency: 4500, bandwidth: 140, gainDb: 2 },
   },
   oo: {
-    f1: { frequency: 300, bandwidth: 60, gainDb: 22 },
-    f2: { frequency: 870, bandwidth: 80, gainDb: 16 },
-    f3: { frequency: 2240, bandwidth: 120, gainDb: 12 },
-    f4: { frequency: 3400, bandwidth: 130, gainDb: 8 },
-    f5: { frequency: 4500, bandwidth: 140, gainDb: 5 },
+    f1: { frequency: 300, bandwidth: 60, gainDb: 12 },
+    f2: { frequency: 870, bandwidth: 80, gainDb: 8 },
+    f3: { frequency: 2240, bandwidth: 120, gainDb: 6 },
+    f4: { frequency: 3400, bandwidth: 130, gainDb: 4 },
+    f5: { frequency: 4500, bandwidth: 140, gainDb: 2 },
   },
   eh: {
-    f1: { frequency: 530, bandwidth: 70, gainDb: 21 },
-    f2: { frequency: 1840, bandwidth: 95, gainDb: 12 },
-    f3: { frequency: 2480, bandwidth: 120, gainDb: 10 },
-    f4: { frequency: 3400, bandwidth: 130, gainDb: 8 },
-    f5: { frequency: 4500, bandwidth: 140, gainDb: 5 },
+    f1: { frequency: 530, bandwidth: 70, gainDb: 11 },
+    f2: { frequency: 1840, bandwidth: 95, gainDb: 6 },
+    f3: { frequency: 2480, bandwidth: 120, gainDb: 5 },
+    f4: { frequency: 3400, bandwidth: 130, gainDb: 4 },
+    f5: { frequency: 4500, bandwidth: 140, gainDb: 2 },
   },
   oh: {
-    f1: { frequency: 570, bandwidth: 75, gainDb: 21 },
-    f2: { frequency: 840, bandwidth: 80, gainDb: 16 },
-    f3: { frequency: 2410, bandwidth: 120, gainDb: 12 },
-    f4: { frequency: 3400, bandwidth: 130, gainDb: 8 },
-    f5: { frequency: 4500, bandwidth: 140, gainDb: 5 },
+    f1: { frequency: 570, bandwidth: 75, gainDb: 11 },
+    f2: { frequency: 840, bandwidth: 80, gainDb: 8 },
+    f3: { frequency: 2410, bandwidth: 120, gainDb: 6 },
+    f4: { frequency: 3400, bandwidth: 130, gainDb: 4 },
+    f5: { frequency: 4500, bandwidth: 140, gainDb: 2 },
   },
   uh: {
-    f1: { frequency: 640, bandwidth: 75, gainDb: 21 },
-    f2: { frequency: 1190, bandwidth: 90, gainDb: 14 },
-    f3: { frequency: 2390, bandwidth: 120, gainDb: 11 },
-    f4: { frequency: 3400, bandwidth: 130, gainDb: 8 },
-    f5: { frequency: 4500, bandwidth: 140, gainDb: 5 },
+    f1: { frequency: 640, bandwidth: 75, gainDb: 11 },
+    f2: { frequency: 1190, bandwidth: 90, gainDb: 7 },
+    f3: { frequency: 2390, bandwidth: 120, gainDb: 6 },
+    f4: { frequency: 3400, bandwidth: 130, gainDb: 4 },
+    f5: { frequency: 4500, bandwidth: 140, gainDb: 2 },
   },
 };
 
@@ -173,46 +179,46 @@ const MALE_FORMANTS: Record<Vowel, FormantSet> = {
  */
 const FEMALE_FORMANTS: Record<Vowel, FormantSet> = {
   aa: {
-    f1: { frequency: 850, bandwidth: 90, gainDb: 20 },
-    f2: { frequency: 1220, bandwidth: 100, gainDb: 15 },
-    f3: { frequency: 2810, bandwidth: 140, gainDb: 12 },
-    f4: { frequency: 3800, bandwidth: 150, gainDb: 8 },
-    f5: { frequency: 5000, bandwidth: 160, gainDb: 5 },
+    f1: { frequency: 850, bandwidth: 90, gainDb: 10 },
+    f2: { frequency: 1220, bandwidth: 100, gainDb: 8 },
+    f3: { frequency: 2810, bandwidth: 140, gainDb: 6 },
+    f4: { frequency: 3800, bandwidth: 150, gainDb: 4 },
+    f5: { frequency: 5000, bandwidth: 160, gainDb: 2 },
   },
   ee: {
-    f1: { frequency: 310, bandwidth: 70, gainDb: 22 },
-    f2: { frequency: 2790, bandwidth: 110, gainDb: 10 },
-    f3: { frequency: 3310, bandwidth: 150, gainDb: 8 },
-    f4: { frequency: 3750, bandwidth: 160, gainDb: 8 },
-    f5: { frequency: 5000, bandwidth: 160, gainDb: 5 },
+    f1: { frequency: 310, bandwidth: 70, gainDb: 12 },
+    f2: { frequency: 2790, bandwidth: 110, gainDb: 6 },
+    f3: { frequency: 3310, bandwidth: 150, gainDb: 4 },
+    f4: { frequency: 3750, bandwidth: 160, gainDb: 4 },
+    f5: { frequency: 5000, bandwidth: 160, gainDb: 2 },
   },
   oo: {
-    f1: { frequency: 370, bandwidth: 70, gainDb: 22 },
-    f2: { frequency: 950, bandwidth: 90, gainDb: 16 },
-    f3: { frequency: 2670, bandwidth: 140, gainDb: 12 },
-    f4: { frequency: 3800, bandwidth: 150, gainDb: 8 },
-    f5: { frequency: 5000, bandwidth: 160, gainDb: 5 },
+    f1: { frequency: 370, bandwidth: 70, gainDb: 12 },
+    f2: { frequency: 950, bandwidth: 90, gainDb: 8 },
+    f3: { frequency: 2670, bandwidth: 140, gainDb: 6 },
+    f4: { frequency: 3800, bandwidth: 150, gainDb: 4 },
+    f5: { frequency: 5000, bandwidth: 160, gainDb: 2 },
   },
   eh: {
-    f1: { frequency: 610, bandwidth: 80, gainDb: 21 },
-    f2: { frequency: 2150, bandwidth: 105, gainDb: 12 },
-    f3: { frequency: 2900, bandwidth: 140, gainDb: 10 },
-    f4: { frequency: 3800, bandwidth: 150, gainDb: 8 },
-    f5: { frequency: 5000, bandwidth: 160, gainDb: 5 },
+    f1: { frequency: 610, bandwidth: 80, gainDb: 11 },
+    f2: { frequency: 2150, bandwidth: 105, gainDb: 6 },
+    f3: { frequency: 2900, bandwidth: 140, gainDb: 5 },
+    f4: { frequency: 3800, bandwidth: 150, gainDb: 4 },
+    f5: { frequency: 5000, bandwidth: 160, gainDb: 2 },
   },
   oh: {
-    f1: { frequency: 660, bandwidth: 85, gainDb: 21 },
-    f2: { frequency: 980, bandwidth: 90, gainDb: 16 },
-    f3: { frequency: 2820, bandwidth: 140, gainDb: 12 },
-    f4: { frequency: 3800, bandwidth: 150, gainDb: 8 },
-    f5: { frequency: 5000, bandwidth: 160, gainDb: 5 },
+    f1: { frequency: 660, bandwidth: 85, gainDb: 11 },
+    f2: { frequency: 980, bandwidth: 90, gainDb: 8 },
+    f3: { frequency: 2820, bandwidth: 140, gainDb: 6 },
+    f4: { frequency: 3800, bandwidth: 150, gainDb: 4 },
+    f5: { frequency: 5000, bandwidth: 160, gainDb: 2 },
   },
   uh: {
-    f1: { frequency: 740, bandwidth: 85, gainDb: 21 },
-    f2: { frequency: 1390, bandwidth: 100, gainDb: 14 },
-    f3: { frequency: 2790, bandwidth: 140, gainDb: 11 },
-    f4: { frequency: 3800, bandwidth: 150, gainDb: 8 },
-    f5: { frequency: 5000, bandwidth: 160, gainDb: 5 },
+    f1: { frequency: 740, bandwidth: 85, gainDb: 11 },
+    f2: { frequency: 1390, bandwidth: 100, gainDb: 7 },
+    f3: { frequency: 2790, bandwidth: 140, gainDb: 6 },
+    f4: { frequency: 3800, bandwidth: 150, gainDb: 4 },
+    f5: { frequency: 5000, bandwidth: 160, gainDb: 2 },
   },
 };
 
@@ -221,10 +227,10 @@ const FEMALE_FORMANTS: Record<Vowel, FormantSet> = {
 // ---------------------------------------------------------------------------
 
 const SINGER_FORMANTS: Record<VoiceType, SingerFormant> = {
-  baritone: { frequency: 2700, q: 7.0, gainDb: 14 },
-  tenor: { frequency: 2800, q: 7.0, gainDb: 12 },
-  alto: { frequency: 3100, q: 6.5, gainDb: 12 },
-  soprano: { frequency: 3200, q: 6.4, gainDb: 10 },
+  baritone: { frequency: 2700, q: 7.0, gainDb: 8 },
+  tenor: { frequency: 2800, q: 7.0, gainDb: 7 },
+  alto: { frequency: 3100, q: 6.5, gainDb: 7 },
+  soprano: { frequency: 3200, q: 6.4, gainDb: 6 },
 };
 
 // ---------------------------------------------------------------------------
