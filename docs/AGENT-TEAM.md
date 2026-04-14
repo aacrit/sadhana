@@ -1,6 +1,6 @@
 # Sādhanā — Agent Team
 
-Last updated: 2026-04-11 (rev 2)
+Last updated: 2026-04-14 (rev 3)
 
 ## Org Structure
 

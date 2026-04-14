@@ -1,6 +1,6 @@
 # Engine Reference
 
-Last updated: 2026-04-13
+Last updated: 2026-04-14
 
 The engine lives at `/engine/`. Pure TypeScript. Zero UI. Zero dependencies except Tone.js (synthesis only). Single barrel export from `engine/index.ts`.
 
@@ -101,7 +101,7 @@ All core type definitions.
 | `RagaJati` | `'audava' \| 'shadava' \| 'sampoorna'` (5/6/7 notes) |
 | `Rasa` | 9 rasas: shant, karuna, shringar, veer, adbhut, bhayanak, raudra, bibhatsa, hasya |
 | `Prahara` | `1-8` (3-hour divisions of the day) |
-| `Raga` | Complete raga: id, aroha, avaroha, vadi, samvadi, pakad, prahara, rasa, ornaments, description |
+| `Raga` | Complete raga: id, aroha, avaroha, vadi, samvadi, pakad, prahara, rasa, ornaments, ornamentMap, vakra, description |
 | `Thaat` | Bhatkhande thaat: id, name, 7 swaras, description |
 | `Tala` | Rhythmic cycle: beats, vibhag, sam, khali, theka |
 | `n(swara, octave?)` | Helper to create SwaraNote |
@@ -129,9 +129,9 @@ All core type definitions.
 | `findThaat(swaras)` | fn | Match 7 swaras to a thaat |
 | `getRagasByThaat(thaatId)` | fn | Returns raga IDs for a thaat |
 
-### ragas/ (16 raga files)
+### ragas/ (30 raga files)
 
-The engine defines 16 ragas. The 5 v1 pedagogy ragas are ordered first:
+The engine defines 30 ragas. The 5 v1 pedagogy ragas are ordered first:
 
 v1 pedagogy ragas (fully used in journeys):
 
@@ -143,7 +143,7 @@ v1 pedagogy ragas (fully used in journeys):
 | Bhairav | Bhairav | sampoorna/sampoorna | Dha_k / Re_k | 1, 8 | Re_k, Dha_k (andolan) |
 | Bageshri | Kafi | shadava/sampoorna | Ma / Sa | 6, 7 | Ga_k, Ni_k |
 
-Additional engine ragas (defined, not yet wired to journeys): Bhairavi, Darbari Kanada, Desh, Hameer, Kafi, Kedar, Malkauns, Marwa, Puriya Dhanashri, Sohini, Todi.
+Additional engine ragas (defined, not yet wired to journeys): Asavari, Bhairavi, Bilawal, Darbari Kanada, Desh, Durga, Hameer, Hamsadhwani, Jaunpuri, Jog, Kafi, Kedar, Khamaj, Lalit, Madhuvanti, Malkauns, Marwa, Multani, Pahadi, Puriya, Puriya Dhanashri, Shree, Sohini, Tilak Kamod, Todi.
 
 Each raga file exports a complete `Raga` object with pakad phrases, ornaments, description, western bridge, gharana variations.
 
@@ -222,10 +222,12 @@ Validate sung phrases against raga rules.
 |--------|------|-------------|
 | `GrammarViolation` | interface | `{ type, swara, message, index }` |
 | `GrammarResult` | interface | `{ valid, violations[], score }` |
-| `validatePhrase(swaras, raga)` | fn | Checks: forbidden swaras, aroha/avaroha movement, vadi emphasis (8+ notes) |
+| `validatePhrase(swaras, raga)` | fn | Checks: forbidden swaras, aroha/avaroha movement, vakra patterns, vadi emphasis (8+ notes) |
 | `checkForbiddenSwaras(swaras, raga)` | fn | Varjit swara detection |
 
 Scoring: forbidden_swara -0.25, aroha/avaroha_violated -0.10, vadi_ignored -0.15. Scaled by phrase length.
+
+Vakra (oblique/zigzag) movement: when a raga defines `vakra` sequences, those specific out-of-order swara progressions are explicitly permitted. The validator pre-computes vakra swara sequences and skips the aroha/avaroha directional check for any transition that falls inside a defined vakra pattern.
 
 ### phrase-recognition.ts
 
@@ -252,11 +254,13 @@ Additive synthesis drone from first principles.
 
 | Export | Kind | Description |
 |--------|------|-------------|
-| `TanpuraConfig` | interface | `{ sa_hz, volume, strings: 4, useMa?, saDetuningCents? }` |
-| `DEFAULT_TANPURA_CONFIG` | const | 261.63 Hz, volume 0.3, 2 cents detuning |
+| `TanpuraConfig` | interface | `{ sa_hz, volume, strings: 4, useMa?, saDetuningCents?, cycleDuration? }` |
+| `DEFAULT_TANPURA_CONFIG` | const | 261.63 Hz, volume 0.3, 2 cents detuning, 7s pluck cycle |
 | `TanpuraDrone` | class | `start()`, `stop()`, `setSa(hz)`, `setVolume(v)`, `getPartialFrequencies()`, `getProfiles()` |
 
 Architecture: 4 strings x 10 partials = 40 sine oscillators. Third string detuned 2 cents for shimmer. String volume balance: Pa/Ma 0.7, low Sa 0.6, middle Sa 1.0. 500ms fade-out on stop. Web Audio API directly (no Tone.js).
+
+Pluck cycle model: strings are not sustained continuously but plucked sequentially (Pa → Sa → Sa → low Sa → repeat) with a jivari amplitude envelope per pluck. The `cycleDuration` parameter controls the full 4-string pluck cycle in seconds (default 7s, yielding one pluck every 1.75s). Higher partials sustain longer than lower partials, matching the physical behaviour of the jivari bridge.
 
 ### swara-voice.ts
 

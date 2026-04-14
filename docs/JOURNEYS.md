@@ -1,6 +1,6 @@
 # Journey UX Specs
 
-Last updated: 2026-04-13
+Last updated: 2026-04-14
 
 Four entry points to the same engine. Different interfaces, different depth, same musical truth.
 
@@ -24,6 +24,10 @@ The root page shows all four journeys as cards with Framer Motion stagger animat
 All four journeys are accessible from day one (`accessible: true, minLevel: 0`). Scholar and Master pages show "being built" messaging. All cards link to `/journeys/{id}`.
 
 Today's raga (from `getRagaForTimeOfDay(hour)`) and streak count displayed above the grid.
+
+### Daily Goal Ring
+
+An SVG ring displayed on the home page shows today's riyaz completion status. The ring is empty (unfilled) until the daily riyaz is complete, then fills and applies `--accent` (saffron) color. Status text reads "Complete" when done, "Not yet — begin when ready" when pending. Driven by `profile.riyazDone`.
 
 ---
 
@@ -240,6 +244,10 @@ Always visible in freeform mode. Maps -50 to +50 cents. Color: green (<=20c), am
 - **Tanpura toggle** -- waveform icon + "Tanpura" label. Mute/unmute the drone.
 - **End riyaz** -- stops listening, disposes audio, navigates back via `window.history.back()`.
 
+### Raga Selector
+
+The freeform page exposes a raga selector (dropdown/list) so the student can choose which raga's tanpura tuning and string visibility to use. Default is the time-of-day raga (from `getRagaForTimeOfDay`). Selecting a raga updates Tantri's raga-aware string visibility and the tanpura drone's Sa reference without interrupting the session.
+
 ### Session Persistence
 
 Uses `useFreeformSession` hook. Sessions >= 30s are saved to Supabase `sessions` table with `raga_id: 'freeform'`, `journey: 'freeform'`. XP: 2 per minute. Fire-and-forget -- errors logged but never thrown to UI.
@@ -299,4 +307,27 @@ Source: `frontend/app/profile/page.tsx`
 
 ## Explorer, Scholar, Master
 
-v1 state: Explorer has a full page at `frontend/app/journeys/explorer/page.tsx` with raga browser, ear training (`/ear-training`), and raga detail (`/[ragaId]`) routes. Scholar and Master have pages at `frontend/app/journeys/{scholar,master}/page.tsx` with "being built" messaging. All three are navigable from the home page.
+v1 state: Explorer has a full page at `frontend/app/journeys/explorer/page.tsx` with raga browser, ear training (`/ear-training`), interval training (`/interval-training`), and raga detail (`/[ragaId]`) routes. Scholar and Master have pages at `frontend/app/journeys/{scholar,master}/page.tsx` with "being built" messaging. All three are navigable from the home page.
+
+### Explorer — Tantri Integration
+
+The Explorer raga detail pages render Tantri in `portal` variant with raga-aware string visibility. Only the swaras present in the selected raga's aroha and avaroha are shown — strings for varjit (forbidden) swaras are hidden. This gives the student a visual map of the raga's swara set before they practice.
+
+### Explorer — Interval Training
+
+Source: `frontend/app/journeys/explorer/interval-training/page.tsx`
+
+10-round binaural ear-training exercise. Raga-aware: intervals are drawn from the time-of-day raga's swara set.
+
+| Rounds | Mode | Description |
+|--------|------|-------------|
+| 1–5 | Sequential | Sa plays first, then the target swara. Student identifies the swara from 4 options. |
+| 6–10 | Binaural | Sa and the target swara play simultaneously — Sa panned hard left, target panned hard right. Student must separate and identify the right-ear swara. |
+
+Audio: 4-partial additive synthesis via `StereoPannerNode` + `Web Audio API` (no external library). Just-intonation tuning via `getSwaraFrequency`. 8 XP per correct answer. Wrong answers replay the interval sequentially before advancing.
+
+### Profile — Practice Heatmap
+
+Source: `frontend/app/profile/page.tsx`
+
+A 90-day grid heatmap is displayed on the profile page (Section 5). Each cell represents one day; intensity levels 0–4 encode practice volume (minutes). Data fetched via `getPracticeHistory(userId, 90)` from Supabase. A legend and total-minutes label accompany the grid. Cell intensity thresholds: 0 = no practice, 1 = 1–5 min, 2 = 6–15 min, 3 = 16–30 min, 4 = >30 min.

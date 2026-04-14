@@ -1,6 +1,6 @@
 # Database Schema Reference
 
-Last updated: 2026-04-11
+Last updated: 2026-04-14
 
 Supabase (free tier). All tables have Row Level Security (RLS) enabled. Every table is scoped to the authenticated user via `auth.uid()`.
 
@@ -130,6 +130,17 @@ Unique: `(user_id, raga_id)`
 Index: `(user_id, last_practiced DESC)`
 
 RLS: select own, insert own, update own.
+
+---
+
+## Client Helpers
+
+Source: `frontend/app/lib/supabase.ts`
+
+| Helper | Signature | Description |
+|--------|-----------|-------------|
+| `getRecentRagas` | `(userId, limit)` | Fetch last N raga_encounters ordered by `last_practiced DESC` |
+| `getPracticeHistory` | `(userId, days)` | Aggregate sessions by day for the last N days. Returns `{ date: string, minutes: number, sessions: number }[]`. Used by the profile heatmap. |
 
 ---
 

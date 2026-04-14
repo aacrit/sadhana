@@ -1,0 +1,335 @@
+/**
+ * overview.module.css -- Investor overview page
+ *
+ * Self-contained styles for a print-ready document.
+ * Uses system + Google Fonts directly, not the app's design tokens.
+ * Print to PDF from browser for sharing.
+ */
+
+@page {
+  size: A4;
+  margin: 2cm 2.5cm;
+}
+
+@media print {
+  .doc { font-size: 10pt; }
+  .pageBreak { page-break-before: always; }
+  .sectionTitle { page-break-after: avoid; }
+  .table { page-break-inside: avoid; }
+}
+
+/* -- Document wrapper ------------------------------------------------- */
+
+.doc {
+  font-family: 'Inter', -apple-system, sans-serif;
+  font-size: 11pt;
+  line-height: 1.6;
+  color: #1a1a1a;
+  max-width: 210mm;
+  margin: 0 auto;
+  padding: 2cm 2.5cm;
+  background: #fff;
+}
+
+/* -- Cover ------------------------------------------------------------ */
+
+.cover {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 90vh;
+  text-align: center;
+  padding: 4rem 0;
+}
+
+.coverLogo { margin-bottom: 2rem; }
+
+.coverTitle {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 3.5rem;
+  font-weight: 300;
+  color: #0A1A14;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.5rem;
+}
+
+.coverDevanagari {
+  font-family: 'Noto Serif Devanagari', serif;
+  font-size: 1.8rem;
+  color: #4a4a4a;
+  margin-bottom: 1.5rem;
+}
+
+.coverTagline {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.3rem;
+  font-weight: 300;
+  font-style: italic;
+  color: #4a4a4a;
+  margin-bottom: 3rem;
+}
+
+.coverSubtitle {
+  font-size: 0.95rem;
+  color: #8a8a8a;
+  max-width: 480px;
+  line-height: 1.7;
+}
+
+.coverDate {
+  margin-top: 3rem;
+  font-size: 0.85rem;
+  color: #8a8a8a;
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+/* -- Headings --------------------------------------------------------- */
+
+.sectionTitle {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.6rem;
+  font-weight: 400;
+  color: #0A1A14;
+  margin-top: 2.5rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.3rem;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.accentBar {
+  width: 40px;
+  height: 3px;
+  background: #E8871E;
+  margin: 0.5rem 0 1rem;
+  border-radius: 2px;
+}
+
+/* -- Text ------------------------------------------------------------- */
+
+.text {
+  margin-bottom: 0.8rem;
+  color: #4a4a4a;
+}
+
+.list {
+  margin: 0.5rem 0 1rem 1.5rem;
+  color: #4a4a4a;
+}
+
+.list li {
+  margin-bottom: 0.3rem;
+}
+
+/* -- Metrics grid ----------------------------------------------------- */
+
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+
+.metric {
+  text-align: center;
+  padding: 1rem;
+  background: linear-gradient(135deg, #f8f8f8, #fff);
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+}
+
+.metricValue {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 1.6rem;
+  color: #0A1A14;
+  display: block;
+}
+
+.metricLabel {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #8a8a8a;
+  margin-top: 0.25rem;
+  display: block;
+}
+
+/* -- Tables ----------------------------------------------------------- */
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0 1.5rem;
+  font-size: 0.9rem;
+}
+
+.table th {
+  background: #0A1A14;
+  color: #fff;
+  font-weight: 500;
+  text-align: left;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.table td {
+  padding: 0.45rem 0.75rem;
+  border-bottom: 1px solid #e0e0e0;
+  color: #4a4a4a;
+}
+
+.table tr:nth-child(even) td {
+  background: #f9f9f9;
+}
+
+/* -- Architecture diagram --------------------------------------------- */
+
+.archDiagram {
+  background: #0A1A14;
+  color: #fff;
+  padding: 1.5rem;
+  border-radius: 6px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.75rem;
+  line-height: 1.7;
+  margin: 1rem 0;
+}
+
+.archLayer {
+  padding: 0.6rem 1rem;
+  margin: 0.4rem 0;
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 4px;
+}
+
+.archEngine { border-color: #E8871E; }
+.archJourney { border-color: #2D6A4F; }
+.archPresentation { border-color: #D4AF37; }
+.archData { border-color: #1E3A5F; }
+
+.archLabel {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  opacity: 0.7;
+}
+
+.archArrow {
+  text-align: center;
+  font-size: 0.8rem;
+  opacity: 0.5;
+  padding: 0.15rem 0;
+}
+
+/* -- Flow diagram ----------------------------------------------------- */
+
+.flow {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  margin: 1rem 0;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.75rem;
+  color: #4a4a4a;
+}
+
+.flowStep {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.75rem;
+  background: #f5f5f5;
+  border-radius: 4px;
+  border-left: 3px solid #2D6A4F;
+}
+
+.flowArrow {
+  text-align: center;
+  color: #8a8a8a;
+  font-size: 0.9rem;
+}
+
+/* -- Raga level grid -------------------------------------------------- */
+
+.ragaGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin: 1rem 0;
+}
+
+.ragaLevel {
+  padding: 0.75rem 1rem;
+  border-radius: 4px;
+  border: 1px solid #e0e0e0;
+}
+
+.ragaLevel h4 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.ragaLevel p {
+  font-size: 0.8rem;
+  margin: 0;
+  color: #8a8a8a;
+}
+
+.shishya { border-left: 3px solid #0A1A14; }
+.sadhaka { border-left: 3px solid #2D6A4F; }
+.varistha { border-left: 3px solid #1E3A5F; }
+.guru { border-left: 3px solid #D4AF37; }
+
+/* -- Pre blocks ------------------------------------------------------- */
+
+.pre {
+  background: #f5f5f5;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  padding: 1rem;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  overflow-x: auto;
+  margin: 1rem 0;
+  color: #1a1a1a;
+}
+
+/* -- Footer ----------------------------------------------------------- */
+
+.footer {
+  margin-top: 3rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e0e0e0;
+  text-align: center;
+  font-size: 0.8rem;
+  color: #8a8a8a;
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+}
+
+/* -- Page breaks ------------------------------------------------------ */
+
+.pageBreak { height: 1px; }
+
+@media print {
+  .pageBreak { page-break-before: always; }
+}
+
+/* -- Reduced motion --------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .doc { animation: none; }
+}
