@@ -525,9 +525,15 @@ export function updateFieldFromVoice(
     if (s.touched) continue;
 
     if (voiceMap && voiceMap.primaryIndex === i) {
-      // Primary string: snap to voice amplitude, set accuracy
+      // Primary string: voice IS playing the instrument.
+      // Perfect/good accuracy → strong vibration (like a click), regardless of mic volume.
+      // Approaching → moderate. Off → weak. This ensures vocal input feels powerful.
+      const bandBoost =
+        voiceMap.accuracyBand === 'perfect' ? 0.85 :
+        voiceMap.accuracyBand === 'good' ? 0.7 :
+        voiceMap.accuracyBand === 'approaching' ? 0.5 : 0.2;
       const targetAmp = Math.min(
-        voiceAmplitude * (voiceMap.accuracyBand === 'off' ? 0.3 : 1.0),
+        Math.max(voiceAmplitude, bandBoost),
         MAX_AMPLITUDE,
       );
       // Lerp toward target for smooth transitions (frame-rate corrected)
