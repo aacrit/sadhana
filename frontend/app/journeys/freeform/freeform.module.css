@@ -160,16 +160,15 @@
   color: var(--text-2);
 }
 
-/* -- Voice frequency waveform overlay --------------------------------- */
+/* -- Tantri portal (centered guitar-like band) ----------------------- */
 
-.voiceWaveOverlay {
+.tantriPortal {
   position: absolute;
-  top: 0;
   left: 0;
   right: 0;
-  height: 35vh;
+  top: 50%;
+  transform: translateY(-50%);
   z-index: 1;
-  pointer-events: none;
 }
 
 /* -- HUD -------------------------------------------------------------- */
@@ -202,14 +201,17 @@
 /* -- Swara field ------------------------------------------------------ */
 
 .swaraField {
-  position: relative;
+  position: absolute;
+  top: 10%;
+  left: 50%;
+  transform: translateX(-50%);
   width: 100%;
   max-width: 600px;
-  height: 50vh;
+  height: 25vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: var(--z-base);
+  z-index: 2;
   pointer-events: none; /* Pass all touches through to Tantri canvas below */
 }
 
@@ -287,7 +289,7 @@
 
 .centsContainer {
   position: absolute;
-  bottom: calc(var(--space-16) + var(--space-8));
+  bottom: calc(50% - 25vh);
   left: 50%;
   transform: translateX(-50%);
   z-index: var(--z-overlay);

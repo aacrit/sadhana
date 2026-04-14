@@ -17,6 +17,7 @@
  *
  * Variants:
  *   - full:    Full-screen, all strings, labels, cinematic focus
+ *   - portal:  Centered band (~40vh), guitar-like, with integrated pitch trail
  *   - compact: 120px strip, in-raga strings only, single-char labels
  *
  * The canvas renders at 60fps with standing-wave waveforms, sympathetic
@@ -72,8 +73,8 @@ export interface TantriProps {
   /** Sub-level within the journey tier (1-based). */
   subLevel?: number;
 
-  /** Display variant. */
-  variant?: 'full' | 'compact';
+  /** Display variant. 'portal' = centered narrow band with integrated pitch trail. */
+  variant?: 'full' | 'portal' | 'compact';
 
   /** AnalyserNode from the voice pipeline for real-time input. */
   analyser?: AnalyserNode | null;
@@ -215,6 +216,103 @@ const PADDING_X = 48;
 const PADDING_Y_TOP = 24;
 const PADDING_Y_BOTTOM = 24;
 const LABEL_WIDTH = 40;
+
+// ---------------------------------------------------------------------------
+// Pitch trail (voice → flowing line between strings)
+// ---------------------------------------------------------------------------
+
+/** Maximum trail length in frames (~1.5s at 60fps). */
+const PITCH_TRAIL_MAX = 90;
+
+interface PitchTrailPoint {
+  /** Canvas-space Y position (mapped from Hz). */
+  y: number;
+  /** Animation timestamp. */
+  time: number;
+  /** Accuracy band for color. */
+  band: AccuracyBand;
+  /** Voice amplitude (0-1). */
+  amp: number;
+}
+
+/**
+ * Render the pitch trail — a flowing line that shows the voice pitch
+ * position relative to the strings. Drawn BEHIND the strings so it
+ * feels like part of the instrument, not an overlay.
+ */
+function renderPitchTrail(
+  ctx: CanvasRenderingContext2D,
+  trail: PitchTrailPoint[],
+  canvasWidth: number,
+  dpr: number,
+  time: number,
+): void {
+  if (trail.length < 2) return;
+
+  const x0 = (PADDING_X + LABEL_WIDTH) * dpr;
+  const x1 = (canvasWidth - PADDING_X) * dpr;
+  const trailWidth = x1 - x0;
+  if (trailWidth <= 0) return;
+
+  ctx.save();
+
+  // Draw the trail as a line flowing from right (newest) to left (oldest)
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+
+  for (let i = 1; i < trail.length; i++) {
+    const prev = trail[i - 1]!;
+    const curr = trail[i]!;
+
+    // Horizontal position: newest point at right edge, oldest at left
+    const progress = i / trail.length;
+    const prevProgress = (i - 1) / trail.length;
+
+    const px = x0 + prevProgress * trailWidth;
+    const cx = x0 + progress * trailWidth;
+
+    // Y position already in canvas space (from dpr-scaled string positions)
+    const py = prev.y;
+    const cy = curr.y;
+
+    // Age-based fade: oldest points are most transparent
+    const age = (time - curr.time);
+    const fadeAlpha = Math.max(0, 1 - age / 1.5) * curr.amp;
+
+    if (fadeAlpha < 0.02) continue;
+
+    // Color from accuracy band
+    const color = getAccuracyColor(curr.band);
+
+    ctx.beginPath();
+    ctx.strokeStyle = color;
+    ctx.globalAlpha = fadeAlpha * 0.5;
+    ctx.lineWidth = (2 + curr.amp * 3) * dpr;
+    ctx.moveTo(px, py);
+    ctx.lineTo(cx, cy);
+    ctx.stroke();
+  }
+
+  // Glow on the newest point (current pitch position)
+  const newest = trail[trail.length - 1]!;
+  if (newest.amp > 0.05) {
+    const nx = x1; // rightmost position
+    const ny = newest.y;
+    const glowColor = getAccuracyColor(newest.band);
+
+    ctx.beginPath();
+    ctx.fillStyle = glowColor;
+    ctx.globalAlpha = newest.amp * 0.6;
+    ctx.shadowColor = glowColor;
+    ctx.shadowBlur = 12 * dpr;
+    ctx.arc(nx, ny, (4 + newest.amp * 4) * dpr, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+    ctx.shadowColor = 'transparent';
+  }
+
+  ctx.restore();
+}
 
 /**
  * Get the Y position for a string based on its index among visible strings.
@@ -467,6 +565,8 @@ const Tantri = memo(function Tantri({
   const touchedStringRef = useRef<number | null>(null);
   const pitchHzRef = useRef<number | null>(pitchHz);
   const pitchClarityRef = useRef(pitchClarity);
+  /** Pitch trail ring buffer for the portal variant's integrated waveform. */
+  const pitchTrailRef = useRef<PitchTrailPoint[]>([]);
 
   // Keep pitch refs in sync with props
   pitchHzRef.current = pitchHz;
@@ -579,6 +679,43 @@ const Tantri = memo(function Tantri({
     const visibleIndices = visibleIndicesRef.current;
     const totalVisible = visibleIndices.length;
 
+    // --- Pitch trail: record current pitch position ---
+    if (variant === 'portal' && voiceMap && voiceMap.primaryIndex >= 0 && voiceAmplitude > 0.03) {
+      // Map the primary string's visible index to a Y position
+      const visIdx = visibleIndices.indexOf(voiceMap.primaryIndex);
+      if (visIdx >= 0) {
+        const baseY = getStringY(visIdx, totalVisible, h / dpr) * dpr;
+        // Offset by cents deviation for smooth interpolation between strings
+        const centsOffset = voiceMap.centsDev;
+        // Each string is separated by ~spacing in canvas pixels
+        const spacing = totalVisible > 1
+          ? (h - (PADDING_Y_TOP + PADDING_Y_BOTTOM) * dpr) / (totalVisible - 1)
+          : 0;
+        // Cents per string gap varies, but ~100 is typical; use a scaled offset
+        const pixelOffset = spacing > 0 ? (centsOffset / 100) * spacing * -0.5 : 0;
+        const trailY = baseY + pixelOffset;
+
+        pitchTrailRef.current.push({
+          y: trailY,
+          time: timeRef.current,
+          band: voiceMap.accuracyBand,
+          amp: voiceAmplitude,
+        });
+        // Trim trail to max length
+        if (pitchTrailRef.current.length > PITCH_TRAIL_MAX) {
+          pitchTrailRef.current = pitchTrailRef.current.slice(-PITCH_TRAIL_MAX);
+        }
+      }
+    } else if (variant === 'portal') {
+      // Fade trail naturally — don't add new points but keep old ones
+      // They'll fade via age in renderPitchTrail
+    }
+
+    // --- Render pitch trail BEHIND strings (portal variant) ---
+    if (variant === 'portal' && pitchTrailRef.current.length > 1) {
+      renderPitchTrail(ctx, pitchTrailRef.current, w / dpr, dpr, timeRef.current);
+    }
+
     // Pass voice time-domain data to renderString for real-time waveform
     const voiceWaveData = analyserDataRef.current;
 
@@ -590,7 +727,7 @@ const Tantri = memo(function Tantri({
     }
 
     animFrameRef.current = requestAnimationFrame(render);
-  }, [analyser]);
+  }, [analyser, variant]);
 
   useEffect(() => {
     animFrameRef.current = requestAnimationFrame(render);
@@ -721,7 +858,7 @@ const Tantri = memo(function Tantri({
 
   const containerClass = [
     styles.tantri,
-    variant === 'compact' ? styles.compact : styles.full,
+    variant === 'compact' ? styles.compact : variant === 'portal' ? styles.portal : styles.full,
     className,
   ]
     .filter(Boolean)
