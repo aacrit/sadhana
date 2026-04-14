@@ -150,8 +150,8 @@ export function mapPitchToSwara(
   ragaId?: string,
   level: Level = 'shishya',
 ): PitchResult {
-  if (hz <= 0 || saHz <= 0) {
-    throw new RangeError('Frequencies must be positive');
+  if (!Number.isFinite(hz) || !Number.isFinite(saHz) || hz <= 0 || saHz <= 0) {
+    throw new RangeError('Frequencies must be finite positive numbers');
   }
 
   // Step 1: Compute raw cents from Sa
