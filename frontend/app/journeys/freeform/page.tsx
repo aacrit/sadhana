@@ -345,12 +345,13 @@ export default function FreeformPage() {
 
       if (event.timbre === 'voice-male' || event.timbre === 'voice-female') {
         await ensureVocalAudioReady();
-        // Long duration — stopped on release via handleStringRelease
+        // Long duration — stopped on release via handleStringRelease.
+        // Not awaited (30s note); catch silences any late rejections.
         playVocalSwaraNote(note, userSaHz, {
           duration: 30,
           volume: vol,
           voiceType: event.timbre === 'voice-male' ? 'baritone' : 'soprano',
-        });
+        }).catch(() => {});
       } else {
         await ensureAudioReady();
         // Long duration — stopped on release via handleStringRelease
