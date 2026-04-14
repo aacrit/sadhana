@@ -1,34 +1,36 @@
 /**
- * Logo.tsx -- The Sadhana mark: Tantri Resonance
+ * Logo.tsx -- The Sadhana Brand Mark (Redesigned)
  *
- * Five horizontal strings at just-intonation intervals -- the pentatonic
- * field of Raga Bhoopali (Sa Re Ga Pa Dha), the first raga a student
- * encounters. Spacing follows logarithmic frequency ratios: acoustically
- * truthful, not decorative.
+ * The wordmark IS the brand. "Sadhana" in Cormorant Garamond commands
+ * the space. The Devanagari "sadhana" is an equal partner, not a
+ * subtitle. The Tantri strings (Bhoopali pentatonic at just-intonation
+ * intervals) serve as a resonant accent band beneath -- connecting the
+ * brand to the instrument, but never competing with the text.
  *
- * The Sa string (lowest, thickest) carries a standing wave -- the shape
- * of a sung note activating the instrument. A saffron terminus point
- * anchors the tonic at the left. Strings extend rightward without
- * boundary -- the practice continues.
+ * The design philosophy: an instrument, not a tech product.
  *
- * Motion physics (from Ragamala motion grammar):
- *   Loading:  Sa wave oscillates via CSS @keyframes (zero JS, ~0.5Hz)
- *   Hover:    Strings brighten, Sa glow intensifies (Andolan: 120/8)
- *   Press:    Kan snap (1000/30) -- strings contract momentarily
- *   Idle:     Subtle phase drift on standing wave (~0.5Hz), barely perceptible
+ * Three variants:
+ *   full     -- Large wordmark + Devanagari + Tantri string accent
+ *   wordmark -- Text only (Sadhana + Devanagari)
+ *   compact  -- Tantri mark only (icon contexts, favicon, loading)
  *
  * Size presets:
- *   favicon (16px) -- 3 strings, Sa point only, no wave
- *   nav     (32px) -- 5 strings, simplified wave, interactive
- *   header  (48px) -- full articulation, interactive
- *   hero    (96px) -- full articulation with enhanced glow
- *   splash (200px) -- full articulation, maximum detail
+ *   xs    (24px)  -- Compact mark only, minimal detail
+ *   sm    (32px)  -- Navigation, small contexts
+ *   md    (48px)  -- Header standard
+ *   lg    (80px)  -- Hero sections
+ *   xl   (120px)  -- Splash, landing
+ *   xxl  (200px)  -- Maximum detail, cinematic
+ *   hero (400px)  -- Home page hero, maximum impact
  *
- * Wordmark variant: "Sadhana" in Cormorant Garamond with a hairline
- * string threading the baseline, Sa terminus at the 'S'.
+ * Motion physics (Ragamala spring grammar):
+ *   Load:   Strings resolve via Tanpura Release (400/15), text fades up
+ *   Hover:  Standing wave intensifies via Andolan (120/8)
+ *   Press:  Kan snap (1000/30)
+ *   Idle:   Subtle Sa glow pulse (~1.5s), wave drift (~2s)
  *
- * Works in Night mode (warm parchment strings on Deep Malachite) and
- * Day mode (dark ink strings on Ivory).
+ * Works on Night (#0A1A14) and Day (#F5F0E8) backgrounds.
+ * Respects prefers-reduced-motion.
  */
 
 'use client';
@@ -53,23 +55,29 @@ const STRING_POSITIONS = BHOOPALI_RATIOS.map((r) => Math.log2(r) / LOG2_MAX);
 // ---------------------------------------------------------------------------
 
 const SPRING_PRESETS = {
-  /** Andolan -- subtle shake, breath, barely perceptible */
   andolan: { stiffness: 120, damping: 8, mass: 1 },
-  /** Kan -- grace note, instantaneous snap */
   kan: { stiffness: 1000, damping: 30, mass: 1 },
-  /** Tanpura Release -- long decay, natural string settling */
   tanpuraRelease: { stiffness: 400, damping: 15, mass: 1 },
-  /** Meend -- glide between swaras, smooth, no overshoot */
-  meend: { stiffness: 80, damping: 20, mass: 1 },
 } as const;
 
 // ---------------------------------------------------------------------------
 // Size presets
 // ---------------------------------------------------------------------------
 
-export type LogoSizePreset = 'favicon' | 'nav' | 'header' | 'hero' | 'splash';
+export type LogoSizePreset = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl' | 'hero';
 
 const SIZE_PRESETS: Record<LogoSizePreset, number> = {
+  xs: 24,
+  sm: 32,
+  md: 48,
+  lg: 80,
+  xl: 120,
+  xxl: 200,
+  hero: 400,
+};
+
+// Legacy preset mapping for backward compatibility
+const LEGACY_PRESETS: Record<string, number> = {
   favicon: 16,
   nav: 32,
   header: 48,
@@ -77,22 +85,34 @@ const SIZE_PRESETS: Record<LogoSizePreset, number> = {
   splash: 200,
 };
 
-// Base opacities per string index (used for both static and animated paths)
-const BASE_OPACITIES = [0.85, 0.45, 0.45, 0.65, 0.40];
+// String visual properties
+const STRING_PROPS = [
+  { label: 'Sa', width: 2.2, opacity: 0.85, isSa: true, isPa: false },
+  { label: 'Re', width: 1.0, opacity: 0.45, isSa: false, isPa: false },
+  { label: 'Ga', width: 1.0, opacity: 0.45, isSa: false, isPa: false },
+  { label: 'Pa', width: 1.8, opacity: 0.65, isSa: false, isPa: true },
+  { label: 'Dha', width: 1.0, opacity: 0.40, isSa: false, isPa: false },
+];
+
+const BASE_OPACITIES = STRING_PROPS.map((s) => s.opacity);
 
 // ---------------------------------------------------------------------------
 // Props
 // ---------------------------------------------------------------------------
 
+export type LogoVariant = 'full' | 'wordmark' | 'compact' | 'icon';
+
 export interface LogoProps {
-  /** Size in pixels (height), or a named preset. Default 40. */
-  size?: number | LogoSizePreset;
-  /** 'full' shows mark + wordmark. 'icon' shows mark only. */
-  variant?: 'full' | 'icon';
-  /** When true, the Sa standing wave animates (CSS keyframes, zero JS). */
+  /** Size in pixels (height), or a named preset. Default 48. */
+  size?: number | LogoSizePreset | 'favicon' | 'nav' | 'header' | 'hero' | 'splash';
+  /** 'full' = text + mark, 'wordmark' = text only, 'compact'/'icon' = mark only. */
+  variant?: LogoVariant;
+  /** When true, the Sa standing wave animates (CSS keyframes). */
   loading?: boolean;
-  /** When true, hover/press physics are active. Default: true for sizes >= 24px. */
+  /** When true, hover/press spring physics are active. Default: true for sizes >= 24px. */
   interactive?: boolean;
+  /** Show the load-in animation. Default false. */
+  animate?: boolean;
   /** Additional class name. */
   className?: string;
   /** Additional inline styles. */
@@ -103,11 +123,6 @@ export interface LogoProps {
 // Standing wave path generator
 // ---------------------------------------------------------------------------
 
-/**
- * Generate an SVG path for a standing wave (fundamental mode).
- * Displacement follows sin(pi * x/L) * amplitude -- a single
- * antinode at center, the shape of a string vibrating at its fundamental.
- */
 function standingWavePath(
   x0: number,
   y: number,
@@ -130,12 +145,10 @@ function standingWavePath(
 }
 
 // ---------------------------------------------------------------------------
-// CSS keyframes for zero-JS wave animation
-// Scoped by uid. Translates the wave group vertically for a breathing
-// effect (idle) or a pronounced oscillation (loading). No JS RAF needed.
+// CSS keyframes (scoped by uid)
 // ---------------------------------------------------------------------------
 
-function getWaveKeyframes(uid: string, amplitude: number): string {
+function getKeyframes(uid: string, amplitude: number): string {
   const drift = Math.max(0.3, amplitude * 0.15);
   return `
     @keyframes sadhana-wave-drift-${uid} {
@@ -149,18 +162,25 @@ function getWaveKeyframes(uid: string, amplitude: number): string {
       50% { transform: translateY(${(amplitude * 0.5).toFixed(2)}px); }
     }
     @keyframes sadhana-glow-pulse-${uid} {
-      0%, 100% { opacity: 0.08; }
-      50% { opacity: 0.18; }
+      0%, 100% { opacity: 0.15; }
+      50% { opacity: 0.35; }
+    }
+    @keyframes sadhana-sa-pulse-${uid} {
+      0%, 100% { r: ${(amplitude > 0 ? 2.8 : 2).toFixed(1)}; opacity: 0.6; }
+      50% { r: ${(amplitude > 0 ? 3.4 : 2.4).toFixed(1)}; opacity: 1; }
+    }
+    @keyframes sadhana-text-glow-${uid} {
+      0%, 100% { opacity: 0.03; }
+      50% { opacity: 0.08; }
     }
   `;
 }
 
 // ---------------------------------------------------------------------------
-// Sub-component: Interactive strings (motion-driven)
-// Isolated so that all hooks are called unconditionally at the top level.
+// Sub-component: Interactive string accent (motion-driven)
 // ---------------------------------------------------------------------------
 
-interface InteractiveStringsProps {
+interface StringAccentProps {
   visibleStrings: number[];
   stringYs: number[];
   fieldLeft: number;
@@ -170,11 +190,10 @@ interface InteractiveStringsProps {
   filterUrl: string;
   loading: boolean;
   uid: string;
-  /** Hover spring value (0=idle, 1=hovered) */
   hoverValue: MotionValue<number>;
 }
 
-function InteractiveStrings({
+function StringAccent({
   visibleStrings,
   stringYs,
   fieldLeft,
@@ -185,72 +204,38 @@ function InteractiveStrings({
   loading,
   uid,
   hoverValue,
-}: InteractiveStringsProps) {
-  // All hooks called unconditionally at the top level of this component
+}: StringAccentProps) {
   const stringOpacityMultiplier = useTransform(hoverValue, [0, 1], [1, 1.4]);
 
-  // Pre-compute derived opacity MotionValues for each of the 5 strings
-  const saOpacity = useTransform(stringOpacityMultiplier, (v) =>
-    Math.min(1, BASE_OPACITIES[0]! * v),
+  const opacityByIndex = BASE_OPACITIES.map((base, _i) =>
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useTransform(stringOpacityMultiplier, (v: number) => Math.min(1, base * v)),
   );
-  const reOpacity = useTransform(stringOpacityMultiplier, (v) =>
-    Math.min(1, BASE_OPACITIES[1]! * v),
-  );
-  const gaOpacity = useTransform(stringOpacityMultiplier, (v) =>
-    Math.min(1, BASE_OPACITIES[2]! * v),
-  );
-  const paOpacity = useTransform(stringOpacityMultiplier, (v) =>
-    Math.min(1, BASE_OPACITIES[3]! * v),
-  );
-  const dhaOpacity = useTransform(stringOpacityMultiplier, (v) =>
-    Math.min(1, BASE_OPACITIES[4]! * v),
-  );
-  const opacityByIndex = [saOpacity, reOpacity, gaOpacity, paOpacity, dhaOpacity];
 
-  // Glow opacity reacts to hover
-  const waveGlowOpacity = useTransform(hoverValue, [0, 1], [0.12, 0.25]);
+  const waveGlowOpacity = useTransform(hoverValue, [0, 1], [0.12, 0.3]);
 
-  // String widths and properties (same as the static version)
-  const stringProps = [
-    { label: 'Sa', width: 2.2, isSa: true, isPa: false },
-    { label: 'Re', width: 1.0, isSa: false, isPa: false },
-    { label: 'Ga', width: 1.0, isSa: false, isPa: false },
-    { label: 'Pa', width: 1.8, isSa: false, isPa: true },
-    { label: 'Dha', width: 1.0, isSa: false, isPa: false },
-  ];
-
-  // Animation styles
   const idleDrift = `sadhana-wave-drift-${uid} 2s ease-in-out infinite`;
   const loadingAnim = `sadhana-wave-loading-${uid} 2s ease-in-out infinite`;
-  const glowPulse = `sadhana-glow-pulse-${uid} 2s ease-in-out infinite`;
+  const glowPulse = `sadhana-glow-pulse-${uid} 1.5s ease-in-out infinite`;
 
   const waveAnimStyle: CSSProperties = loading
     ? { animation: loadingAnim }
     : { animation: idleDrift };
 
-  const glowAnimStyle: CSSProperties = loading
-    ? { animation: glowPulse }
-    : {};
+  const glowAnimStyle: CSSProperties = { animation: glowPulse };
 
   return (
     <>
       {visibleStrings.map((idx) => {
         const y = stringYs[idx]!;
-        const props = stringProps[idx]!;
+        const props = STRING_PROPS[idx]!;
         const opacity = opacityByIndex[idx]!;
 
         if (idx === 0 && waveAmplitude > 0) {
-          // Sa string: standing wave with CSS animation
-          const wavePath = standingWavePath(
-            fieldLeft,
-            y,
-            fieldLength,
-            waveAmplitude,
-          );
+          const wavePath = standingWavePath(fieldLeft, y, fieldLength, waveAmplitude);
           return (
             <g key={props.label}>
               <g style={waveAnimStyle}>
-                {/* Wave glow (saffron, behind the main wave) */}
                 <g style={glowAnimStyle}>
                   <motion.path
                     d={wavePath}
@@ -262,7 +247,6 @@ function InteractiveStrings({
                     filter={filterUrl}
                   />
                 </g>
-                {/* Main wave path */}
                 <motion.path
                   d={wavePath}
                   stroke="var(--text, #F0E6D3)"
@@ -276,7 +260,6 @@ function InteractiveStrings({
           );
         }
 
-        // Other strings: straight horizontal lines
         return (
           <motion.line
             key={props.label}
@@ -285,9 +268,7 @@ function InteractiveStrings({
             x2={fieldRight}
             y2={y}
             stroke={
-              props.isPa
-                ? 'var(--text-2, #B8A99A)'
-                : 'var(--text, #F0E6D3)'
+              props.isPa ? 'var(--text-2, #B8A99A)' : 'var(--text, #F0E6D3)'
             }
             strokeWidth={props.width}
             strokeLinecap="round"
@@ -300,10 +281,10 @@ function InteractiveStrings({
 }
 
 // ---------------------------------------------------------------------------
-// Sub-component: Interactive Sa glow (motion-driven)
+// Sub-component: Interactive Sa glow
 // ---------------------------------------------------------------------------
 
-interface InteractiveSaGlowProps {
+interface SaGlowProps {
   cx: number;
   cy: number;
   r: number;
@@ -311,15 +292,9 @@ interface InteractiveSaGlowProps {
   hoverValue: MotionValue<number>;
 }
 
-function InteractiveSaGlow({
-  cx,
-  cy,
-  r,
-  gradientUrl,
-  hoverValue,
-}: InteractiveSaGlowProps) {
-  const glowScale = useTransform(hoverValue, [0, 1], [1, 1.35]);
-  const glowOpacity = useTransform(hoverValue, [0, 1], [0.4, 0.7]);
+function SaGlow({ cx, cy, r, gradientUrl, hoverValue }: SaGlowProps) {
+  const glowScale = useTransform(hoverValue, [0, 1], [1, 1.5]);
+  const glowOpacity = useTransform(hoverValue, [0, 1], [0.5, 0.8]);
 
   return (
     <motion.circle
@@ -337,321 +312,469 @@ function InteractiveSaGlow({
 }
 
 // ---------------------------------------------------------------------------
-// Main component
+// Compact mark (icon variant) -- used for small sizes
 // ---------------------------------------------------------------------------
 
-export default function Logo({
-  size: sizeProp = 40,
-  variant = 'icon',
-  loading = false,
-  interactive: interactiveProp,
+function CompactMark({
+  size,
+  loading,
+  uid,
+  ids,
+  hoverSpring,
+  pressScale,
+  interactive,
+  handleHoverStart,
+  handleHoverEnd,
+  handleTapStart,
+  handleTap,
+  handleTapCancel,
   className,
   style,
-}: LogoProps) {
-  // Resolve size from preset or number
-  const size = typeof sizeProp === 'string' ? SIZE_PRESETS[sizeProp] : sizeProp;
-
-  // Unique prefix for SVG IDs (safe when multiple Logos on one page)
-  const uid = useId().replace(/:/g, '');
-  const ids = useMemo(
-    () => ({
-      saGlow: `sa-glow-${uid}`,
-      fade: `string-fade-${uid}`,
-      mask: `fade-mask-${uid}`,
-      filter: `wave-glow-${uid}`,
-    }),
-    [uid],
-  );
-
-  const showWordmark = variant === 'full';
-
-  // At very small sizes (< 24px), simplify to 3 strings
+}: {
+  size: number;
+  loading: boolean;
+  uid: string;
+  ids: { saGlow: string; fade: string; mask: string; filter: string };
+  hoverSpring: MotionValue<number>;
+  pressScale: MotionValue<number>;
+  interactive: boolean;
+  handleHoverStart: () => void;
+  handleHoverEnd: () => void;
+  handleTapStart: () => void;
+  handleTap: () => void;
+  handleTapCancel: () => void;
+  className?: string;
+  style?: CSSProperties;
+}) {
   const isCompact = size < 24;
-
-  // Interactive defaults to true for non-compact sizes
-  const interactive = interactiveProp ?? !isCompact;
-
-  // Icon viewBox: 64x64. Wordmark extends to 240x64.
-  const totalWidth = showWordmark ? 240 : 64;
-  const svgWidth = showWordmark ? size * (totalWidth / 64) : size;
-
-  // String field geometry within the 64x64 icon area
   const fieldLeft = 12;
   const fieldRight = 62;
   const fieldTop = 10;
   const fieldBottom = 54;
   const fieldHeight = fieldBottom - fieldTop;
   const fieldLength = fieldRight - fieldLeft;
-
-  // String Y positions (inverted: Sa at bottom, Dha at top)
-  const stringYs = STRING_POSITIONS.map(
-    (pos) => fieldBottom - pos * fieldHeight,
-  );
-
-  // Standing wave amplitude on Sa string (scales with size)
+  const stringYs = STRING_POSITIONS.map((pos) => fieldBottom - pos * fieldHeight);
   const waveAmplitude = isCompact ? 0 : Math.min(4.5, size * 0.08);
-
-  // Which strings to show at compact sizes
-  const visibleStrings = isCompact
-    ? [0, 3, 4] // Sa, Pa, Dha -- the skeleton
-    : [0, 1, 2, 3, 4]; // All five
-
-  // Sa terminus point radius
+  const visibleStrings = isCompact ? [0, 3, 4] : [0, 1, 2, 3, 4];
   const saPointR = isCompact ? 2.0 : 2.8;
 
-  // CSS keyframes (scoped, injected once)
   const keyframesCSS = useMemo(
-    () => getWaveKeyframes(uid, waveAmplitude),
+    () => getKeyframes(uid, waveAmplitude),
     [uid, waveAmplitude],
   );
 
-  // --- Framer Motion springs (always created to satisfy hooks rules) ---
-  const hoverSpring = useSpring(0, SPRING_PRESETS.andolan);
-  const pressSpring = useSpring(0, SPRING_PRESETS.kan);
-  const pressScale = useTransform(pressSpring, [0, 1], [1, 0.965]);
-
-  // --- Event handlers ---
-  const handleHoverStart = () => { hoverSpring.set(1); };
-  const handleHoverEnd = () => { hoverSpring.set(0); };
-  const handleTapStart = () => { pressSpring.set(1); };
-  const handleTap = () => { pressSpring.set(0); };
-  const handleTapCancel = () => { pressSpring.set(0); };
-
-  // -----------------------------------------------------------------------
-  // Static string props (used when non-interactive)
-  // -----------------------------------------------------------------------
-  const staticStringProps = [
-    { label: 'Sa', width: 2.2, opacity: 0.85, isSa: true, isPa: false },
-    { label: 'Re', width: 1.0, opacity: 0.45, isSa: false, isPa: false },
-    { label: 'Ga', width: 1.0, opacity: 0.45, isSa: false, isPa: false },
-    { label: 'Pa', width: 1.8, opacity: 0.65, isSa: false, isPa: true },
-    { label: 'Dha', width: 1.0, opacity: 0.40, isSa: false, isPa: false },
-  ];
-
-  // CSS animation styles for static (non-interactive) wave
   const idleDrift = `sadhana-wave-drift-${uid} 2s ease-in-out infinite`;
   const loadingAnim = `sadhana-wave-loading-${uid} 2s ease-in-out infinite`;
-  const glowPulse = `sadhana-glow-pulse-${uid} 2s ease-in-out infinite`;
+  const glowPulse = `sadhana-glow-pulse-${uid} 1.5s ease-in-out infinite`;
   const staticWaveStyle: CSSProperties = loading
     ? { animation: loadingAnim }
     : { animation: idleDrift };
-  const staticGlowStyle: CSSProperties = loading
-    ? { animation: glowPulse }
-    : {};
+  const staticGlowStyle: CSSProperties = { animation: glowPulse };
 
-  // -----------------------------------------------------------------------
-  // Render
-  // -----------------------------------------------------------------------
-
-  return (
+  const content = (
     <>
-      {/* Inject scoped keyframes (no-op at compact sizes where wave is hidden) */}
       {!isCompact && (
         <style dangerouslySetInnerHTML={{ __html: keyframesCSS }} />
       )}
+      <defs>
+        <radialGradient id={ids.saGlow} cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="#E8871E" stopOpacity="0.5" />
+          <stop offset="100%" stopColor="#E8871E" stopOpacity="0" />
+        </radialGradient>
+        <linearGradient id={ids.fade} x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stopOpacity="1" />
+          <stop offset="75%" stopOpacity="1" />
+          <stop offset="100%" stopOpacity="0" />
+        </linearGradient>
+        <mask id={ids.mask}>
+          <rect x={fieldLeft} y="0" width={fieldLength} height="64" fill={`url(#${ids.fade})`} />
+        </mask>
+        {!isCompact && (
+          <filter id={ids.filter} x="-20%" y="-100%" width="140%" height="300%">
+            <feGaussianBlur stdDeviation="1.5" result="blur" />
+            <feMerge>
+              <feMergeNode in="blur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+        )}
+      </defs>
 
-      {interactive ? (
-        /* ------- INTERACTIVE VARIANT: motion.svg with spring physics ------ */
-        <motion.svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox={`0 0 ${totalWidth} 64`}
-          width={svgWidth}
-          height={size}
-          fill="none"
-          role="img"
-          aria-label="Sadhana"
-          className={className}
-          tabIndex={0}
-          onHoverStart={handleHoverStart}
-          onHoverEnd={handleHoverEnd}
-          onTapStart={handleTapStart}
-          onTap={handleTap}
-          onTapCancel={handleTapCancel}
-          style={{ scale: pressScale, cursor: 'pointer', ...style }}
-        >
-          {/* --- Defs --- */}
-          <defs>
-            <radialGradient id={ids.saGlow} cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stopColor="#E8871E" stopOpacity="0.4" />
-              <stop offset="100%" stopColor="#E8871E" stopOpacity="0" />
-            </radialGradient>
-            <linearGradient id={ids.fade} x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stopOpacity="1" />
-              <stop offset="75%" stopOpacity="1" />
-              <stop offset="100%" stopOpacity="0" />
-            </linearGradient>
-            <mask id={ids.mask}>
-              <rect
-                x={fieldLeft}
-                y="0"
-                width={fieldLength}
-                height="64"
-                fill={`url(#${ids.fade})`}
+      <g mask={`url(#${ids.mask})`}>
+        {interactive ? (
+          <StringAccent
+            visibleStrings={visibleStrings}
+            stringYs={stringYs}
+            fieldLeft={fieldLeft}
+            fieldRight={fieldRight}
+            fieldLength={fieldLength}
+            waveAmplitude={waveAmplitude}
+            filterUrl={`url(#${ids.filter})`}
+            loading={loading}
+            uid={uid}
+            hoverValue={hoverSpring}
+          />
+        ) : (
+          visibleStrings.map((idx) => {
+            const y = stringYs[idx]!;
+            const props = STRING_PROPS[idx]!;
+            if (idx === 0 && waveAmplitude > 0) {
+              const wavePath = standingWavePath(fieldLeft, y, fieldLength, waveAmplitude);
+              return (
+                <g key={props.label}>
+                  <g style={staticWaveStyle}>
+                    <g style={staticGlowStyle}>
+                      <path
+                        d={wavePath}
+                        stroke="#E8871E"
+                        strokeWidth={props.width + 1.5}
+                        strokeLinecap="round"
+                        fill="none"
+                        opacity={0.12}
+                        filter={`url(#${ids.filter})`}
+                      />
+                    </g>
+                    <path
+                      d={wavePath}
+                      stroke="var(--text, #F0E6D3)"
+                      strokeWidth={props.width}
+                      strokeLinecap="round"
+                      fill="none"
+                      opacity={props.opacity}
+                    />
+                  </g>
+                </g>
+              );
+            }
+            return (
+              <line
+                key={props.label}
+                x1={fieldLeft}
+                y1={y}
+                x2={fieldRight}
+                y2={y}
+                stroke={props.isPa ? 'var(--text-2, #B8A99A)' : 'var(--text, #F0E6D3)'}
+                strokeWidth={props.width}
+                strokeLinecap="round"
+                opacity={props.opacity}
               />
-            </mask>
-            {!isCompact && (
-              <filter
-                id={ids.filter}
-                x="-20%"
-                y="-100%"
-                width="140%"
-                height="300%"
-              >
-                <feGaussianBlur stdDeviation="1.5" result="blur" />
-                <feMerge>
-                  <feMergeNode in="blur" />
-                  <feMergeNode in="SourceGraphic" />
-                </feMerge>
-              </filter>
-            )}
-          </defs>
+            );
+          })
+        )}
+      </g>
 
-          {/* --- String field (interactive) --- */}
-          <g mask={`url(#${ids.mask})`}>
-            <InteractiveStrings
-              visibleStrings={visibleStrings}
+      {!isCompact && interactive && (
+        <SaGlow
+          cx={fieldLeft}
+          cy={stringYs[0]!}
+          r={saPointR * 3}
+          gradientUrl={`url(#${ids.saGlow})`}
+          hoverValue={hoverSpring}
+        />
+      )}
+      {!isCompact && !interactive && (
+        <circle
+          cx={fieldLeft}
+          cy={stringYs[0]!}
+          r={saPointR * 3}
+          fill={`url(#${ids.saGlow})`}
+        />
+      )}
+
+      <circle cx={fieldLeft} cy={stringYs[0]!} r={saPointR} fill="#E8871E" />
+
+      {!isCompact && (
+        <circle
+          cx={fieldLeft}
+          cy={stringYs[3]!}
+          r={1.5}
+          fill="var(--text-2, #B8A99A)"
+          opacity={0.6}
+        />
+      )}
+    </>
+  );
+
+  if (interactive) {
+    return (
+      <motion.svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 64 64"
+        width={size}
+        height={size}
+        fill="none"
+        role="img"
+        aria-label="Sadhana"
+        className={className}
+        tabIndex={0}
+        onHoverStart={handleHoverStart}
+        onHoverEnd={handleHoverEnd}
+        onTapStart={handleTapStart}
+        onTap={handleTap}
+        onTapCancel={handleTapCancel}
+        style={{ scale: pressScale, cursor: 'pointer', ...style }}
+      >
+        {content}
+      </motion.svg>
+    );
+  }
+
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 64 64"
+      width={size}
+      height={size}
+      fill="none"
+      role="img"
+      aria-label="Sadhana"
+      className={className}
+      style={style}
+    >
+      {content}
+    </svg>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Full logo (text-dominant with string accent) -- REDESIGNED
+//
+// The text IS the brand. "Sadhana" in large Cormorant Garamond dominates.
+// The Devanagari sits as an equal partner. The Tantri strings are a
+// subtle resonant accent band beneath, not the primary element.
+//
+// ViewBox layout (proportional, responsive):
+//   0-56:   "Sadhana" wordmark -- large, tracked, commanding
+//   56-80:  Devanagari -- slightly smaller, same visual weight
+//   82-108: Tantri string accent band (if showing)
+// ---------------------------------------------------------------------------
+
+function FullLogo({
+  size,
+  showDevanagari,
+  showStrings,
+  loading,
+  animate,
+  uid,
+  ids,
+  hoverSpring,
+  pressScale,
+  interactive,
+  handleHoverStart,
+  handleHoverEnd,
+  handleTapStart,
+  handleTap,
+  handleTapCancel,
+  className,
+  style,
+}: {
+  size: number;
+  showDevanagari: boolean;
+  showStrings: boolean;
+  loading: boolean;
+  animate: boolean;
+  uid: string;
+  ids: { saGlow: string; fade: string; mask: string; filter: string };
+  hoverSpring: MotionValue<number>;
+  pressScale: MotionValue<number>;
+  interactive: boolean;
+  handleHoverStart: () => void;
+  handleHoverEnd: () => void;
+  handleTapStart: () => void;
+  handleTap: () => void;
+  handleTapCancel: () => void;
+  className?: string;
+  style?: CSSProperties;
+}) {
+  // Scale font size relative to the component's rendered height.
+  // The viewBox is defined for a "standard" height of 120 units.
+  // At size=80 (lg), the wordmark should be visually large and commanding.
+  // At size=200+ (xxl/hero), it should be enormous.
+
+  // ViewBox dimensions -- fixed coordinate space
+  const vbWidth = 480;
+
+  // Layout constants in viewBox coordinates
+  const primaryFontSize = 72; // "Sadhana" -- large, commanding
+  const devanagariFontSize = 28;
+  const primaryY = 56;
+  const devanagariY = showDevanagari ? 86 : 0;
+  const stringAreaTop = showDevanagari ? 100 : 72;
+  const stringAreaHeight = showStrings ? 22 : 0;
+  const vbHeight = showStrings
+    ? stringAreaTop + stringAreaHeight + 8
+    : (showDevanagari ? 96 : 68);
+  const aspectRatio = vbWidth / vbHeight;
+  const svgWidth = size * aspectRatio;
+
+  // String field within the viewbox (full width, thin band)
+  const sFieldLeft = 24;
+  const sFieldRight = 456;
+  const sFieldLength = sFieldRight - sFieldLeft;
+  const sFieldBottom = stringAreaTop + stringAreaHeight;
+  const sFieldHeight = stringAreaHeight;
+  const stringYs = STRING_POSITIONS.map(
+    (pos) => sFieldBottom - pos * sFieldHeight,
+  );
+  const waveAmplitude = showStrings ? Math.min(3.5, size * 0.04) : 0;
+
+  const keyframesCSS = useMemo(
+    () => getKeyframes(uid, waveAmplitude),
+    [uid, waveAmplitude],
+  );
+
+  // Static animation styles
+  const idleDrift = `sadhana-wave-drift-${uid} 2s ease-in-out infinite`;
+  const loadingAnim = `sadhana-wave-loading-${uid} 2s ease-in-out infinite`;
+  const glowPulse = `sadhana-glow-pulse-${uid} 1.5s ease-in-out infinite`;
+  const textGlowPulse = `sadhana-text-glow-${uid} 3s ease-in-out infinite`;
+  const waveAnimStyle: CSSProperties = loading
+    ? { animation: loadingAnim }
+    : { animation: idleDrift };
+  const glowAnimStyle: CSSProperties = { animation: glowPulse };
+
+  // Hover-driven text glow
+  const textGlowOpacity = useTransform(hoverSpring, [0, 1], [0, 0.12]);
+
+  const content = (
+    <>
+      {showStrings && (
+        <style dangerouslySetInnerHTML={{ __html: keyframesCSS }} />
+      )}
+      {!showStrings && (
+        <style dangerouslySetInnerHTML={{ __html: getKeyframes(uid, 0) }} />
+      )}
+      <defs>
+        <radialGradient id={ids.saGlow} cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="#E8871E" stopOpacity="0.5" />
+          <stop offset="100%" stopColor="#E8871E" stopOpacity="0" />
+        </radialGradient>
+        <linearGradient id={ids.fade} x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stopOpacity="1" />
+          <stop offset="75%" stopOpacity="1" />
+          <stop offset="100%" stopOpacity="0" />
+        </linearGradient>
+        <mask id={ids.mask}>
+          <rect x={sFieldLeft} y="0" width={sFieldLength} height={vbHeight} fill={`url(#${ids.fade})`} />
+        </mask>
+        {showStrings && (
+          <filter id={ids.filter} x="-20%" y="-100%" width="140%" height="300%">
+            <feGaussianBlur stdDeviation="1" result="blur" />
+            <feMerge>
+              <feMergeNode in="blur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+        )}
+      </defs>
+
+      {/* -- Primary wordmark: "Sadhana" -- THE HERO -- */}
+      <text
+        x={vbWidth / 2}
+        y={primaryY}
+        fontFamily="'Cormorant Garamond', Georgia, serif"
+        fontSize={primaryFontSize}
+        fontWeight="400"
+        letterSpacing="0.08em"
+        fill="var(--text, #F0E6D3)"
+        textAnchor="middle"
+        dominantBaseline="auto"
+      >
+        S&#x101;dhan&#x101;
+      </text>
+
+      {/* Subtle ambient saffron glow behind the wordmark -- breathing */}
+      <text
+        x={vbWidth / 2}
+        y={primaryY}
+        fontFamily="'Cormorant Garamond', Georgia, serif"
+        fontSize={primaryFontSize}
+        fontWeight="400"
+        letterSpacing="0.08em"
+        fill="#E8871E"
+        textAnchor="middle"
+        dominantBaseline="auto"
+        opacity={0.04}
+        style={{ animation: textGlowPulse }}
+        aria-hidden="true"
+      />
+
+      {/* Hover text glow -- saffron warmth on interaction */}
+      {interactive && (
+        <motion.text
+          x={vbWidth / 2}
+          y={primaryY}
+          fontFamily="'Cormorant Garamond', Georgia, serif"
+          fontSize={primaryFontSize}
+          fontWeight="400"
+          letterSpacing="0.08em"
+          fill="#E8871E"
+          textAnchor="middle"
+          dominantBaseline="auto"
+          style={{ opacity: textGlowOpacity }}
+          aria-hidden="true"
+        >
+          S&#x101;dhan&#x101;
+        </motion.text>
+      )}
+
+      {/* Saffron accent dot -- a tiny Sa marker beside the S */}
+      <circle
+        cx={vbWidth / 2 - 148}
+        cy={primaryY + 4}
+        r="2.5"
+        fill="#E8871E"
+        opacity={0.6}
+      />
+
+      {/* -- Devanagari -- treated as an equal, not a subtitle -- */}
+      {showDevanagari && (
+        <text
+          x={vbWidth / 2}
+          y={devanagariY}
+          fontFamily="'Noto Serif Devanagari', serif"
+          fontSize={devanagariFontSize}
+          fontWeight="400"
+          letterSpacing="0.12em"
+          fill="var(--text-2, #B8A99A)"
+          textAnchor="middle"
+          dominantBaseline="auto"
+          opacity={0.75}
+        >
+          {'\u0938\u093E\u0927\u0928\u093E'}
+        </text>
+      )}
+
+      {/* -- Tantri string accent band -- */}
+      {showStrings && (
+        <g mask={`url(#${ids.mask})`}>
+          {interactive ? (
+            <StringAccent
+              visibleStrings={[0, 1, 2, 3, 4]}
               stringYs={stringYs}
-              fieldLeft={fieldLeft}
-              fieldRight={fieldRight}
-              fieldLength={fieldLength}
+              fieldLeft={sFieldLeft}
+              fieldRight={sFieldRight}
+              fieldLength={sFieldLength}
               waveAmplitude={waveAmplitude}
               filterUrl={`url(#${ids.filter})`}
               loading={loading}
               uid={uid}
               hoverValue={hoverSpring}
             />
-          </g>
-
-          {/* --- Sa terminus glow (interactive) --- */}
-          {!isCompact && (
-            <InteractiveSaGlow
-              cx={fieldLeft}
-              cy={stringYs[0]!}
-              r={saPointR * 3}
-              gradientUrl={`url(#${ids.saGlow})`}
-              hoverValue={hoverSpring}
-            />
-          )}
-
-          {/* Solid saffron point */}
-          <circle cx={fieldLeft} cy={stringYs[0]!} r={saPointR} fill="#E8871E" />
-
-          {/* Pa terminus point */}
-          {!isCompact && (
-            <circle
-              cx={fieldLeft}
-              cy={stringYs[3]!}
-              r={1.5}
-              fill="var(--text-2, #B8A99A)"
-              opacity={0.6}
-            />
-          )}
-
-          {/* Wordmark */}
-          {showWordmark && (
-            <g>
-              <line
-                x1={fieldRight + 2}
-                y1={stringYs[0]!}
-                x2={totalWidth - 4}
-                y2={stringYs[0]!}
-                stroke="var(--text-3, #7A6B5E)"
-                strokeWidth="0.5"
-                opacity="0.3"
-              />
-              <text
-                x={fieldRight + 12}
-                y={stringYs[0]! + 1}
-                fontFamily="'Cormorant Garamond', Georgia, serif"
-                fontSize="21"
-                fontWeight="400"
-                letterSpacing="0.06em"
-                fill="var(--text, #F0E6D3)"
-                dominantBaseline="middle"
-                textAnchor="start"
-              >
-                S&#x101;dhan&#x101;
-              </text>
-              <circle
-                cx={fieldRight + 6}
-                cy={stringYs[0]!}
-                r="1.5"
-                fill="#E8871E"
-                opacity="0.5"
-              />
-            </g>
-          )}
-        </motion.svg>
-      ) : (
-        /* ------- STATIC VARIANT: plain <svg>, CSS-only animation --------- */
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox={`0 0 ${totalWidth} 64`}
-          width={svgWidth}
-          height={size}
-          fill="none"
-          role="img"
-          aria-label="Sadhana"
-          className={className}
-          style={style}
-        >
-          <defs>
-            <radialGradient id={ids.saGlow} cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stopColor="#E8871E" stopOpacity="0.4" />
-              <stop offset="100%" stopColor="#E8871E" stopOpacity="0" />
-            </radialGradient>
-            <linearGradient id={ids.fade} x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stopOpacity="1" />
-              <stop offset="75%" stopOpacity="1" />
-              <stop offset="100%" stopOpacity="0" />
-            </linearGradient>
-            <mask id={ids.mask}>
-              <rect
-                x={fieldLeft}
-                y="0"
-                width={fieldLength}
-                height="64"
-                fill={`url(#${ids.fade})`}
-              />
-            </mask>
-            {!isCompact && (
-              <filter
-                id={ids.filter}
-                x="-20%"
-                y="-100%"
-                width="140%"
-                height="300%"
-              >
-                <feGaussianBlur stdDeviation="1.5" result="blur" />
-                <feMerge>
-                  <feMergeNode in="blur" />
-                  <feMergeNode in="SourceGraphic" />
-                </feMerge>
-              </filter>
-            )}
-          </defs>
-
-          {/* --- String field (static) --- */}
-          <g mask={`url(#${ids.mask})`}>
-            {visibleStrings.map((idx) => {
+          ) : (
+            [0, 1, 2, 3, 4].map((idx) => {
               const y = stringYs[idx]!;
-              const props = staticStringProps[idx]!;
-
+              const props = STRING_PROPS[idx]!;
               if (idx === 0 && waveAmplitude > 0) {
-                const wavePath = standingWavePath(
-                  fieldLeft,
-                  y,
-                  fieldLength,
-                  waveAmplitude,
-                );
+                const wavePath = standingWavePath(sFieldLeft, y, sFieldLength, waveAmplitude);
                 return (
                   <g key={props.label}>
-                    <g style={staticWaveStyle}>
-                      <g style={staticGlowStyle}>
+                    <g style={waveAnimStyle}>
+                      <g style={glowAnimStyle}>
                         <path
                           d={wavePath}
                           stroke="#E8871E"
-                          strokeWidth={props.width + 1.5}
+                          strokeWidth={props.width + 1}
                           strokeLinecap="round"
                           fill="none"
                           opacity={0.12}
@@ -670,99 +793,212 @@ export default function Logo({
                   </g>
                 );
               }
-
               return (
                 <line
                   key={props.label}
-                  x1={fieldLeft}
+                  x1={sFieldLeft}
                   y1={y}
-                  x2={fieldRight}
+                  x2={sFieldRight}
                   y2={y}
-                  stroke={
-                    props.isPa
-                      ? 'var(--text-2, #B8A99A)'
-                      : 'var(--text, #F0E6D3)'
-                  }
-                  strokeWidth={props.width}
+                  stroke={props.isPa ? 'var(--text-2, #B8A99A)' : 'var(--text, #F0E6D3)'}
+                  strokeWidth={props.width * 0.8}
                   strokeLinecap="round"
-                  opacity={props.opacity}
+                  opacity={props.opacity * 0.7}
                 />
               );
-            })}
-          </g>
+            })
+          )}
+        </g>
+      )}
 
-          {/* Sa terminus glow */}
-          {!isCompact && (
-            <circle
-              cx={fieldLeft}
+      {/* Sa terminus point on the string accent */}
+      {showStrings && (
+        <>
+          {interactive ? (
+            <SaGlow
+              cx={sFieldLeft}
               cy={stringYs[0]!}
-              r={saPointR * 3}
+              r={6}
+              gradientUrl={`url(#${ids.saGlow})`}
+              hoverValue={hoverSpring}
+            />
+          ) : (
+            <circle
+              cx={sFieldLeft}
+              cy={stringYs[0]!}
+              r={6}
               fill={`url(#${ids.saGlow})`}
             />
           )}
-
-          {/* Solid saffron point */}
-          <circle cx={fieldLeft} cy={stringYs[0]!} r={saPointR} fill="#E8871E" />
-
-          {/* Pa terminus point */}
-          {!isCompact && (
-            <circle
-              cx={fieldLeft}
-              cy={stringYs[3]!}
-              r={1.5}
-              fill="var(--text-2, #B8A99A)"
-              opacity={0.6}
-            />
-          )}
-
-          {/* Wordmark */}
-          {showWordmark && (
-            <g>
-              <line
-                x1={fieldRight + 2}
-                y1={stringYs[0]!}
-                x2={totalWidth - 4}
-                y2={stringYs[0]!}
-                stroke="var(--text-3, #7A6B5E)"
-                strokeWidth="0.5"
-                opacity="0.3"
-              />
-              <text
-                x={fieldRight + 12}
-                y={stringYs[0]! + 1}
-                fontFamily="'Cormorant Garamond', Georgia, serif"
-                fontSize="21"
-                fontWeight="400"
-                letterSpacing="0.06em"
-                fill="var(--text, #F0E6D3)"
-                dominantBaseline="middle"
-                textAnchor="start"
-              >
-                S&#x101;dhan&#x101;
-              </text>
-              <circle
-                cx={fieldRight + 6}
-                cy={stringYs[0]!}
-                r="1.5"
-                fill="#E8871E"
-                opacity="0.5"
-              />
-            </g>
-          )}
-        </svg>
+          <circle cx={sFieldLeft} cy={stringYs[0]!} r={2.2} fill="#E8871E" />
+        </>
       )}
     </>
+  );
+
+  if (interactive) {
+    return (
+      <motion.svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox={`0 0 ${vbWidth} ${vbHeight}`}
+        width={svgWidth}
+        height={size}
+        fill="none"
+        role="img"
+        aria-label="Sadhana"
+        className={className}
+        tabIndex={0}
+        onHoverStart={handleHoverStart}
+        onHoverEnd={handleHoverEnd}
+        onTapStart={handleTapStart}
+        onTap={handleTap}
+        onTapCancel={handleTapCancel}
+        style={{ scale: pressScale, cursor: 'pointer', ...style }}
+        {...(animate
+          ? {
+              initial: { opacity: 0, y: 12 },
+              animate: {
+                opacity: 1,
+                y: 0,
+                transition: {
+                  type: 'spring' as const,
+                  stiffness: 400,
+                  damping: 15,
+                  delay: 0.08,
+                },
+              },
+            }
+          : {})}
+      >
+        {content}
+      </motion.svg>
+    );
+  }
+
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox={`0 0 ${vbWidth} ${vbHeight}`}
+      width={svgWidth}
+      height={size}
+      fill="none"
+      role="img"
+      aria-label="Sadhana"
+      className={className}
+      style={style}
+    >
+      {content}
+    </svg>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Main component
+// ---------------------------------------------------------------------------
+
+export default function Logo({
+  size: sizeProp = 48,
+  variant = 'full',
+  loading = false,
+  interactive: interactiveProp,
+  animate = false,
+  className,
+  style,
+}: LogoProps) {
+  // Resolve size from preset or number
+  const size =
+    typeof sizeProp === 'string'
+      ? SIZE_PRESETS[sizeProp as LogoSizePreset] ??
+        LEGACY_PRESETS[sizeProp] ??
+        48
+      : sizeProp;
+
+  // Normalize variant: 'icon' maps to 'compact' for backward compat
+  const resolvedVariant: LogoVariant =
+    variant === 'icon' ? 'compact' : variant;
+
+  const uid = useId().replace(/:/g, '');
+  const ids = useMemo(
+    () => ({
+      saGlow: `sa-glow-${uid}`,
+      fade: `string-fade-${uid}`,
+      mask: `fade-mask-${uid}`,
+      filter: `wave-glow-${uid}`,
+    }),
+    [uid],
+  );
+
+  // Interactive defaults to true for non-tiny sizes
+  const interactive = interactiveProp ?? size >= 24;
+
+  // --- Framer Motion springs (always created to satisfy hooks rules) ---
+  const hoverSpring = useSpring(0, SPRING_PRESETS.andolan);
+  const pressSpring = useSpring(0, SPRING_PRESETS.kan);
+  const pressScale = useTransform(pressSpring, [0, 1], [1, 0.965]);
+
+  const handleHoverStart = () => { hoverSpring.set(1); };
+  const handleHoverEnd = () => { hoverSpring.set(0); };
+  const handleTapStart = () => { pressSpring.set(1); };
+  const handleTap = () => { pressSpring.set(0); };
+  const handleTapCancel = () => { pressSpring.set(0); };
+
+  // Decide what to show based on variant and size
+  if (resolvedVariant === 'compact') {
+    return (
+      <CompactMark
+        size={size}
+        loading={loading}
+        uid={uid}
+        ids={ids}
+        hoverSpring={hoverSpring}
+        pressScale={pressScale}
+        interactive={interactive}
+        handleHoverStart={handleHoverStart}
+        handleHoverEnd={handleHoverEnd}
+        handleTapStart={handleTapStart}
+        handleTap={handleTap}
+        handleTapCancel={handleTapCancel}
+        className={className}
+        style={style}
+      />
+    );
+  }
+
+  // Full and wordmark variants
+  const showDevanagari = size >= 36;
+  const showStrings = resolvedVariant === 'full' && size >= 36;
+
+  return (
+    <FullLogo
+      size={size}
+      showDevanagari={showDevanagari}
+      showStrings={showStrings}
+      loading={loading}
+      animate={animate}
+      uid={uid}
+      ids={ids}
+      hoverSpring={hoverSpring}
+      pressScale={pressScale}
+      interactive={interactive}
+      handleHoverStart={handleHoverStart}
+      handleHoverEnd={handleHoverEnd}
+      handleTapStart={handleTapStart}
+      handleTap={handleTap}
+      handleTapCancel={handleTapCancel}
+      className={className}
+      style={style}
+    />
   );
 }
 
 // ---------------------------------------------------------------------------
 // LogoMark -- Icon only, no wordmark, minimal wrapper
-// For tight spaces: favicons, tab icons, mobile status bar, loading spinners.
+// Backward compatible export for existing usage.
 // ---------------------------------------------------------------------------
 
 export interface LogoMarkProps {
   /** Size in pixels or named preset. Default 32. */
-  size?: number | LogoSizePreset;
+  size?: number | LogoSizePreset | 'favicon' | 'nav' | 'header' | 'hero' | 'splash';
   /** When true, the Sa standing wave animates. */
   loading?: boolean;
   /** Additional class name. */
@@ -780,7 +1016,7 @@ export function LogoMark({
   return (
     <Logo
       size={size}
-      variant="icon"
+      variant="compact"
       loading={loading}
       interactive={false}
       className={className}

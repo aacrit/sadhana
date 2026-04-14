@@ -324,46 +324,50 @@ Named after the Mughal metalwork technique of inlaying gold wire into steel. In 
 
 ---
 
-## Logo -- Tantri Resonance Mark
+## Logo -- Text-Dominant Brand Mark with Tantri Accent
 
-Source: `frontend/app/components/Logo.tsx`. SVG + Framer Motion springs, works 16px to 200px.
+Source: `frontend/app/components/Logo.tsx`. SVG + Framer Motion springs, works 16px to 400px.
+
+**Design philosophy:**
+The text IS the brand. "Sadhana" in large Cormorant Garamond commands the space -- it must pop, it must be unmistakable. The Devanagari "sadhana" is treated as an equal partner, not a subtitle. The Tantri strings (Bhoopali pentatonic at just-intonation intervals) serve as a resonant accent band beneath the text, connecting the brand to the instrument without competing for attention. The logo feels like an instrument, not a tech product.
 
 **Concept:**
-The logo IS Tantri. Five horizontal strings at just-intonation intervals -- the pentatonic field of Raga Bhoopali (Sa Re Ga Pa Dha). Spacing follows logarithmic frequency ratios (1:1, 9:8, 5:4, 3:2, 5:3), making the intervals acoustically truthful, not decorative. The Sa string carries a standing wave -- the fundamental vibration mode -- the shape of a human voice activating the instrument. A saffron terminus point anchors the tonic. Strings extend rightward without boundary: the practice continues.
+The wordmark dominates. Below it, five horizontal strings at just-intonation intervals -- the pentatonic field of Raga Bhoopali (Sa Re Ga Pa Dha) -- provide the Tantri accent. Spacing follows logarithmic frequency ratios (1:1, 9:8, 5:4, 3:2, 5:3), making the intervals acoustically truthful, not decorative. The Sa string carries a standing wave. A saffron terminus point anchors the tonic. Strings extend rightward without boundary: the practice continues.
 
-**Anatomy:**
-- Five horizontal strings at just-intonation vertical spacing (log2 scale)
-- Sa string (lowest, thickest): strokeWidth 2.2, opacity 0.85, carries a standing wave (fundamental mode: `sin(pi * t)`)
-- Pa string: strokeWidth 1.8, opacity 0.65, `--text-2` color (achala, visually anchored)
-- Re, Ga, Dha strings: strokeWidth 1.0, opacity 0.40-0.45, `--text` color
-- Sa terminus point: saffron `#E8871E`, r=2.8, with radial glow halo (shifts to gold `#D4AF37` at Guru level)
-- Pa terminus point: `--text-2`, r=1.5, opacity 0.6
-- Right edge: strings fade to transparent via linear gradient mask (no boundary -- practice continues)
-- Standing wave glow: saffron at 12% opacity behind the Sa wave, gaussian blur filter
+**Anatomy (full variant):**
+- "Sadhana" (with macrons) in Cormorant Garamond 400, fontSize 72 (viewBox units), letterSpacing 0.08em -- large, commanding, the hero element
+- Subtle ambient saffron glow (4% opacity) on the wordmark with a 3s breathing pulse
+- Saffron accent dot (r=2.5, opacity 0.6) beside the S -- a Sa marker
+- Devanagari "sadhana" in Noto Serif Devanagari 400, fontSize 28, letterSpacing 0.12em, opacity 0.75 -- equal partner
+- Tantri string accent band:
+  - Five horizontal strings at just-intonation vertical spacing (log2 scale)
+  - Sa string (lowest, thickest): strokeWidth 2.2, opacity 0.85, carries a standing wave (fundamental mode: `sin(pi * t)`)
+  - Pa string: strokeWidth 1.8, opacity 0.65, `--text-2` color (achala, visually anchored)
+  - Re, Ga, Dha strings: strokeWidth 1.0, opacity 0.40-0.45, `--text` color (reduced to 70% in non-interactive mode)
+  - Sa terminus point: saffron `#E8871E`, r=2.2, with radial glow halo r=6
+  - Right edge: strings fade to transparent via linear gradient mask (no boundary -- practice continues)
+  - Standing wave glow: saffron at 12% opacity behind the Sa wave, gaussian blur filter
 
 **Size presets:**
 
 | Preset | Pixels | Detail level | Interactive | Use |
 |--------|--------|-------------|------------|-----|
-| `favicon` | 16px | 3 strings (Sa, Pa, Dha), Sa point only, no wave | No | Browser tab, PWA icon |
-| `nav` | 32px | 5 strings, standing wave, both terminus points | Yes | Navigation bar |
-| `header` | 48px | Full articulation, interactive | Yes | Page headers |
-| `hero` | 96px | Full articulation with enhanced glow | Yes | Landing page hero |
-| `splash` | 200px | Maximum detail, full wave articulation | Yes | Loading screen, about page |
+| `xs` | 24px | Compact mark only, minimal strings | No | Tight spaces |
+| `sm` / `nav` | 32px | 5 strings, standing wave, both terminus points | Yes | Navigation bar |
+| `md` / `header` | 48px | Full text + Devanagari + strings, interactive | Yes | Page headers |
+| `lg` | 80px | Full articulation with enhanced glow | Yes | Hero sections |
+| `xl` | 120px | Maximum detail, full wave articulation | Yes | Splash, landing |
+| `xxl` / `splash` | 200px | Maximum detail, cinematic | Yes | Loading screen, about |
+| `hero` | 400px | Maximum impact, cinematic scale | Yes | Home page hero |
 
-Usage: `<Logo size="nav" />` or `<Logo size={48} />` (both accepted).
+Usage: `<Logo size="xl" />` or `<Logo size={120} />` (both accepted). Legacy presets (`'nav'`, `'header'`, `'hero'`, `'splash'`) still work.
 
 **Variants:**
-- `icon`: mark only, viewBox 64x64
-- `full`: mark + wordmark, viewBox 240x64
+- `full`: text + Devanagari + Tantri string accent (viewBox 480xN, height-driven)
+- `wordmark`: text + Devanagari only, no strings
+- `compact` / `icon`: Tantri mark only, viewBox 64x64
 
-**LogoMark:** Exported as `LogoMark` -- icon-only wrapper with `loading` prop. For tight spaces (favicons, tab icons, mobile status bar, loading spinners). Always non-interactive.
-
-**Wordmark:**
-- "Sadhana" (with macrons) in Cormorant Garamond 400, fontSize 21, letterSpacing 0.06em
-- A hairline string (strokeWidth 0.5, opacity 0.3) threads through the baseline, connecting icon to word
-- A small saffron echo point (r=1.5, opacity 0.5) bridges the icon strings to the wordmark
-- Text uses `var(--text)` for automatic Night/Day mode adaptation
+**LogoMark:** Exported as `LogoMark` -- icon-only wrapper with `loading` prop. For tight spaces (favicons, tab icons, loading spinners). Always non-interactive.
 
 ### Motion Physics
 
@@ -371,11 +375,12 @@ The logo responds like a physical instrument. Every animation maps to a named sp
 
 | State | Behavior | Spring / Technique | Detail |
 |-------|----------|-------------------|--------|
-| **Idle** | Subtle vertical drift on Sa wave, ~0.5Hz | CSS `@keyframes`, 2s period | Barely perceptible breathing. The string vibrates at rest. No JS animation frame. |
+| **Idle** | Subtle vertical drift on Sa wave, ~0.5Hz. Ambient saffron text glow breathes at 3s. | CSS `@keyframes`, 2s wave / 3s text | Barely perceptible breathing. The string vibrates at rest. No JS animation frame. |
 | **Loading** | Pronounced Sa wave oscillation | CSS `@keyframes`, 2s period, larger amplitude | Wave displacement is 50% of amplitude (vs 15% for idle). Saffron glow pulses in sync. |
-| **Hover** | All strings brighten (opacity x1.4), Sa glow intensifies and scales | Andolan (stiffness 120, damping 8) | The string field responds as if the student's voice approached. Gentle oscillation, organic settle. |
+| **Hover** | All strings brighten (opacity x1.4), Sa glow intensifies and scales. Text gains saffron warmth (12% opacity). | Andolan (stiffness 120, damping 8) | The string field responds as if the student's voice approached. Gentle oscillation, organic settle. |
 | **Press/click** | Entire mark contracts to 96.5% scale | Kan (stiffness 1000, damping 30) | Instantaneous snap inward, like a string being plucked. No wind-up, no delay. |
 | **Release** | Mark returns to 100% scale | Kan spring naturally decays back | The high damping of the Kan preset ensures a single crisp snap with no oscillation. |
+| **Load-in** | Logo resolves upward via Tanpura Release spring with 80ms delay | Tanpura Release (stiffness 400, damping 15) | 12px vertical travel, opacity 0 to 1. Feels like a string settling. |
 
 **Loading prop:** `<Logo loading />` activates the loading wave animation. The Sa standing wave oscillates with greater amplitude, and the saffron glow behind it pulses. This is pure CSS `@keyframes` -- zero JavaScript animation frames, works even before React hydration.
 
@@ -390,22 +395,33 @@ The logo responds like a physical instrument. Every animation maps to a named sp
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
-| `size` | `number \| LogoSizePreset` | `40` | Height in pixels, or a named preset (`'favicon'`, `'nav'`, `'header'`, `'hero'`, `'splash'`) |
-| `variant` | `'full' \| 'icon'` | `'icon'` | `'full'` shows mark + wordmark. `'icon'` shows mark only. |
+| `size` | `number \| LogoSizePreset` | `48` | Height in pixels, or a named preset |
+| `variant` | `'full' \| 'wordmark' \| 'compact' \| 'icon'` | `'full'` | `'full'` shows text + Devanagari + strings. `'wordmark'` shows text + Devanagari. `'compact'`/`'icon'` shows mark only. |
 | `loading` | `boolean` | `false` | When true, Sa wave animates with pronounced oscillation |
 | `interactive` | `boolean` | auto | When true, hover/press spring physics are active. Auto-enabled for sizes >= 24px. |
+| `animate` | `boolean` | `false` | Show the load-in animation (Tanpura Release spring). |
 | `className` | `string` | -- | Additional CSS class |
 | `style` | `CSSProperties` | -- | Additional inline styles |
 
+### Brand Loader
+
+Source: `frontend/app/components/BrandLoader.tsx`.
+
+A cinematic loading state that shows the full Sadhana wordmark (variant="full", size=80) with animated standing wave and optional tagline. Replaces generic loading spinners with brand recognition from the first millisecond.
+
+Usage: `<BrandLoader loading={true} tagline="Disciplined practice toward mastery" />`
+
+Exit animation: scales to 95% and fades via Tanpura Release spring.
+
 ### PWA Icons
 
-SVG icons derived from the Tantri Resonance Mark. Stored in `frontend/public/icons/`.
+SVG icons derived from the brand mark. Stored in `frontend/public/icons/`.
 
-| File | Size | Detail | Use |
-|------|------|--------|-----|
-| `favicon.svg` | scalable | 3 strings (Sa, Pa, Dha), Sa point, no wave | Browser favicon |
-| `icon-192.svg` | 192px target | Full 5-string mark, standing wave, saffron terminus | PWA home screen icon |
-| `icon-512.svg` | 512px target | Full 5-string mark, enhanced glow, full wave articulation | PWA splash / app store |
+| File | Size | Content | Use |
+|------|------|---------|-----|
+| `favicon.svg` | scalable (16px target) | Compact: 3 strings (Sa, Pa, Dha), Sa point, no wave, Deep Malachite bg | Browser favicon |
+| `icon-192.svg` | 192px | Text-dominant: "Sadhana" wordmark, Devanagari, 5-string accent, standing wave | PWA home screen icon |
+| `icon-512.svg` | 512px | Text-dominant: large "Sadhana" wordmark (108px font), Devanagari, full wave articulation, enhanced glow | PWA splash / app store |
 
 The `manifest.json` at `frontend/public/manifest.json` references all three. Icons are SVG (not rasterized) for infinite crispness at all device densities.
 
@@ -413,7 +429,7 @@ The `manifest.json` at `frontend/public/manifest.json` references all three. Ico
 - Bhoopali ratios: Sa=1, Re=9/8, Ga=5/4, Pa=3/2, Dha=5/3
 - Vertical position: `log2(ratio) / log2(5/3)` normalized to field height
 - Standing wave path: `y = amplitude * sin(pi * t)` where t in [0,1]
-- Wave amplitude: `min(4.5, size * 0.08)` -- scales with logo size, capped at 4.5 SVG units
+- Wave amplitude: `min(3.5, size * 0.04)` -- scales with logo size, capped at 3.5 SVG units
 - 48 segments for smooth SVG path rendering
 
 ---

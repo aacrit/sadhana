@@ -224,15 +224,26 @@ export function isValidInRaga(swara: Swara, raga: Raga): boolean {
 /**
  * Returns the expected ornament for a swara in a given raga, if any.
  *
+ * Uses the raga's `ornamentMap` field when available, which provides
+ * musicologically accurate per-swara ornament expectations. Falls back
+ * to a minimal hardcoded table for ragas that haven't been annotated yet.
+ *
  * For example, Re_k in Bhairav is expected to be sung with andolan.
  * This information is used by the feedback system to give raga-specific
  * guidance.
  */
 function getExpectedOrnament(swara: Swara, raga: Raga): Ornament | undefined {
-  // Known ornament expectations by raga and swara
-  // This is a simplified model; in practice, ornament expectations depend
-  // on the phrase context, tempo, and gharana. But these are the canonical
-  // cases every student should know.
+  // Use the raga's ornamentMap if available (preferred — musicologically complete)
+  if (raga.ornamentMap) {
+    const ornaments = raga.ornamentMap[swara];
+    if (ornaments && ornaments.length > 0) {
+      // Return the first (primary) ornament for this swara
+      return ornaments[0];
+    }
+    return undefined;
+  }
+
+  // Fallback: minimal hardcoded expectations for ragas without ornamentMap
   const expectations: Record<string, Record<string, Ornament>> = {
     bhairav: {
       Re_k: 'andolan',

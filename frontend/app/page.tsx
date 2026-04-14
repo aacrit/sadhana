@@ -23,6 +23,7 @@ import { useMemo, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import Logo from './components/Logo';
+import BrandLoader from './components/BrandLoader';
 import TanpuraViz from './components/TanpuraViz';
 import { getJourneyIcon } from './components/icons';
 import FreeformIcon from './components/icons/FreeformIcon';
@@ -206,14 +207,10 @@ export default function HomePage() {
   // by the AuthPill (via layout.tsx), not on the page directly.
   void isGuest;
 
-  // Loading state
+  // Loading state -- branded loader with Tantri mark
   if (loading) {
     return (
-      <div className={styles.page}>
-        <div className={styles.loadingContainer}>
-          <div className={styles.loadingDot} aria-label="Loading" />
-        </div>
-      </div>
+      <BrandLoader loading={true} tagline="Disciplined practice toward mastery" />
     );
   }
 
@@ -222,14 +219,14 @@ export default function HomePage() {
       {/* Ambient tanpura waveform background */}
       <TanpuraViz active={false} />
 
-      {/* Header: logo + tagline */}
+      {/* Header: prominent logo with Devanagari + string accent */}
       <motion.header
         className={styles.header}
         variants={headerVariants}
         initial="hidden"
         animate="visible"
       >
-        <Logo size={48} variant="full" />
+        <Logo size="xl" variant="full" animate />
         <p className={styles.tagline}>
           Disciplined practice toward mastery
         </p>
