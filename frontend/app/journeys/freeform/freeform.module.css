@@ -160,6 +160,18 @@
   color: var(--text-2);
 }
 
+/* -- Voice frequency waveform overlay --------------------------------- */
+
+.voiceWaveOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 35vh;
+  z-index: 1;
+  pointer-events: none;
+}
+
 /* -- HUD -------------------------------------------------------------- */
 
 .hud {

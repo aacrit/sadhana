@@ -29,8 +29,8 @@ import Logo from '../../components/Logo';
 import VoiceWave from '../../components/VoiceWave';
 import Tantri from '../../components/Tantri';
 import type { TantriPlayEvent } from '@/engine/interaction/tantri';
-import { playSwaraNote, ensureAudioReady } from '@/engine/synthesis/swara-voice';
-import { playVocalSwaraNote, ensureVocalAudioReady } from '@/engine/synthesis/voice';
+import { playSwaraNote, ensureAudioReady, stopHarmoniumPlayback } from '@/engine/synthesis/swara-voice';
+import { playVocalSwaraNote, ensureVocalAudioReady, stopVocalPlayback } from '@/engine/synthesis/voice';
 import VoiceTimbreSelector, { useTimbreSelection } from '../../components/VoiceTimbreSelector';
 import { useFreeformSession } from '../../lib/useFreeformSession';
 import type { SwaraEvent } from '../../lib/useFreeformSession';
@@ -320,8 +320,9 @@ export default function FreeformPage() {
     router.push('/');
   }, [session, router]);
 
-  // Tantri string trigger — touch a string to hear the swara
-  // Dispatches to harmonium or TantriVoice(TM) based on timbre selection
+  // Tantri string trigger — touch a string to hear the swara.
+  // Uses long duration for sustained (long-press) playback.
+  // Dispatches to harmonium or TantriVoice(TM) based on timbre selection.
   const handleStringTrigger = useCallback(async (event: TantriPlayEvent) => {
     try {
       const note = { swara: event.swara, octave: event.octave };
@@ -329,19 +330,27 @@ export default function FreeformPage() {
 
       if (event.timbre === 'voice-male' || event.timbre === 'voice-female') {
         await ensureVocalAudioReady();
-        await playVocalSwaraNote(note, userSaHz, {
-          duration: 0.8,
+        // Long duration — stopped on release via handleStringRelease
+        playVocalSwaraNote(note, userSaHz, {
+          duration: 30,
           volume: vol,
           voiceType: event.timbre === 'voice-male' ? 'baritone' : 'soprano',
         });
       } else {
         await ensureAudioReady();
-        await playSwaraNote(note, userSaHz, { duration: 0.8, volume: vol });
+        // Long duration — stopped on release via handleStringRelease
+        playSwaraNote(note, userSaHz, { duration: 30, volume: vol });
       }
     } catch {
       // Audio not ready — silently fail
     }
   }, [userSaHz]);
+
+  // Tantri string release — stop the sustained note immediately
+  const handleStringRelease = useCallback(() => {
+    stopVocalPlayback();
+    stopHarmoniumPlayback();
+  }, []);
 
   // -----------------------------------------------------------------------
   // Render: start state
@@ -455,6 +464,7 @@ export default function FreeformPage() {
         pitchHz={session.currentHz}
         pitchClarity={session.currentClarity}
         onStringTrigger={handleStringTrigger}
+        onStringRelease={handleStringRelease}
         timbre={timbre}
         onActivityChange={setTantriActive}
         style={{
@@ -462,6 +472,17 @@ export default function FreeformPage() {
           inset: 0,
           zIndex: 0,
           opacity: tantriActive ? 1 : 0.7,
+          transition: 'opacity 0.6s ease-out',
+        }}
+      />
+
+      {/* Voice frequency waveform with swara markers — above Tantri */}
+      <VoiceWave
+        variant="full"
+        saHz={userSaHz}
+        className={styles.voiceWaveOverlay}
+        style={{
+          opacity: session.isListening ? 0.7 : 0.15,
           transition: 'opacity 0.6s ease-out',
         }}
       />

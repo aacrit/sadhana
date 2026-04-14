@@ -297,6 +297,23 @@ function createHarmoniumNote(
 }
 
 // ---------------------------------------------------------------------------
+// Active note tracking (for long-press stop)
+// ---------------------------------------------------------------------------
+
+let _activeHarmoniumNote: HarmoniumNote | null = null;
+
+/**
+ * Stop any currently playing harmonium note immediately.
+ * Used for long-press release.
+ */
+export function stopHarmoniumPlayback(): void {
+  if (_activeHarmoniumNote) {
+    _activeHarmoniumNote.dispose();
+    _activeHarmoniumNote = null;
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Single swara playback
 // ---------------------------------------------------------------------------
 
@@ -380,7 +397,14 @@ export async function playSwaraNote(
   const hz = getSwaraFrequency(swaraNote.swara, saHz, swaraNote.octave);
   const now = ctx.currentTime;
 
+  // Stop any previously active note
+  if (_activeHarmoniumNote) {
+    _activeHarmoniumNote.dispose();
+    _activeHarmoniumNote = null;
+  }
+
   const note = createHarmoniumNote(ctx, hz, now, duration, volume, attack, release);
+  _activeHarmoniumNote = note;
 
   if (ornament) {
     applyOrnament(note.oscillators, ornament, hz, duration, now, ctx);
@@ -391,10 +415,12 @@ export async function playSwaraNote(
     if (firstOsc) {
       firstOsc.onended = () => {
         note.dispose();
+        if (_activeHarmoniumNote === note) _activeHarmoniumNote = null;
         resolve();
       };
     } else {
       note.dispose();
+      if (_activeHarmoniumNote === note) _activeHarmoniumNote = null;
       resolve();
     }
   });

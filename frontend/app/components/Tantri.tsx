@@ -91,6 +91,9 @@ export interface TantriProps {
   /** Callback when a string is triggered by touch/click. */
   onStringTrigger?: (event: TantriPlayEvent) => void;
 
+  /** Callback when a string is released (pointer up/leave). */
+  onStringRelease?: (event: TantriPlayEvent) => void;
+
   /**
    * TantriVoice(TM) — Instrument timbre for string touch playback.
    * 'harmonium' (default): existing harmonium synthesis
@@ -320,7 +323,13 @@ function renderString(
     ctx.globalAlpha = opacity;
     // Touched strings pulse with a subtle shimmer (8Hz flicker)
     const touchPulse = s.touched ? 1 + 0.15 * Math.sin(time * 8 * Math.PI * 2) : 0;
-    ctx.lineWidth = baseWidth * dpr * (1 + s.amplitude * 0.5 + touchPulse);
+    // Voice-active strings shimmer like touched strings when accuracy is good/perfect
+    const isVoiceMatched = !s.touched && s.amplitude > 0.08 &&
+      (s.accuracyBand === 'perfect' || s.accuracyBand === 'good');
+    const voiceShimmer = isVoiceMatched
+      ? 0.4 * s.amplitude + 0.1 * Math.sin(time * 6 * Math.PI * 2) * s.amplitude
+      : 0;
+    ctx.lineWidth = baseWidth * dpr * (1 + s.amplitude * 0.5 + touchPulse + voiceShimmer);
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
 
@@ -340,16 +349,19 @@ function renderString(
     // Uses shadowBlur instead of ctx.filter to avoid software rasterization.
     // Reuses blendedDisplacements from the primary pass — no second waveform loop.
     const glowBand = s.accuracyBand;
+    // Lower thresholds for voice-matched strings so they glow like click
     const shouldGlow =
-      (glowBand === 'perfect' && s.amplitude > 0.2) ||
-      (glowBand === 'good' && s.amplitude > 0.3) ||
-      (glowBand === 'approaching' && s.amplitude > 0.5);
+      (glowBand === 'perfect' && s.amplitude > 0.08) ||
+      (glowBand === 'good' && s.amplitude > 0.12) ||
+      (glowBand === 'approaching' && s.amplitude > 0.4);
 
     if (shouldGlow) {
-      const glowIntensity = glowBand === 'perfect' ? 1.0
-        : glowBand === 'good' ? 0.6
-        : 0.3;
-      const blurRadius = glowBand === 'perfect' ? 14 : glowBand === 'good' ? 8 : 4;
+      // Voice-matched: stronger glow intensity to match click visual
+      const voiceBoost = isVoiceMatched ? 1.3 : 1.0;
+      const glowIntensity = (glowBand === 'perfect' ? 1.0
+        : glowBand === 'good' ? 0.7
+        : 0.3) * voiceBoost;
+      const blurRadius = glowBand === 'perfect' ? 16 : glowBand === 'good' ? 10 : 5;
 
       ctx.beginPath();
       ctx.strokeStyle = color;
@@ -440,6 +452,7 @@ const Tantri = memo(function Tantri({
   pitchHz = null,
   pitchClarity = 0,
   onStringTrigger,
+  onStringRelease,
   timbre,
   onActivityChange,
   className,
@@ -645,17 +658,41 @@ const Tantri = memo(function Tantri({
     const field = fieldRef.current;
     if (!field || touchedStringRef.current === null) return;
 
-    releaseString(touchedStringRef.current, field);
+    const idx = touchedStringRef.current;
+    const s = field.strings[idx];
+    if (s && onStringRelease) {
+      onStringRelease({
+        swara: s.swara,
+        octave: 'madhya',
+        hz: s.hz,
+        velocity: 0,
+        timbre,
+      });
+    }
+
+    releaseString(idx, field);
     touchedStringRef.current = null;
-  }, []);
+  }, [onStringRelease, timbre]);
 
   const handlePointerLeave = useCallback(() => {
     const field = fieldRef.current;
     if (!field || touchedStringRef.current === null) return;
 
-    releaseString(touchedStringRef.current, field);
+    const idx = touchedStringRef.current;
+    const s = field.strings[idx];
+    if (s && onStringRelease) {
+      onStringRelease({
+        swara: s.swara,
+        octave: 'madhya',
+        hz: s.hz,
+        velocity: 0,
+        timbre,
+      });
+    }
+
+    releaseString(idx, field);
     touchedStringRef.current = null;
-  }, []);
+  }, [onStringRelease, timbre]);
 
   // -----------------------------------------------------------------------
   // External pitch update API

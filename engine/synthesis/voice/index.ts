@@ -773,6 +773,14 @@ function isNasalSyllable(syllable: string): boolean {
 let _defaultSynth: VocalSynth | null = null;
 
 /**
+ * Stop any currently playing vocal note on the default synth.
+ * Used for long-press release — stops the sustained note immediately.
+ */
+export function stopVocalPlayback(): void {
+  _defaultSynth?.stop();
+}
+
+/**
  * Play a single swara with voice synthesis (convenience — creates synth if needed).
  */
 export async function playVocalSwara(
@@ -780,8 +788,11 @@ export async function playVocalSwara(
   saHz: number,
   options?: PlayVocalOptions & { voiceType?: VoiceType },
 ): Promise<void> {
+  const requestedType = options?.voiceType ?? 'tenor';
   if (!_defaultSynth) {
-    _defaultSynth = await createVocalSynth(options?.voiceType ?? 'tenor');
+    _defaultSynth = await createVocalSynth(requestedType);
+  } else if (_defaultSynth.voiceType !== requestedType) {
+    _defaultSynth.setVoiceType(requestedType);
   }
   await _defaultSynth.playSwara(swara, saHz, options);
 }
@@ -794,8 +805,11 @@ export async function playVocalSwaraNote(
   saHz: number,
   options?: PlayVocalOptions & { voiceType?: VoiceType },
 ): Promise<void> {
+  const requestedType = options?.voiceType ?? 'tenor';
   if (!_defaultSynth) {
-    _defaultSynth = await createVocalSynth(options?.voiceType ?? 'tenor');
+    _defaultSynth = await createVocalSynth(requestedType);
+  } else if (_defaultSynth.voiceType !== requestedType) {
+    _defaultSynth.setVoiceType(requestedType);
   }
   await _defaultSynth.playSwaraNote(note, saHz, options);
 }
@@ -808,8 +822,11 @@ export async function playVocalPhrase(
   saHz: number,
   options?: PlayVocalPhraseOptions & { voiceType?: VoiceType },
 ): Promise<void> {
+  const requestedType = options?.voiceType ?? 'tenor';
   if (!_defaultSynth) {
-    _defaultSynth = await createVocalSynth(options?.voiceType ?? 'tenor');
+    _defaultSynth = await createVocalSynth(requestedType);
+  } else if (_defaultSynth.voiceType !== requestedType) {
+    _defaultSynth.setVoiceType(requestedType);
   }
   await _defaultSynth.playPhrase(phrase, saHz, options);
 }
