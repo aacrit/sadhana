@@ -318,15 +318,19 @@ export class TanpuraDrone {
   /**
    * Schedule a pluck on a single string.
    *
+   * A real tanpura string sustains for most of the full cycle (all 4
+   * plucks) — the drone character comes from all strings ringing
+   * simultaneously with overlapping harmonics. The jivari bridge
+   * re-excites upper partials on each contact, so partials 2-5
+   * sustain even longer than the fundamental.
+   *
    * The jivari envelope model:
    *   - Attack: ~15ms sharp rise (string contact with jivari bridge)
-   *   - Sustain: partials 2-5 stay louder longer (jivari re-excitation)
-   *   - Decay: fundamental decays over ~800ms; higher partials sustain
-   *     to ~1200ms due to repeated bridge contact
-   *
-   * The string interval (cycleDuration / 4) determines how long each
-   * string rings before the next pluck. Partials decay naturally
-   * within this window.
+   *   - Sustain: string rings across 3-4 pluck intervals (~3-4s)
+   *   - Jivari shimmer: partials 2-5 decay slower, creating the
+   *     characteristic waxing/waning of overtones
+   *   - The next pluck of the same string naturally re-attacks over
+   *     whatever residual sustain remains — no hard cut
    */
   private pluckString(stringIdx: number): void {
     if (!this.audioContext) return;
@@ -334,7 +338,7 @@ export class TanpuraDrone {
     if (!voice) return;
 
     const now = this.audioContext.currentTime;
-    const interval = (this.config.cycleDuration ?? 4.0) / 4;
+    const cycleDuration = this.config.cycleDuration ?? 4.0;
 
     for (let p = 0; p < voice.gains.length; p++) {
       const gainNode = voice.gains[p]!;
@@ -343,29 +347,33 @@ export class TanpuraDrone {
 
       // Jivari model: higher partials (2-5) have slower decay because
       // the bridge re-excites them. The fundamental decays fastest.
-      // Beyond partial 5, decay speeds up again.
+      // Beyond partial 5, decay speeds up again (string stiffness).
       const jivariSustainFactor =
         partialNum === 1 ? 1.0 :
-        partialNum <= 3 ? 1.4 :
-        partialNum <= 5 ? 1.2 :
-        0.8;
+        partialNum === 2 ? 1.8 :
+        partialNum <= 4 ? 1.6 :
+        partialNum <= 6 ? 1.3 :
+        0.9;
 
-      // Base decay time: scales with the pluck interval so the string
-      // rings for most of its window
-      const decayTime = interval * 0.85 * jivariSustainFactor;
+      // Each string should sustain across most of the full cycle
+      // (all 4 plucks = cycleDuration). The string is still audible
+      // at ~20-30% when the same string is plucked again, creating
+      // the continuous drone. Time constant chosen so the string
+      // reaches ~15% at one full cycle.
+      const decayTime = cycleDuration * 0.9 * jivariSustainFactor;
+      const timeConstant = decayTime / 2.0;
 
-      // Attack: sharp 15ms rise
+      // Attack: sharp 15ms rise — jivari bridge contact
       const attackEnd = now + 0.015;
 
-      // Cancel any scheduled values from a previous pluck
+      // Smoothly ramp from current level (residual sustain from
+      // previous pluck) to peak, preserving the continuous feel.
       gainNode.gain.cancelScheduledValues(now);
-      gainNode.gain.setValueAtTime(0, now);
+      gainNode.gain.setValueAtTime(gainNode.gain.value, now);
       gainNode.gain.linearRampToValueAtTime(peak, attackEnd);
 
-      // Decay: exponential decay to near-silence
-      // Use setTargetAtTime for natural exponential envelope
-      // Time constant = decayTime / 3 (reaches ~5% at 3 time constants)
-      gainNode.gain.setTargetAtTime(0, attackEnd, decayTime / 3);
+      // Long exponential decay — string rings across 3+ pluck intervals
+      gainNode.gain.setTargetAtTime(0, attackEnd, timeConstant);
     }
   }
 
