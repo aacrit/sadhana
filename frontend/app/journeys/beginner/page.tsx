@@ -1024,9 +1024,10 @@ export default function BeginnerPage() {
             position: 'absolute', inset: 0, zIndex: 0,
             opacity: tantriActive ? 0.5 : 0.2,
             transition: 'opacity 0.3s ease-out',
-            // Only allow string interaction during practice phases.
-            // During non-practice phases, Tantri is visual-only background.
-            pointerEvents: isVoicePhase ? 'auto' : 'none',
+            // Tantri is visual-only in beginner lessons — never interactive.
+            // Strings respond to voice input visually, but clicks go through
+            // to the lesson UI (buttons, navigation) above.
+            pointerEvents: 'none',
           }}
         />
 
