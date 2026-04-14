@@ -16,8 +16,9 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: var(--bg);
+  background: var(--raga-bg, var(--bg));
   overflow: hidden;
+  transition: background var(--tantri-raga-transition, 2400ms) var(--ease-out);
 }
 
 /* -- Back link (start state) ------------------------------------------ */
@@ -194,7 +195,7 @@
 .hudMono {
   font-family: var(--font-mono);
   font-size: var(--text-sm);
-  color: rgba(255, 255, 255, 0.40);
+  color: var(--text-3);
   letter-spacing: var(--tracking-wide);
 }
 
@@ -315,7 +316,7 @@
   position: relative;
   flex: 1;
   height: 2px;
-  background: rgba(255, 255, 255, 0.10);
+  background: var(--border);
   border-radius: var(--radius-full);
 }
 
@@ -326,7 +327,7 @@
   transform: translate(-50%, -50%);
   width: 1px;
   height: 8px;
-  background: rgba(255, 255, 255, 0.20);
+  background: var(--text-3);
 }
 
 .centsIndicator {
@@ -439,7 +440,7 @@
   max-width: 90vw;
   padding: var(--space-2) var(--space-4);
   border-radius: var(--radius-md);
-  background: rgba(0, 0, 0, 0.75);
+  background: var(--scrim-heavy, rgba(0, 0, 0, 0.75));
   border: 1px solid var(--in-progress);
   color: var(--in-progress);
   font-family: var(--font-sans);

@@ -1,0 +1,186 @@
+# Lesson V-08: Shruti-Level Precision
+# Journey: Scholar | Level: Varistha (7-9)
+# Presence Rule: you hear before you name.
+# NEW PHASE TYPE: shruti_exercise
+# The 22-shruti system becomes real
+
+id: varistha-08-shruti
+journey: scholar
+level_range: [7, 9]
+raga_id: null                # cross-raga shruti awareness
+duration_target_min: 15
+xp_award: 55
+
+meta:
+  title: "The 22 Positions"
+  subtitle: "Shruti Precision"
+  time_of_day: null
+  rasa: null
+
+phases:
+
+  - id: listen
+    type: tanpura_drone
+    duration_s: 20
+    instruction: |
+      The tanpura is with you.
+      You have been singing 12 swaras. But the tradition knows 22.
+      Each swara has variants — shrutis — positions so close
+      that only the trained ear can tell them apart.
+      Today your ear crosses that threshold.
+    tanpura:
+      strings: [Pa, Sa, Sa, Sa_upper]
+      sa_hz: null
+
+  - id: sa_calibration
+    type: sa_detection
+    skip_if: sa_already_set
+    instruction: |
+      Confirm your Sa.
+    attempts: 5
+    min_clarity: 0.85
+    fallback_hz: 261.6256
+
+  # DEMONSTRATE — two shrutis of komal Ga
+  - id: shruti_ga_high
+    type: phrase_playback
+    phrase: [Sa, Ga_k]
+    instruction: |
+      Ga komal. The version you know.
+      In Bhimpalasi and Bageshri, Ga komal sits at ratio 6/5.
+      316 cents above Sa.
+    repeat: 2
+    show_labels: true
+    shruti_variant: higher              # 6/5 ratio
+
+  - id: shruti_ga_low
+    type: phrase_playback
+    phrase: [Sa, Ga_k]
+    instruction: |
+      Now listen again. Ga komal — but lower.
+      In Darbari Kanada, Ga komal sits at ratio 32/27.
+      294 cents above Sa. Lower by 22 cents.
+      The same swara name. A different position.
+    repeat: 2
+    show_labels: true
+    shruti_variant: lower               # 32/27 ratio
+
+  - id: shruti_ga_compare
+    type: swara_comparison
+    instruction: |
+      Hear them side by side. Two Ga komals.
+      One bright (Bhimpalasi). One heavy (Darbari).
+      22 cents apart. A world of difference.
+    swara_a: Ga_k
+    swara_b: Ga_k
+    shruti_a: higher                    # 6/5
+    shruti_b: lower                     # 32/27
+    label_a: "Ga komal (Bhimpalasi) — 316 cents"
+    label_b: "Ga komal (Darbari) — 294 cents"
+    play_count: 3
+    context_phrase_a: [Sa, Ga_k, Ma, Pa]
+    context_phrase_b: [Sa, Re, Ga_k, Ma]
+
+  # SHRUTI EXERCISE — distinguish the two Ga komals
+  - id: shruti_round_1
+    type: shruti_exercise              # NEW PHASE TYPE
+    instruction: |
+      The engine plays Ga komal. Which shruti?
+      Higher (Bhimpalasi) or lower (Darbari)?
+      Listen to the weight. The lower one is heavier.
+    swara: Ga_k
+    variants:
+      - name: "higher"
+        ratio: "6/5"
+        cents: 316
+        raga_context: bhimpalasi
+      - name: "lower"
+        ratio: "32/27"
+        cents: 294
+        raga_context: darbari_kanada
+    rounds: 6
+    play_count: 2
+    response_mode: identify             # student identifies which variant
+    feedback_layer: standard
+
+  # TWO SHRUTIS OF RE
+  - id: shruti_re_demo
+    type: swara_comparison
+    instruction: |
+      Re shuddha also has two positions.
+      In Yaman context: Re is bright, at 9/8 (204 cents).
+      In Kafi context: Re can sit slightly lower, at 10/9 (182 cents).
+    swara_a: Re
+    swara_b: Re
+    shruti_a: higher                    # 9/8
+    shruti_b: lower                     # 10/9
+    label_a: "Re shuddha (Yaman) — 204 cents"
+    label_b: "Re shuddha (Kafi) — 182 cents"
+    play_count: 3
+
+  - id: shruti_round_2
+    type: shruti_exercise
+    instruction: |
+      Which Re shuddha? Higher (Yaman) or lower (Kafi)?
+    swara: Re
+    variants:
+      - name: "higher"
+        ratio: "9/8"
+        cents: 204
+        raga_context: yaman
+      - name: "lower"
+        ratio: "10/9"
+        cents: 182
+        raga_context: kafi
+    rounds: 6
+    play_count: 2
+    response_mode: identify
+    feedback_layer: standard
+
+  # SING WITH SHRUTI AWARENESS
+  - id: sing_bhimpalasi_ga
+    type: pitch_exercise
+    target_swara: Ga_k
+    duration_s: 10
+    instruction: |
+      Sing Ga komal — the Bhimpalasi version. Higher. Brighter.
+    feedback_layer: standard
+    level_tolerance: varistha
+    shruti_target: higher
+
+  - id: sing_darbari_ga
+    type: pitch_exercise
+    target_swara: Ga_k
+    duration_s: 10
+    instruction: |
+      Now Ga komal — the Darbari version. Lower. Heavier.
+      The difference is 22 cents. Your ear can hear it.
+      Your voice must learn to place it.
+    feedback_layer: standard
+    level_tolerance: varistha
+    shruti_target: lower
+
+  - id: complete
+    type: session_summary
+    show_accuracy: true
+    show_streak: true
+    message: |
+      22 shrutis. The ancient tuning system.
+      Not 12 notes — 22 positions.
+      The same swara name can mean different things
+      in different ragas. The ear that hears this
+      has crossed a threshold that most never reach.
+
+engine:
+  raga_grammar_active: false
+  pakad_recognition: false
+  ornaments_shown: false
+  cents_display: always               # shruti exercises need cents visible
+  accuracy_model: varistha
+  shruti_mode: active                 # enable 22-shruti detection
+
+unlock_next:
+  lesson_id: varistha-09-todi
+  requires:
+    min_sessions: 1
+    min_accuracy: 0.55               # shruti distinction is hard

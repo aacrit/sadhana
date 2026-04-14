@@ -1,0 +1,181 @@
+# Exercise G-03: Raga Bhairavi — The Flexible Raga
+# Journey: Master | Level: Guru (10+)
+# Engine source: engine/theory/ragas/bhairavi.ts (needs creation)
+# NEW PHASE TYPE: controlled_deviation
+# KEY CONCEPT: Chhayanat — shading with foreign swaras
+
+id: guru-03-bhairavi
+journey: master
+level_range: [10, 99]
+raga_id: bhairavi
+duration_target_min: 15
+xp_award: 65
+
+meta:
+  title: "The Flexible Raga"
+  subtitle: "Raga Bhairavi"
+  time_of_day: null            # concluding raga, any time
+  rasa: bhakti                 # devotion, peace
+
+phases:
+
+  - id: listen
+    type: tanpura_drone
+    duration_s: 30
+    instruction: |
+      Close your eyes.
+      This is Bhairavi — the raga that ends every concert.
+      The most flexible raga in Hindustani music.
+      Four komal swaras. But all twelve may appear.
+    tanpura:
+      strings: [Pa, Sa, Sa, Sa_upper]
+      sa_hz: null
+
+  - id: sa_calibration
+    type: sa_detection
+    skip_if: sa_already_set
+    instruction: |
+      Confirm your Sa.
+    attempts: 5
+    min_clarity: 0.85
+    fallback_hz: 261.6256
+
+  # PURE BHAIRAVI — 4 komal swaras
+  - id: aroha_listen
+    type: phrase_playback
+    phrase: [Sa, Re_k, Ga_k, Ma, Pa, Dha_k, Ni_k, Sa_upper]
+    instruction: |
+      Bhairavi in its pure form. Four komal swaras.
+      Re komal. Ga komal. Dha komal. Ni komal.
+      Only Sa, Ma, and Pa are shuddha.
+    repeat: 2
+    show_labels: true
+
+  - id: avaroha_listen
+    type: phrase_playback
+    phrase: [Sa_upper, Ni_k, Dha_k, Pa, Ma, Ga_k, Re_k, Sa]
+    instruction: |
+      Descending. Same four komal swaras.
+      This is the structural form. The skeleton.
+    repeat: 1
+    show_labels: true
+
+  # SING PURE BHAIRAVI
+  - id: sing_aroha
+    type: phrase_exercise
+    phrase: [Sa, Re_k, Ga_k, Ma, Pa, Dha_k, Ni_k, Sa_upper]
+    instruction: |
+      Sing the pure form first. Four komal swaras.
+      Place each one precisely. This is the foundation.
+    guide_tone: true
+    feedback_layer: standard
+
+  # INTRODUCE CHHAYANAT — shuddha Re as passing tone
+  - id: chhayanat_re
+    type: phrase_playback
+    phrase: [Sa, Re, Ga_k, Ma]
+    instruction: |
+      Now listen. Shuddha Re — a foreign swara — appears.
+      It passes through. It does not stay.
+      This is chhayanat — shading. Bhairavi allows it.
+      The raga bends but does not break.
+    repeat: 2
+    show_labels: true
+
+  # CONTROLLED DEVIATION — student adds foreign swaras
+  - id: deviation_1
+    type: controlled_deviation           # NEW PHASE TYPE
+    instruction: |
+      Sing a Bhairavi phrase. When the engine signals,
+      introduce shuddha Re as a passing note.
+      It should touch — not land. Pass through, not stay.
+    raga_id: bhairavi
+    base_phrase: [Sa, Re_k, Ga_k, Ma, Pa]
+    allowed_deviations:
+      - swara: Re                        # shuddha Re
+        role: passing                    # must be a passing tone, not sustained
+        max_duration_ms: 500
+    duration_s: 20
+    evaluation:
+      grammar_check: true
+      deviation_check: true
+      pitch_tolerance_cents: 10
+    attempts: 3
+
+  - id: deviation_2
+    type: controlled_deviation
+    instruction: |
+      Now introduce shuddha Dha as a passing tone.
+      The phrase descends through komal Dha — but touches shuddha Dha first.
+      A moment of brightness in the dark register.
+    raga_id: bhairavi
+    base_phrase: [Pa, Dha_k, Ma, Ga_k, Re_k, Sa]
+    allowed_deviations:
+      - swara: Dha
+        role: passing
+        max_duration_ms: 500
+    duration_s: 20
+    evaluation:
+      grammar_check: true
+      deviation_check: true
+      pitch_tolerance_cents: 10
+    attempts: 3
+
+  - id: deviation_3
+    type: controlled_deviation
+    instruction: |
+      The ultimate test. Tivra Ma in Bhairavi.
+      A fleeting touch — Ma tivra — in a phrase that uses shuddha Ma.
+      This is the limit of Bhairavi's flexibility.
+      If you hold tivra Ma, you leave Bhairavi.
+      If you touch it and return — you reveal Bhairavi's depth.
+    raga_id: bhairavi
+    base_phrase: [Ga_k, Ma, Pa, Ma, Ga_k, Re_k, Sa]
+    allowed_deviations:
+      - swara: Ma_t
+        role: fleeting                   # even briefer than passing
+        max_duration_ms: 300
+    duration_s: 25
+    evaluation:
+      grammar_check: true
+      deviation_check: true
+      pitch_tolerance_cents: 10
+    attempts: 3
+
+  # FREE SINGING — Bhairavi with chhayanat awareness
+  - id: free_bhairavi
+    type: passive_phrase_recognition
+    enabled: true
+    instruction: |
+      Sing freely in Bhairavi. You may use chhayanat —
+      passing touches of shuddha Re, shuddha Dha, even tivra Ma.
+      But the foundation is four komal swaras.
+      Return to them. They are home.
+    duration_s: 90                      # Bhairavi needs space
+    watch_for_pakad: true
+    pakad_reward:
+      xp_bonus: 25
+      ceremony: gsap_pakad_moment
+
+  - id: complete
+    type: session_summary
+    show_accuracy: true
+    show_streak: true
+    message: |
+      Bhairavi. The raga that ends every concert.
+      The most forgiving and the most demanding.
+      A beginner can sing it. A master reveals its infinity.
+      All twelve swaras may visit — but four komal swaras are home.
+
+engine:
+  raga_grammar_active: true
+  pakad_recognition: true
+  ornaments_shown: true
+  cents_display: always
+  accuracy_model: guru
+
+unlock_next:
+  lesson_id: guru-04-modulation
+  requires:
+    min_sessions: 1
+    min_accuracy: 0.55

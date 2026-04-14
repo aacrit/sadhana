@@ -67,10 +67,12 @@
   --accent-hover: #D07518;
   --accent-dim: rgba(232, 135, 30, 0.15);
   --accent-glow: rgba(232, 135, 30, 0.25);
+  --accent-rgb: 232, 135, 30;
 
   /* Mastery -- Gold: zarr-kashi only. Hairlines and points, never fills. */
   --gold: #D4AF37;
   --gold-dim: rgba(212, 175, 55, 0.15);
+  --mastery-rgb: 212, 175, 55;
   --gold-glow: rgba(212, 175, 55, 0.25);
   --gold-hairline: rgba(212, 175, 55, 0.6);
 
@@ -192,14 +194,14 @@
   --tantri-string-sa-width: 2px;
   --tantri-string-pa-width: 2px;
   --tantri-string-default-width: 1px;
-  --tantri-string-rest-opacity: 0.5;
+  --tantri-string-rest-opacity: 0.35;
   --tantri-string-ghost-opacity: 0.08;
   --tantri-string-achala-opacity: 0.15;
   --tantri-ripple-duration: 400ms;
   --tantri-ripple-opacity: 0.15;
   --tantri-ripple-scale: 2;
   --tantri-compact-height: 120px;
-  --tantri-raga-transition: var(--dur-slow);
+  --tantri-raga-transition: var(--dur-cinematic);
 
   /* -- Canvas texture -------------------------------------------------- */
   --canvas-pattern-opacity: 0.035;

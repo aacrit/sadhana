@@ -36,6 +36,7 @@ import { useFreeformSession } from '../../lib/useFreeformSession';
 import type { SwaraEvent } from '../../lib/useFreeformSession';
 import { useAuth } from '../../lib/auth';
 import { useVoiceWave } from '../../lib/VoiceWaveContext';
+import { getRagaForTimeOfDay } from '@/engine/theory/ragas';
 import styles from './freeform.module.css';
 
 // ---------------------------------------------------------------------------
@@ -98,7 +99,7 @@ function formatDuration(seconds: number): string {
 // ---------------------------------------------------------------------------
 
 function getCentsColor(cents: number | null): string {
-  if (cents === null) return 'rgba(255,255,255,0.20)';
+  if (cents === null) return 'var(--border)';
   const abs = Math.abs(cents);
   if (abs <= 20) return 'var(--correct)';
   if (abs <= 35) return 'var(--in-progress)';
@@ -116,11 +117,12 @@ function getGlowStyle(
   if (harmonyStrength <= 0.6 || !inTune) return null;
 
   const isStrong = harmonyStrength > 0.80;
-  const color = isStrong ? '212, 175, 55' : '232, 135, 30';
   const alpha = harmonyStrength * 0.35;
 
   return {
-    background: `radial-gradient(circle, rgba(${color}, ${alpha}) 0%, transparent 60%)`,
+    background: isStrong
+      ? `radial-gradient(circle, rgba(var(--mastery-rgb, 212, 175, 55), ${alpha}) 0%, transparent 60%)`
+      : `radial-gradient(circle, rgba(var(--accent-rgb, 232, 135, 30), ${alpha}) 0%, transparent 60%)`,
   };
 }
 
@@ -199,6 +201,12 @@ export default function FreeformPage() {
   const router = useRouter();
   const { profile } = useAuth();
   const userSaHz = profile?.saHz ?? 261.63;
+
+  // Time-of-day raga for ambient color world
+  const todayRaga = useMemo(() => {
+    const hour = new Date().getHours();
+    return getRagaForTimeOfDay(hour);
+  }, []);
 
   const session = useFreeformSession(userSaHz);
   const { setAnalyser, setSaHz } = useVoiceWave();
@@ -385,7 +393,7 @@ export default function FreeformPage() {
 
   if (!hasStarted) {
     return (
-      <div className={styles.page}>
+      <div className={styles.page} data-raga={todayRaga.id}>
         <VoiceWave variant="full" style={{ opacity: 0.15 }} />
 
         <Link href="/" className={styles.backLink}>
@@ -436,7 +444,7 @@ export default function FreeformPage() {
 
   if (session.micPermission === 'denied') {
     return (
-      <div className={styles.page}>
+      <div className={styles.page} data-raga={todayRaga.id}>
         <VoiceWave variant="full" style={{ opacity: 0.15 }} />
 
         <motion.div
@@ -479,7 +487,7 @@ export default function FreeformPage() {
     : null;
 
   return (
-    <div className={styles.page}>
+    <div className={styles.page} data-raga={todayRaga.id}>
       {/* Tantri portal — centered guitar-like band with strings + pitch trail */}
       <Tantri
         saHz={userSaHz}

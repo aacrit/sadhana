@@ -1,0 +1,186 @@
+# Lesson V-11: Varistha Challenge — Gateway to Guru
+# Journey: Scholar | Level: Varistha (7-9)
+# Presence Rule: you hear before you name.
+# Assessment. Must pass across 5 separate sessions.
+# Phase type: mastery_challenge
+# Unlocks Guru journey
+
+id: varistha-11-challenge
+journey: scholar
+level_range: [7, 9]
+raga_id: null
+duration_target_min: 18
+xp_award: 250
+
+meta:
+  title: "Varistha Challenge"
+  subtitle: "Gateway to Guru"
+  time_of_day: null
+  rasa: null
+
+session_rules:
+  required_sessions: 5            # stricter than Sadhaka
+  session_cooldown_hours: 6
+  progress_persists: true
+  partial_credit: true
+
+phases:
+
+  - id: listen
+    type: tanpura_drone
+    duration_s: 20
+    instruction: |
+      The tanpura is with you.
+      Twelve ragas. Three ornaments. Shruti awareness.
+      Tala integration. Phrase composition.
+      Now: demonstrate mastery.
+    tanpura:
+      strings: [Pa, Sa, Sa, Sa_upper]
+      sa_hz: null
+
+  - id: sa_calibration
+    type: sa_detection
+    skip_if: sa_already_set
+    instruction: |
+      Confirm your Sa.
+    attempts: 5
+    min_clarity: 0.85
+    fallback_hz: 261.6256
+
+  # CHALLENGE 1: Aroha/Avaroha of 5 ragas at +-15 cents
+  - id: challenge_scales
+    type: mastery_challenge
+    challenge_id: scales_precision
+    instruction: |
+      Sing the aroha and avaroha of five ragas.
+      Choose any five from the twelve you have learned.
+      No guide tone. +-15 cents tolerance.
+    raga_pool: [bhoopali, yaman, bhairav, bhimpalasi, bageshri, desh, kafi, marwa, darbari_kanada, puriya_dhanashri, malkauns, todi]
+    student_chooses: 5
+    exercise_per_raga:
+      - sing_aroha: true
+        guide_tone: false
+      - sing_avaroha: true
+        guide_tone: false
+    tolerance_cents: 15
+    min_accuracy: 0.85
+
+  # CHALLENGE 2: Darbari andolan on Ga_k
+  - id: challenge_darbari_andolan
+    type: mastery_challenge
+    challenge_id: darbari_andolan
+    instruction: |
+      Sing Ga komal in Darbari Kanada. With andolan.
+      The heavy wave. Touching Re below. 2 Hz. Wide amplitude.
+      This is the defining sound.
+    raga_id: darbari_kanada
+    exercise_type: ornament
+    ornament_type: andolan
+    target_swara: Ga_k
+    evaluation:
+      oscillation_rate_hz: [1.5, 3]
+      amplitude_cents: [30, 50]
+      min_duration_ms: 4000
+      center_accuracy_cents: 15
+    attempts_allowed: 3
+
+  # CHALLENGE 3: Compose a valid 8-swara phrase in Yaman
+  - id: challenge_composition
+    type: mastery_challenge
+    challenge_id: composition_yaman
+    instruction: |
+      Compose and sing a valid phrase in Yaman.
+      At least 8 swaras. The engine validates grammar.
+      Your phrase must sound like Yaman — not just use Yaman's notes.
+    raga_id: yaman
+    exercise_type: composition
+    min_swaras: 8
+    evaluation:
+      grammar_check: true
+      pitch_tolerance_cents: 15
+      pakad_bonus: true              # extra credit if phrase contains pakad
+    attempts_allowed: 3
+
+  # CHALLENGE 4: Raga identification — 7 of 10
+  - id: challenge_raga_id
+    type: mastery_challenge
+    challenge_id: raga_identification_advanced
+    instruction: |
+      The engine plays pakad phrases from the full repertoire.
+      Identify the raga. Sing a distinguishing phrase.
+      10 rounds. You need 7 correct.
+    raga_pool: [bhoopali, yaman, bhairav, bhimpalasi, bageshri, desh, kafi, marwa, darbari_kanada, puriya_dhanashri, malkauns, todi]
+    rounds: 10
+    min_correct: 7
+    pakad_plays: 2
+    response_duration_s: 12
+    evaluation: pakad_recognition
+
+  # CHALLENGE 5: Teentaal — pakad on sam
+  - id: challenge_tala_melody
+    type: mastery_challenge
+    challenge_id: tala_melody
+    instruction: |
+      Sing a pakad phrase landing on sam of teentaal.
+      Choose any raga. The vadi must arrive on beat 1.
+    tala_id: teentaal
+    raga_pool: [bhoopali, yaman, bhairav, bhimpalasi, bageshri, desh, kafi]
+    student_chooses: 1
+    cycles: 2
+    tempo_bpm: 72
+    evaluation:
+      landing_tolerance_ms: 200
+      pitch_tolerance_cents: 15
+    attempts_allowed: 3
+
+  # CHALLENGE 6: Distinguish closely related ragas
+  - id: challenge_distinction
+    type: mastery_challenge
+    challenge_id: raga_distinction
+    instruction: |
+      The engine picks two closely related ragas.
+      Sing a phrase from each that distinguishes them.
+      The phrases must be unmistakably different ragas.
+    raga_pairs:
+      - [bhimpalasi, bageshri]
+      - [puriya_dhanashri, marwa]
+      - [bhoopali, yaman]
+    engine_picks: 1                  # engine picks one pair
+    response_duration_s: 15
+    evaluation:
+      distinction_check: true
+      pitch_tolerance_cents: 15
+    attempts_allowed: 3
+
+  - id: complete
+    type: session_summary
+    show_accuracy: true
+    show_streak: true
+    show_challenge_progress: true
+    message_in_progress: |
+      Progress saved. Return when ready.
+      Five sessions. Each one builds on the last.
+      The varistha does not rush.
+    message_complete: |
+      You have completed the Varistha Challenge.
+      Twelve ragas. Shruti precision. Ornament mastery.
+      Composition. Tala integration. Raga distinction.
+      You are ready for the final level.
+      The guru's path is not about learning more.
+      It is about depth, completeness, and the ability to teach.
+
+engine:
+  raga_grammar_active: true
+  pakad_recognition: true
+  ornaments_shown: false
+  cents_display: hidden
+  accuracy_model: varistha_strict    # +-15 cents
+  tala_active: true
+  shruti_mode: active
+
+unlock_next:
+  lesson_id: guru-01-raga-id-advanced
+  requires:
+    min_sessions: 5
+    challenges_passed: [scales_precision, darbari_andolan, composition_yaman, raga_identification_advanced, tala_melody, raga_distinction]
+    journey_transition: master

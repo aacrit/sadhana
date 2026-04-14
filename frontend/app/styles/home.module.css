@@ -30,7 +30,7 @@
     ellipse 80% 70% at 50% 45%,
     transparent 0%,
     transparent 50%,
-    rgba(0, 0, 0, 0.15) 80%,
+    var(--canvas-vignette-inner, rgba(0, 0, 0, 0.15)) 80%,
     var(--canvas-vignette-outer, rgba(0, 0, 0, 0.35)) 100%
   );
 }

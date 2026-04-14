@@ -1,0 +1,110 @@
+# Copy layer for sadhaka-10-challenge
+# lesson-writer owns this file. Do not merge into the lesson YAML.
+# Theory audit: PENDING
+
+lesson_id: sadhaka-10-challenge
+
+# --- PHASE COPY ----------------------------------------------------
+
+phases:
+
+  listen:
+    screen_title: "The Challenge"
+    body: |
+      The tanpura is playing.
+      Seven ragas. Three ornaments. One tala.
+      This is not a test. It is a measure of how far you have come.
+    audio_label: null
+
+  sa_calibration:
+    screen_title: "Find Your Sa"
+    body: |
+      Confirm your Sa.
+    prompt: "Sing or hum a comfortable note."
+    calibrating_message: "Listening..."
+    success_message: "That's your Sa."
+
+  challenge_aroha_avaroha:
+    screen_title: "Seven Ragas"
+    body: |
+      Sing the aroha and avaroha of each raga.
+      No guide tone. Just you and the tanpura.
+    raga_display: "Current raga: {raga_name}"
+    feedback:
+      passed: "The swaras are settled in your voice."
+      needs_work: "Some swaras need more precision. Return to the ragas."
+      failed: "Keep practising. The swaras will come."
+
+  challenge_meend:
+    screen_title: "Meend"
+    body: |
+      Sing a smooth glide. Sa to a swara at least three
+      positions away. No steps.
+    feedback:
+      passed: "Smooth trajectory."
+      needs_work: "There are steps in the glide. More practice."
+      failed: "Return to S-02. The meend will come."
+
+  challenge_andolan:
+    screen_title: "Andolan in Bhairav"
+    body: |
+      Sing komal Re with andolan. Five seconds.
+      The engine listens for the oscillation.
+    feedback:
+      passed: "The andolan is there. Bhairav breathes."
+      needs_work: "The oscillation needs refinement."
+      failed: "Return to S-03. Let the wave come naturally."
+
+  challenge_raga_id:
+    screen_title: "Name the Raga"
+    body: |
+      Five pakad phrases. Name the raga.
+      Four correct to pass.
+    feedback:
+      correct: "Correct."
+      incorrect: "Not this time. Listen for the signature movement."
+
+  challenge_teentaal:
+    screen_title: "Teentaal"
+    body: |
+      Clap sam. Wave khali. Four cycles.
+    feedback:
+      passed: "Sam and khali, both consistent."
+      needs_work: "Timing needs work. Return to S-05."
+      failed: "Keep practising. The cycle will become natural."
+
+  complete:
+    screen_title_in_progress: "Progress Saved"
+    screen_title_complete: "Sadhaka Complete"
+    xp_line: "+150 XP"
+    streak_line: null
+    progress_note: |
+      {passed_count}/5 challenges completed.
+      {sessions_remaining} session(s) remaining.
+
+# --- THEORY NOTE ---------------------------------------------------
+
+theory_note:
+  title: "The Sadhaka Path"
+  body: |
+    Sadhaka means "practitioner" — one who practises with discipline
+    and intention. You have practised seven ragas (Bhoopali, Yaman,
+    Bhairav, Bhimpalasi, Bageshri, Desh, Kafi), three ornaments
+    (meend, andolan, gamak), one tala (teentaal), and the grammar
+    that distinguishes a scale from a raga. The challenge asks you
+    to demonstrate these skills consistently across three sessions.
+    Consistency is the mark of the practitioner.
+
+# --- CULTURAL NOTE -------------------------------------------------
+
+cultural_note:
+  title: "Three Sessions"
+  body: |
+    As with the Shishya Challenge, the requirement of three separate
+    sessions reflects the gurukul principle: mastery is consistency,
+    not intensity. The sadhaka who can demonstrate andolan on Re
+    komal today, tomorrow, and the day after has internalised the
+    ornament — it lives in the body, not just the memory. When all
+    five challenges are passed, the student transitions from
+    practitioner to scholar. The ragas deepen. The ornaments
+    multiply. The ear sharpens. The journey continues.

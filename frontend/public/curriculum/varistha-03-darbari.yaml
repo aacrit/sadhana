@@ -1,0 +1,225 @@
+# Lesson V-03: Raga Darbari Kanada — The Profound Andolan
+# Journey: Scholar | Level: Varistha (7-9)
+# Presence Rule: you hear before you name.
+# Engine source: engine/theory/ragas/darbari_kanada.ts (needs creation)
+# Prahara: 7-8 (late night, midnight)
+# KEY CONCEPT: Ornament as structure — andolan on Ga_k IS Darbari
+
+id: varistha-03-darbari
+journey: scholar
+level_range: [7, 9]
+raga_id: darbari_kanada
+duration_target_min: 15
+xp_award: 60
+
+meta:
+  title: "The Profound Andolan"
+  subtitle: "Raga Darbari Kanada"
+  time_of_day: night
+  rasa: gambhir               # grave, profound
+
+# --- PHASES -------------------------------------------------------
+
+phases:
+
+  - id: listen
+    type: tanpura_drone
+    duration_s: 30
+    instruction: |
+      Close your eyes. Listen.
+      Midnight. The deepest hour. The tanpura is with you.
+      What you are about to hear is one of the most profound sounds
+      in all of Hindustani music.
+    tanpura:
+      strings: [Pa, Sa, Sa, Sa_upper]
+      sa_hz: null
+
+  - id: sa_calibration
+    type: sa_detection
+    skip_if: sa_already_set
+    instruction: |
+      Confirm your Sa.
+    attempts: 5
+    min_clarity: 0.85
+    fallback_hz: 261.6256
+
+  # HEAR THE DEFINING SOUND — Ga_k with andolan
+  - id: darbari_ga
+    type: phrase_playback
+    phrase: [Re, Ga_k, Re, Sa]
+    instruction: |
+      Listen to Ga komal in Darbari.
+      This is not the Ga komal you know from Bhimpalasi.
+      This Ga breathes. It oscillates. Heavy. Slow.
+      It touches Re below and returns. This IS Darbari.
+    repeat: 3
+    show_labels: false
+    ornament: andolan
+    ornament_params:
+      swara: Ga_k
+      rate_hz: 2
+      amplitude_cents: 40        # wider than normal andolan — Darbari specific
+
+  # COMPARE — plain Ga_k vs Darbari Ga_k
+  - id: compare_ga_plain
+    type: phrase_playback
+    phrase: [Sa, Re, Ga_k, Ma]
+    instruction: |
+      Ga komal without andolan. Plain. Flat.
+      This is how you sang it in Bhimpalasi.
+    repeat: 1
+    show_labels: true
+
+  - id: compare_ga_darbari
+    type: phrase_playback
+    phrase: [Sa, Re, Ga_k, Ma]
+    instruction: |
+      Now with Darbari's andolan. The same pitch position.
+      But the treatment transforms it. A komal Ga without andolan
+      is not Darbari. It is Asavari.
+    repeat: 2
+    show_labels: true
+    ornament: andolan
+    ornament_params:
+      swara: Ga_k
+      rate_hz: 2
+      amplitude_cents: 40
+
+  # HEAR THE AROHA
+  - id: aroha_listen
+    type: phrase_playback
+    phrase: [Sa, Re, Ga_k, Ma, Pa, Dha_k, Ni_k, Sa_upper]
+    instruction: |
+      Darbari's ascent. All seven swaras.
+      Ga komal, Dha komal, Ni komal — three altered swaras.
+      Each with its own weight.
+    repeat: 2
+    show_labels: false
+
+  - id: aroha_show
+    type: phrase_playback
+    phrase: [Sa, Re, Ga_k, Ma, Pa, Dha_k, Ni_k, Sa_upper]
+    instruction: |
+      Sa Re Ga Ma Pa Dha Ni Sa.
+      Three komal swaras. Each one heavy. Each one with gravity.
+    repeat: 1
+    show_labels: true
+
+  # HEAR THE AVAROHA — with vakra movement
+  - id: avaroha_listen
+    type: phrase_playback
+    phrase: [Sa_upper, Ni_k, Dha_k, Pa, Ma, Pa, Ga_k, Ma, Re, Sa]
+    instruction: |
+      The descent is not straight. It turns back.
+      Sa Ni Dha Pa — then Ma Pa — then Ga Ma Re Sa.
+      The raga circles before descending. This is vakra movement.
+    repeat: 2
+    show_labels: false
+
+  - id: avaroha_show
+    type: phrase_playback
+    phrase: [Sa_upper, Ni_k, Dha_k, Pa, Ma, Pa, Ga_k, Ma, Re, Sa]
+    instruction: |
+      Sa Ni Dha Pa Ma Pa Ga Ma Re Sa.
+      Vakra — oblique. The descent revisits Pa and Ma.
+      Darbari does not descend in a straight line.
+    repeat: 1
+    show_labels: true
+
+  # MEET THE SWARAS
+  - id: meet_darbari
+    type: swara_introduction
+    instruction: |
+      Darbari uses all seven swaras. Three are komal.
+      Re is the vadi. Pa is the samvadi.
+      But the soul of the raga is Ga komal — with andolan.
+    swaras: [Sa, Re, Ga_k, Ma, Pa, Dha_k, Ni_k]
+    presentation: sequential
+    audio_first: true
+    highlight_vadi: Re
+    highlight_samvadi: Pa
+
+  # ORNAMENT EXERCISE — Darbari andolan on Ga_k
+  - id: andolan_ga_darbari
+    type: ornament_exercise
+    instruction: |
+      Sing Ga komal. Then add Darbari andolan.
+      Slow. Heavy. The oscillation should touch Re below.
+      2 oscillations per second. Wide amplitude.
+      This is the hardest ornament you have attempted.
+    target_swara: Ga_k
+    ornament_type: andolan
+    duration_s: 20
+    guide_tone: true
+    evaluation:
+      oscillation_rate_hz: [1.5, 3]    # Darbari andolan is slower than standard
+      amplitude_cents: [30, 50]         # wider than standard andolan
+      min_duration_ms: 4000
+      center_accuracy_cents: 15         # Varistha precision
+    attempts: 5                          # more attempts — this is hard
+    feedback_layer: standard
+
+  # SING A DARBARI PHRASE
+  - id: sing_phrase
+    type: phrase_exercise
+    phrase: [Sa, Re, Ga_k, Ma, Re, Sa]
+    instruction: |
+      Sing this phrase. Add andolan on Ga komal.
+      The phrase rises to Ma, then falls through Ga — with the wave — to Re to Sa.
+    guide_tone: true
+    feedback_layer: standard
+    ornament_targets:
+      - swara: Ga_k
+        expected_ornament: andolan
+
+  # PAKAD PHRASES
+  - id: pakad_listen
+    type: phrase_playback
+    phrase: [Ma, Pa, Ga_k, Ma, Re, Sa]
+    instruction: |
+      Darbari's descent. Ma Pa — the turn — then Ga with andolan,
+      falling through Ma Re to Sa. This is the sound of midnight.
+    repeat: 2
+    show_labels: true
+    ornament: andolan
+    ornament_params:
+      swara: Ga_k
+      rate_hz: 2
+      amplitude_cents: 40
+
+  # FREE SINGING
+  - id: pakad_watch
+    type: passive_phrase_recognition
+    enabled: true
+    instruction: |
+      Sing freely in Darbari. Midnight.
+      Every time you touch Ga komal — add the wave.
+      Without it, the raga loses its soul.
+    duration_s: 75                      # longer — Darbari needs space
+    watch_for_pakad: true
+    pakad_reward:
+      xp_bonus: 25
+      ceremony: gsap_pakad_moment
+
+  - id: complete
+    type: session_summary
+    show_accuracy: true
+    show_streak: true
+    message: |
+      Darbari Kanada.
+      The raga where an ornament is not decoration — it is structure.
+      A komal Ga without andolan is not Darbari.
+      The wave on that single swara carries centuries of midnight.
+
+engine:
+  raga_grammar_active: true
+  pakad_recognition: true
+  ornaments_shown: true
+  cents_display: on_tap
+  accuracy_model: varistha
+
+unlock_next:
+  lesson_id: varistha-04-composition
+  requires:
+    min_sessions: 2           # Darbari needs repetition
+    min_accuracy: 0.60

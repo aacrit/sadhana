@@ -17,9 +17,10 @@
 import { useEffect } from 'react';
 import type { ReactNode } from 'react';
 import { MotionConfig } from 'framer-motion';
-import { AuthProvider } from './lib/auth';
+import { AuthProvider, useAuth } from './lib/auth';
 import { VoiceWaveProvider } from './lib/VoiceWaveContext';
 import { useReducedMotion } from './lib/useReducedMotion';
+import { getLevelTitle } from './lib/types';
 import ScriptToggle from './components/ScriptToggle';
 import ThemeToggle from './components/ThemeToggle';
 import VoiceWave from './components/VoiceWave';
@@ -50,12 +51,32 @@ function ReducedMotionBridge() {
   return null;
 }
 
+/**
+ * LevelBridge — sets data-level on <html> from user profile.
+ *
+ * The interface deepens invisibly as the student progresses:
+ * Shishya (base) → Sadhaka (warmer borders) → Varistha (lapis precision)
+ * → Guru (zarr-kashi gold hairlines). No announcements.
+ */
+function LevelBridge() {
+  const { profile } = useAuth();
+
+  useEffect(() => {
+    const level = profile?.level ?? 1;
+    const title = getLevelTitle(level).toLowerCase();
+    document.documentElement.dataset.level = title;
+  }, [profile?.level]);
+
+  return null;
+}
+
 export default function Providers({ children }: { children: ReactNode }) {
   return (
     <MotionConfig reducedMotion="user">
       <AuthProvider>
         <VoiceWaveProvider>
           <ReducedMotionBridge />
+          <LevelBridge />
           <VoiceWave variant="ambient" />
           {children}
           <ThemeToggle />

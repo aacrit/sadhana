@@ -1,0 +1,91 @@
+# Exercise G-10: Open Mastery — No Ceiling
+# Journey: Master | Level: Guru (10+)
+# The infinite exercise. No upper bound.
+# The app becomes practice partner, not teacher.
+
+id: guru-10-open-mastery
+journey: master
+level_range: [10, 99]
+raga_id: null
+duration_target_min: 0         # no limit
+xp_award: 0                   # XP no longer matters here
+
+meta:
+  title: "No Ceiling"
+  subtitle: "Open Mastery"
+  time_of_day: null
+  rasa: null
+
+# No unlock conditions — this is the final exercise. It is always available.
+
+phases:
+
+  - id: listen
+    type: tanpura_drone
+    duration_s: 30
+    instruction: |
+      The tanpura is with you.
+      There is no lesson here. No score. No target.
+      You are the musician. The engine is your partner.
+      Choose what to practice. Set your own goals.
+      This is sādhanā.
+    tanpura:
+      strings: [Pa, Sa, Sa, Sa_upper]
+      sa_hz: null
+
+  - id: sa_calibration
+    type: sa_detection
+    skip_if: sa_already_set
+    instruction: |
+      Confirm your Sa.
+    attempts: 5
+    min_clarity: 0.85
+    fallback_hz: 261.6256
+
+  # PRACTICE OPTIONS
+  - id: open_practice
+    type: passive_phrase_recognition
+    enabled: true
+    instruction: |
+      Sing in any raga. The engine listens.
+      Grammar feedback is active. Ornament detection is active.
+      Pakad recognition is active. Shruti awareness is active.
+      But there is no score. No pass. No fail.
+
+      Suggestions for advanced practice:
+      — Explore a rare raga outside the curriculum
+      — Compose a bandish in a raga of your choice
+      — Practice taan at increasing speeds
+      — Render a complete alap-jod-jhala
+      — Sing in ektaal (12 beats) or rupak (7 beats)
+      — Explore multi-octave phrases
+      — Find the exact shruti of a swara in different raga contexts
+      — Teach a raga to someone else — the app records your teaching
+
+      The tanpura is with you. For as long as you need it.
+    duration_s: 0                       # unlimited
+    raga_id: null                       # any
+    grammar_feedback: true
+    watch_for_pakad: true
+    pakad_reward:
+      xp_bonus: 0                       # no XP at this level
+      ceremony: gsap_pakad_moment       # the ceremony remains — always
+
+  - id: complete
+    type: session_summary
+    show_accuracy: false
+    show_streak: false
+    message: |
+      Sādhanā has no end.
+      The practice continues.
+
+engine:
+  raga_grammar_active: true
+  pakad_recognition: true
+  ornaments_shown: true
+  cents_display: always
+  accuracy_model: guru
+  shruti_mode: active
+  tala_active: false                    # student enables if desired
+
+# No unlock_next — this is the final exercise

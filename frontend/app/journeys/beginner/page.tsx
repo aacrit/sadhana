@@ -58,7 +58,22 @@ import homeStyles from '../../styles/beginner.module.css';
 import lessonStyles from '../../styles/beginner-lesson.module.css';
 
 // ---------------------------------------------------------------------------
-// Lesson phases
+// Beginner lesson catalog (matches YAML files in content/curriculum/)
+// ---------------------------------------------------------------------------
+
+const BEGINNER_LESSONS = [
+  { id: 'beginner-01-bhoopali', title: 'Your First Raga', raga: 'Bhoopali' },
+  { id: 'beginner-02-sa-pa-drone', title: 'Sa and Pa', raga: 'Drone' },
+  { id: 'beginner-03-yaman', title: 'Evening Light', raga: 'Yaman' },
+  { id: 'beginner-04-bhairav', title: 'Dawn Austerity', raga: 'Bhairav' },
+  { id: 'beginner-05-bhimpalasi', title: 'Afternoon Longing', raga: 'Bhimpalasi' },
+  { id: 'beginner-06-bageshri', title: 'Night Intimacy', raga: 'Bageshri' },
+  { id: 'beginner-07-consolidation', title: 'Five Ragas', raga: 'Review' },
+  { id: 'beginner-08-challenge', title: 'Shishya Challenge', raga: 'Mastery' },
+] as const;
+
+// ---------------------------------------------------------------------------
+// Lesson phases (legacy inline lesson — kept for today's daily riyaz)
 // ---------------------------------------------------------------------------
 
 const LESSON_PHASES = [
@@ -1256,6 +1271,28 @@ export default function BeginnerPage() {
             </div>
           ))
         )}
+      </motion.section>
+
+      {/* Lesson catalog */}
+      <motion.section
+        className={homeStyles.recentSection}
+        variants={fadeUp}
+        aria-label="Beginner lessons"
+      >
+        <h3 className={homeStyles.sectionTitle}>Lessons</h3>
+        {BEGINNER_LESSONS.map((lesson) => (
+          <Link
+            key={lesson.id}
+            href={`/journeys/beginner/lessons/${lesson.id}`}
+            className={homeStyles.recentCard}
+            style={{ textDecoration: 'none', cursor: 'pointer' }}
+          >
+            <span className={homeStyles.recentRagaName}>{lesson.title}</span>
+            <span className={homeStyles.recentAccuracy} style={{ fontSize: 'var(--text-xs)', color: 'var(--text-3)' }}>
+              {lesson.raga}
+            </span>
+          </Link>
+        ))}
       </motion.section>
 
       {/* First-time user callout */}
