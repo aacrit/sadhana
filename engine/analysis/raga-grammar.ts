@@ -137,17 +137,15 @@ export function checkForbiddenSwaras(
 /**
  * Checks ascending and descending movement against aroha/avaroha rules.
  *
- * This is a simplified model: we check that when the pitch moves up,
- * the transition between consecutive swaras is allowed in the aroha,
- * and when pitch moves down, it is allowed in the avaroha.
+ * When a raga defines vakra (oblique) movement patterns, those specific
+ * sequences are allowed even when they would otherwise violate strict
+ * aroha/avaroha ordering. For example, Bhimpalasi's Ma-Ga(k)-Ma-Pa is
+ * a valid vakra descent-then-ascent that the aroha check alone would reject.
  *
  * A transition from swara A to swara B is "allowed" if both A and B
  * appear in the aroha (for ascending) or avaroha (for descending) and
- * they appear in the correct order.
- *
- * This does not catch all vakra (oblique) movement rules, which are
- * raga-specific and complex. A more sophisticated version would use
- * the actual aroha/avaroha sequences to validate subsequence ordering.
+ * they appear in the correct order, OR if the transition is part of a
+ * defined vakra pattern.
  */
 function checkMovement(
   swaras: readonly Swara[],
@@ -158,12 +156,20 @@ function checkMovement(
   const arohaSwaras = raga.aroha.map((n) => n.swara);
   const avarohaSwaras = raga.avaroha.map((n) => n.swara);
 
+  // Pre-compute vakra swara sequences for fast subsequence matching
+  const vakraSequences: readonly Swara[][] = (raga.vakra ?? []).map(
+    (pattern) => pattern.map((note) => note.swara),
+  );
+
   for (let i = 1; i < swaras.length; i++) {
     const prev = swaras[i - 1]!;
     const curr = swaras[i]!;
 
     // Skip if same swara (repetition is always allowed)
     if (prev === curr) continue;
+
+    // Check if this transition is part of a vakra pattern
+    if (isPartOfVakra(swaras, i, vakraSequences)) continue;
 
     // Determine direction by comparing cents positions
     const prevCents = getCentsForSwara(prev);
@@ -176,8 +182,6 @@ function checkMovement(
     if (ascending) {
       // Check if this ascending transition exists in the aroha
       if (!isTransitionAllowed(prev, curr, arohaSwaras)) {
-        // Not necessarily a hard violation for vakra ragas — flag it
-        // only if the current swara is not in aroha at all
         if (!arohaSwaras.includes(curr) && !raga.varjit.includes(curr)) {
           const def = SWARA_MAP[curr];
           violations.push({
@@ -205,6 +209,41 @@ function checkMovement(
   }
 
   return violations;
+}
+
+/**
+ * Checks if the transition at position `index` in the swara sequence
+ * is part of a defined vakra pattern for this raga.
+ *
+ * We look for any vakra pattern whose swara sequence appears as a
+ * subsequence starting at or before the current position.
+ */
+function isPartOfVakra(
+  swaras: readonly Swara[],
+  index: number,
+  vakraSequences: readonly (readonly Swara[])[],
+): boolean {
+  for (const pattern of vakraSequences) {
+    if (pattern.length < 2) continue;
+
+    // Try matching the pattern starting at each position that could
+    // include the current index
+    for (let start = Math.max(0, index - pattern.length + 1); start <= index; start++) {
+      if (start + pattern.length > swaras.length) continue;
+
+      let match = true;
+      for (let j = 0; j < pattern.length; j++) {
+        if (swaras[start + j] !== pattern[j]) {
+          match = false;
+          break;
+        }
+      }
+
+      if (match) return true;
+    }
+  }
+
+  return false;
 }
 
 /**

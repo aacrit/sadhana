@@ -117,6 +117,18 @@ export const darbari_kanada: Raga = {
     'but Darbari\'s identity is inseparable from its andolan on Ga(k) and its vakra ' +
     'avaroha — microtonal and structural features that have no equivalent in Western practice.',
 
+  vakra: [
+    // Ma-Pa-Dha_k-Ni_k-Dha_k-Pa — the signature avaroha vakra
+    [n('Ma', 'madhya'), n('Pa', 'madhya'), n('Dha_k', 'madhya'), n('Ni_k', 'madhya'), n('Dha_k', 'madhya'), n('Pa', 'madhya')],
+  ],
+
+  ornamentMap: {
+    'Ga_k': ['andolan'],          // Ga komal receives deep andolan — THE defining ornament
+    'Re': ['meend'],              // Re gets meend from Ga_k below
+    'Dha_k': ['andolan', 'kan'],  // Dha komal gets andolan (mirroring Ga_k) and kan
+    'Ni_k': ['kan'],              // Ni komal gets kan
+  },
+
   relatedRagas: ['adana', 'kanada', 'nayaki_kanada', 'shahana_kanada'],
 
   gharanaVariations:

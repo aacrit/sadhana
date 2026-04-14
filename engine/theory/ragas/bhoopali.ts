@@ -101,6 +101,12 @@ export const bhoopali: Raga = {
     'Bhoopali\'s identity comes from its characteristic phrases and the emphasis on Ga ' +
     'and Dha, not merely the note set.',
 
+  ornamentMap: {
+    'Ga': ['meend', 'kan'],      // Ga (vadi) gets meend and kan
+    'Dha': ['meend'],            // Dha (samvadi) gets meend
+    'Re': ['kan'],               // Re gets kan
+  },
+
   relatedRagas: ['deshkar', 'shuddha_kalyan', 'yaman'],
 
   gharanaVariations:

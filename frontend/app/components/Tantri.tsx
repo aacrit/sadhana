@@ -859,6 +859,70 @@ const Tantri = memo(function Tantri({
   }, [onStringRelease, timbre]);
 
   // -----------------------------------------------------------------------
+  // Keyboard navigation — arrow keys select strings, Enter/Space triggers
+  // -----------------------------------------------------------------------
+
+  const focusedStringRef = useRef<number>(0);
+
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      const field = fieldRef.current;
+      if (!field) return;
+
+      const visibleIndices = visibleIndicesRef.current;
+      if (visibleIndices.length === 0) return;
+
+      const currentFocus = focusedStringRef.current;
+      const currentVisIdx = visibleIndices.indexOf(currentFocus);
+      const safeVisIdx = currentVisIdx >= 0 ? currentVisIdx : 0;
+
+      switch (e.key) {
+        case 'ArrowUp': {
+          e.preventDefault();
+          // Move to next higher-pitched string (higher visible index)
+          const nextVisIdx = Math.min(safeVisIdx + 1, visibleIndices.length - 1);
+          focusedStringRef.current = visibleIndices[nextVisIdx]!;
+          break;
+        }
+        case 'ArrowDown': {
+          e.preventDefault();
+          // Move to next lower-pitched string
+          const prevVisIdx = Math.max(safeVisIdx - 1, 0);
+          focusedStringRef.current = visibleIndices[prevVisIdx]!;
+          break;
+        }
+        case 'Enter':
+        case ' ': {
+          e.preventDefault();
+          const idx = focusedStringRef.current;
+          const event = triggerString(idx, field);
+          if (event && onStringTrigger) {
+            onStringTrigger(timbre ? { ...event, timbre } : event);
+          }
+          // Auto-release after a short delay (keyboard pluck)
+          setTimeout(() => {
+            const f = fieldRef.current;
+            if (!f) return;
+            const s = f.strings[idx];
+            if (s && onStringRelease) {
+              onStringRelease({
+                swara: s.swara,
+                octave: 'madhya',
+                hz: s.hz,
+                velocity: 0,
+                timbre,
+              });
+            }
+            releaseString(idx, f);
+          }, 200);
+          break;
+        }
+      }
+    },
+    [onStringTrigger, onStringRelease, timbre],
+  );
+
+  // -----------------------------------------------------------------------
   // External pitch update API
   // -----------------------------------------------------------------------
   // Expose a method for the parent to feed pitch data directly.
@@ -891,20 +955,30 @@ const Tantri = memo(function Tantri({
     .filter(Boolean)
     .join(' ');
 
+  // Build aria description from visible strings
+  const ariaDesc = fieldRef.current
+    ? `${visibleIndicesRef.current.length} swara strings. Use arrow keys to navigate, Enter to pluck.`
+    : 'Tantri instrument loading';
+
   return (
     <div
       className={containerClass}
       style={style}
-      role="img"
+      role="application"
       aria-label="Tantri — interactive swara strings"
+      aria-roledescription="musical instrument"
     >
       <canvas
         ref={canvasRef}
         className={styles.canvas}
+        tabIndex={0}
+        role="group"
+        aria-label={ariaDesc}
         onPointerDown={handlePointerDown}
         onPointerUp={handlePointerUp}
         onPointerLeave={handlePointerLeave}
-        style={{ touchAction: 'none' }}
+        onKeyDown={handleKeyDown}
+        style={{ touchAction: 'none', outline: 'none' }}
       />
     </div>
   );

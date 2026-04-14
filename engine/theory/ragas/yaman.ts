@@ -108,6 +108,13 @@ export const yaman: Raga = {
     'raised fourth), though Yaman\'s identity lies not in the scale but in its ' +
     'characteristic phrases, ornaments, and the specific gravity given to Ga and Ni.',
 
+  ornamentMap: {
+    'Ni': ['kan', 'meend'],      // Ni gets kan from Sa and meend approaching Sa
+    'Ga': ['meend'],             // Ga gets meend — vadi, lingered on with grace
+    'Re': ['kan'],               // Re gets kan from Ni below
+    'Ma_t': ['kan'],             // Ma tivra gets kan — brief touch, never heavy
+  },
+
   relatedRagas: ['bhoopali', 'shuddha_kalyan', 'hameer', 'kedar', 'yaman_kalyan'],
 
   gharanaVariations:

@@ -108,6 +108,13 @@ export const bhairav: Raga = {
     'but Bhairav\'s identity is shaped by the andolan on Re and Dha — microtonal ' +
     'oscillations that have no Western equivalent — and its association with dawn.',
 
+  ornamentMap: {
+    'Re_k': ['andolan'],         // Re komal receives andolan — the defining ornament of Bhairav
+    'Dha_k': ['andolan'],        // Dha komal also receives andolan (mirror of Re_k)
+    'Ga': ['kan'],               // Ga gets kan from Re_k
+    'Ni': ['meend'],             // Ni gets meend sliding to/from Sa
+  },
+
   relatedRagas: ['ahir_bhairav', 'nat_bhairav', 'jogiya', 'kalingda', 'bhairavi'],
 
   gharanaVariations:

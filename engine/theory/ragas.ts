@@ -27,6 +27,20 @@ import { bhairavi } from './ragas/bhairavi';
 import { kedar } from './ragas/kedar';
 import { hameer } from './ragas/hameer';
 import { sohini } from './ragas/sohini';
+import { puriya } from './ragas/puriya';
+import { bilawal } from './ragas/bilawal';
+import { asavari } from './ragas/asavari';
+import { khamaj } from './ragas/khamaj';
+import { lalit } from './ragas/lalit';
+import { shree } from './ragas/shree';
+import { multani } from './ragas/multani';
+import { jaunpuri } from './ragas/jaunpuri';
+import { tilak_kamod } from './ragas/tilak_kamod';
+import { pahadi } from './ragas/pahadi';
+import { durga } from './ragas/durga';
+import { hamsadhwani } from './ragas/hamsadhwani';
+import { madhuvanti } from './ragas/madhuvanti';
+import { jog } from './ragas/jog';
 
 // ---------------------------------------------------------------------------
 // Registry
@@ -34,9 +48,8 @@ import { sohini } from './ragas/sohini';
 
 /**
  * All ragas indexed by ID.
- * v1 includes five ragas ordered by pedagogical accessibility:
- * Bhoopali (pentatonic) -> Yaman (sampoorna) -> Bhimpalasi (komal swaras)
- * -> Bhairav (dawn gravity) -> Bageshri (deep night).
+ * 30 ragas spanning all four levels:
+ * Shishya (5) -> Sadhaka (10) -> Varistha (11) -> Guru (4)
  */
 export const RAGAS: Readonly<Record<string, Raga>> = {
   yaman,
@@ -55,33 +68,67 @@ export const RAGAS: Readonly<Record<string, Raga>> = {
   kedar,
   hameer,
   sohini,
+  puriya,
+  bilawal,
+  asavari,
+  khamaj,
+  lalit,
+  shree,
+  multani,
+  jaunpuri,
+  tilak_kamod,
+  pahadi,
+  durga,
+  hamsadhwani,
+  madhuvanti,
+  jog,
 };
 
 /**
  * All ragas as an ordered array, sorted by pedagogical sequence
  * (simplest to most complex).
+ *
+ * 30 ragas across four levels:
+ *   Shishya (5)  — foundational ragas for beginners
+ *   Sadhaka (10) — intermediate ragas building on Shishya skills
+ *   Varistha (11) — advanced ragas with complex alterations & structures
+ *   Guru (4)     — master-level ragas requiring deep understanding
  */
 export const RAGA_LIST: readonly Raga[] = [
-  // --- Shishya (Beginner) ---
-  bhoopali,    // Level 1 — pentatonic, all shuddha
-  yaman,       // Level 2 — sampoorna, one alteration (Ma_t)
-  bhimpalasi,  // Level 3 — komal swaras, vakra movement
-  bhairav,     // Level 4 — andolan, dawn gravity
-  bageshri,    // Level 5 — midnight longing, emotional depth
-  // --- Sadhaka (Intermediate) ---
-  desh,        // Level 6 — Khamaj thaat, dual Ni treatment
-  kafi,        // Level 7 — parent of Kafi thaat, komal Ga/Ni
-  // --- Varistha (Advanced) ---
-  marwa,       // Level 8 — no Pa, sunset tension, Marwa thaat
-  darbari_kanada, // Level 9 — andolan on Ga_k, vakra avaroha
-  puriya_dhanashri, // Level 10 — Poorvi thaat, 3 altered swaras
-  malkauns,    // Level 11 — pentatonic, no Re/Pa, all komal
-  todi,        // Level 12 — maximum chromaticism, 4 altered swaras
-  // --- Guru (Master) ---
-  bhairavi,    // Level 13 — all komal, allows all 12 passing tones
-  kedar,       // Level 14 — dual Ma, Kalyan thaat
-  hameer,      // Level 15 — dual Ma, distinct from Kedar, regal
-  sohini,      // Level 16 — Marwa thaat, no Pa, light contrast to Marwa
+  // --- Shishya (Beginner) — 5 ragas ---
+  bhoopali,         // 1  — pentatonic, all shuddha, dusk
+  yaman,            // 2  — sampoorna, one alteration (Ma_t), evening
+  bhimpalasi,       // 3  — komal swaras, vakra movement, afternoon
+  bhairav,          // 4  — andolan, dawn gravity
+  bageshri,         // 5  — midnight longing, emotional depth
+  // --- Sadhaka (Intermediate) — 10 ragas ---
+  desh,             // 6  — Khamaj thaat, dual Ni treatment, monsoon
+  kafi,             // 7  — parent of Kafi thaat, komal Ga/Ni, spring
+  pahadi,           // 8  — folk pentatonic, all shuddha, time-free
+  durga,            // 9  — pentatonic, no Ga/Ni, devotional strength
+  bilawal,          // 10 — all shuddha, morning clarity
+  hamsadhwani,      // 11 — pentatonic, no Ma/Dha, auspicious brilliance
+  khamaj,           // 12 — parent of Khamaj thaat, romantic evening
+  tilak_kamod,      // 13 — Khamaj thaat, festive, vakra descent
+  jaunpuri,         // 14 — Asavari thaat, morning, three komal swaras
+  asavari,          // 15 — parent of Asavari thaat, late morning pathos
+  // --- Varistha (Advanced) — 11 ragas ---
+  marwa,            // 16 — no Pa, sunset tension, Marwa thaat
+  darbari_kanada,   // 17 — andolan on Ga_k, vakra avaroha
+  puriya_dhanashri, // 18 — Poorvi thaat, 3 altered swaras
+  malkauns,         // 19 — pentatonic, no Re/Pa, all komal, midnight
+  todi,             // 20 — maximum chromaticism, 4 altered swaras
+  puriya,           // 21 — no Pa, Ga vadi, twilight devotion
+  multani,          // 22 — Todi thaat, afternoon, audava aroha
+  madhuvanti,       // 23 — Todi variant, sweet intensity, shuddha Re/Ni
+  lalit,            // 24 — dual Ma, no Pa, pre-dawn chromatic density
+  shree,            // 25 — Poorvi thaat, majestic evening, vakra descent
+  jog,              // 26 — Kafi thaat, meditative night, angular aroha
+  // --- Guru (Master) — 4 ragas ---
+  bhairavi,         // 27 — all komal, allows all 12 passing tones
+  kedar,            // 28 — dual Ma, Kalyan thaat
+  hameer,           // 29 — dual Ma, distinct from Kedar, regal
+  sohini,           // 30 — Marwa thaat, no Pa, light contrast to Marwa
 ] as const;
 
 // ---------------------------------------------------------------------------
@@ -104,6 +151,20 @@ export { bhairavi } from './ragas/bhairavi';
 export { kedar } from './ragas/kedar';
 export { hameer } from './ragas/hameer';
 export { sohini } from './ragas/sohini';
+export { puriya } from './ragas/puriya';
+export { bilawal } from './ragas/bilawal';
+export { asavari } from './ragas/asavari';
+export { khamaj } from './ragas/khamaj';
+export { lalit } from './ragas/lalit';
+export { shree } from './ragas/shree';
+export { multani } from './ragas/multani';
+export { jaunpuri } from './ragas/jaunpuri';
+export { tilak_kamod } from './ragas/tilak_kamod';
+export { pahadi } from './ragas/pahadi';
+export { durga } from './ragas/durga';
+export { hamsadhwani } from './ragas/hamsadhwani';
+export { madhuvanti } from './ragas/madhuvanti';
+export { jog } from './ragas/jog';
 
 // ---------------------------------------------------------------------------
 // Query functions

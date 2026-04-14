@@ -289,6 +289,27 @@ export interface Raga {
 
   /** Notable differences in treatment across gharanas (schools). */
   readonly gharanaVariations?: string;
+
+  /**
+   * Vakra (zigzag) movement sequences — swaras that are approached
+   * obliquely rather than in straight aroha/avaroha order.
+   *
+   * Example: Bhimpalasi's aroha skips Pa going up but touches it
+   * coming down through Ma-Pa-Ga, so the vakra descent is [Ma, Pa, Ga].
+   *
+   * When present, the grammar checker allows these specific patterns
+   * even when they would otherwise violate strict aroha/avaroha order.
+   */
+  readonly vakra?: readonly (readonly SwaraNote[])[];
+
+  /**
+   * Raga-specific ornament parameters — which swaras receive which
+   * ornaments, with intensity hints.
+   *
+   * Key: swara symbol. Value: array of ornament types applied to that swara.
+   * Example: Bhairav's Re_k gets andolan, Yaman's Ni gets kan from Sa.
+   */
+  readonly ornamentMap?: Readonly<Partial<Record<Swara, readonly Ornament[]>>>;
 }
 
 // ---------------------------------------------------------------------------

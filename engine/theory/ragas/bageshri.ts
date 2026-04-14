@@ -108,6 +108,13 @@ export const bageshri: Raga = {
     'and komal Ni, but Bageshri\'s character is defined by its obsessive circling of Ma — ' +
     'a melodic behaviour with no direct Western counterpart.',
 
+  ornamentMap: {
+    'Ga_k': ['meend', 'andolan'], // Ga komal gets meend and subtle andolan
+    'Ma': ['gamak'],              // Ma gets gamak as an emphasis tool
+    'Dha': ['meend', 'kan'],      // Dha gets meend (vadi) and kan
+    'Ni_k': ['kan'],              // Ni komal gets kan approaching Sa
+  },
+
   relatedRagas: ['bhimpalasi', 'rageshri', 'kafi', 'pilu', 'dhanashri'],
 
   gharanaVariations:
