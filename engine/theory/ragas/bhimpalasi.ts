@@ -108,6 +108,20 @@ export const bhimpalasi: Raga = {
     'the komal Ga and komal Ni, but Bhimpalasi\'s identity lies in its vakra (oblique) ' +
     'movement and the emotional centrality of Ma — characteristics without Western parallel.',
 
+  vakra: [
+    // Ma-Ga(k)-Ma-Pa — the characteristic turn around Ma (descending touch before ascending)
+    [n('Ma', 'madhya'), n('Ga_k', 'madhya'), n('Ma', 'madhya'), n('Pa', 'madhya')],
+    // Pa-Ni(k)-Dha-Pa — upper register vakra
+    [n('Pa', 'madhya'), n('Ni_k', 'madhya'), n('Dha', 'madhya'), n('Pa', 'madhya')],
+  ],
+
+  ornamentMap: {
+    'Ga_k': ['meend', 'kan'],   // Ga komal receives meend from Ma and kan
+    'Ma': ['gamak'],             // Ma gets gamak (oscillation) as the vadi
+    'Ni_k': ['kan'],             // Ni komal gets kan when approaching Sa
+    'Pa': ['meend'],             // Meend to/from Pa
+  },
+
   relatedRagas: ['dhanashri', 'pilu', 'kafi', 'bageshri'],
 
   gharanaVariations:
