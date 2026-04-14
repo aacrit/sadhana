@@ -571,6 +571,219 @@ describe('updateFieldFromVoice — accuracyBand decay', () => {
   });
 });
 
+// ---------------------------------------------------------------------------
+// Mock voice integration — full practice scenarios
+// ---------------------------------------------------------------------------
+
+describe('Mock voice: full practice session simulation', () => {
+  /**
+   * Helper: generate a synthetic Hz value for a given swara at Sa=261.63 Hz.
+   * Optionally offset by `centsOff` to simulate sharp/flat singing.
+   */
+  function swaraHz(swara: string, centsOff = 0): number {
+    const freq = getSwaraFrequency(swara as Parameters<typeof getSwaraFrequency>[0], SA_HZ);
+    return freq * Math.pow(2, centsOff / 1200);
+  }
+
+  it('Scenario 1: sing Sa perfectly for 30 frames → string vibrates at click intensity', () => {
+    const field = createTantriField(SA_HZ, 'bhoopali');
+    const sa = field.strings[field.swaraIndex['Sa']!]!;
+
+    // Simulate 30 frames of singing Sa perfectly (clarity 0.9, amplitude 0.5)
+    for (let i = 0; i < 30; i++) {
+      const voiceMap = mapVoiceToStrings(swaraHz('Sa'), 0.9, field);
+      updateFieldFromVoice(field, voiceMap, 0.5);
+    }
+
+    // String should vibrate at click-like intensity (0.85 bandBoost for perfect)
+    expect(sa.amplitude).toBeGreaterThan(0.7);
+    expect(sa.accuracyBand).toBe('perfect');
+    expect(sa.centsDev).toBeCloseTo(0, 0);
+  });
+
+  it('Scenario 2: sing Sa slightly sharp (+15 cents) → "good" band, strong vibration', () => {
+    const field = createTantriField(SA_HZ);
+    const sa = field.strings[field.swaraIndex['Sa']!]!;
+
+    for (let i = 0; i < 20; i++) {
+      const voiceMap = mapVoiceToStrings(swaraHz('Sa', 15), 0.85, field);
+      updateFieldFromVoice(field, voiceMap, 0.4);
+    }
+
+    expect(sa.accuracyBand).toBe('good');
+    // 'good' bandBoost = 0.7 → should be at least 0.6
+    expect(sa.amplitude).toBeGreaterThan(0.55);
+    expect(sa.centsDev).toBeGreaterThan(10);
+    expect(sa.centsDev).toBeLessThan(20);
+  });
+
+  it('Scenario 3: sing Sa very flat (-35 cents) → "off" band, weak vibration', () => {
+    const field = createTantriField(SA_HZ);
+    const sa = field.strings[field.swaraIndex['Sa']!]!;
+
+    for (let i = 0; i < 20; i++) {
+      const voiceMap = mapVoiceToStrings(swaraHz('Sa', -35), 0.85, field);
+      updateFieldFromVoice(field, voiceMap, 0.4);
+    }
+
+    expect(sa.accuracyBand).toBe('off');
+    // 'off' bandBoost = 0.2, but voiceAmplitude is 0.4 → max(0.4, 0.2) = 0.4
+    expect(sa.amplitude).toBeGreaterThan(0.2);
+    expect(sa.amplitude).toBeLessThan(0.6);
+  });
+
+  it('Scenario 4: transition Sa → Re → Ga smoothly', () => {
+    const field = createTantriField(SA_HZ);
+    const sa = field.strings[field.swaraIndex['Sa']!]!;
+    const re = field.strings[field.swaraIndex['Re']!]!;
+    const ga = field.strings[field.swaraIndex['Ga']!]!;
+
+    // Phase 1: Sing Sa for 15 frames
+    for (let i = 0; i < 15; i++) {
+      const vm = mapVoiceToStrings(swaraHz('Sa'), 0.9, field);
+      updateFieldFromVoice(field, vm, 0.6);
+    }
+    expect(sa.amplitude).toBeGreaterThan(0.5);
+    expect(sa.accuracyBand).toBe('perfect');
+
+    // Phase 2: Switch to Re
+    for (let i = 0; i < 15; i++) {
+      const vm = mapVoiceToStrings(swaraHz('Re'), 0.9, field);
+      updateFieldFromVoice(field, vm, 0.6);
+    }
+    // Re should now be vibrating
+    expect(re.amplitude).toBeGreaterThan(0.5);
+    expect(re.accuracyBand).toBe('perfect');
+    // Sa should be decaying with 'rest' band
+    expect(sa.accuracyBand).toBe('rest');
+    expect(sa.amplitude).toBeLessThan(re.amplitude);
+
+    // Phase 3: Switch to Ga
+    for (let i = 0; i < 15; i++) {
+      const vm = mapVoiceToStrings(swaraHz('Ga'), 0.9, field);
+      updateFieldFromVoice(field, vm, 0.6);
+    }
+    expect(ga.amplitude).toBeGreaterThan(0.5);
+    expect(ga.accuracyBand).toBe('perfect');
+    expect(re.accuracyBand).toBe('rest');
+  });
+
+  it('Scenario 5: silence after singing → full decay to zero', () => {
+    const field = createTantriField(SA_HZ);
+    const sa = field.strings[field.swaraIndex['Sa']!]!;
+
+    // Sing Sa strongly
+    for (let i = 0; i < 20; i++) {
+      const vm = mapVoiceToStrings(swaraHz('Sa'), 0.9, field);
+      updateFieldFromVoice(field, vm, 0.8);
+    }
+    expect(sa.amplitude).toBeGreaterThan(0.7);
+
+    // 120 frames of silence (~2 seconds) → should decay to zero
+    for (let i = 0; i < 120; i++) {
+      updateFieldFromVoice(field, null, 0);
+    }
+    expect(sa.amplitude).toBe(0);
+    expect(sa.accuracyBand).toBe('rest');
+  });
+
+  it('Scenario 6: noise (no clear pitch, only amplitude) → no string activates', () => {
+    const field = createTantriField(SA_HZ);
+
+    // Send amplitude without a voice map (simulating noise/speech without pitch)
+    for (let i = 0; i < 30; i++) {
+      updateFieldFromVoice(field, null, 0.5);
+    }
+
+    // No string should be vibrating
+    for (const s of field.strings) {
+      expect(s.amplitude).toBe(0);
+      expect(s.accuracyBand).toBe('rest');
+    }
+  });
+
+  it('Scenario 7: sympathetic Pa vibrates when Sa is sung', () => {
+    const field = createTantriField(SA_HZ);
+    const pa = field.strings[field.swaraIndex['Pa']!]!;
+
+    // Sing Sa for 20 frames
+    for (let i = 0; i < 20; i++) {
+      const vm = mapVoiceToStrings(swaraHz('Sa'), 0.9, field);
+      updateFieldFromVoice(field, vm, 0.7);
+    }
+
+    // Pa should have sympathetic vibration (not zero, but less than Sa)
+    const sa = field.strings[field.swaraIndex['Sa']!]!;
+    expect(pa.amplitude).toBeGreaterThan(0);
+    expect(pa.amplitude).toBeLessThan(sa.amplitude);
+    // Sympathetic strings should have 'rest' band (not accuracy-colored)
+    expect(pa.accuracyBand).toBe('rest');
+  });
+
+  it('Scenario 8: rapid pitch oscillation (gamak) between Re and Ga', () => {
+    const field = createTantriField(SA_HZ);
+    const re = field.strings[field.swaraIndex['Re']!]!;
+    const ga = field.strings[field.swaraIndex['Ga']!]!;
+
+    // Alternate between Re and Ga every 2 frames (simulating gamak ornament)
+    for (let i = 0; i < 30; i++) {
+      const swara = i % 4 < 2 ? 'Re' : 'Ga';
+      const vm = mapVoiceToStrings(swaraHz(swara), 0.9, field);
+      updateFieldFromVoice(field, vm, 0.6);
+    }
+
+    // Both strings should have been activated at some point
+    // The currently targeted one should be active; the other decaying
+    // After frame 30 (i=29, 29%4=1 → Re), Re should be the active string
+    expect(re.accuracyBand).toBe('perfect');
+    expect(ga.accuracyBand).toBe('rest');
+    // Both should have non-zero amplitude (Ga is decaying but recently active)
+    expect(re.amplitude).toBeGreaterThan(0);
+    expect(ga.amplitude).toBeGreaterThan(0);
+  });
+
+  it('Scenario 9: voice in raga context — out-of-raga swara flagged', () => {
+    // Bhoopali: Sa Re Ga Pa Dha (no Ma, no Ni)
+    const field = createTantriField(SA_HZ, 'bhoopali');
+
+    // Sing Ma (not in Bhoopali)
+    const vm = mapVoiceToStrings(swaraHz('Ma'), 0.9, field);
+
+    // The mapping should flag it as out of raga
+    expect(vm.inRaga).toBe(false);
+    // But it should still map to the nearest string
+    expect(vm.primarySwara).toBe('Ma');
+  });
+
+  it('Scenario 10: very quiet voice (low amplitude) → minimal string excitation', () => {
+    const field = createTantriField(SA_HZ);
+    const sa = field.strings[field.swaraIndex['Sa']!]!;
+
+    // Very quiet: amplitude 0.05
+    for (let i = 0; i < 30; i++) {
+      const vm = mapVoiceToStrings(swaraHz('Sa'), 0.9, field);
+      updateFieldFromVoice(field, vm, 0.05);
+    }
+
+    // bandBoost for perfect is 0.85, max(0.05, 0.85) = 0.85
+    // Even quiet voice should produce clear feedback when pitch is accurate
+    expect(sa.amplitude).toBeGreaterThan(0.5);
+    expect(sa.accuracyBand).toBe('perfect');
+  });
+
+  it('Scenario 11: soprano range (high Sa, 2 octaves above) → still maps correctly', () => {
+    const highSa = SA_HZ * 4; // ~1046 Hz
+    const field = createTantriField(highSa);
+
+    // Sing Pa at the high Sa reference
+    const paHz = highSa * 1.5; // ~1569 Hz
+    const vm = mapVoiceToStrings(paHz, 0.9, field);
+
+    expect(vm.primarySwara).toBe('Pa');
+    expect(vm.accuracyBand).toBe('perfect');
+  });
+});
+
 describe('SPRING_PRESETS', () => {
   it('Kan is the stiffest', () => {
     expect(SPRING_PRESETS.kan.stiffness).toBeGreaterThan(

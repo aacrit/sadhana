@@ -334,6 +334,135 @@ function renderPitchTrail(
   ctx.restore();
 }
 
+// ---------------------------------------------------------------------------
+// Voice oscilloscope (heart-rate-monitor waveform overlay)
+// ---------------------------------------------------------------------------
+
+/**
+ * Rolling buffer of downsampled voice waveform chunks for scrolling display.
+ * Each entry stores a small slice of the mic signal at one animation frame.
+ */
+interface OscilloscopeFrame {
+  /** Downsampled voice samples (typically 32–64 values per frame). */
+  samples: Float32Array;
+  /** Y position in canvas-space where this frame should render. */
+  y: number;
+  /** Accuracy band color for this frame. */
+  band: AccuracyBand;
+  /** Voice amplitude (0–1). */
+  amp: number;
+  /** Animation timestamp. */
+  time: number;
+}
+
+/** Max frames stored — ~1.5s at 60fps. */
+const OSCILLOSCOPE_MAX_FRAMES = 90;
+/** Samples per frame after downsampling (controls waveform density). */
+const OSCILLOSCOPE_SAMPLES_PER_FRAME = 48;
+
+/**
+ * Render the voice oscilloscope — a heart-rate-monitor style scrolling
+ * waveform that shows the raw mic signal overlaid on the Tantri canvas.
+ *
+ * Newest data appears at the right edge; older data scrolls left and fades.
+ * The waveform is positioned at the Y-coordinate of the matched swara string,
+ * so the voice visually "hits" the correct string.
+ *
+ * Drawn ABOVE the strings as the primary voice feedback layer.
+ */
+function renderVoiceOscilloscope(
+  ctx: CanvasRenderingContext2D,
+  frames: OscilloscopeFrame[],
+  canvasWidth: number,
+  dpr: number,
+  time: number,
+): void {
+  if (frames.length < 1) return;
+
+  const x0 = (PADDING_X + LABEL_WIDTH) * dpr;
+  const x1 = (canvasWidth - PADDING_X) * dpr;
+  const totalWidth = x1 - x0;
+  if (totalWidth <= 0) return;
+
+  ctx.save();
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+
+  const totalFrames = frames.length;
+  // Width allocated to each frame's samples
+  const frameWidth = totalWidth / OSCILLOSCOPE_MAX_FRAMES;
+  // Max vertical displacement for the waveform (pixels in canvas space)
+  const maxDisp = 28 * dpr;
+
+  // Draw each frame as a connected waveform segment
+  for (let fi = 0; fi < totalFrames; fi++) {
+    const frame = frames[fi]!;
+    const nextFrame = fi < totalFrames - 1 ? frames[fi + 1]! : null;
+
+    // Horizontal position: newest frame at right, oldest at left
+    // Frame index 0 = oldest, totalFrames-1 = newest
+    const frameX = x0 + (fi / OSCILLOSCOPE_MAX_FRAMES) * totalWidth;
+
+    // Age-based fade: older frames become transparent
+    const age = time - frame.time;
+    const fadeAlpha = Math.max(0, 1 - age / 2.0) * Math.min(frame.amp * 2, 1);
+    if (fadeAlpha < 0.02) continue;
+
+    const color = getAccuracyColor(frame.band);
+
+    ctx.beginPath();
+    ctx.strokeStyle = color;
+    ctx.globalAlpha = fadeAlpha * 0.7;
+    ctx.lineWidth = (1.5 + frame.amp * 2) * dpr;
+
+    const samples = frame.samples;
+    const samplesPerFrame = samples.length;
+
+    for (let si = 0; si < samplesPerFrame; si++) {
+      const sample = samples[si]!;
+      const x = frameX + (si / samplesPerFrame) * frameWidth;
+      // Y: centered on the matched string's position, displaced by voice signal
+      const y = frame.y + sample * maxDisp;
+
+      if (si === 0) {
+        ctx.moveTo(x, y);
+      } else {
+        ctx.lineTo(x, y);
+      }
+    }
+
+    // Connect to the start of the next frame for continuity
+    if (nextFrame && nextFrame.samples.length > 0) {
+      const nx = frameX + frameWidth;
+      const ny = nextFrame.y + nextFrame.samples[0]! * maxDisp;
+      ctx.lineTo(nx, ny);
+    }
+
+    ctx.stroke();
+  }
+
+  // Glowing dot at the current position (newest frame, last sample)
+  const newest = frames[totalFrames - 1]!;
+  if (newest.amp > 0.03) {
+    const lastSample = newest.samples[newest.samples.length - 1] ?? 0;
+    const dotX = x1;
+    const dotY = newest.y + lastSample * maxDisp;
+    const dotColor = getAccuracyColor(newest.band);
+
+    ctx.beginPath();
+    ctx.fillStyle = dotColor;
+    ctx.globalAlpha = Math.min(newest.amp * 2, 1) * 0.9;
+    ctx.shadowColor = dotColor;
+    ctx.shadowBlur = 14 * dpr;
+    ctx.arc(dotX, dotY, (3 + newest.amp * 4) * dpr, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+    ctx.shadowColor = 'transparent';
+  }
+
+  ctx.restore();
+}
+
 /**
  * Get the Y position for a string based on its index among visible strings.
  * Sa (index 0, lowest pitch) at the bottom, Ni (highest pitch) at the top.
@@ -598,6 +727,8 @@ const Tantri = memo(function Tantri({
   const pitchClarityRef = useRef(pitchClarity);
   /** Pitch trail ring buffer for the portal variant's integrated waveform. */
   const pitchTrailRef = useRef<PitchTrailPoint[]>([]);
+  /** Voice oscilloscope rolling buffer — scrolling heart-rate-monitor waveform. */
+  const oscilloscopeRef = useRef<OscilloscopeFrame[]>([]);
 
   // Keep pitch refs in sync with props
   pitchHzRef.current = pitchHz;
@@ -763,6 +894,34 @@ const Tantri = memo(function Tantri({
       const s = field.strings[idx]!;
       const y = getStringY(vi, totalVisible, h / dpr) * dpr;
       renderString(ctx, s, y, w / dpr, timeRef.current, dpr, voiceWaveData);
+    }
+
+    // --- Voice oscilloscope: scrolling heart-rate-monitor waveform ---
+    if (voiceWaveData && voiceMap && voiceMap.primaryIndex >= 0 && voiceAmplitude > 0.02) {
+      const visIdx = visibleIndices.indexOf(voiceMap.primaryIndex);
+      if (visIdx >= 0) {
+        const oscY = getStringY(visIdx, totalVisible, h / dpr) * dpr;
+        // Downsample the raw analyser data to OSCILLOSCOPE_SAMPLES_PER_FRAME points
+        const downsampled = new Float32Array(OSCILLOSCOPE_SAMPLES_PER_FRAME);
+        const step = voiceWaveData.length / OSCILLOSCOPE_SAMPLES_PER_FRAME;
+        for (let i = 0; i < OSCILLOSCOPE_SAMPLES_PER_FRAME; i++) {
+          downsampled[i] = voiceWaveData[Math.floor(i * step)] ?? 0;
+        }
+        oscilloscopeRef.current.push({
+          samples: downsampled,
+          y: oscY,
+          band: voiceMap.accuracyBand,
+          amp: voiceAmplitude,
+          time: timeRef.current,
+        });
+        const excess = oscilloscopeRef.current.length - OSCILLOSCOPE_MAX_FRAMES;
+        if (excess > 0) oscilloscopeRef.current.splice(0, excess);
+      }
+    }
+
+    // Render oscilloscope ABOVE strings — the primary voice feedback layer
+    if (oscilloscopeRef.current.length > 0) {
+      renderVoiceOscilloscope(ctx, oscilloscopeRef.current, w / dpr, dpr, timeRef.current);
     }
 
     animFrameRef.current = requestAnimationFrame(render);
