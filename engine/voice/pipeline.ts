@@ -163,7 +163,7 @@ export class VoicePipeline {
 
   constructor(config: VoicePipelineConfig) {
     this.config = {
-      clarityThreshold: 0.70,
+      clarityThreshold: 0.80,
       fftSize: 2048,
       swaraBufferSize: 20,
       level: 'shishya',
@@ -386,8 +386,14 @@ export class VoicePipeline {
     const rms = computeRMS(buffer);
     const now = this.audioContext.currentTime;
 
-    if (rms < 0.01) {
-      // Silence — no meaningful audio
+    // Silence threshold — below this, no meaningful audio
+    const SILENCE_RMS = 0.01;
+    // Noise floor — sound present but no clear pitch (speech, ambient, etc.)
+    const NOISE_RMS = 0.015;
+    // Dynamic pitch ceiling: 2 octaves above Sa (covers soprano range)
+    const pitchCeiling = Math.min(this.config.sa_hz * 4, 4200);
+
+    if (rms < SILENCE_RMS) {
       this.emitSilence(now);
     } else {
       // Attempt pitch detection
@@ -396,15 +402,16 @@ export class VoicePipeline {
         this.audioContext.sampleRate,
       );
 
-      const threshold = this.config.clarityThreshold ?? 0.70;
+      const threshold = this.config.clarityThreshold ?? 0.80;
 
-      if (clarity >= threshold && pitch > 50 && pitch < 2000) {
+      if (clarity >= threshold && pitch > 50 && pitch < pitchCeiling) {
         // Valid pitch detected
         this.emitPitch(pitch, clarity, now);
-      } else if (rms > 0.02) {
+      } else if (rms > NOISE_RMS) {
         // Sound present but no clear pitch — noise/speech
         this.emitNoise(now);
       } else {
+        // RMS in [SILENCE_RMS, NOISE_RMS) with low clarity — treat as silence
         this.emitSilence(now);
       }
     }

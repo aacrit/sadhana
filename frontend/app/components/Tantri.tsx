@@ -421,7 +421,10 @@ function renderString(
       s._blendBuffer = blendedDisplacements;
       s._blendBufferSize = numPoints;
     }
-    const hasVoiceData = voiceData && voiceData.length > 0 && !s.touched && s.amplitude > 0.05;
+    // Voice data is relevant when: analyser has data, string is voice-driven (not touched),
+    // amplitude is meaningful, AND the string has an active accuracy band (not decaying)
+    const hasVoiceData = voiceData && voiceData.length > 0 && !s.touched &&
+      s.amplitude > 0.05 && s.accuracyBand !== 'rest';
 
     if (hasVoiceData) {
       // Sample voice waveform data evenly across the string
@@ -431,9 +434,10 @@ function renderString(
         // Standing-wave envelope: nodes at endpoints (physical correctness)
         const x = i / (numPoints - 1);
         const envelope = Math.sin(Math.PI * x);
-        // Blend: voice waveform (scaled) + subtle synthetic undertone
-        const voiceContribution = voiceSample * envelope * s.amplitude * 3;
-        const syntheticContribution = (syntheticWave[i] ?? 0) * 0.2;
+        // Blend: voice waveform (scaled by clarity-weighted amplitude) + subtle synthetic undertone
+        // Use voiceAmplitude directly (already clarity-weighted), not s.amplitude which double-attenuates
+        const voiceContribution = voiceSample * envelope * 4;
+        const syntheticContribution = (syntheticWave[i] ?? 0) * 0.15;
         blendedDisplacements[i] = (voiceContribution + syntheticContribution) * maxDisplacement;
       }
     } else {
@@ -448,8 +452,10 @@ function renderString(
     ctx.globalAlpha = opacity;
     // Touched strings pulse with a subtle shimmer (8Hz flicker)
     const touchPulse = s.touched ? 1 + 0.15 * Math.sin(time * 8 * Math.PI * 2) : 0;
-    // Voice-active strings shimmer like touched strings when accuracy is good/perfect
+    // Voice-active strings shimmer when accuracy is good/perfect AND string is actively voiced
+    // (accuracyBand is now reset to 'rest' immediately on decay, so this naturally stops)
     const isVoiceMatched = !s.touched && s.amplitude > 0.08 &&
+      s.accuracyBand !== 'rest' &&
       (s.accuracyBand === 'perfect' || s.accuracyBand === 'good');
     const voiceShimmer = isVoiceMatched
       ? 0.4 * s.amplitude + 0.1 * Math.sin(time * 6 * Math.PI * 2) * s.amplitude
@@ -665,7 +671,7 @@ const Tantri = memo(function Tantri({
     let voiceAmplitude = 0;
     let voiceMap: VoiceMapResult | null = null;
 
-    // Get amplitude from analyser
+    // Get amplitude from analyser, weighted by pitch clarity
     if (analyser && analyserDataRef.current) {
       analyser.getFloatTimeDomainData(analyserDataRef.current);
       let sum = 0;
@@ -673,12 +679,17 @@ const Tantri = memo(function Tantri({
         const v = analyserDataRef.current[i]!;
         sum += v * v;
       }
-      voiceAmplitude = Math.min(Math.sqrt(sum / analyserDataRef.current.length) * 5, 1);
+      const rawRms = Math.sqrt(sum / analyserDataRef.current.length);
+      // Weight by clarity: noise (low clarity) suppressed, clear pitch (high clarity) passes through
+      const clarityWeight = pitchClarityRef.current > 0 ? pitchClarityRef.current : 0.1;
+      voiceAmplitude = Math.min(rawRms * 5 * clarityWeight, 1);
     }
 
     // Map pitch to strings (accurate, from voice pipeline)
-    if (pitchHzRef.current && pitchHzRef.current > 0 && pitchClarityRef.current > 0) {
-      voiceMap = mapVoiceToStrings(pitchHzRef.current, pitchClarityRef.current, field);
+    const hz = pitchHzRef.current;
+    const cl = pitchClarityRef.current;
+    if (hz && Number.isFinite(hz) && hz > 0 && cl > 0) {
+      voiceMap = mapVoiceToStrings(hz, cl, field);
     }
 
     updateFieldFromVoice(field, voiceMap, voiceAmplitude);
@@ -709,15 +720,17 @@ const Tantri = memo(function Tantri({
       // Map the primary string's visible index to a Y position
       const visIdx = visibleIndices.indexOf(voiceMap.primaryIndex);
       if (visIdx >= 0) {
-        const baseY = getStringY(visIdx, totalVisible, h / dpr) * dpr;
+        // Compute Y in CSS-space, then scale to canvas-space consistently
+        const cssH = h / dpr;
+        const baseY = getStringY(visIdx, totalVisible, cssH) * dpr;
         // Offset by cents deviation for smooth interpolation between strings
         const centsOffset = voiceMap.centsDev;
-        // Each string is separated by ~spacing in canvas pixels
+        // Each string is separated by ~spacing in CSS pixels (then scaled)
         const spacing = totalVisible > 1
-          ? (h - (PADDING_Y_TOP + PADDING_Y_BOTTOM) * dpr) / (totalVisible - 1)
+          ? (cssH - PADDING_Y_TOP - PADDING_Y_BOTTOM) / (totalVisible - 1)
           : 0;
         // Cents per string gap varies, but ~100 is typical; use a scaled offset
-        const pixelOffset = spacing > 0 ? (centsOffset / 100) * spacing * -0.5 : 0;
+        const pixelOffset = spacing > 0 ? (centsOffset / 100) * spacing * -0.5 * dpr : 0;
         const trailY = baseY + pixelOffset;
 
         pitchTrailRef.current.push({

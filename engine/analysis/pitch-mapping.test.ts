@@ -406,6 +406,41 @@ describe('mapPitchToSwara — edge cases', () => {
 // LEVEL_TOLERANCE
 // ---------------------------------------------------------------------------
 
+describe('mapPitchToSwara — NaN/Infinity guards', () => {
+  it('should throw for NaN Hz', () => {
+    expect(() => mapPitchToSwara(NaN, SA_HZ, 1)).toThrow();
+  });
+
+  it('should throw for Infinity Hz', () => {
+    expect(() => mapPitchToSwara(Infinity, SA_HZ, 1)).toThrow();
+  });
+
+  it('should throw for -Infinity Hz', () => {
+    expect(() => mapPitchToSwara(-Infinity, SA_HZ, 1)).toThrow();
+  });
+
+  it('should throw for NaN saHz', () => {
+    expect(() => mapPitchToSwara(440, NaN, 1)).toThrow();
+  });
+
+  it('should throw for Infinity saHz', () => {
+    expect(() => mapPitchToSwara(440, Infinity, 1)).toThrow();
+  });
+
+  it('should handle soprano-range frequencies (high pitch)', () => {
+    // Soprano C6 = 1046.5 Hz — should still map correctly
+    const result = mapPitchToSwara(1046.5, SA_HZ, 1);
+    expect(result.nearestSwara).toBe('Sa');
+  });
+
+  it('should handle sub-bass frequencies', () => {
+    // Low male voice Sa around 130 Hz (octave below standard)
+    const result = mapPitchToSwara(130.81, SA_HZ, 1);
+    // Should normalise to same octave
+    expect(result.nearestSwara).toBe('Sa');
+  });
+});
+
 describe('LEVEL_TOLERANCE', () => {
   it('should have correct tolerance values', () => {
     expect(LEVEL_TOLERANCE.shishya).toBe(50);

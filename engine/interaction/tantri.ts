@@ -415,7 +415,7 @@ export function mapVoiceToStrings(
 ): VoiceMapResult {
   const r = _voiceResult;
 
-  if (hz <= 0 || clarity <= 0) {
+  if (!Number.isFinite(hz) || !Number.isFinite(clarity) || hz <= 0 || clarity <= 0) {
     r.primaryIndex = -1;
     r.primarySwara = null;
     r.centsDev = 0;
@@ -543,21 +543,21 @@ export function updateFieldFromVoice(
         s.accuracyBand = 'rest';
         s.centsDev = 0;
       } else {
-        // Decay toward rest (frame-rate corrected)
+        // No longer the voice target — reset band immediately, then decay amplitude
+        s.accuracyBand = 'rest';
+        s.centsDev = 0;
         s.amplitude *= decay;
         if (s.amplitude < REST_THRESHOLD) {
           s.amplitude = 0;
-          s.accuracyBand = 'rest';
-          s.centsDev = 0;
         }
       }
     } else {
       // Silence: all strings decay (frame-rate corrected)
+      s.accuracyBand = 'rest';
+      s.centsDev = 0;
       s.amplitude *= decay;
       if (s.amplitude < REST_THRESHOLD) {
         s.amplitude = 0;
-        s.accuracyBand = 'rest';
-        s.centsDev = 0;
       }
     }
   }

@@ -474,6 +474,103 @@ describe('generateStringWaveform', () => {
 // Spring presets (sanity check)
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// NaN/Infinity guards
+// ---------------------------------------------------------------------------
+
+describe('mapVoiceToStrings — NaN/Infinity guards', () => {
+  it('returns rest for NaN Hz', () => {
+    const field = createTantriField(SA_HZ);
+    const result = mapVoiceToStrings(NaN, 0.9, field);
+    expect(result.primaryIndex).toBe(-1);
+    expect(result.accuracyBand).toBe('rest');
+  });
+
+  it('returns rest for Infinity Hz', () => {
+    const field = createTantriField(SA_HZ);
+    const result = mapVoiceToStrings(Infinity, 0.9, field);
+    expect(result.primaryIndex).toBe(-1);
+    expect(result.accuracyBand).toBe('rest');
+  });
+
+  it('returns rest for NaN clarity', () => {
+    const field = createTantriField(SA_HZ);
+    const result = mapVoiceToStrings(SA_HZ, NaN, field);
+    expect(result.primaryIndex).toBe(-1);
+    expect(result.accuracyBand).toBe('rest');
+  });
+
+  it('returns rest for -Infinity clarity', () => {
+    const field = createTantriField(SA_HZ);
+    const result = mapVoiceToStrings(SA_HZ, -Infinity, field);
+    expect(result.primaryIndex).toBe(-1);
+    expect(result.accuracyBand).toBe('rest');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// accuracyBand decay behaviour
+// ---------------------------------------------------------------------------
+
+describe('updateFieldFromVoice — accuracyBand decay', () => {
+  it('resets accuracyBand immediately when voice switches to a different string', () => {
+    const field = createTantriField(SA_HZ);
+
+    // Voice on Sa
+    const saMap = mapVoiceToStrings(SA_HZ, 0.9, field);
+    updateFieldFromVoice(field, saMap, 0.8);
+    const sa = field.strings[field.swaraIndex['Sa']!]!;
+    expect(sa.accuracyBand).toBe('perfect');
+    expect(sa.amplitude).toBeGreaterThan(0);
+
+    // Voice moves to Pa — Sa should immediately lose its accuracy band
+    const paHz = getSwaraFrequency('Pa', SA_HZ);
+    const paMap = mapVoiceToStrings(paHz, 0.9, field);
+    updateFieldFromVoice(field, paMap, 0.8);
+
+    // Sa is now decaying but should have 'rest' band immediately
+    expect(sa.accuracyBand).toBe('rest');
+    // Amplitude may still be non-zero (decay hasn't completed), but band is rest
+    expect(sa.centsDev).toBe(0);
+  });
+
+  it('resets accuracyBand immediately on silence', () => {
+    const field = createTantriField(SA_HZ);
+
+    // Voice on Sa
+    const saMap = mapVoiceToStrings(SA_HZ, 0.9, field);
+    updateFieldFromVoice(field, saMap, 0.8);
+    const sa = field.strings[field.swaraIndex['Sa']!]!;
+    expect(sa.accuracyBand).toBe('perfect');
+
+    // Single frame of silence
+    updateFieldFromVoice(field, null, 0);
+
+    // Band resets immediately even if amplitude is still decaying
+    expect(sa.accuracyBand).toBe('rest');
+    expect(sa.centsDev).toBe(0);
+  });
+
+  it('decaying strings do not show stale accuracy colors', () => {
+    const field = createTantriField(SA_HZ);
+
+    // Strongly voice Sa for multiple frames to build up amplitude
+    const saMap = mapVoiceToStrings(SA_HZ, 0.9, field);
+    for (let i = 0; i < 10; i++) {
+      updateFieldFromVoice(field, saMap, 0.9);
+    }
+    const sa = field.strings[field.swaraIndex['Sa']!]!;
+    expect(sa.amplitude).toBeGreaterThan(0.5);
+
+    // Go silent — one frame
+    updateFieldFromVoice(field, null, 0);
+
+    // Amplitude should still be > 0 (decay is gradual), but band must be 'rest'
+    expect(sa.amplitude).toBeGreaterThan(0);
+    expect(sa.accuracyBand).toBe('rest');
+  });
+});
+
 describe('SPRING_PRESETS', () => {
   it('Kan is the stiffest', () => {
     expect(SPRING_PRESETS.kan.stiffness).toBeGreaterThan(
