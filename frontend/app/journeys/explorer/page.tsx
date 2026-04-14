@@ -529,6 +529,25 @@ export default function ExplorerPage() {
           Begin Training
         </Link>
       </motion.section>
+
+      {/* Interval training CTA */}
+      <motion.section
+        className={styles.earTrainingSection}
+        variants={fadeUp}
+        aria-label="Interval training"
+      >
+        <h2 className={`${styles.earTrainingTitle} raga-name`}>Interval Training</h2>
+        <p className={styles.earTrainingDescription}>
+          Hear two swaras. Identify the interval. Rounds 1-5 play sequentially;
+          rounds 6-10 play binaurally -- Sa in one ear, the target in the other.
+        </p>
+        <Link
+          href="/journeys/explorer/interval-training"
+          className={styles.earTrainingLink}
+        >
+          Begin Intervals
+        </Link>
+      </motion.section>
     </motion.div>
   );
 }

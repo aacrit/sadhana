@@ -325,3 +325,44 @@ export async function getRecentRagas(
     bestAccuracy: Number(row.best_accuracy) || 0,
   }));
 }
+
+/**
+ * Practice history: one entry per date with total minutes and session count.
+ * Used by the profile heatmap visualization.
+ *
+ * @param userId - Supabase user ID
+ * @param days - Number of days to look back (default: 90)
+ * @returns Array of { date: string (YYYY-MM-DD), minutes: number, sessions: number }
+ */
+export async function getPracticeHistory(
+  userId: string,
+  days = 90,
+): Promise<{ date: string; minutes: number; sessions: number }[]> {
+  const since = new Date();
+  since.setDate(since.getDate() - days);
+
+  const { data, error } = await supabase
+    .from('sessions')
+    .select('started_at, duration_s')
+    .eq('user_id', userId)
+    .gte('started_at', since.toISOString())
+    .order('started_at', { ascending: true });
+
+  if (error || !data) return [];
+
+  // Group by date
+  const byDate = new Map<string, { minutes: number; sessions: number }>();
+  for (const row of data) {
+    const date = new Date(row.started_at as string).toISOString().slice(0, 10);
+    const entry = byDate.get(date) ?? { minutes: 0, sessions: 0 };
+    entry.minutes += Math.round(Number(row.duration_s) / 60);
+    entry.sessions += 1;
+    byDate.set(date, entry);
+  }
+
+  return Array.from(byDate.entries()).map(([date, v]) => ({
+    date,
+    minutes: v.minutes,
+    sessions: v.sessions,
+  }));
+}
