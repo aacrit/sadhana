@@ -1,0 +1,158 @@
+# Exercise G-06: Kedar and Hameer — The Two Mas
+# Journey: Master | Level: Guru (10+)
+# Engine source: engine/theory/ragas/kedar.ts, hameer.ts (need creation)
+
+id: guru-06-kedar-hameer
+journey: master
+level_range: [10, 99]
+raga_id: null
+duration_target_min: 15
+xp_award: 60
+
+meta:
+  title: "The Two Mas"
+  subtitle: "Kedar and Hameer"
+  time_of_day: evening
+  rasa: shringar
+
+phases:
+
+  - id: listen
+    type: tanpura_drone
+    duration_s: 20
+    instruction: |
+      The tanpura is with you. Evening.
+      Two ragas. Both use shuddha Ma AND tivra Ma.
+      Same two notes. Opposite roles.
+    tanpura:
+      strings: [Pa, Sa, Sa, Sa_upper]
+      sa_hz: null
+
+  - id: sa_calibration
+    type: sa_detection
+    skip_if: sa_already_set
+    instruction: |
+      Confirm your Sa.
+    attempts: 5
+    min_clarity: 0.85
+    fallback_hz: 261.6256
+
+  # KEDAR — Ma shuddha in aroha, both in descent
+  - id: kedar_aroha
+    type: phrase_playback
+    phrase: [Sa, Ma, Ma_t, Pa, Dha, Ni, Sa_upper]
+    instruction: |
+      Kedar ascending. Listen: Ma shuddha first, then Ma tivra.
+      Both appear in sequence. Sa Ma Ma' Pa...
+      The rise from shuddha Ma to tivra Ma is Kedar's signature.
+    repeat: 2
+    show_labels: true
+
+  - id: kedar_avaroha
+    type: phrase_playback
+    phrase: [Sa_upper, Ni, Dha, Pa, Ma, Ga, Re, Sa]
+    instruction: |
+      Kedar descending. Ma shuddha alone in the descent.
+      The tivra Ma belongs to the ascent.
+    repeat: 2
+    show_labels: true
+
+  # HAMEER — shuddha Ma in aroha, tivra Ma appears in descent
+  - id: hameer_aroha
+    type: phrase_playback
+    phrase: [Sa, Re, Ga, Ma, Pa, Dha, Ni, Sa_upper]
+    instruction: |
+      Hameer ascending. Shuddha Ma in the aroha.
+      So far, it could be many ragas.
+    repeat: 2
+    show_labels: true
+
+  - id: hameer_avaroha
+    type: phrase_playback
+    phrase: [Sa_upper, Ni, Dha, Pa, Ma_t, Ga, Ma, Re, Sa]
+    instruction: |
+      Hameer descending. Now Ma tivra appears.
+      Sa Ni Dha Pa Ma' Ga Ma Re Sa.
+      Tivra Ma in the descent, then shuddha Ma.
+      The exact reverse of Kedar.
+    repeat: 2
+    show_labels: true
+
+  # SIDE BY SIDE
+  - id: compare
+    type: raga_comparison_advanced
+    instruction: |
+      Kedar and Hameer. Both use both Mas.
+      Kedar: tivra Ma in ascent. Shuddha Ma in descent.
+      Hameer: shuddha Ma in ascent. Tivra Ma in descent.
+      Reversed. Same tools. Opposite architecture.
+    comparison_set:
+      - raga_id: kedar
+        pakad: [Sa, Ma, Ma_t, Pa, Dha, Pa]
+        label: "Kedar — Ma rising to Ma tivra"
+        character: "The ascent defines. Ma shuddha → Ma tivra is the soul."
+      - raga_id: hameer
+        pakad: [Pa, Ma_t, Ga, Ma, Re, Sa]
+        label: "Hameer — Ma tivra falling to Ma shuddha"
+        character: "The descent defines. Ma tivra → Ga → Ma shuddha is the soul."
+    play_count: 2
+    show_analysis: true
+
+  # SING KEDAR
+  - id: sing_kedar
+    type: phrase_exercise
+    phrase: [Sa, Ma, Ma_t, Pa, Dha, Pa, Ma, Ga, Re, Sa]
+    instruction: |
+      Sing Kedar. Both Mas. Ma shuddha rises to Ma tivra.
+      The transition is the test.
+    guide_tone: false
+    feedback_layer: standard
+
+  # SING HAMEER
+  - id: sing_hameer
+    type: phrase_exercise
+    phrase: [Pa, Dha, Ni, Sa_upper, Ni, Dha, Pa, Ma_t, Ga, Ma, Re, Sa]
+    instruction: |
+      Now Hameer. Ma tivra falls to Ga then Ma shuddha.
+      Different movement. Different raga.
+    guide_tone: false
+    feedback_layer: standard
+
+  # DISTINGUISH — sing each on demand
+  - id: distinguish
+    type: raga_identification
+    instruction: |
+      The engine names a raga. Sing a phrase that is
+      unmistakably that raga — not the other.
+    raga_pool: [kedar, hameer]
+    selection: random_no_repeat
+    pakad_plays: 0                      # no playback — student must recall
+    student_response: sing
+    response_duration_s: 15
+    feedback_layer: standard
+    level_tolerance: guru
+    rounds: 4
+
+  - id: complete
+    type: session_summary
+    show_accuracy: true
+    show_streak: true
+    message: |
+      Kedar and Hameer. The two Mas.
+      Same swaras. Reversed roles.
+      The guru who can distinguish them
+      understands that raga identity is not the note set —
+      it is the direction.
+
+engine:
+  raga_grammar_active: true
+  pakad_recognition: true
+  ornaments_shown: true
+  cents_display: always
+  accuracy_model: guru
+
+unlock_next:
+  lesson_id: guru-07-sohini-marwa
+  requires:
+    min_sessions: 1
+    min_accuracy: 0.55

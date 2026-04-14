@@ -1,0 +1,163 @@
+# Lesson S-10: Sadhaka Challenge — Gateway to Varistha
+# Journey: Explorer | Level: Sadhaka (4-6)
+# Presence Rule: you hear before you name.
+# Assessment. Must pass across 3 separate sessions.
+# Uses mastery_challenge phase type.
+
+id: sadhaka-10-challenge
+journey: explorer
+level_range: [4, 6]
+raga_id: null
+duration_target_min: 12
+xp_award: 150
+
+meta:
+  title: "Sadhaka Challenge"
+  subtitle: "Gateway to Varistha"
+  time_of_day: null
+  rasa: null
+
+session_rules:
+  required_sessions: 3
+  session_cooldown_hours: 4
+  progress_persists: true
+  partial_credit: true
+
+phases:
+
+  - id: listen
+    type: tanpura_drone
+    duration_s: 20
+    instruction: |
+      The tanpura is with you.
+      This is the Sadhaka Challenge. Not a test — a measure.
+      You have learned seven ragas, three ornaments, a tala,
+      and the grammar that makes a raga a raga.
+      Now demonstrate consistency. Across three sessions.
+    tanpura:
+      strings: [Pa, Sa, Sa, Sa_upper]
+      sa_hz: null
+
+  - id: sa_calibration
+    type: sa_detection
+    skip_if: sa_already_set
+    instruction: |
+      Confirm your Sa.
+    attempts: 5
+    min_clarity: 0.85
+    fallback_hz: 261.6256
+
+  # CHALLENGE 1: Aroha/Avaroha of all 7 ragas within +-25 cents
+  - id: challenge_aroha_avaroha
+    type: mastery_challenge
+    challenge_id: aroha_avaroha_seven
+    instruction: |
+      Sing the aroha and avaroha of each raga.
+      The engine will present them one at a time.
+      No guide tone. Just you and the tanpura.
+    raga_pool: [bhoopali, yaman, bhairav, bhimpalasi, bageshri, desh, kafi]
+    raga_count: 7
+    exercise_per_raga:
+      - sing_aroha: true
+        guide_tone: false
+      - sing_avaroha: true
+        guide_tone: false
+    tolerance_cents: 25
+    min_accuracy: 0.75
+
+  # CHALLENGE 2: Meend — smooth glide Sa to Pa (or wider)
+  - id: challenge_meend
+    type: mastery_challenge
+    challenge_id: meend_glide
+    instruction: |
+      Sing a meend from Sa to a swara at least three positions away.
+      The engine evaluates the trajectory. Smooth. No steps.
+    exercise: ornament_challenge
+    ornament_type: meend
+    min_interval_swaras: 3
+    evaluation:
+      trajectory_smoothness: true
+      arrival_accuracy_cents: 25
+      min_duration_ms: 500
+    attempts_allowed: 3
+
+  # CHALLENGE 3: Andolan on Re_k in Bhairav
+  - id: challenge_andolan
+    type: mastery_challenge
+    challenge_id: andolan_bhairav
+    instruction: |
+      Sing komal Re in Bhairav with andolan.
+      The engine listens for the oscillation.
+      2-4 Hz. 15-40 cents amplitude. Centred on Re komal.
+    raga: bhairav
+    exercise: ornament_challenge
+    ornament_type: andolan
+    target_swara: Re_k
+    hold_duration_s: 5
+    evaluation:
+      oscillation_rate_hz: [2, 4]
+      amplitude_cents: [15, 40]
+      centre_accuracy_cents: 25
+      min_cycles: 6
+    attempts_allowed: 3
+
+  # CHALLENGE 4: Raga identification — 4 out of 5
+  - id: challenge_raga_id
+    type: mastery_challenge
+    challenge_id: raga_identification
+    instruction: |
+      The engine plays a pakad. Name the raga.
+      Five rounds. You need four correct.
+    exercise: raga_identification
+    raga_pool: [bhoopali, yaman, bhairav, bhimpalasi, bageshri, desh, kafi]
+    rounds: 5
+    min_correct: 4
+    pakad_plays: 2
+
+  # CHALLENGE 5: Teentaal clapping — sam and khali for 4 cycles
+  - id: challenge_teentaal
+    type: mastery_challenge
+    challenge_id: teentaal_clapping
+    instruction: |
+      The tabla plays teentaal. Clap sam and wave khali.
+      Four consecutive cycles. The engine measures your timing.
+    exercise: tala_challenge
+    tala: teentaal
+    tempo_bpm: 70
+    cycles: 4
+    timing_tolerance_ms: 200
+    min_accuracy: 0.75
+
+  - id: complete
+    type: session_summary
+    show_accuracy: true
+    show_streak: true
+    show_challenge_progress: true
+    message_in_progress: |
+      Progress saved. Return to continue the challenge.
+      Mastery is demonstrated across sessions, not in one sitting.
+    message_complete: |
+      You have completed the Sadhaka Challenge.
+      Seven ragas. Three ornaments. One tala. The grammar that binds them.
+      Your ear has deepened. Your voice has steadied.
+      A new level awaits.
+
+engine:
+  raga_grammar_active: true
+  pakad_recognition: true
+  ornaments_shown: true
+  ornament_detection: [meend, andolan, gamak]
+  cents_display: hidden
+  accuracy_model: sadhaka_strict
+
+unlock_next:
+  lesson_id: varistha-01-marwa
+  requires:
+    min_sessions: 3
+    challenges_passed:
+      - aroha_avaroha_seven
+      - meend_glide
+      - andolan_bhairav
+      - raga_identification
+      - teentaal_clapping
+    journey_transition: scholar

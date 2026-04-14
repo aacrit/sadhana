@@ -1,0 +1,125 @@
+# Exercise G-08: Complete Raga Rendering — Alap, Jod, Jhala
+# Journey: Master | Level: Guru (10+)
+# NEW PHASE TYPE: raga_rendering
+# The capstone exercise
+
+id: guru-08-raga-rendering
+journey: master
+level_range: [10, 99]
+raga_id: null                # student chooses
+duration_target_min: 20
+xp_award: 80
+
+meta:
+  title: "The Complete Rendering"
+  subtitle: "Alap — Jod — Jhala"
+  time_of_day: null
+  rasa: null
+
+phases:
+
+  - id: listen
+    type: tanpura_drone
+    duration_s: 30
+    instruction: |
+      The tanpura is with you.
+      This is the capstone. The complete raga rendering.
+      Alap — slow, meditative exploration. No rhythm.
+      Jod — rhythmic pulse introduced.
+      Jhala — fast, energetic conclusion.
+      Choose your raga. You are the musician.
+    tanpura:
+      strings: [Pa, Sa, Sa, Sa_upper]
+      sa_hz: null
+
+  - id: sa_calibration
+    type: sa_detection
+    skip_if: sa_already_set
+    instruction: |
+      Confirm your Sa.
+    attempts: 5
+    min_clarity: 0.85
+    fallback_hz: 261.6256
+
+  # CHOOSE RAGA
+  - id: raga_selection
+    type: raga_rendering              # NEW PHASE TYPE
+    instruction: |
+      Choose any raga from the sixteen you have learned.
+      You will render it completely.
+    raga_pool: [bhoopali, yaman, bhairav, bhimpalasi, bageshri, desh, kafi, marwa, darbari_kanada, puriya_dhanashri, malkauns, todi, bhairavi, kedar, hameer, sohini]
+    student_chooses: 1
+    mode: select
+
+  # ALAP — slow exploration, no rhythm
+  - id: alap
+    type: raga_rendering
+    instruction: |
+      Alap. Slow. Meditative.
+      Begin from Sa. Explore the lower register first.
+      Introduce each swara as if for the first time.
+      No rhythm. No pulse. Only the voice and the tanpura.
+      The vadi should receive the most attention.
+    mode: alap
+    duration_s: 120                     # 2 minutes
+    evaluation:
+      grammar_check: true
+      ornament_usage: true
+      swara_emphasis: true              # does vadi receive emphasis?
+      register_exploration: true        # does student explore all registers?
+      pitch_tolerance_cents: 10
+
+  # JOD — rhythmic pulse introduced
+  - id: jod
+    type: raga_rendering
+    instruction: |
+      Jod. Introduce a pulse. Not tala — a personal rhythm.
+      The phrases become rhythmic. Patterns emerge.
+      The tempo gently increases.
+    mode: jod
+    duration_s: 90                      # 1.5 minutes
+    evaluation:
+      grammar_check: true
+      rhythmic_pulse: true              # detects if student maintains pulse
+      pitch_tolerance_cents: 10
+
+  # JHALA — fast, energetic conclusion
+  - id: jhala
+    type: raga_rendering
+    instruction: |
+      Jhala. Fast. Energetic. The conclusion.
+      Rapid phrases. Strong rhythm. The raga at full intensity.
+      End on Sa. Land firmly.
+    mode: jhala
+    duration_s: 60                      # 1 minute
+    evaluation:
+      grammar_check: true
+      energy_trajectory: ascending       # should build to climax
+      final_swara: Sa                   # must end on Sa
+      pitch_tolerance_cents: 15          # relaxed for speed
+
+  - id: complete
+    type: session_summary
+    show_accuracy: true
+    show_streak: true
+    show_rendering_analysis: true       # detailed breakdown of alap/jod/jhala
+    message: |
+      You have rendered a raga completely.
+      Alap — the meditative opening.
+      Jod — the rhythmic middle.
+      Jhala — the energetic conclusion.
+      This is the oldest and most rigorous form of raga exposition.
+      You are the musician now.
+
+engine:
+  raga_grammar_active: true
+  pakad_recognition: true
+  ornaments_shown: true
+  cents_display: always
+  accuracy_model: guru
+
+unlock_next:
+  lesson_id: guru-09-teaching
+  requires:
+    min_sessions: 1
+    min_accuracy: 0.50

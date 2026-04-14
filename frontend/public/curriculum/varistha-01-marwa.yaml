@@ -1,0 +1,217 @@
+# Lesson V-01: Raga Marwa — The Absent Fifth
+# Journey: Scholar | Level: Varistha (7-9)
+# Presence Rule: you hear before you name.
+# Engine source: engine/theory/ragas/marwa.ts (needs creation)
+# Prahara: 4 (sunset, sandhya prakaash)
+# KEY CONCEPT: Pa omitted — fundamental instability
+
+id: varistha-01-marwa
+journey: scholar
+level_range: [7, 9]          # Varistha
+raga_id: marwa
+duration_target_min: 15
+xp_award: 60
+
+meta:
+  title: "The Absent Fifth"
+  subtitle: "Raga Marwa"
+  time_of_day: sunset          # prahara 4 — the liminal moment
+  rasa: karuna                 # deep pathos, heroic intensity
+
+# --- PHASES -------------------------------------------------------
+
+phases:
+
+  # 1. LISTENING — tanpura drone WITHOUT Pa string
+  - id: listen
+    type: tanpura_drone
+    duration_s: 30
+    instruction: |
+      Close your eyes. Listen.
+      Something is missing. The tanpura does not give you Pa.
+      The ground beneath the fifth — gone.
+    tanpura:
+      strings: [Sa, Sa, Sa, Sa_upper]   # No Pa string — deliberate
+      sa_hz: null
+
+  # 2. SA DETECTION
+  - id: sa_calibration
+    type: sa_detection
+    skip_if: sa_already_set
+    instruction: |
+      Confirm your Sa.
+    attempts: 5
+    min_clarity: 0.85
+    fallback_hz: 261.6256
+
+  # 3. HEAR THE AROHA — .N S r G M D N S'
+  - id: aroha_listen
+    type: phrase_playback
+    phrase: [Ni_mandra, Sa, Re_k, Ga, Ma_t, Dha, Ni, Sa_upper]
+    instruction: |
+      Listen to Marwa climbing.
+      It begins from Ni below Sa. It never touches Pa.
+      The fifth — the note you have relied on since your second lesson — is absent.
+    repeat: 2
+    show_labels: false
+
+  - id: aroha_show
+    type: phrase_playback
+    phrase: [Ni_mandra, Sa, Re_k, Ga, Ma_t, Dha, Ni, Sa_upper]
+    instruction: |
+      Ni Sa Re Ga Ma Dha Ni Sa.
+      Re is komal. Ma is tivra. Pa is nowhere.
+      Six swaras ascending. The gap where Pa would be — feel it.
+    repeat: 1
+    show_labels: true
+
+  # 4. HEAR THE AVAROHA — S' N D M G r S
+  - id: avaroha_listen
+    type: phrase_playback
+    phrase: [Sa_upper, Ni, Dha, Ma_t, Ga, Re_k, Sa]
+    instruction: |
+      Descending. Still no Pa. The descent passes through
+      the place Pa would be — Dha to Ma — and the absence creates tension.
+    repeat: 2
+    show_labels: false
+
+  - id: avaroha_show
+    type: phrase_playback
+    phrase: [Sa_upper, Ni, Dha, Ma_t, Ga, Re_k, Sa]
+    instruction: |
+      Sa Ni Dha Ma Ga Re Sa.
+      From Dha straight to Ma tivra. The skip is the raga's signature.
+    repeat: 1
+    show_labels: true
+
+  # 5. WHAT IS MISSING — Pa awareness exercise
+  - id: pa_absence
+    type: phrase_playback
+    phrase: [Sa, Re, Ga, Ma, Pa, Dha, Ni, Sa_upper]
+    instruction: |
+      For comparison — a scale WITH Pa.
+      Yaman. Sa Re Ga Ma Pa Dha Ni Sa.
+      Pa is there. The foundation is solid.
+    repeat: 1
+    show_labels: true
+
+  - id: pa_absence_marwa
+    type: phrase_playback
+    phrase: [Sa, Re_k, Ga, Ma_t, Dha, Ni, Sa_upper]
+    instruction: |
+      Now Marwa again. Without Pa.
+      The difference is not a missing note. It is a missing foundation.
+      Marwa does not resolve. It yearns.
+    repeat: 1
+    show_labels: true
+
+  # 6. MEET THE SWARAS
+  - id: meet_marwa
+    type: swara_introduction
+    instruction: |
+      Marwa uses six swaras. Re komal is the vadi — the most important.
+      A komal Re as vadi gives the raga unbearable tension.
+      Dha is the samvadi. The only anchor in the upper register.
+    swaras: [Sa, Re_k, Ga, Ma_t, Dha, Ni]
+    presentation: sequential
+    audio_first: true
+    highlight_vadi: Re_k
+    highlight_samvadi: Dha
+
+  # 7. SING Sa — feel the instability
+  - id: sing_sa
+    type: pitch_exercise
+    target_swara: Sa
+    duration_s: 15
+    instruction: |
+      Sing Sa. Without Pa in the tanpura, Sa feels different.
+      The anchor holds — but barely.
+    feedback_layer: minimal
+    level_tolerance: varistha         # +-15 cents
+
+  # 8. SING THE AROHA
+  - id: sing_aroha
+    type: phrase_exercise
+    phrase: [Sa, Re_k, Ga, Ma_t, Dha, Ni, Sa_upper]
+    instruction: |
+      Follow the guide tone up. Do not sing Pa.
+      Your voice will want to go there. Resist. Skip it.
+      Dha to Ma is the leap. Own it.
+    guide_tone: true
+    feedback_layer: standard
+
+  # 9. SING THE AVAROHA
+  - id: sing_avaroha
+    type: phrase_exercise
+    phrase: [Sa_upper, Ni, Dha, Ma_t, Ga, Re_k, Sa]
+    instruction: |
+      Down. Dha to Ma tivra — no Pa between them.
+      The descent is where the tension lives.
+    guide_tone: true
+    feedback_layer: standard
+
+  # 10. PAKAD PHRASES
+  - id: pakad_listen
+    type: phrase_playback
+    phrase: [Ni_mandra, Re_k, Sa, Re_k, Ni_mandra]
+    instruction: |
+      Listen to this phrase. Ni-Re-Sa-Re-Ni.
+      The raga circles its vadi — Re komal — obsessively.
+      Sunset. Tension that does not release.
+    repeat: 2
+    show_labels: true
+
+  - id: pakad_listen_2
+    type: phrase_playback
+    phrase: [Dha, Ni, Dha, Ma_t, Ga, Re_k]
+    instruction: |
+      And this descent. Dha Ni Dha Ma Ga Re.
+      The upper register anchors to Dha, then falls.
+    repeat: 2
+    show_labels: true
+
+  # 11. FREE SINGING
+  - id: pakad_watch
+    type: passive_phrase_recognition
+    enabled: true
+    instruction: |
+      Sing freely in Marwa. The tanpura has no Pa.
+      Let the absence shape your phrases.
+      The raga is not comfortable. It is not meant to be.
+    duration_s: 60
+    watch_for_pakad: true
+    pakad_reward:
+      xp_bonus: 20
+      ceremony: gsap_pakad_moment
+
+  # 12. COMPLETION
+  - id: complete
+    type: session_summary
+    show_accuracy: true
+    show_streak: true
+    message: |
+      You have met Marwa.
+      A raga that removes the most stable interval.
+      Where Pa should be — only space. Only yearning.
+      Sunset. The moment between day and night.
+
+# --- ENGINE PARAMETERS --------------------------------------------
+
+engine:
+  raga_grammar_active: true
+  pakad_recognition: true
+  ornaments_shown: true
+  cents_display: on_tap
+  accuracy_model: varistha          # +-15 cents
+
+# --- TANTRI CONFIGURATION -----------------------------------------
+# All 12 chromatic swaras visible (Varistha disclosure).
+# Pa string present but dim/inactive — deliberately visible as absent.
+
+# --- UNLOCK CONDITION ---------------------------------------------
+
+unlock_next:
+  lesson_id: varistha-02-raga-comparison
+  requires:
+    min_sessions: 1
+    min_accuracy: 0.65

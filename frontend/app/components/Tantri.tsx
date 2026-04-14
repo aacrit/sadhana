@@ -766,8 +766,9 @@ const Tantri = memo(function Tantri({
         }
       }
 
-      // Generous touch target (32px) for responsive interaction
-      if (closestDist > 32) return null;
+      // Dynamic hit threshold: generous for full/portal, tight for compact
+      const threshold = Math.min(32, Math.max(12, (h / totalVisible) * 0.4));
+      if (closestDist > threshold) return null;
       return closestIdx;
     },
     [],

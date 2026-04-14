@@ -1,0 +1,157 @@
+# Exercise G-02: Bandish Structure — Mukhda and Antara
+# Journey: Master | Level: Guru (10+)
+# NEW PHASE TYPE: bandish_exercise
+
+id: guru-02-bandish
+journey: master
+level_range: [10, 99]
+raga_id: yaman
+duration_target_min: 15
+xp_award: 60
+
+meta:
+  title: "The Fixed Composition"
+  subtitle: "Bandish — Mukhda and Antara"
+  time_of_day: evening
+  rasa: shringar
+
+phases:
+
+  - id: listen
+    type: tanpura_drone
+    duration_s: 20
+    instruction: |
+      The tanpura is with you. Evening.
+      Until now, you have sung phrases — fragments of ragas.
+      A bandish is a complete composition. It has structure:
+      a refrain that returns, and a section that climbs.
+    tanpura:
+      strings: [Pa, Sa, Sa, Sa_upper]
+      sa_hz: null
+
+  - id: sa_calibration
+    type: sa_detection
+    skip_if: sa_already_set
+    instruction: |
+      Confirm your Sa.
+    attempts: 5
+    min_clarity: 0.85
+    fallback_hz: 261.6256
+
+  # EXPLAIN BANDISH STRUCTURE
+  - id: explain_mukhda
+    type: phrase_playback
+    phrase: [Ni_mandra, Re, Ga, Re, Sa]
+    instruction: |
+      This is a mukhda — the opening refrain of a bandish.
+      It always returns to sam — beat 1 of the tala cycle.
+      The mukhda IS the composition. Everything else departs and returns to it.
+    repeat: 2
+    show_labels: true
+
+  - id: explain_antara
+    type: phrase_playback
+    phrase: [Pa, Dha, Ni, Sa_upper, Re_upper, Sa_upper, Ni, Dha, Pa]
+    instruction: |
+      This is an antara — the upper register section.
+      It climbs above the mukhda's range, then returns.
+      Mukhda lives in the middle octave. Antara reaches the upper.
+    repeat: 2
+    show_labels: true
+
+  # HEAR A COMPLETE BANDISH IN YAMAN
+  - id: bandish_listen
+    type: bandish_exercise              # NEW PHASE TYPE
+    instruction: |
+      Listen to a complete bandish in Yaman.
+      Mukhda — the refrain. Antara — the climb.
+      Both within teentaal. Both landing on sam.
+    raga_id: yaman
+    tala_id: teentaal
+    tempo_bpm: 72
+    bandish:
+      mukhda: [Ni_mandra, Re, Ga, Re, Sa]
+      antara: [Pa, Dha, Ni, Sa_upper, Re_upper, Sa_upper, Ni, Dha, Pa, Ma_t, Ga, Re, Sa]
+    mode: listen
+    cycles: 4                           # 2 mukhda cycles + 2 antara cycles
+    show_tala_markers: true
+
+  # SING THE MUKHDA
+  - id: sing_mukhda
+    type: bandish_exercise
+    instruction: |
+      Sing the mukhda. Land on Sa at sam.
+      Ni Re Ga Re Sa — the refrain returns to the beginning.
+    raga_id: yaman
+    tala_id: teentaal
+    tempo_bpm: 72
+    bandish:
+      mukhda: [Ni_mandra, Re, Ga, Re, Sa]
+    mode: sing_mukhda
+    cycles: 2
+    guide_tone: true
+    evaluation:
+      pitch_tolerance_cents: 10
+      landing_tolerance_ms: 200
+
+  # SING THE ANTARA
+  - id: sing_antara
+    type: bandish_exercise
+    instruction: |
+      Now the antara. Climb to the upper register.
+      Then descend back to the mukhda's territory.
+    raga_id: yaman
+    tala_id: teentaal
+    tempo_bpm: 72
+    bandish:
+      antara: [Pa, Dha, Ni, Sa_upper, Re_upper, Sa_upper, Ni, Dha, Pa, Ma_t, Ga, Re, Sa]
+    mode: sing_antara
+    cycles: 2
+    guide_tone: true
+    evaluation:
+      pitch_tolerance_cents: 10
+      landing_tolerance_ms: 200
+
+  # COMPOSE YOUR OWN MUKHDA
+  - id: compose_mukhda
+    type: bandish_exercise
+    instruction: |
+      Create your own mukhda in Yaman.
+      Rules: it must land on sam. It must use Yaman's grammar.
+      It must be singable as a refrain — something you could repeat.
+    raga_id: yaman
+    tala_id: teentaal
+    tempo_bpm: 72
+    mode: compose_mukhda
+    cycles: 2
+    evaluation:
+      grammar_check: true
+      sam_landing: true
+      pitch_tolerance_cents: 10
+    attempts: 3
+
+  - id: complete
+    type: session_summary
+    show_accuracy: true
+    show_streak: true
+    message: |
+      Bandish. The vehicle for raga exposition.
+      Mukhda — the home you always return to.
+      Antara — the journey upward and back.
+      A musician who can compose a mukhda
+      has crossed from practitioner to creator.
+
+engine:
+  raga_grammar_active: true
+  pakad_recognition: true
+  ornaments_shown: true
+  cents_display: always
+  accuracy_model: guru
+  tala_active: true
+  tala_id: teentaal
+
+unlock_next:
+  lesson_id: guru-03-bhairavi
+  requires:
+    min_sessions: 1
+    min_accuracy: 0.55

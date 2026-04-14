@@ -1,0 +1,149 @@
+# Exercise G-09: Teaching Exercise — Explain to Demonstrate Understanding
+# Journey: Master | Level: Guru (10+)
+# NEW PHASE TYPE: teaching_exercise
+
+id: guru-09-teaching
+journey: master
+level_range: [10, 99]
+raga_id: null                # student chooses
+duration_target_min: 15
+xp_award: 70
+
+meta:
+  title: "The Guru Teaches"
+  subtitle: "Teaching Exercise"
+  time_of_day: null
+  rasa: null
+
+phases:
+
+  - id: listen
+    type: tanpura_drone
+    duration_s: 15
+    instruction: |
+      The tanpura is with you.
+      The guru who cannot teach does not truly know.
+      Today you teach a raga to the app.
+      You demonstrate. You explain. You reveal.
+    tanpura:
+      strings: [Pa, Sa, Sa, Sa_upper]
+      sa_hz: null
+
+  - id: sa_calibration
+    type: sa_detection
+    skip_if: sa_already_set
+    instruction: |
+      Confirm your Sa.
+    attempts: 5
+    min_clarity: 0.85
+    fallback_hz: 261.6256
+
+  # CHOOSE RAGA
+  - id: choose_raga
+    type: teaching_exercise              # NEW PHASE TYPE
+    instruction: |
+      Choose a raga to teach. Any raga you have learned.
+    raga_pool: [bhoopali, yaman, bhairav, bhimpalasi, bageshri, desh, kafi, marwa, darbari_kanada, puriya_dhanashri, malkauns, todi, bhairavi, kedar, hameer, sohini]
+    student_chooses: 1
+    mode: select
+
+  # STEP 1 — Sing the aroha
+  - id: teach_aroha
+    type: teaching_exercise
+    instruction: |
+      Teach the aroha. Sing it clearly.
+      A student hearing this for the first time should understand
+      the ascending shape of the raga.
+    mode: demonstrate_aroha
+    evaluation:
+      completeness: true                 # all aroha swaras present
+      pitch_tolerance_cents: 10
+      clarity: true                      # clear, pedagogical delivery
+
+  # STEP 2 — Sing the avaroha
+  - id: teach_avaroha
+    type: teaching_exercise
+    instruction: |
+      Teach the avaroha. Sing the descent.
+    mode: demonstrate_avaroha
+    evaluation:
+      completeness: true
+      pitch_tolerance_cents: 10
+      clarity: true
+
+  # STEP 3 — Emphasize the vadi
+  - id: teach_vadi
+    type: teaching_exercise
+    instruction: |
+      Which swara is most important? Sing it.
+      Hold it. Give it weight. A student should hear
+      that this is the anchor of the raga.
+    mode: demonstrate_vadi
+    duration_s: 15
+    evaluation:
+      vadi_correct: true                 # did student sing the correct vadi?
+      emphasis: true                     # was it given appropriate weight?
+      pitch_tolerance_cents: 10
+
+  # STEP 4 — Sing the pakad
+  - id: teach_pakad
+    type: teaching_exercise
+    instruction: |
+      Sing the signature phrase — the pakad.
+      This is the phrase that identifies the raga.
+      A student hearing this should recognise the raga instantly.
+    mode: demonstrate_pakad
+    duration_s: 20
+    evaluation:
+      pakad_recognition: true            # engine validates pakad
+      pitch_tolerance_cents: 10
+
+  # STEP 5 — Demonstrate characteristic ornaments
+  - id: teach_ornaments
+    type: teaching_exercise
+    instruction: |
+      Which ornaments belong to this raga?
+      Demonstrate them on the correct swaras.
+      Andolan? On which swara? Meend? Between which two?
+    mode: demonstrate_ornaments
+    duration_s: 25
+    evaluation:
+      ornament_appropriateness: true     # correct ornament on correct swara
+      pitch_tolerance_cents: 10
+
+  # STEP 6 — Voice note explaining the raga
+  - id: teach_explain
+    type: teaching_exercise
+    instruction: |
+      Record a voice note. Explain the raga's character.
+      Its time of day. Its mood. What makes it different from similar ragas.
+      Speak as if to a student.
+    mode: voice_explanation
+    duration_s: 45
+    evaluation:
+      content_completeness: true         # mentions time, rasa, key features
+
+  - id: complete
+    type: session_summary
+    show_accuracy: true
+    show_streak: true
+    show_teaching_score: true
+    message: |
+      To teach is to truly know.
+      You have demonstrated the aroha, the avaroha, the vadi,
+      the pakad, the ornaments, and the character.
+      The raga lives in your voice and your words.
+      This is mastery.
+
+engine:
+  raga_grammar_active: true
+  pakad_recognition: true
+  ornaments_shown: true
+  cents_display: always
+  accuracy_model: guru
+
+unlock_next:
+  lesson_id: guru-10-open-mastery
+  requires:
+    min_sessions: 1
+    min_accuracy: 0.50

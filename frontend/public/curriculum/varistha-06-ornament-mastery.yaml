@@ -1,0 +1,183 @@
+# Lesson V-06: Ornament Mastery — Context-Specific Application
+# Journey: Scholar | Level: Varistha (7-9)
+# Presence Rule: you hear before you name.
+# NEW PHASE TYPE: ornament_context_exercise
+# Which ornament belongs WHERE — ornament grammar
+
+id: varistha-06-ornament-mastery
+journey: scholar
+level_range: [7, 9]
+raga_id: null                # multi-raga ornament context
+duration_target_min: 12
+xp_award: 50
+
+meta:
+  title: "Where Ornaments Belong"
+  subtitle: "Ornament Mastery"
+  time_of_day: null
+  rasa: null
+
+phases:
+
+  - id: listen
+    type: tanpura_drone
+    duration_s: 20
+    instruction: |
+      The tanpura is with you.
+      You know three ornaments: meend, andolan, gamak.
+      Today you learn: not every ornament belongs everywhere.
+      Ornaments are part of the raga's grammar.
+    tanpura:
+      strings: [Pa, Sa, Sa, Sa_upper]
+      sa_hz: null
+
+  - id: sa_calibration
+    type: sa_detection
+    skip_if: sa_already_set
+    instruction: |
+      Confirm your Sa.
+    attempts: 5
+    min_clarity: 0.85
+    fallback_hz: 261.6256
+
+  # DEMONSTRATION — correct vs incorrect ornament
+  - id: correct_andolan
+    type: phrase_playback
+    phrase: [Sa, Re_k, Ga, Re_k, Sa]
+    instruction: |
+      Andolan on Re komal in Bhairav. Correct.
+      The gentle wave is Bhairav's identity. Without it, Re komal is flat.
+    repeat: 2
+    show_labels: true
+    ornament: andolan
+    ornament_params:
+      swara: Re_k
+      rate_hz: 3
+      amplitude_cents: 25
+
+  - id: incorrect_gamak
+    type: phrase_playback
+    phrase: [Sa, Re_k, Ga, Re_k, Sa]
+    instruction: |
+      Now gamak on Re komal in Bhairav. Listen.
+      Too vigorous. Too fast. This is not Bhairav — it destroys the mood.
+      Bhairav's Re needs gentleness, not force.
+    repeat: 1
+    show_labels: true
+    ornament: gamak
+    ornament_params:
+      swara: Re_k
+      rate_hz: 6
+      amplitude_cents: 100
+
+  # ORNAMENT CONTEXT ROUNDS
+  - id: context_round_1
+    type: ornament_context_exercise        # NEW PHASE TYPE
+    instruction: |
+      The engine gives you a raga and a swara.
+      Apply the correct ornament.
+    rounds:
+      - raga_id: bhairav
+        swara: Re_k
+        correct_ornament: andolan
+        explanation: "Andolan. Bhairav's Re komal must wave gently."
+      - raga_id: bhairav
+        swara: Dha_k
+        correct_ornament: andolan
+        explanation: "Andolan. Like Re komal, Dha komal in Bhairav carries a gentle oscillation."
+      - raga_id: bhimpalasi
+        swara: Ma
+        correct_ornament: gamak
+        explanation: "Gamak. Bhimpalasi's Ma shakes with energy — the heart of the raga's fire."
+      - raga_id: darbari_kanada
+        swara: Ga_k
+        correct_ornament: andolan
+        explanation: "Andolan. But heavier than Bhairav. Darbari's Ga komal is the heaviest andolan in all Hindustani music."
+    evaluation:
+      ornament_detection: true
+      pitch_tolerance_cents: 15
+
+  - id: context_round_2
+    type: ornament_context_exercise
+    instruction: |
+      More. Listen to the raga. Feel which ornament belongs.
+    rounds:
+      - raga_id: yaman
+        swara: Ga
+        correct_ornament: meend
+        explanation: "Meend from Ga to Re. Yaman's descent glides — it does not jump."
+        meend_target: Re
+      - raga_id: bhoopali
+        swara: Ga
+        correct_ornament: none
+        explanation: "None. Bhoopali is shuddha. Clean. No heavy ornaments on Ga."
+      - raga_id: desh
+        swara: Pa
+        correct_ornament: meend
+        explanation: "Meend from Pa to Ga. Desh flows downward through the glide."
+        meend_target: Ga
+      - raga_id: kafi
+        swara: Ga_k
+        correct_ornament: meend
+        explanation: "Meend on Ga komal in Kafi. A characteristic ornament in folk-flavoured ragas."
+    evaluation:
+      ornament_detection: true
+      pitch_tolerance_cents: 15
+
+  # COMPOSE WITH CORRECT ORNAMENTS
+  - id: compose_ornamented
+    type: composition_exercise
+    instruction: |
+      Sing a phrase in Bhairav. Include andolan on Re komal.
+      The engine checks both grammar AND ornament placement.
+    raga_id: bhairav
+    duration_s: 25
+    min_swaras: 4
+    evaluation:
+      grammar_check: true
+      ornament_check: true
+      pitch_tolerance_cents: 15
+    feedback_mode: realtime
+    attempts: 3
+
+  - id: compose_darbari
+    type: composition_exercise
+    instruction: |
+      Now Darbari. Sing a phrase. Ga komal must have andolan.
+      Without it, the raga does not exist.
+    raga_id: darbari_kanada
+    duration_s: 25
+    min_swaras: 4
+    evaluation:
+      grammar_check: true
+      ornament_check: true
+      required_ornament:
+        swara: Ga_k
+        type: andolan
+      pitch_tolerance_cents: 15
+    feedback_mode: realtime
+    attempts: 3
+
+  - id: complete
+    type: session_summary
+    show_accuracy: true
+    show_streak: true
+    message: |
+      Ornaments are not decoration. They are grammar.
+      Andolan in Bhairav. Gamak in Bhimpalasi. Meend in Yaman.
+      Each belongs where it belongs. Nowhere else.
+      A musician who places ornaments correctly
+      has understood the raga at its deepest level.
+
+engine:
+  raga_grammar_active: true
+  pakad_recognition: false
+  ornaments_shown: true
+  cents_display: on_tap
+  accuracy_model: varistha
+
+unlock_next:
+  lesson_id: varistha-07-malkauns
+  requires:
+    min_sessions: 1
+    min_accuracy: 0.60

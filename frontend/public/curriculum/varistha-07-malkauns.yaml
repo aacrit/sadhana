@@ -1,0 +1,197 @@
+# Lesson V-07: Raga Malkauns — Power in Five Notes
+# Journey: Scholar | Level: Varistha (7-9)
+# Presence Rule: you hear before you name.
+# Engine source: engine/theory/ragas/malkauns.ts (needs creation)
+# Prahara: 7-8 (late night, midnight)
+# KEY CONCEPT: Pentatonic komal — mirror of Bhoopali
+
+id: varistha-07-malkauns
+journey: scholar
+level_range: [7, 9]
+raga_id: malkauns
+duration_target_min: 15
+xp_award: 55
+
+meta:
+  title: "Power in Five Notes"
+  subtitle: "Raga Malkauns"
+  time_of_day: night
+  rasa: veer                   # heroic intensity
+
+phases:
+
+  - id: listen
+    type: tanpura_drone
+    duration_s: 30
+    instruction: |
+      Close your eyes. Midnight.
+      You began your journey with five notes — Bhoopali. Pure. Light.
+      Now: five notes again. But the opposite world.
+    tanpura:
+      strings: [Sa, Sa, Sa, Sa_upper]   # No Pa — Malkauns omits Pa
+      sa_hz: null
+
+  - id: sa_calibration
+    type: sa_detection
+    skip_if: sa_already_set
+    instruction: |
+      Confirm your Sa.
+    attempts: 5
+    min_clarity: 0.85
+    fallback_hz: 261.6256
+
+  # HEAR THE AROHA — S g M d n S'
+  - id: aroha_listen
+    type: phrase_playback
+    phrase: [Sa, Ga_k, Ma, Dha_k, Ni_k, Sa_upper]
+    instruction: |
+      Five notes ascending. No Re. No Pa.
+      Every swara except Sa and Ma is komal.
+      This is the darkest palette in the curriculum.
+    repeat: 2
+    show_labels: false
+
+  - id: aroha_show
+    type: phrase_playback
+    phrase: [Sa, Ga_k, Ma, Dha_k, Ni_k, Sa_upper]
+    instruction: |
+      Sa Ga Ma Dha Ni Sa.
+      Ga komal. Dha komal. Ni komal. Three darkened swaras.
+      And no Re or Pa — the two most stable intervals after Sa, both gone.
+    repeat: 1
+    show_labels: true
+
+  # HEAR THE AVAROHA — S' n d M g S
+  - id: avaroha_listen
+    type: phrase_playback
+    phrase: [Sa_upper, Ni_k, Dha_k, Ma, Ga_k, Sa]
+    instruction: |
+      Descending. The same five notes. Heavy. Intense.
+    repeat: 2
+    show_labels: false
+
+  - id: avaroha_show
+    type: phrase_playback
+    phrase: [Sa_upper, Ni_k, Dha_k, Ma, Ga_k, Sa]
+    instruction: |
+      Sa Ni Dha Ma Ga Sa.
+      Ma is the vadi. The anchor in the darkness.
+    repeat: 1
+    show_labels: true
+
+  # COMPARE WITH BHOOPALI — pentatonic mirror
+  - id: compare_bhoopali
+    type: raga_comparison_advanced
+    instruction: |
+      Bhoopali and Malkauns. Both pentatonic. Both omit Re and Pa... no.
+      Bhoopali omits Ma and Ni. Malkauns omits Re and Pa.
+      Five notes each. Structural twins. Opposite universes.
+    comparison_set:
+      - raga_id: bhoopali
+        pakad: [Sa, Re, Ga, Pa, Dha, Sa_upper]
+        label: "Bhoopali — five shuddha swaras"
+        character: "Pure. Light. Dusk. Your first raga."
+      - raga_id: malkauns
+        pakad: [Sa, Ga_k, Ma, Dha_k, Ni_k, Sa_upper]
+        label: "Malkauns — five dark swaras"
+        character: "Intense. Heavy. Midnight. Power."
+    play_count: 2
+    show_analysis: true
+
+  # MEET THE SWARAS
+  - id: meet_malkauns
+    type: swara_introduction
+    instruction: |
+      Five swaras. Sa is the only unaltered anchor.
+      Ma is vadi. Sa is samvadi.
+      Three komal swaras. No Re. No Pa.
+    swaras: [Sa, Ga_k, Ma, Dha_k, Ni_k]
+    presentation: sequential
+    audio_first: true
+    highlight_vadi: Ma
+    highlight_samvadi: Sa
+
+  # SING
+  - id: sing_sa
+    type: pitch_exercise
+    target_swara: Sa
+    duration_s: 15
+    instruction: |
+      Sing Sa. Without Re or Pa in the raga,
+      Sa is utterly alone. The only pure anchor.
+    feedback_layer: minimal
+    level_tolerance: varistha
+
+  - id: sing_aroha
+    type: phrase_exercise
+    phrase: [Sa, Ga_k, Ma, Dha_k, Ni_k, Sa_upper]
+    instruction: |
+      Five dark notes up. Komal Ga. Komal Dha. Komal Ni.
+      Each must be precisely placed. This is the ultimate komal test.
+    guide_tone: true
+    feedback_layer: standard
+
+  - id: sing_avaroha
+    type: phrase_exercise
+    phrase: [Sa_upper, Ni_k, Dha_k, Ma, Ga_k, Sa]
+    instruction: |
+      Down. Heavy. Let each swara land with weight.
+    guide_tone: true
+    feedback_layer: standard
+
+  # PAKAD
+  - id: pakad_listen
+    type: phrase_playback
+    phrase: [Ma, Ga_k, Ma, Dha_k, Ni_k]
+    instruction: |
+      Malkauns circles Ma — its vadi. Ma Ga Ma — the orbit.
+      Then rises to Dha Ni. Power in five notes.
+    repeat: 2
+    show_labels: true
+
+  - id: pakad_listen_2
+    type: phrase_playback
+    phrase: [Dha_k, Ma, Ga_k, Sa]
+    instruction: |
+      The descent. Dha Ma Ga Sa. Direct. Unadorned.
+      Malkauns needs no ornament to command attention.
+    repeat: 2
+    show_labels: true
+
+  # FREE SINGING
+  - id: pakad_watch
+    type: passive_phrase_recognition
+    enabled: true
+    instruction: |
+      Sing freely in Malkauns. Midnight.
+      Five notes. No Re. No Pa. Every phrase is intense.
+      The tanpura has no Pa string — like Marwa, but darker.
+    duration_s: 60
+    watch_for_pakad: true
+    pakad_reward:
+      xp_bonus: 20
+      ceremony: gsap_pakad_moment
+
+  - id: complete
+    type: session_summary
+    show_accuracy: true
+    show_streak: true
+    message: |
+      Malkauns.
+      You began with Bhoopali — five pure notes, dusk.
+      Now Malkauns — five dark notes, midnight.
+      The same structure. The opposite world.
+      Pentatonic is not simple. It is essential.
+
+engine:
+  raga_grammar_active: true
+  pakad_recognition: true
+  ornaments_shown: true
+  cents_display: on_tap
+  accuracy_model: varistha
+
+unlock_next:
+  lesson_id: varistha-08-shruti
+  requires:
+    min_sessions: 1
+    min_accuracy: 0.60

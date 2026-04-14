@@ -40,9 +40,6 @@ export default function ScriptToggle() {
   const { user } = useAuth();
   const [script, setScript] = useState<ScriptMode>(DEFAULT_SCRIPT);
 
-  // Hide on auth pages
-  if (pathname.startsWith('/auth')) return null;
-
   // On mount: read from localStorage and apply to documentElement
   useEffect(() => {
     let saved: ScriptMode = DEFAULT_SCRIPT;
@@ -91,6 +88,9 @@ export default function ScriptToggle() {
       })();
     }
   }, [script, user]);
+
+  // Hide on auth pages — placed after all hooks to obey Rules of Hooks
+  if (pathname.startsWith('/auth')) return null;
 
   // The button shows the *opposite* script's glyph — what you'll switch TO.
   // In romanized mode: show "अ" (click to go Devanagari)

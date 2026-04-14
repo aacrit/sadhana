@@ -1,0 +1,173 @@
+# Lesson V-04: Phrase Composition — Creating Valid Phrases
+# Journey: Scholar | Level: Varistha (7-9)
+# Presence Rule: you hear before you name.
+# NEW PHASE TYPE: composition_exercise
+# Student creates phrases, engine validates grammar
+
+id: varistha-04-composition
+journey: scholar
+level_range: [7, 9]
+raga_id: null                # multi-raga composition
+duration_target_min: 15
+xp_award: 50
+
+meta:
+  title: "Creating Valid Phrases"
+  subtitle: "Phrase Composition"
+  time_of_day: null
+  rasa: null
+
+phases:
+
+  - id: listen
+    type: tanpura_drone
+    duration_s: 20
+    instruction: |
+      The tanpura is with you.
+      Until now, you have imitated. Today you create.
+      The engine will listen. Not for pitch alone —
+      for grammar. Does your phrase belong to the raga?
+    tanpura:
+      strings: [Pa, Sa, Sa, Sa_upper]
+      sa_hz: null
+
+  - id: sa_calibration
+    type: sa_detection
+    skip_if: sa_already_set
+    instruction: |
+      Confirm your Sa.
+    attempts: 5
+    min_clarity: 0.85
+    fallback_hz: 261.6256
+
+  # ROUND 1 — Bhoopali (simplest grammar)
+  - id: compose_bhoopali
+    type: composition_exercise            # NEW PHASE TYPE
+    instruction: |
+      Sing a phrase in Bhoopali. Five swaras. Any order.
+      The engine checks: does your phrase follow Bhoopali's rules?
+      Sa Re Ga Pa Dha. No Ma. No Ni. Stay within the five.
+    raga_id: bhoopali
+    duration_s: 20
+    min_swaras: 4                        # phrase must have at least 4 swaras
+    max_swaras: 8
+    evaluation:
+      grammar_check: true
+      forbidden_swaras: [Ma, Ma_t, Ni, Ni_k, Re_k, Ga_k, Dha_k]
+      pitch_tolerance_cents: 15
+    feedback_mode: realtime              # engine shows grammar status as student sings
+    attempts: 3
+
+  # ROUND 2 — Yaman (sampoorna, one alteration)
+  - id: compose_yaman
+    type: composition_exercise
+    instruction: |
+      Now Yaman. Seven swaras. Ma is tivra.
+      Create a phrase. Let it sound like Yaman.
+      The Ni-Re-Ga movement is the soul — use it.
+    raga_id: yaman
+    duration_s: 25
+    min_swaras: 5
+    max_swaras: 10
+    evaluation:
+      grammar_check: true
+      pitch_tolerance_cents: 15
+    feedback_mode: realtime
+    attempts: 3
+
+  # ROUND 3 — Bhimpalasi (asymmetric jati)
+  - id: compose_bhimpalasi
+    type: composition_exercise
+    instruction: |
+      Bhimpalasi. Remember: Re and Dha are omitted in ascent.
+      If your phrase ascends, skip them. Descend freely.
+      The grammar is stricter here. The engine is watching.
+    raga_id: bhimpalasi
+    duration_s: 25
+    min_swaras: 5
+    max_swaras: 10
+    evaluation:
+      grammar_check: true
+      aroha_rules: true                  # checks ascending movement for omissions
+      pitch_tolerance_cents: 15
+    feedback_mode: realtime
+    attempts: 3
+
+  # ROUND 4 — Desh (mixed swaras)
+  - id: compose_desh
+    type: composition_exercise
+    instruction: |
+      Desh. Ni shuddha ascending. Ni komal descending.
+      Create a phrase that uses both. A phrase that turns direction
+      and the Ni changes with it. This is Desh's identity.
+    raga_id: desh
+    duration_s: 30
+    min_swaras: 6
+    max_swaras: 12
+    evaluation:
+      grammar_check: true
+      mixed_swara_check: true            # validates Ni/Ni_k usage by direction
+      pitch_tolerance_cents: 15
+    feedback_mode: realtime
+    attempts: 3
+
+  # ROUND 5 — Marwa (no Pa, high constraint)
+  - id: compose_marwa
+    type: composition_exercise
+    instruction: |
+      Marwa. No Pa. Six swaras. Re komal. Ma tivra.
+      Create a phrase. The constraint is tight.
+      Every note you sing must belong to this tense, yearning raga.
+    raga_id: marwa
+    duration_s: 30
+    min_swaras: 5
+    max_swaras: 10
+    evaluation:
+      grammar_check: true
+      forbidden_swaras: [Pa, Re, Ma, Ga_k, Dha_k, Ni_k]
+      pitch_tolerance_cents: 15
+    feedback_mode: realtime
+    attempts: 3
+
+  # FREE COMPOSITION — student picks raga
+  - id: compose_free
+    type: composition_exercise
+    instruction: |
+      Choose any raga. Sing freely. Create phrases.
+      The engine validates grammar in real time.
+      Green: valid. Red: outside the raga.
+      This is how a musician thinks — within the grammar, beyond the imitation.
+    raga_id: null                        # student selects
+    raga_pool: [bhoopali, yaman, bhairav, bhimpalasi, bageshri, desh, kafi, marwa]
+    student_chooses: 1
+    duration_s: 45
+    min_swaras: 4
+    evaluation:
+      grammar_check: true
+      pitch_tolerance_cents: 15
+    feedback_mode: realtime
+    attempts: 0                          # unlimited in free mode
+
+  - id: complete
+    type: session_summary
+    show_accuracy: true
+    show_streak: true
+    show_composition_scores: true
+    message: |
+      You have created music. Not imitated — created.
+      Within the grammar of a raga, there is infinite freedom.
+      The rules do not constrain. They liberate.
+      A musician who knows the rules can break them with purpose.
+
+engine:
+  raga_grammar_active: true
+  pakad_recognition: true
+  ornaments_shown: true
+  cents_display: on_tap
+  accuracy_model: varistha
+
+unlock_next:
+  lesson_id: varistha-05-puriya-dhanashri
+  requires:
+    min_sessions: 1
+    min_accuracy: 0.60

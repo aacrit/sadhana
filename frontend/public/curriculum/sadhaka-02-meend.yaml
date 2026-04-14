@@ -1,0 +1,187 @@
+# Lesson S-02: Meend — The Glide
+# Journey: Explorer | Level: Sadhaka (4-6)
+# Presence Rule: you hear before you name.
+# Not raga-specific — standalone ornament lesson.
+# NEW PHASE TYPE: ornament_exercise
+# Uses Bhoopali for context (simplest grammar, all shuddha)
+
+id: sadhaka-02-meend
+journey: explorer
+level_range: [4, 6]
+raga_id: bhoopali
+duration_target_min: 10
+xp_award: 40
+
+meta:
+  title: "The Glide"
+  subtitle: "Meend"
+  time_of_day: null
+  rasa: null
+
+phases:
+
+  - id: listen
+    type: tanpura_drone
+    duration_s: 20
+    instruction: |
+      Close your eyes. Listen.
+      The tanpura is with you. Today you learn to glide.
+    tanpura:
+      strings: [Pa, Sa, Sa, Sa_upper]
+      sa_hz: null
+
+  - id: sa_calibration
+    type: sa_detection
+    skip_if: sa_already_set
+    instruction: |
+      Confirm your Sa. Hold it steady.
+    attempts: 5
+    min_clarity: 0.85
+    fallback_hz: 261.6256
+
+  - id: hear_meend_sa_re
+    type: phrase_playback
+    phrase: [Sa, Re]
+    instruction: |
+      Listen to these two notes. Not as steps — as a continuous slide.
+      The voice does not jump. It travels.
+    repeat: 3
+    show_labels: true
+    ornament: meend
+    ornament_params:
+      from: Sa
+      to: Re
+      duration_ratio: 0.7
+
+  - id: hear_meend_sa_ga
+    type: phrase_playback
+    phrase: [Sa, Ga]
+    instruction: |
+      A wider glide. Sa slides all the way to Ga.
+      Every frequency between the two is touched.
+      This is meend — the defining ornament of Hindustani music.
+    repeat: 3
+    show_labels: true
+    ornament: meend
+    ornament_params:
+      from: Sa
+      to: Ga
+      duration_ratio: 0.7
+
+  - id: hear_meend_sa_pa
+    type: phrase_playback
+    phrase: [Sa, Pa]
+    instruction: |
+      The widest glide. Sa to Pa. The entire distance between
+      the tonic and its fifth, traversed as one continuous sound.
+    repeat: 2
+    show_labels: true
+    ornament: meend
+    ornament_params:
+      from: Sa
+      to: Pa
+      duration_ratio: 0.8
+
+  # NEW PHASE TYPE: ornament_exercise
+  - id: sing_meend_sa_re
+    type: ornament_exercise
+    ornament_type: meend
+    instruction: |
+      Now you. Start on Sa. Slide up to Re.
+      Do not jump. Let the pitch move smoothly.
+    from_swara: Sa
+    to_swara: Re
+    guide_tone: true
+    duration_s: 20
+    attempts: 3
+    evaluation:
+      trajectory: smooth
+      arrival_accuracy_cents: 25
+      min_duration_ms: 300
+    level_tolerance: sadhaka
+
+  - id: sing_meend_sa_ga
+    type: ornament_exercise
+    ornament_type: meend
+    instruction: |
+      Wider now. Start on Sa. Slide up to Ga.
+      The journey matters as much as the destination.
+    from_swara: Sa
+    to_swara: Ga
+    guide_tone: true
+    duration_s: 20
+    attempts: 3
+    evaluation:
+      trajectory: smooth
+      arrival_accuracy_cents: 25
+      min_duration_ms: 500
+    level_tolerance: sadhaka
+
+  - id: sing_meend_sa_pa
+    type: ornament_exercise
+    ornament_type: meend
+    instruction: |
+      The full glide. Sa to Pa.
+      Let the tanpura guide you. Feel the distance.
+    from_swara: Sa
+    to_swara: Pa
+    guide_tone: true
+    duration_s: 25
+    attempts: 3
+    evaluation:
+      trajectory: smooth
+      arrival_accuracy_cents: 25
+      min_duration_ms: 600
+    level_tolerance: sadhaka
+
+  - id: sing_meend_ga_sa
+    type: ornament_exercise
+    ornament_type: meend
+    instruction: |
+      Now descending. Start on Ga. Slide down to Sa.
+      The meend reveals the microtonal landscape between two swaras.
+    from_swara: Ga
+    to_swara: Sa
+    guide_tone: true
+    duration_s: 20
+    attempts: 3
+    evaluation:
+      trajectory: smooth
+      arrival_accuracy_cents: 25
+      min_duration_ms: 500
+    level_tolerance: sadhaka
+
+  - id: free_meend
+    type: pitch_exercise
+    target_swara: null
+    allowed_swaras: [Sa, Re, Ga, Pa, Dha]
+    duration_s: 45
+    instruction: |
+      Move between the swaras of Bhoopali. Use meend.
+      Do not step from note to note. Slide.
+      Let each transition be a journey.
+    feedback_layer: standard
+    level_tolerance: sadhaka
+    ornaments_shown: true
+
+  - id: complete
+    type: session_summary
+    show_accuracy: true
+    show_streak: true
+    message: |
+      Meend. The glide. The continuous voice.
+      A well-sung meend reveals the space between two swaras —
+      the microtonal landscape that lives between the notes.
+
+engine:
+  raga_grammar_active: true
+  pakad_recognition: false
+  ornaments_shown: true
+  cents_display: on_tap
+  accuracy_model: sadhaka
+
+unlock_next:
+  lesson_id: sadhaka-03-andolan
+  requires:
+    min_sessions: 1
+    min_accuracy: 0.60

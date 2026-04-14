@@ -1,0 +1,145 @@
+# Exercise G-07: Sohini vs Marwa — Same Constraint, Different Worlds
+# Journey: Master | Level: Guru (10+)
+# Engine source: engine/theory/ragas/sohini.ts (needs creation)
+
+id: guru-07-sohini-marwa
+journey: master
+level_range: [10, 99]
+raga_id: null
+duration_target_min: 15
+xp_award: 60
+
+meta:
+  title: "Same Constraint, Different Worlds"
+  subtitle: "Sohini and Marwa"
+  time_of_day: evening
+  rasa: null
+
+phases:
+
+  - id: listen
+    type: tanpura_drone
+    duration_s: 20
+    instruction: |
+      The tanpura is with you.
+      Two ragas. Both omit Pa. Both use Marwa thaat swaras.
+      Marwa is tense and heroic. Sohini is light and sparkling.
+      Same absence. Opposite worlds.
+    tanpura:
+      strings: [Sa, Sa, Sa, Sa_upper]   # no Pa
+      sa_hz: null
+
+  - id: sa_calibration
+    type: sa_detection
+    skip_if: sa_already_set
+    instruction: |
+      Confirm your Sa.
+    attempts: 5
+    min_clarity: 0.85
+    fallback_hz: 261.6256
+
+  # MARWA RECAP
+  - id: marwa_phrase
+    type: phrase_playback
+    phrase: [Ni_mandra, Re_k, Sa, Re_k, Ni_mandra]
+    instruction: |
+      Marwa. You know this tension. Re komal as vadi.
+      The raga that does not resolve.
+    repeat: 2
+    show_labels: true
+
+  # SOHINI — hear it
+  - id: sohini_aroha
+    type: phrase_playback
+    phrase: [Sa, Re_k, Ga, Ma_t, Dha, Ni, Sa_upper]
+    instruction: |
+      Sohini ascending. Same thaat. No Pa.
+      But listen — it sparkles. Light. Quick. Almost playful.
+      Dha is the vadi here, not Re komal.
+    repeat: 2
+    show_labels: true
+
+  - id: sohini_avaroha
+    type: phrase_playback
+    phrase: [Sa_upper, Ni, Dha, Ma_t, Ga, Re_k, Sa]
+    instruction: |
+      Sohini descending. The lightness remains.
+      Where Marwa broods, Sohini dances.
+    repeat: 2
+    show_labels: true
+
+  # COMPARE
+  - id: compare
+    type: raga_comparison_advanced
+    instruction: |
+      Marwa and Sohini. Same thaat. Same absent Pa.
+      What makes them different? Emphasis. Speed. Mood.
+    comparison_set:
+      - raga_id: marwa
+        pakad: [Ni_mandra, Re_k, Sa, Re_k, Ga, Ma_t, Dha]
+        label: "Marwa — sunset tension"
+        character: "Re komal is vadi. Slow. Heavy. Unresolved."
+      - raga_id: sohini
+        pakad: [Dha, Ni, Sa_upper, Re_k_upper, Sa_upper, Ni, Dha]
+        label: "Sohini — evening sparkle"
+        character: "Dha is vadi. Quick. Light. Upper register favoured."
+    play_count: 2
+    show_analysis: true
+
+  # SING — distinguish by mood
+  - id: sing_marwa
+    type: phrase_exercise
+    phrase: [Ni_mandra, Re_k, Sa, Re_k, Ga, Ma_t]
+    instruction: |
+      Sing Marwa. Heavy. The weight is on Re komal.
+    guide_tone: false
+    feedback_layer: standard
+
+  - id: sing_sohini
+    type: phrase_exercise
+    phrase: [Dha, Ni, Sa_upper, Re_k_upper, Sa_upper, Ni, Dha]
+    instruction: |
+      Now Sohini. Light. Quick. Dha is the anchor.
+      The upper register sparkles.
+    guide_tone: false
+    feedback_layer: standard
+
+  # DISTINGUISH
+  - id: distinguish
+    type: raga_identification
+    instruction: |
+      The engine names a raga. Sing a phrase
+      that could only be that raga — not the other.
+      Same swaras. Different soul.
+    raga_pool: [marwa, sohini]
+    selection: random_no_repeat
+    pakad_plays: 0
+    student_response: sing
+    response_duration_s: 15
+    feedback_layer: standard
+    level_tolerance: guru
+    rounds: 4
+
+  - id: complete
+    type: session_summary
+    show_accuracy: true
+    show_streak: true
+    message: |
+      Sohini and Marwa.
+      Same thaat. Same absent fifth. Opposite worlds.
+      The guru who can sing both — and distinguish both —
+      understands the deepest truth of Hindustani music:
+      the raga is not the notes. It is the life between them.
+
+engine:
+  raga_grammar_active: true
+  pakad_recognition: true
+  ornaments_shown: true
+  cents_display: always
+  accuracy_model: guru
+
+unlock_next:
+  lesson_id: guru-08-raga-rendering
+  requires:
+    min_sessions: 1
+    min_accuracy: 0.55
