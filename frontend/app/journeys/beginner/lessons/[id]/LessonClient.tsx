@@ -126,7 +126,7 @@ function LessonPageInner({
           level="shishya"
           subLevel={1}
           variant="full"
-          style={{ position: 'absolute', inset: 0, zIndex: 0 }}
+          style={{ position: 'absolute', inset: 0, zIndex: 0, pointerEvents: 'none' }}
         />
         <motion.div
           className={styles.centeredMessage}

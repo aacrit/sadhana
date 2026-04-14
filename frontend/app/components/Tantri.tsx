@@ -355,10 +355,10 @@ interface OscilloscopeFrame {
   time: number;
 }
 
-/** Max frames stored — ~1.5s at 60fps. */
-const OSCILLOSCOPE_MAX_FRAMES = 90;
+/** Max frames stored — ~4s at 60fps. Longer buffer = slower scroll. */
+const OSCILLOSCOPE_MAX_FRAMES = 240;
 /** Samples per frame after downsampling (controls waveform density). */
-const OSCILLOSCOPE_SAMPLES_PER_FRAME = 48;
+const OSCILLOSCOPE_SAMPLES_PER_FRAME = 32;
 
 /**
  * Render the voice oscilloscope — a heart-rate-monitor style scrolling
@@ -403,9 +403,9 @@ function renderVoiceOscilloscope(
     // Frame index 0 = oldest, totalFrames-1 = newest
     const frameX = x0 + (fi / OSCILLOSCOPE_MAX_FRAMES) * totalWidth;
 
-    // Age-based fade: older frames become transparent
+    // Age-based fade: older frames become transparent (~4s fade)
     const age = time - frame.time;
-    const fadeAlpha = Math.max(0, 1 - age / 2.0) * Math.min(frame.amp * 2, 1);
+    const fadeAlpha = Math.max(0, 1 - age / 4.5) * Math.max(frame.amp * 1.5, 0.08);
     if (fadeAlpha < 0.02) continue;
 
     const color = getAccuracyColor(frame.band);
@@ -896,27 +896,45 @@ const Tantri = memo(function Tantri({
       renderString(ctx, s, y, w / dpr, timeRef.current, dpr, voiceWaveData);
     }
 
-    // --- Voice oscilloscope: scrolling heart-rate-monitor waveform ---
-    if (voiceWaveData && voiceMap && voiceMap.primaryIndex >= 0 && voiceAmplitude > 0.02) {
-      const visIdx = visibleIndices.indexOf(voiceMap.primaryIndex);
-      if (visIdx >= 0) {
-        const oscY = getStringY(visIdx, totalVisible, h / dpr) * dpr;
-        // Downsample the raw analyser data to OSCILLOSCOPE_SAMPLES_PER_FRAME points
-        const downsampled = new Float32Array(OSCILLOSCOPE_SAMPLES_PER_FRAME);
-        const step = voiceWaveData.length / OSCILLOSCOPE_SAMPLES_PER_FRAME;
-        for (let i = 0; i < OSCILLOSCOPE_SAMPLES_PER_FRAME; i++) {
-          downsampled[i] = voiceWaveData[Math.floor(i * step)] ?? 0;
-        }
-        oscilloscopeRef.current.push({
-          samples: downsampled,
-          y: oscY,
-          band: voiceMap.accuracyBand,
-          amp: voiceAmplitude,
-          time: timeRef.current,
-        });
-        const excess = oscilloscopeRef.current.length - OSCILLOSCOPE_MAX_FRAMES;
-        if (excess > 0) oscilloscopeRef.current.splice(0, excess);
+    // --- Voice oscilloscope: continuously scrolling waveform ---
+    // Always push frames when the analyser is connected, even during silence.
+    // This creates a heart-rate-monitor feel: the line always flows, showing
+    // activity when singing and a gentle flatline when listening.
+    if (voiceWaveData) {
+      // Determine Y position: matched string if singing, Sa string if idle
+      let oscY: number;
+      let band: AccuracyBand = 'rest';
+      let amp = voiceAmplitude;
+
+      if (voiceMap && voiceMap.primaryIndex >= 0 && voiceAmplitude > 0.02) {
+        // Active voice — position at matched string
+        const visIdx = visibleIndices.indexOf(voiceMap.primaryIndex);
+        oscY = visIdx >= 0
+          ? getStringY(visIdx, totalVisible, h / dpr) * dpr
+          : getStringY(0, totalVisible, h / dpr) * dpr;
+        band = voiceMap.accuracyBand;
+      } else {
+        // Idle — position at Sa (bottom string, index 0)
+        oscY = getStringY(0, totalVisible, h / dpr) * dpr;
+        // Very subtle amplitude for the "listening" flatline
+        amp = Math.max(voiceAmplitude, 0.015);
       }
+
+      // Downsample the raw analyser data
+      const downsampled = new Float32Array(OSCILLOSCOPE_SAMPLES_PER_FRAME);
+      const step = voiceWaveData.length / OSCILLOSCOPE_SAMPLES_PER_FRAME;
+      for (let i = 0; i < OSCILLOSCOPE_SAMPLES_PER_FRAME; i++) {
+        downsampled[i] = voiceWaveData[Math.floor(i * step)] ?? 0;
+      }
+      oscilloscopeRef.current.push({
+        samples: downsampled,
+        y: oscY,
+        band,
+        amp,
+        time: timeRef.current,
+      });
+      const excess = oscilloscopeRef.current.length - OSCILLOSCOPE_MAX_FRAMES;
+      if (excess > 0) oscilloscopeRef.current.splice(0, excess);
     }
 
     // Render oscilloscope ABOVE strings — the primary voice feedback layer

@@ -355,23 +355,224 @@ function ListenPhase({ onAdvance, durationMs }: { onAdvance: () => void; duratio
 }
 
 /** Sa calibration phase: waits for voice detection, falls back after timeoutMs. */
-function SaCalibrationPhase({ onAdvance, timeoutMs }: { onAdvance: () => void; timeoutMs: number }) {
-  useEffect(() => {
-    const timer = setTimeout(onAdvance, timeoutMs);
-    return () => clearTimeout(timer);
-  }, [onAdvance, timeoutMs]);
+/**
+ * Map Hz to the nearest Western note name (for display context only).
+ * Hindustani-first: shown as "Your Sa ~ G3 (196 Hz)" — Western note is a bridge.
+ */
+function hzToNoteName(hz: number): string {
+  const noteNames = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+  const semitones = 12 * Math.log2(hz / 440);
+  const midiNote = Math.round(semitones) + 69;
+  const noteIndex = ((midiNote % 12) + 12) % 12;
+  const octave = Math.floor(midiNote / 12) - 1;
+  return `${noteNames[noteIndex]}${octave}`;
+}
 
+const SA_DETECTION_READINGS = 5;
+
+function SaCalibrationPhase({
+  onAdvance,
+  audio,
+  onSaDetected,
+}: {
+  onAdvance: () => void;
+  audio: ReturnType<typeof useLessonAudio>;
+  onSaDetected: (hz: number) => void;
+}) {
+  const [state, setState] = useState<'listening' | 'detected' | 'timeout'>('listening');
+  const [readings, setReadings] = useState(0);
+  const [detectedHz, setDetectedHz] = useState<number | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    // Start Sa detection via the lesson audio hook
+    audio.startSaDetection((hz: number, _clarity: number) => {
+      if (cancelled) return;
+      setDetectedHz(hz);
+      setState('detected');
+      onSaDetected(hz);
+    });
+
+    // Timeout after 30 seconds — give user plenty of time
+    const timer = setTimeout(() => {
+      if (!cancelled && detectedHz === null) {
+        setState('timeout');
+      }
+    }, 30000);
+
+    // Track reading progress via a polling interval
+    // (the actual readings happen inside startSaDetection's onPitch callback)
+    const progressInterval = setInterval(() => {
+      // We can't directly read the internal readings count, so we increment
+      // on each interval tick while the pipeline is active
+      if (!cancelled) {
+        setReadings((prev) => Math.min(prev + 1, SA_DETECTION_READINGS - 1));
+      }
+    }, 2000);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+      clearInterval(progressInterval);
+      audio.stopSaDetection();
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Detected — show the result and let user confirm or retry
+  if (state === 'detected' && detectedHz) {
+    return (
+      <motion.div key="sa_detected" {...phaseTransition} className={lessonStyles.centeredMessage}>
+        <p style={{
+          fontFamily: 'var(--font-serif)',
+          fontSize: 'var(--text-xl)',
+          color: 'var(--text)',
+          marginBottom: 'var(--space-2)',
+        }}>
+          Your Sa
+        </p>
+        <p style={{
+          fontFamily: 'var(--font-mono)',
+          fontSize: 'var(--text-3xl)',
+          color: 'var(--accent)',
+          fontWeight: 600,
+          marginBottom: 'var(--space-1)',
+        }}>
+          {Math.round(detectedHz)} Hz
+        </p>
+        <p style={{
+          fontFamily: 'var(--font-sans)',
+          fontSize: 'var(--text-sm)',
+          color: 'var(--text-3)',
+          marginBottom: 'var(--space-6)',
+        }}>
+          ~ {hzToNoteName(detectedHz)}
+        </p>
+        <p style={{
+          fontFamily: 'var(--font-sans)',
+          fontSize: 'var(--text-sm)',
+          color: 'var(--text-2)',
+          marginBottom: 'var(--space-6)',
+          maxWidth: '320px',
+          lineHeight: 1.6,
+        }}>
+          Does this feel right? This is your home note &mdash; everything will be tuned to it.
+        </p>
+        <div style={{ display: 'flex', gap: 'var(--space-3)', justifyContent: 'center' }}>
+          <button
+            type="button"
+            className={lessonStyles.actionButton}
+            onClick={onAdvance}
+          >
+            Yes, continue
+          </button>
+          <button
+            type="button"
+            className={lessonStyles.actionButton}
+            onClick={() => {
+              setState('listening');
+              setReadings(0);
+              setDetectedHz(null);
+              audio.startSaDetection((hz: number, _clarity: number) => {
+                setDetectedHz(hz);
+                setState('detected');
+                onSaDetected(hz);
+              });
+            }}
+            style={{ background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-2)' }}
+          >
+            Try again
+          </button>
+        </div>
+      </motion.div>
+    );
+  }
+
+  // Timeout — let user skip or retry
+  if (state === 'timeout') {
+    return (
+      <motion.div key="sa_timeout" {...phaseTransition} className={lessonStyles.centeredMessage}>
+        <p>Couldn&rsquo;t detect your pitch clearly.</p>
+        <p style={{
+          fontSize: 'var(--text-xs)',
+          color: 'var(--text-3)',
+          marginTop: 'var(--space-2)',
+          marginBottom: 'var(--space-6)',
+          maxWidth: '300px',
+          lineHeight: 1.6,
+        }}>
+          Make sure your microphone is working and try humming a steady note. We&rsquo;ll use C4 (262 Hz) as a default if you skip.
+        </p>
+        <div style={{ display: 'flex', gap: 'var(--space-3)', justifyContent: 'center' }}>
+          <button
+            type="button"
+            className={lessonStyles.actionButton}
+            onClick={() => {
+              setState('listening');
+              setReadings(0);
+              audio.startSaDetection((hz: number, _clarity: number) => {
+                setDetectedHz(hz);
+                setState('detected');
+                onSaDetected(hz);
+              });
+            }}
+          >
+            Try again
+          </button>
+          <button
+            type="button"
+            className={lessonStyles.actionButton}
+            onClick={onAdvance}
+            style={{ background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-2)' }}
+          >
+            Skip (use default)
+          </button>
+        </div>
+      </motion.div>
+    );
+  }
+
+  // Listening state — show progress
   return (
     <motion.div key="sa_calibration" {...phaseTransition} className={lessonStyles.centeredMessage}>
-      <p>Sing or hum a comfortable note.</p>
-      <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-3)', marginTop: 'var(--space-2)' }}>
-        Listening for your Sa...
+      <p style={{
+        fontFamily: 'var(--font-serif)',
+        fontSize: 'var(--text-lg)',
+        color: 'var(--text)',
+        marginBottom: 'var(--space-4)',
+      }}>
+        Find your Sa
       </p>
+      <p style={{
+        fontSize: 'var(--text-sm)',
+        color: 'var(--text-2)',
+        marginBottom: 'var(--space-4)',
+        maxWidth: '320px',
+        lineHeight: 1.6,
+      }}>
+        Hum or sing a comfortable note. Hold it steady. This becomes your home note.
+      </p>
+
+      {/* Pulsing listening indicator */}
+      <div className={lessonStyles.saListeningPulse}>
+        <div className={lessonStyles.saListeningPulseInner} />
+      </div>
+
+      <p style={{
+        fontFamily: 'var(--font-mono)',
+        fontSize: 'var(--text-xs)',
+        color: 'var(--text-3)',
+        marginBottom: 'var(--space-6)',
+      }}>
+        Listening...
+      </p>
+
       <button
         type="button"
         className={lessonStyles.actionButton}
         onClick={onAdvance}
-        style={{ marginTop: 'var(--space-8)' }}
+        style={{ background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-3)', fontSize: 'var(--text-xs)' }}
       >
         Skip
       </button>
@@ -504,6 +705,16 @@ export default function BeginnerPage() {
       const nextPhase = LESSON_PHASES[nextIndex];
       if (nextPhase !== undefined) {
         setPhase(nextPhase);
+      }
+    }
+  }, [currentPhaseIndex]);
+
+  const goBackPhase = useCallback(() => {
+    const prevIndex = currentPhaseIndex - 1;
+    if (prevIndex >= 0) {
+      const prevPhase = LESSON_PHASES[prevIndex];
+      if (prevPhase !== undefined) {
+        setPhase(prevPhase);
       }
     }
   }, [currentPhaseIndex]);
@@ -813,6 +1024,9 @@ export default function BeginnerPage() {
             position: 'absolute', inset: 0, zIndex: 0,
             opacity: tantriActive ? 0.5 : 0.2,
             transition: 'opacity 0.3s ease-out',
+            // Only allow string interaction during practice phases.
+            // During non-practice phases, Tantri is visual-only background.
+            pointerEvents: isVoicePhase ? 'auto' : 'none',
           }}
         />
 
@@ -873,9 +1087,19 @@ export default function BeginnerPage() {
               <ListenPhase onAdvance={advancePhase} durationMs={8000} />
             )}
 
-            {/* SA CALIBRATION phase — timeout after 15s if voice detection doesn't fire */}
+            {/* SA CALIBRATION phase — real voice detection with confirm/adjust */}
             {phase === 'sa_calibration' && (
-              <SaCalibrationPhase onAdvance={advancePhase} timeoutMs={15000} />
+              <SaCalibrationPhase
+                onAdvance={advancePhase}
+                audio={audio}
+                onSaDetected={(hz: number) => {
+                  setSaHz(hz);
+                  // Persist to profile if signed in
+                  if (authUser) {
+                    updateSa(authUser.id, hz);
+                  }
+                }}
+              />
             )}
 
             {/* MEET BHOOPALI phase — swara introduction */}
@@ -1126,6 +1350,35 @@ export default function BeginnerPage() {
             sargam="Ga Pa Dha Pa Ga"
             onDismiss={handlePakadDismiss}
           />
+        )}
+
+        {/* Lesson navigation — back / skip */}
+        {phase !== 'complete' && phase !== 'listen' && (
+          <div className={lessonStyles.lessonNav}>
+            <button
+              type="button"
+              className={lessonStyles.navButton}
+              onClick={goBackPhase}
+              disabled={currentPhaseIndex <= 0}
+              aria-label="Go to previous phase"
+            >
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                <path d="M9 11L5 7L9 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              Back
+            </button>
+            <button
+              type="button"
+              className={lessonStyles.navButton}
+              onClick={advancePhase}
+              aria-label="Skip to next phase"
+            >
+              Skip
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                <path d="M5 3L9 7L5 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
+          </div>
         )}
 
         {/* Progress dots */}
