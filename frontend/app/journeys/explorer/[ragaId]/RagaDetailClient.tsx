@@ -412,6 +412,21 @@ export default function RagaDetailClient({ ragaId }: RagaDetailClientProps) {
         </motion.div>
       )}
 
+      {/* Practice button */}
+      <motion.div variants={fadeUp} style={{ width: '100%', marginBottom: 'var(--space-6)' }}>
+        <Link
+          href={`/journeys/explorer/${ragaId}/practice`}
+          className={styles.practiceLink}
+          aria-label={`Practice ${raga.name}`}
+        >
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <circle cx="8" cy="8" r="6" stroke="currentColor" strokeWidth="1.5" />
+            <path d="M7 5.5L10.5 8L7 10.5V5.5Z" fill="currentColor" />
+          </svg>
+          Practice {raga.name}
+        </Link>
+      </motion.div>
+
       <motion.div variants={fadeUp}>
         <Link href="/journeys/explorer" className={styles.backLink} aria-label="Back to Explorer">
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
