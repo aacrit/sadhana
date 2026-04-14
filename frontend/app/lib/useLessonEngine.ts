@@ -96,6 +96,7 @@ export interface LessonEngineControls {
   // Actions
   begin(): void;
   advancePhase(): void;
+  goBackPhase(): void;
   exitLesson(): void;
   setSaHz(hz: number): void;
   grantMic(): Promise<void>;
@@ -259,6 +260,18 @@ export function useLessonEngine(
     } else {
       setState('lesson_complete');
     }
+  }, [lesson, phaseIndex]);
+
+  const goBackPhase = useCallback(() => {
+    if (!lesson || phaseIndex <= 0) return;
+
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+
+    setPhaseIndex(phaseIndex - 1);
+    setState('phase_active');
   }, [lesson, phaseIndex]);
 
   const exitLesson = useCallback(() => {
@@ -459,6 +472,7 @@ export function useLessonEngine(
 
     begin,
     advancePhase,
+    goBackPhase,
     exitLesson,
     setSaHz,
     grantMic,

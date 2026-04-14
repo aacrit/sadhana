@@ -140,6 +140,41 @@
   outline-offset: 2px;
 }
 
+/* -- Lesson navigation (back/skip) ------------------------------------ */
+
+.lessonNav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-2) 0;
+  margin-top: auto;
+}
+
+.navButton {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  color: var(--text-3);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: var(--space-2) var(--space-3);
+  border-radius: 6px;
+  transition: color 0.15s, background 0.15s;
+}
+
+.navButton:hover {
+  color: var(--text-2);
+  background: var(--bg-2);
+}
+
+.navButton:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
 /* -- Progress dots (bottom) ------------------------------------------ */
 
 .progressDots {

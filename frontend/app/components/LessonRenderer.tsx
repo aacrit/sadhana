@@ -481,6 +481,35 @@ export default function LessonRenderer({
         />
       )}
 
+      {/* Lesson navigation — back / skip */}
+      {state !== 'lesson_complete' && phase.type !== 'session_summary' && phase.type !== 'tanpura_drone' && (
+        <div className={styles.lessonNav}>
+          <button
+            type="button"
+            className={styles.navButton}
+            onClick={engine.goBackPhase}
+            disabled={phaseIndex <= 0}
+            aria-label="Go to previous phase"
+          >
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+              <path d="M9 11L5 7L9 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            Back
+          </button>
+          <button
+            type="button"
+            className={styles.navButton}
+            onClick={engine.advancePhase}
+            aria-label="Skip to next phase"
+          >
+            Skip
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+              <path d="M5 3L9 7L5 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
+        </div>
+      )}
+
       {/* Progress dots */}
       {state !== 'lesson_complete' && phase.type !== 'session_summary' && (
         <nav className={styles.progressDots} aria-label="Lesson progress">
