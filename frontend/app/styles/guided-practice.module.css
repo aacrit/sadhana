@@ -1,0 +1,539 @@
+/**
+ * guided-practice.module.css — Guided raga practice with star scoring.
+ *
+ * Single-column, centered. Stage indicator top, Tantri + voice middle,
+ * controls bottom. Ragamala aesthetic: sparse, focused, nothing extra.
+ */
+
+/* -- Page layout ------------------------------------------------------ */
+
+.page {
+  position: relative;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: var(--space-4);
+}
+
+/* -- Back link -------------------------------------------------------- */
+
+.backLink {
+  align-self: flex-start;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  color: var(--text-3);
+  text-decoration: none;
+  padding: var(--space-2);
+  margin-bottom: var(--space-4);
+  border-radius: var(--radius-sm);
+  min-height: var(--touch-min);
+  min-width: var(--touch-min);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color var(--dur-fast) var(--ease-out);
+}
+
+.backLink:hover {
+  color: var(--text-2);
+}
+
+/* -- Stage header ----------------------------------------------------- */
+
+.stageHeader {
+  text-align: center;
+  margin-bottom: var(--space-4);
+}
+
+.ragaTitle {
+  font-family: var(--font-serif);
+  font-size: var(--text-lg);
+  font-weight: var(--weight-light);
+  color: var(--text-3);
+  margin-bottom: var(--space-1);
+}
+
+.stageTitle {
+  font-family: var(--font-serif);
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-light);
+  color: var(--text);
+  margin-bottom: var(--space-2);
+}
+
+.stageSubtitle {
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  color: var(--text-3);
+}
+
+/* -- Stage progress bar ----------------------------------------------- */
+
+.stageProgress {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-6);
+}
+
+.stageDot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.stageDotCircle {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-full);
+  border: 2px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-3);
+  transition: border-color var(--dur-fast) var(--ease-out),
+              background var(--dur-fast) var(--ease-out),
+              color var(--dur-fast) var(--ease-out);
+}
+
+.stageDotActive {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.stageDotComplete {
+  border-color: var(--correct);
+  background: var(--correct-dim);
+  color: var(--correct);
+}
+
+.stageDotLabel {
+  font-family: var(--font-sans);
+  font-size: 10px;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-widest);
+}
+
+.stageConnector {
+  width: 24px;
+  height: 2px;
+  background: var(--border);
+  margin-bottom: var(--space-4);
+}
+
+.stageConnectorComplete {
+  background: var(--correct);
+}
+
+/* -- Target display --------------------------------------------------- */
+
+.targetDisplay {
+  text-align: center;
+  padding: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+.targetSargam {
+  font-family: var(--font-mono);
+  font-size: var(--text-lg);
+  color: var(--text);
+  letter-spacing: var(--tracking-wide);
+  line-height: var(--leading-relaxed);
+}
+
+.currentSwara {
+  font-family: var(--font-serif);
+  font-size: var(--text-3xl);
+  font-weight: var(--weight-light);
+  color: var(--accent);
+  margin-bottom: var(--space-2);
+}
+
+.swaraCounter {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-3);
+}
+
+/* -- Content area (Tantri / voice viz) -------------------------------- */
+
+.contentArea {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  min-height: 200px;
+}
+
+/* -- Listen indicator ------------------------------------------------- */
+
+.listenIndicator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-6);
+}
+
+.listenPulse {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-full);
+  border: 2px solid var(--accent);
+  animation: listenPulse 2s var(--ease-in-out) infinite;
+}
+
+@keyframes listenPulse {
+  0%, 100% { transform: scale(1); opacity: 0.5; }
+  50% { transform: scale(1.15); opacity: 1; }
+}
+
+.listenText {
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  color: var(--text-3);
+  font-style: italic;
+}
+
+/* -- Singing indicator ------------------------------------------------ */
+
+.singingIndicator {
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.singingDot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-full);
+  background: var(--accent);
+  animation: singingBlink 1s ease-in-out infinite;
+}
+
+@keyframes singingBlink {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+
+/* -- Action buttons --------------------------------------------------- */
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4) 0;
+}
+
+.actionButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-3) var(--space-8);
+  min-height: var(--touch-min);
+  min-width: 120px;
+  border: 1px solid var(--text-3);
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-wide);
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-out),
+              border-color var(--dur-fast) var(--ease-out),
+              transform var(--dur-fast) var(--spring);
+}
+
+.actionButton:hover {
+  background: var(--bg-4);
+  border-color: var(--text-2);
+  transform: translateY(-1px);
+}
+
+.actionButton:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.actionButtonSecondary {
+  composes: actionButton;
+  border-color: var(--border);
+  color: var(--text-3);
+  font-size: var(--text-sm);
+}
+
+.actionButtonSecondary:hover {
+  color: var(--text-2);
+}
+
+.actionsRow {
+  display: flex;
+  gap: var(--space-3);
+}
+
+/* -- Star display ----------------------------------------------------- */
+
+.starDisplay {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: var(--space-4) 0;
+}
+
+.star {
+  font-size: var(--text-2xl);
+  color: var(--border);
+  transition: color var(--dur-fast) var(--ease-out),
+              transform var(--dur-fast) var(--spring);
+}
+
+.starFilled {
+  color: var(--accent);
+}
+
+.starLarge {
+  font-size: var(--text-3xl);
+}
+
+/* -- Stage result ----------------------------------------------------- */
+
+.stageResult {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-6);
+  text-align: center;
+}
+
+.resultLabel {
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  color: var(--text-2);
+}
+
+.scoreText {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-3);
+}
+
+/* -- Complete screen -------------------------------------------------- */
+
+.completeScreen {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-6);
+  text-align: center;
+  padding: var(--space-6);
+}
+
+.completeTitle {
+  font-family: var(--font-serif);
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-light);
+  color: var(--text);
+}
+
+.completeMessage {
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  color: var(--text-2);
+  line-height: var(--leading-relaxed);
+  max-width: 36ch;
+}
+
+.stageBreakdown {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  width: 100%;
+  max-width: 320px;
+}
+
+.breakdownRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+}
+
+.breakdownLabel {
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  color: var(--text-2);
+}
+
+.breakdownStars {
+  display: flex;
+  gap: var(--space-1);
+}
+
+.breakdownStar {
+  font-size: var(--text-sm);
+  color: var(--border);
+}
+
+.breakdownStarFilled {
+  color: var(--accent);
+}
+
+.overallStars {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin: var(--space-4) 0;
+}
+
+.overallLabel {
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-widest);
+}
+
+.xpBadge {
+  font-family: var(--font-mono);
+  font-size: var(--text-lg);
+  color: var(--accent);
+  font-weight: var(--weight-medium);
+}
+
+.passLabel {
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  color: var(--correct);
+  font-weight: var(--weight-medium);
+}
+
+.failLabel {
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  color: var(--needs-work);
+}
+
+/* -- Idle screen ------------------------------------------------------ */
+
+.idleScreen {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-6);
+  text-align: center;
+}
+
+.idleTitle {
+  font-family: var(--font-serif);
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-light);
+  color: var(--text);
+}
+
+.idleSubtitle {
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  color: var(--text-2);
+  line-height: var(--leading-relaxed);
+  max-width: 36ch;
+}
+
+.stagePreview {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  width: 100%;
+  max-width: 280px;
+}
+
+.stagePreviewItem {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  color: var(--text-3);
+}
+
+.stagePreviewNumber {
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-3);
+  flex-shrink: 0;
+}
+
+/* -- Voice viz slot --------------------------------------------------- */
+
+.voiceViz {
+  width: 100%;
+  margin-top: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
+/* -- Reduced motion --------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .listenPulse,
+  .singingDot {
+    animation: none;
+    opacity: 0.7;
+  }
+
+  .star,
+  .stageDotCircle {
+    transition: none;
+  }
+}
+
+/* -- Responsive ------------------------------------------------------- */
+
+@media (min-width: 640px) {
+  .page {
+    padding: var(--space-6);
+  }
+
+  .stageTitle {
+    font-size: var(--text-3xl);
+  }
+
+  .currentSwara {
+    font-size: var(--text-4xl);
+  }
+
+  .actionsRow {
+    flex-direction: row;
+  }
+}
