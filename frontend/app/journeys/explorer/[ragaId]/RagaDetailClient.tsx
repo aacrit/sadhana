@@ -18,6 +18,10 @@ import { getRagaById } from '@/engine/theory';
 import type { SwaraNote, Prahara, Rasa, RagaJati } from '@/engine/theory/types';
 import { useLessonAudio } from '../../../lib/lesson-audio';
 import { useTimbreSelection } from '../../../components/VoiceTimbreSelector';
+import { useAuth } from '../../../lib/auth';
+import Tantri from '../../../components/Tantri';
+import type { TantriPlayEvent } from '@/engine/interaction/tantri';
+import { playSwaraNote, ensureAudioReady } from '@/engine/synthesis/swara-voice';
 import styles from '../../../styles/explorer-detail.module.css';
 
 // ---------------------------------------------------------------------------
@@ -112,12 +116,14 @@ interface RagaDetailClientProps {
 
 export default function RagaDetailClient({ ragaId }: RagaDetailClientProps) {
   const raga = getRagaById(ragaId);
+  const { profile } = useAuth();
+  const saHz = profile?.saHz ?? 261.63;
 
   const [playingId, setPlayingId] = useState<string | null>(null);
   const [westernOpen, setWesternOpen] = useState(false);
   const [timbre] = useTimbreSelection();
 
-  const audio = useLessonAudio(261.63, ragaId, timbre);
+  const audio = useLessonAudio(saHz, ragaId, timbre);
   const playingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -156,6 +162,20 @@ export default function RagaDetailClient({ ragaId }: RagaDetailClientProps) {
       });
     },
     [audio, playingId],
+  );
+
+  // Tantri string interaction — tap to hear swara
+  const handleStringTrigger = useCallback(
+    async (event: TantriPlayEvent) => {
+      await ensureAudioReady();
+      const note = event.swara;
+      const octave = event.octave ?? 4;
+      playSwaraNote({ swara: note, octave }, saHz, {
+        duration: 0.8,
+        volume: (event.velocity ?? 0.7) * 0.5,
+      });
+    },
+    [saHz],
   );
 
   if (!raga) {
@@ -223,6 +243,28 @@ export default function RagaDetailClient({ ragaId }: RagaDetailClientProps) {
       <motion.p className={styles.description} variants={fadeUp}>
         {raga.description}
       </motion.p>
+
+      {/* Tantri compact — interactive swara strings for this raga */}
+      <motion.div
+        variants={fadeUp}
+        style={{
+          width: '100%',
+          maxWidth: 'var(--max-width, 720px)',
+          marginBottom: 'var(--space-4)',
+          borderRadius: 'var(--radius-lg)',
+          overflow: 'hidden',
+          border: '1px solid var(--border)',
+        }}
+      >
+        <Tantri
+          saHz={saHz}
+          ragaId={ragaId}
+          level="sadhaka"
+          subLevel={1}
+          variant="compact"
+          onStringTrigger={handleStringTrigger}
+        />
+      </motion.div>
 
       <motion.section className={styles.section} variants={fadeUp} aria-label="Ascending and descending scales">
         <h2 className={styles.sectionTitle}>Aroha &amp; Avaroha</h2>

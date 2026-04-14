@@ -145,6 +145,16 @@ export interface TantriStringState {
 
   /** Number of points the _waveformBuffer was last allocated for. */
   _waveformBufferSize: number;
+
+  /**
+   * Pre-allocated blend buffer for renderString() displacement values.
+   * Reused across frames to eliminate per-frame Float64Array allocation.
+   * Resized only when numPoints changes (canvas resize — infrequent).
+   */
+  _blendBuffer: Float64Array | null;
+
+  /** Number of points the _blendBuffer was last allocated for. */
+  _blendBufferSize: number;
 }
 
 /**
@@ -340,6 +350,8 @@ export function createTantriField(
       isSamvadi: raga ? raga.samvadi === def.symbol : false,
       _waveformBuffer: null,
       _waveformBufferSize: 0,
+      _blendBuffer: null,
+      _blendBufferSize: 0,
     };
   });
 
@@ -352,6 +364,29 @@ export function createTantriField(
     swaraIndex: swaraIndex as Record<Swara, number>,
   };
 }
+
+// ---------------------------------------------------------------------------
+// Pre-allocated VoiceMapResult — reused every frame to avoid GC pressure.
+// The sympathetic array is grown once and reused via length tracking.
+// ---------------------------------------------------------------------------
+
+const _voiceResult: {
+  primaryIndex: number;
+  primarySwara: Swara | null;
+  centsDev: number;
+  accuracyBand: AccuracyBand;
+  inRaga: boolean;
+  sympathetic: [number, number][];
+  _sympatheticLen: number;
+} = {
+  primaryIndex: -1,
+  primarySwara: null,
+  centsDev: 0,
+  accuracyBand: 'rest',
+  inRaga: false,
+  sympathetic: [],
+  _sympatheticLen: 0,
+};
 
 // ---------------------------------------------------------------------------
 // Voice → String mapping
@@ -378,15 +413,16 @@ export function mapVoiceToStrings(
   clarity: number,
   field: TantriField,
 ): VoiceMapResult {
+  const r = _voiceResult;
+
   if (hz <= 0 || clarity <= 0) {
-    return {
-      primaryIndex: -1,
-      primarySwara: null,
-      centsDev: 0,
-      accuracyBand: 'rest',
-      inRaga: false,
-      sympathetic: [],
-    };
+    r.primaryIndex = -1;
+    r.primarySwara = null;
+    r.centsDev = 0;
+    r.accuracyBand = 'rest';
+    r.inRaga = false;
+    r.sympathetic.length = 0;
+    return r;
   }
 
   // Compute cents from Sa, normalized to one octave [0, 1200)
@@ -417,11 +453,15 @@ export function mapVoiceToStrings(
   }
 
   const primaryString = primaryIndex >= 0 ? field.strings[primaryIndex]! : null;
-  const accuracyBand = getAccuracyBand(Math.abs(primaryCentsDev));
-  const inRaga = primaryString ? primaryString.inRaga : false;
 
-  // Compute sympathetic vibrations
-  const sympathetic: [number, number][] = [];
+  r.primaryIndex = primaryIndex;
+  r.primarySwara = primaryString ? primaryString.swara : null;
+  r.centsDev = primaryCentsDev;
+  r.accuracyBand = getAccuracyBand(Math.abs(primaryCentsDev));
+  r.inRaga = primaryString ? primaryString.inRaga : false;
+
+  // Compute sympathetic vibrations — reuse the pre-allocated array
+  let symLen = 0;
   if (primaryIndex >= 0) {
     for (let i = 0; i < field.strings.length; i++) {
       if (i === primaryIndex) continue;
@@ -430,19 +470,21 @@ export function mapVoiceToStrings(
         field.strings[i]!.definition.centsFromSa,
       );
       if (amp > 0) {
-        sympathetic.push([i, amp * clarity]);
+        // Grow the array only if needed (rare after warmup)
+        if (symLen < r.sympathetic.length) {
+          r.sympathetic[symLen]![0] = i;
+          r.sympathetic[symLen]![1] = amp * clarity;
+        } else {
+          r.sympathetic.push([i, amp * clarity]);
+        }
+        symLen++;
       }
     }
   }
+  // Trim excess entries from previous frame without allocating
+  r.sympathetic.length = symLen;
 
-  return {
-    primaryIndex,
-    primarySwara: primaryString ? primaryString.swara : null,
-    centsDev: primaryCentsDev,
-    accuracyBand,
-    inRaga,
-    sympathetic,
-  };
+  return r;
 }
 
 // ---------------------------------------------------------------------------

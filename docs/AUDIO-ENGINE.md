@@ -610,3 +610,70 @@ The service worker (`frontend/public/sw.js`) implements cache-first strategy for
 - Subsequent fetches serve from cache (offline-capable)
 - External CDN requests (WebAudioFont presets from `surikov.github.io`) are not cached by the SW (loaded via script tag, not fetch)
 - Stale caches from previous versions are automatically cleaned on SW activation
+
+---
+
+## TantriVoice — Vocal Synthesis Engine
+
+Source: `engine/synthesis/voice/` (index.ts, source-model.ts, formants.ts, tract-model.ts, voice-presets.ts, ornament-voice.ts, raga-voice.ts, composition.ts, composition-player.ts)
+
+Formant-based vocal synthesis using the Fant source-filter model, implemented entirely in the Web Audio API at $0 cost. Produces singing voice for all 12 Hindustani swaras across 4 voice types with raga-aware ornamentation.
+
+### Signal Chain
+
+```
+GlottalSource (PeriodicWave, LF model, output gain 2.0)
+  -> VocalTract (5 series peaking BiquadFilters + singer's formant + nasal notch)
+    -> ADSR GainNode
+      -> DynamicsCompressorNode (soft limiter, prevents formant stack clipping)
+        -> destination
+```
+
+15 audio nodes per voice instance. Touch-to-sound latency: ~3-6ms.
+
+### Voice Types
+
+| VoiceType | Typical range | Character |
+|-----------|--------------|-----------|
+| `'baritone'` | Low, dark | Classical male |
+| `'tenor'` | Mid male | Bright, carrying |
+| `'alto'` | Mid female | Warm, mellow |
+| `'soprano'` | High female | Clear, forward |
+
+`inferVoiceType(hz)` maps frequency to the closest voice type.
+
+### Gain Staging (critical — corrected in commit 286e257)
+
+PeriodicWave normalization produces peak 1.0 / RMS ~0.25. Source output gain is set to **2.0** to compensate. Formant gainDb values are scaled for **series peaking filters** (2–12 dB), not the speech-spectroscopy values (15–22 dB) which are only valid for parallel filter banks. The DynamicsCompressor at chain end acts as a soft limiter to prevent clipping when formant peaks align.
+
+### Swara-to-Vowel Mapping
+
+Each swara is assigned a characteristic vowel from Indian vocal tradition (e.g., Sa = 'aa', Re = 'ri', Ma = 'ma'). The `SWARA_VOWEL_MAP` in `formants.ts` drives formant selection per note.
+
+### Primary API
+
+```typescript
+import { createVocalSynth } from '@/engine/synthesis/voice';
+
+const synth = await createVocalSynth('tenor');
+await synth.playSwara('Ga', 196);
+await synth.playPakad(yamanRaga, 196, { ornamentLevel: 'natural' });
+synth.dispose();
+```
+
+| Export | Kind | Description |
+|--------|------|-------------|
+| `createVocalSynth(voiceType, ctx?)` | fn | Creates VocalSynth instance. Constructs audio graph. |
+| `VocalSynth` | interface | `playSwara`, `playSwaraNote`, `playPhrase`, `playPakad`, `playAroha`, `playAvaroha`, `dispose` |
+| `PlayVocalOptions` | interface | duration, volume, attack, release, ornament, vowel, ragaId |
+| `PlayVocalPhraseOptions` | interface | tempo, gap, volume, ornamentLevel, legato, ragaId |
+| `inferVoiceType(hz)` | fn | Map Sa Hz to closest voice type |
+| `createCompositionPlayer(synth, ctx)` | fn | Full composition engine for structured songs |
+
+### Composition Engine
+
+`composition.ts` + `composition-player.ts` provide structured song/alap playback: `Composition`, `CompositionSection`, `CompositionLine`, `BeatNote`. Helpers: `createArohaAvarohaBandish`, `createPakadBandish`, `createSongComposition`.
+
+### Integration with Tiered Instrument System
+
+When `timbre` is `'voice-male'` or `'voice-female'`, `useLessonAudio` routes playback to `createVocalSynth` with the matching voice type via `playVocalSwaraNote`. Harmonium tier cascade is bypassed entirely for vocal timbre.
