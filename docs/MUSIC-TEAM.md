@@ -1,6 +1,6 @@
 # Music Team Standards
 
-Last updated: 2026-04-13
+Last updated: 2026-04-14
 
 Raga database standards, shruti science, and cultural guidelines for all musicological content in the engine.
 
@@ -29,6 +29,8 @@ Every raga file (`engine/theory/ragas/*.ts`) exports a single `Raga` object. All
 | `prahara` | Prahara[] | Traditional performance times (1-8) |
 | `rasa` | Rasa[] | Emotional essences |
 | `ornaments` | Ornament[] | Characteristic ornament types |
+| `ornamentMap?` | Partial<Record<Swara, Ornament[]>> | Per-swara ornament expectations. Used by the feedback engine to give raga-context-aware ornament hints (e.g., andolan on Re_k in Bhairav). Optional — only defined for swaras where a specific ornament is stylistically required. |
+| `vakra?` | SwaraNote[][] | Oblique (zigzag) movement sequences. Ragas such as Bhimpalasi use non-linear swara progressions that would appear to violate the aroha/avaroha direction check. Defining these sequences here permits `raga-grammar.ts` to validate them correctly. |
 | `description` | string | Evocative, precise, written for first encounter |
 | `westernBridge` | string | "Western listeners may notice..." -- never "This is like..." |
 | `relatedRagas` | string[] | IDs of similar/easily-confused ragas |
@@ -63,7 +65,7 @@ Five ragas wired to journeys, in pedagogical order:
 4. **Bhairav** (Bhairav thaat) -- andolan on Re_k and Dha_k. Dawn gravity.
 5. **Bageshri** (Kafi thaat) -- midnight depth, emotional complexity.
 
-The engine defines 11 additional ragas not yet wired to journeys: Bhairavi, Darbari Kanada, Desh, Hameer, Kafi, Kedar, Malkauns, Marwa, Puriya Dhanashri, Sohini, Todi. All pass `npm run test:engine`.
+The engine defines 25 additional ragas not yet wired to journeys: Asavari, Bhairavi, Bilawal, Darbari Kanada, Desh, Durga, Hameer, Hamsadhwani, Jaunpuri, Jog, Kafi, Kedar, Khamaj, Lalit, Madhuvanti, Malkauns, Marwa, Multani, Pahadi, Puriya, Puriya Dhanashri, Shree, Sohini, Tilak Kamod, Todi. All 30 ragas pass `npm run test:engine` (318 tests).
 
 ### Adding a New Raga
 

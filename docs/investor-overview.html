@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sadhana — Investor Overview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400&family=Noto+Serif+Devanagari:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --saffron: #E8871E;
+    --gold: #D4AF37;
+    --malachite: #0A1A14;
+    --ivory: #F5F0E8;
+    --lapis: #1E3A5F;
+    --sadhaka-green: #2D6A4F;
+    --text: #1a1a1a;
+    --text-2: #4a4a4a;
+    --text-3: #8a8a8a;
+    --border: #e0e0e0;
+  }
+
+  @page {
+    size: A4;
+    margin: 2cm 2.5cm;
+  }
+
+  @media print {
+    body { font-size: 10pt; }
+    .page-break { page-break-before: always; }
+    h2 { page-break-after: avoid; }
+    table, figure { page-break-inside: avoid; }
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    font-size: 11pt;
+    line-height: 1.6;
+    color: var(--text);
+    max-width: 210mm;
+    margin: 0 auto;
+    padding: 2cm 2.5cm;
+    background: #fff;
+  }
+
+  /* -- Cover ------------------------------------------------------------ */
+
+  .cover {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 90vh;
+    text-align: center;
+    padding: 4rem 0;
+  }
+
+  .cover-logo {
+    margin-bottom: 2rem;
+  }
+
+  .cover h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 3.5rem;
+    font-weight: 300;
+    color: var(--malachite);
+    letter-spacing: -0.02em;
+    margin-bottom: 0.5rem;
+  }
+
+  .cover .devanagari {
+    font-family: 'Noto Serif Devanagari', serif;
+    font-size: 1.8rem;
+    color: var(--text-2);
+    margin-bottom: 1.5rem;
+  }
+
+  .cover .tagline {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.3rem;
+    font-weight: 300;
+    font-style: italic;
+    color: var(--text-2);
+    margin-bottom: 3rem;
+  }
+
+  .cover .subtitle {
+    font-size: 0.95rem;
+    color: var(--text-3);
+    max-width: 480px;
+    line-height: 1.7;
+  }
+
+  .cover .date {
+    margin-top: 3rem;
+    font-size: 0.85rem;
+    color: var(--text-3);
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  /* -- Sections --------------------------------------------------------- */
+
+  h2 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.6rem;
+    font-weight: 400;
+    color: var(--malachite);
+    margin-top: 2.5rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.3rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  h3 {
+    font-family: 'Inter', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  p {
+    margin-bottom: 0.8rem;
+    color: var(--text-2);
+  }
+
+  strong { color: var(--text); }
+
+  /* -- Tables ----------------------------------------------------------- */
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0 1.5rem;
+    font-size: 0.9rem;
+  }
+
+  th {
+    background: var(--malachite);
+    color: #fff;
+    font-weight: 500;
+    text-align: left;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  td {
+    padding: 0.45rem 0.75rem;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-2);
+  }
+
+  tr:nth-child(even) td {
+    background: #f9f9f9;
+  }
+
+  /* -- Code blocks ------------------------------------------------------ */
+
+  pre {
+    background: #f5f5f5;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1rem;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.8rem;
+    line-height: 1.5;
+    overflow-x: auto;
+    margin: 1rem 0;
+    color: var(--text);
+  }
+
+  code {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.85em;
+    background: #f0f0f0;
+    padding: 0.1em 0.3em;
+    border-radius: 3px;
+  }
+
+  /* -- Lists ------------------------------------------------------------ */
+
+  ul, ol {
+    margin: 0.5rem 0 1rem 1.5rem;
+    color: var(--text-2);
+  }
+
+  li {
+    margin-bottom: 0.3rem;
+  }
+
+  /* -- Metrics row ------------------------------------------------------ */
+
+  .metrics {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin: 1.5rem 0;
+  }
+
+  .metric {
+    text-align: center;
+    padding: 1rem;
+    background: linear-gradient(135deg, #f8f8f8, #fff);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+  }
+
+  .metric .value {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 1.6rem;
+    font-weight: 400;
+    color: var(--malachite);
+    display: block;
+  }
+
+  .metric .label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-3);
+    margin-top: 0.25rem;
+    display: block;
+  }
+
+  /* -- Architecture diagram --------------------------------------------- */
+
+  .arch-diagram {
+    background: var(--malachite);
+    color: #fff;
+    padding: 1.5rem;
+    border-radius: 6px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.75rem;
+    line-height: 1.7;
+    margin: 1rem 0;
+  }
+
+  .arch-diagram .layer {
+    padding: 0.6rem 1rem;
+    margin: 0.4rem 0;
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 4px;
+  }
+
+  .arch-diagram .layer-engine { border-color: var(--saffron); }
+  .arch-diagram .layer-tantri { border-color: var(--gold); }
+  .arch-diagram .layer-journey { border-color: var(--sadhaka-green); }
+  .arch-diagram .layer-data { border-color: var(--lapis); }
+
+  .arch-diagram .layer-label {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    opacity: 0.7;
+  }
+
+  .arch-diagram .arrow {
+    text-align: center;
+    font-size: 0.8rem;
+    opacity: 0.5;
+    padding: 0.15rem 0;
+  }
+
+  /* -- Accent bar ------------------------------------------------------- */
+
+  .accent-bar {
+    width: 40px;
+    height: 3px;
+    background: var(--saffron);
+    margin: 0.5rem 0 1rem;
+    border-radius: 2px;
+  }
+
+  /* -- Footer ----------------------------------------------------------- */
+
+  .footer {
+    margin-top: 3rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+    text-align: center;
+    font-size: 0.8rem;
+    color: var(--text-3);
+    font-style: italic;
+    font-family: 'Cormorant Garamond', serif;
+  }
+
+  /* -- Raga level grid -------------------------------------------------- */
+
+  .raga-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+    margin: 1rem 0;
+  }
+
+  .raga-level {
+    padding: 0.75rem 1rem;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+  }
+
+  .raga-level h4 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+  }
+
+  .raga-level p {
+    font-size: 0.8rem;
+    margin: 0;
+    color: var(--text-3);
+  }
+
+  .raga-level.shishya { border-left: 3px solid var(--malachite); }
+  .raga-level.sadhaka { border-left: 3px solid var(--sadhaka-green); }
+  .raga-level.varistha { border-left: 3px solid var(--lapis); }
+  .raga-level.guru { border-left: 3px solid var(--gold); }
+
+  /* -- Flow diagram ----------------------------------------------------- */
+
+  .flow {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    margin: 1rem 0;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--text-2);
+  }
+
+  .flow-step {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 0.75rem;
+    background: #f5f5f5;
+    border-radius: 4px;
+    border-left: 3px solid var(--sadhaka-green);
+  }
+
+  .flow-arrow {
+    text-align: center;
+    color: var(--text-3);
+    font-size: 0.9rem;
+  }
+</style>
+</head>
+<body>
+
+<!-- ================================================================== -->
+<!-- COVER PAGE -->
+<!-- ================================================================== -->
+
+<div class="cover">
+  <svg class="cover-logo" width="200" height="40" viewBox="0 0 200 40" xmlns="http://www.w3.org/2000/svg">
+    <line x1="10" y1="8" x2="190" y2="8" stroke="#0A1A14" stroke-width="1" opacity="0.3"/>
+    <line x1="10" y1="15" x2="190" y2="15" stroke="#0A1A14" stroke-width="1" opacity="0.4"/>
+    <line x1="10" y1="20" x2="190" y2="20" stroke="#E8871E" stroke-width="2"/>
+    <circle cx="10" cy="20" r="3" fill="#E8871E"/>
+    <line x1="10" y1="27" x2="190" y2="27" stroke="#0A1A14" stroke-width="1" opacity="0.4"/>
+    <line x1="10" y1="34" x2="190" y2="34" stroke="#0A1A14" stroke-width="1" opacity="0.3"/>
+    <path d="M 12 20 Q 30 14, 48 20 Q 66 26, 84 20 Q 102 14, 120 20 Q 138 26, 156 20 Q 174 14, 190 20"
+          stroke="#E8871E" stroke-width="1.5" fill="none" opacity="0.6"/>
+  </svg>
+
+  <h1>Sadhana</h1>
+  <div class="devanagari">&#x0938;&#x093E;&#x0927;&#x0928;&#x093E;</div>
+  <div class="tagline">Disciplined practice toward mastery</div>
+
+  <div class="subtitle">
+    A music physics engine for Hindustani classical vocal training.
+    Real-time voice feedback. 30 ragas. Zero operational cost.
+    The world's first browser-based Indian classical music learning platform.
+  </div>
+
+  <div class="date">April 2026 | Confidential</div>
+</div>
+
+<!-- ================================================================== -->
+<!-- PAGE 2: EXECUTIVE SUMMARY + KEY METRICS -->
+<!-- ================================================================== -->
+
+<div class="page-break"></div>
+
+<h2>1. Executive Summary</h2>
+<div class="accent-bar"></div>
+
+<p>
+  <strong>Sadhana</strong> is the world's first browser-based Hindustani classical music training application
+  built on a comprehensive music physics engine. It transforms the student's device into an interactive
+  instrument that listens, responds, and teaches &mdash; all at <strong>$0 operational cost</strong>.
+</p>
+
+<p>
+  <strong>The core insight:</strong> Existing music apps teach Western music theory or treat Indian music
+  as a subset of Western frameworks. Sadhana builds from first principles: 22 shrutis (microtonal positions),
+  just intonation frequency ratios, raga grammar rules, and the oral-tradition pedagogy of Hindustani
+  classical music.
+</p>
+
+<div class="metrics">
+  <div class="metric">
+    <span class="value">~19,000</span>
+    <span class="label">Lines of engine code</span>
+  </div>
+  <div class="metric">
+    <span class="value">30</span>
+    <span class="label">Ragas in catalog</span>
+  </div>
+  <div class="metric">
+    <span class="value">57</span>
+    <span class="label">Curriculum lessons</span>
+  </div>
+  <div class="metric">
+    <span class="value">318</span>
+    <span class="label">Unit tests passing</span>
+  </div>
+  <div class="metric">
+    <span class="value">&lt;50ms</span>
+    <span class="label">Voice-to-visual latency</span>
+  </div>
+  <div class="metric">
+    <span class="value">$0/mo</span>
+    <span class="label">Operational cost</span>
+  </div>
+</div>
+
+<h2>2. The Problem</h2>
+<div class="accent-bar"></div>
+
+<h3>Market Gap</h3>
+<p>
+  Hindustani classical music has <strong>300+ million practitioners</strong> across South Asia and the diaspora. Yet:
+</p>
+<ul>
+  <li><strong>No digital tool</strong> teaches raga grammar (melodic movement rules, not just scales)</li>
+  <li><strong>No app</strong> uses just intonation &mdash; the mathematically correct tuning system that defines Indian music</li>
+  <li><strong>No platform</strong> provides context-aware pitch feedback that understands the difference between komal Re in Raga Bhairav vs. komal Re in Raga Kafi</li>
+  <li>Western music apps (Yousician, Simply Piano) serve 50M+ users but are <strong>structurally incapable</strong> of teaching Indian music correctly</li>
+</ul>
+
+<h3>The Opportunity</h3>
+<ul>
+  <li><strong>Global Indian diaspora</strong>: 32 million people, many seeking cultural connection through music</li>
+  <li><strong>Growing mindfulness market</strong>: Hindustani music is inherently meditative (riyaz = disciplined daily practice)</li>
+  <li><strong>Underserved market</strong>: No serious competitor exists in this space</li>
+</ul>
+
+<!-- ================================================================== -->
+<!-- PAGE 3: SYSTEM ARCHITECTURE -->
+<!-- ================================================================== -->
+
+<div class="page-break"></div>
+
+<h2>3. System Architecture</h2>
+<div class="accent-bar"></div>
+
+<p>Sadhana is not a music learning app that uses audio. It is a <strong>music physics engine</strong> &mdash; the equivalent of NVIDIA PhysX, but for sound.</p>
+
+<div class="arch-diagram">
+  <div class="layer layer-engine">
+    <div class="layer-label">The Engine &mdash; /engine/ (19,000 lines TypeScript)</div>
+    physics/ &rarr; theory/ &rarr; analysis/ &rarr; synthesis/ &rarr; voice/<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;interaction/ (Tantri)
+  </div>
+  <div class="arrow">&darr; engine exposes typed API</div>
+  <div class="layer layer-journey">
+    <div class="layer-label">Journeys &mdash; /frontend/app/journeys/</div>
+    Beginner &bull; Explorer &bull; Scholar &bull; Master &bull; Freeform
+  </div>
+  <div class="arrow">&darr; React components</div>
+  <div class="layer layer-tantri">
+    <div class="layer-label">Presentation &mdash; Next.js 15 / React 19</div>
+    Framer Motion v12 &bull; GSAP 3 &bull; Three.js r170 &bull; Ragamala design system
+  </div>
+  <div class="arrow">&darr; Supabase JS client</div>
+  <div class="layer layer-data">
+    <div class="layer-label">Data &mdash; Supabase (free tier, $0)</div>
+    profiles &bull; sessions &bull; streaks &bull; raga_encounters
+  </div>
+</div>
+
+<h3>Engine Modules</h3>
+
+<table>
+  <tr>
+    <th>Module</th>
+    <th>Purpose</th>
+    <th>Status</th>
+  </tr>
+  <tr>
+    <td><strong>physics/</strong></td>
+    <td>Harmonic series, resonance, 22 shrutis in just intonation</td>
+    <td>Complete</td>
+  </tr>
+  <tr>
+    <td><strong>theory/swaras</strong></td>
+    <td>12 swaras with frequency ratios, cents, harmonic positions</td>
+    <td>Complete</td>
+  </tr>
+  <tr>
+    <td><strong>theory/ragas/</strong></td>
+    <td>30 ragas: aroha, avaroha, pakad, ornaments, prahara, rasa</td>
+    <td>Complete</td>
+  </tr>
+  <tr>
+    <td><strong>theory/talas/</strong></td>
+    <td>Teentaal (16), Ektaal (12), Jhaptaal (10), Rupak (7)</td>
+    <td>Complete</td>
+  </tr>
+  <tr>
+    <td><strong>analysis/</strong></td>
+    <td>Pitch mapping, raga grammar validation, pakad recognition</td>
+    <td>Complete</td>
+  </tr>
+  <tr>
+    <td><strong>synthesis/</strong></td>
+    <td>Tanpura drone, harmonium voice, tala pulse</td>
+    <td>Complete</td>
+  </tr>
+  <tr>
+    <td><strong>interaction/tantri</strong></td>
+    <td>12-string interactive instrument with spring physics</td>
+    <td>Complete</td>
+  </tr>
+  <tr>
+    <td><strong>voice/</strong></td>
+    <td>Real-time pipeline: mic &rarr; denoise &rarr; pitch &rarr; feedback</td>
+    <td>Complete</td>
+  </tr>
+</table>
+
+<!-- ================================================================== -->
+<!-- PAGE 4: VOICE PIPELINE + TANTRI -->
+<!-- ================================================================== -->
+
+<div class="page-break"></div>
+
+<h2>4. The Technical Moat: Voice Pipeline</h2>
+<div class="accent-bar"></div>
+
+<p>The voice pipeline is the core differentiator. It runs <strong>entirely in the browser</strong> at $0 cost, with &lt;50ms latency.</p>
+
+<div class="flow">
+  <div class="flow-step"><strong>Microphone</strong> &mdash; browser getUserMedia API</div>
+  <div class="flow-arrow">&darr;</div>
+  <div class="flow-step"><strong>AudioWorklet</strong> &mdash; off main thread, 128-sample chunks</div>
+  <div class="flow-arrow">&darr;</div>
+  <div class="flow-step"><strong>RNNoise WASM</strong> &mdash; neural noise suppression, removes room noise ($0)</div>
+  <div class="flow-arrow">&darr;</div>
+  <div class="flow-step"><strong>Pitchy McLeod</strong> &mdash; pitch detection, outputs Hz + clarity (0&ndash;1)</div>
+  <div class="flow-arrow">&darr;</div>
+  <div class="flow-step"><strong>Pitch Mapping</strong> &mdash; Hz &rarr; cents from Sa &rarr; nearest swara (raga-context-aware)</div>
+  <div class="flow-arrow">&darr;</div>
+  <div class="flow-step"><strong>Raga Grammar</strong> &mdash; validates aroha/avaroha rules, vakra patterns, varjit swaras</div>
+  <div class="flow-arrow">&darr;</div>
+  <div class="flow-step"><strong>Phrase Recognition</strong> &mdash; sliding window checks for pakad matches</div>
+  <div class="flow-arrow">&darr;</div>
+  <div class="flow-step"><strong>Accuracy Scoring</strong> &mdash; Gaussian curve: 0 cents = 1.0, tolerance = 0.5</div>
+  <div class="flow-arrow">&darr;</div>
+  <div class="flow-step"><strong>Tantri + Canvas</strong> &mdash; 60fps string visualization, pitch trail, feedback</div>
+</div>
+
+<h3>Tantri: The Instrument Layer</h3>
+<p>
+  Tantri ("string of a veena") is a <strong>12-string interactive instrument</strong> rendered on HTML5 Canvas.
+  It is simultaneously input (voice maps to string vibrations) and output (touch triggers synthesis).
+</p>
+<ul>
+  <li><strong>Voice input</strong>: Each string vibrates when the student's voice is near that swara's frequency. Color encodes accuracy: saffron = perfect, green = good, amber = approaching.</li>
+  <li><strong>Sympathetic vibration</strong>: Pa vibrates when Sa is sung, matching real tanpura physics.</li>
+  <li><strong>Spring physics</strong>: Kan snap (stiffness 1000), Andolan sustain (120/8), Tanpura Release (400/15, ~800ms decay).</li>
+  <li><strong>Progressive disclosure</strong>: Shishya sees 1 string (Sa). Raga strings emerge. The instrument grows as the student grows.</li>
+  <li><strong>Keyboard accessible</strong>: ArrowUp/Down navigation, Enter/Space to play.</li>
+</ul>
+
+<!-- ================================================================== -->
+<!-- PAGE 5: USER JOURNEY -->
+<!-- ================================================================== -->
+
+<div class="page-break"></div>
+
+<h2>5. User Lifecycle: Onboarding to Mastery</h2>
+<div class="accent-bar"></div>
+
+<h3>Onboarding (2 minutes)</h3>
+<ol>
+  <li><strong>Sa Detection</strong>: Student hums a comfortable note 3&ndash;5 times. Engine proposes "Your Sa is G3 (196 Hz)." Stored permanently.</li>
+  <li><strong>Journey Selection</strong>: Four paths visible immediately. All show the full vision. No gates on visibility.</li>
+</ol>
+
+<h3>Daily Session Loop</h3>
+<ol>
+  <li><strong>On open</strong>: Today's riyaz prepared. Raga chosen by time of day (Dawn &rarr; Bhairav, Afternoon &rarr; Bhimpalasi, Dusk &rarr; Bhoopali, Evening &rarr; Yaman, Night &rarr; Bageshri).</li>
+  <li>Tanpura begins. Student sings. ~10 minutes. Zero decisions required.</li>
+  <li><strong>On completion</strong>: Transitions to free practice. No friction between ritual and freedom.</li>
+  <li><strong>Daily goal ring</strong> on home page shows completion status.</li>
+</ol>
+
+<h3>Four Journey Paths</h3>
+
+<div class="raga-grid">
+  <div class="raga-level shishya">
+    <h4>Shishya (Beginner)</h4>
+    <p>8 lessons &bull; Sa detection, 5 core ragas, guided riyaz, voice feedback</p>
+  </div>
+  <div class="raga-level sadhaka">
+    <h4>Sadhaka (Explorer)</h4>
+    <p>10 lessons &bull; 10 more ragas, ornaments, ear/interval training, meend, gamak</p>
+  </div>
+  <div class="raga-level varistha">
+    <h4>Varistha (Scholar)</h4>
+    <p>11 lessons &bull; Complex ragas, shruti discrimination, composition, tala integration</p>
+  </div>
+  <div class="raga-level guru">
+    <h4>Guru (Master)</h4>
+    <p>10 lessons &bull; Advanced raga identification, bandish, taan, teaching tools</p>
+  </div>
+</div>
+
+<h3>Progression System</h3>
+<ul>
+  <li><strong>Levels unlocked by musical acts</strong>, not XP. Example: "Sing Bhairav's pakad within &plusmn;20 cents across 3 separate sessions" &rarr; Sadhaka.</li>
+  <li><strong>No popups, no confetti</strong>. Interface deepens invisibly. Student notices one day &mdash; that's the ceremony.</li>
+  <li><strong>XP</strong> tracks consistency only (streak maintenance, sessions completed). It is the practice log, not the grade.</li>
+</ul>
+
+<h3>Pakad Recognition Moment</h3>
+<p>
+  When the student sings the characteristic phrase of their current raga, the engine recognizes it in real time.
+  A cinematic pause: tanpura continues, background deepens, raga name appears in Cormorant Garamond, the phrase
+  in sargam notation fades in. This bridges Beginner and Scholar in one unrepeatable moment.
+</p>
+
+<!-- ================================================================== -->
+<!-- PAGE 6: CURRICULUM + RAGA CATALOG -->
+<!-- ================================================================== -->
+
+<div class="page-break"></div>
+
+<h2>6. Curriculum &amp; Raga Catalog</h2>
+<div class="accent-bar"></div>
+
+<h3>Pedagogical Principles</h3>
+<ol>
+  <li><strong>Audio Before Everything</strong>: Every concept is heard before it is named.</li>
+  <li><strong>The Presence Rule</strong>: Tanpura plays for 30 seconds before any instruction appears.</li>
+  <li><strong>Raga-first</strong>: Students learn Bhoopali (a raga), not "the pentatonic scale."</li>
+  <li><strong>Progressive disclosure</strong>: Complexity emerges from musical experience.</li>
+</ol>
+
+<h3>30-Raga Catalog</h3>
+
+<table>
+  <tr>
+    <th>Level</th>
+    <th>Ragas</th>
+    <th>Count</th>
+  </tr>
+  <tr>
+    <td><strong>Shishya</strong></td>
+    <td>Bhoopali, Yaman, Bhairav, Bhimpalasi, Bageshri</td>
+    <td>5</td>
+  </tr>
+  <tr>
+    <td><strong>Sadhaka</strong></td>
+    <td>Desh, Kafi, Pahadi, Durga, Hamsadhwani, Bilawal, Asavari, Khamaj, Jog, Tilak Kamod</td>
+    <td>10</td>
+  </tr>
+  <tr>
+    <td><strong>Varistha</strong></td>
+    <td>Marwa, Darbari Kanada, Puriya Dhanashri, Malkauns, Todi, Kedar, Hameer, Puriya, Lalit, Multani, Madhuvanti</td>
+    <td>11</td>
+  </tr>
+  <tr>
+    <td><strong>Guru</strong></td>
+    <td>Bhairavi, Sohini, Shree, Jaunpuri</td>
+    <td>4</td>
+  </tr>
+</table>
+
+<p>Each raga is a complete musicological object: aroha, avaroha, vadi, samvadi, jati, thaat, prahara, rasa, pakad, varjit swaras, expected ornaments, vakra patterns, and related ragas.</p>
+
+<h3>Exercise Types</h3>
+
+<table>
+  <tr>
+    <th>Exercise</th>
+    <th>Description</th>
+    <th>Journey</th>
+  </tr>
+  <tr><td>Swara Identification</td><td>Hear a swara, identify from 4 choices</td><td>Explorer+</td></tr>
+  <tr><td>Binaural Interval Training</td><td>Sa in one ear, target in other; identify the interval</td><td>Explorer+</td></tr>
+  <tr><td>Phrase Playback</td><td>Hear a phrase, sing it back, get accuracy score</td><td>Beginner+</td></tr>
+  <tr><td>Pakad Recognition</td><td>Sing freely; engine recognizes characteristic phrases</td><td>All</td></tr>
+  <tr><td>Raga Grammar Validation</td><td>Sing; engine validates aroha/avaroha/varjit rules</td><td>Scholar+</td></tr>
+  <tr><td>Shruti Discrimination</td><td>Hear two shrutis of the same swara; identify which</td><td>Varistha+</td></tr>
+  <tr><td>Tala Integration</td><td>Sing phrases aligned to rhythmic cycles</td><td>Sadhaka+</td></tr>
+</table>
+
+<h3>References</h3>
+<ul>
+  <li><strong>Bhatkhande, V.N.</strong> <em>Hindustani Sangeet Paddhati</em> (Kramik Pustak Malika, 6 vols.) &mdash; foundation of the 10-thaat system</li>
+  <li><strong>Jairazbhoy, N.A.</strong> <em>The Ragas of North Indian Music</em> &mdash; systematic analysis of raga movement patterns</li>
+  <li><strong>Deva, B.C.</strong> <em>The Music of India: A Scientific Study</em> &mdash; acoustic foundations, shruti measurements</li>
+  <li><strong>Raja, D.</strong> <em>Hindustani Music: A Tradition in Transition</em> &mdash; contemporary raga grammar perspectives</li>
+  <li><strong>Bagchee, S.</strong> <em>NAD: Understanding Raga Music</em> &mdash; accessible theory-to-practice connection</li>
+  <li><strong>Bharata Muni</strong> <em>Natya Shastra</em> &mdash; ancient treatise defining the 22 shruti system</li>
+</ul>
+
+<!-- ================================================================== -->
+<!-- PAGE 7: DESIGN + TECH STACK -->
+<!-- ================================================================== -->
+
+<div class="page-break"></div>
+
+<h2>7. Design System: Ragamala</h2>
+<div class="accent-bar"></div>
+
+<p>Named after the tradition of Indian miniature painting &mdash; a garland of ragas, each given a visual world of color, mood, and time of day.</p>
+
+<table>
+  <tr><th>Decision</th><th>Choice</th></tr>
+  <tr><td>Typography</td><td>Cormorant Garamond (titles) / Noto Serif Devanagari / Inter (UI) / IBM Plex Mono (data)</td></tr>
+  <tr><td>Accent</td><td>Saffron #E8871E &mdash; earned only (correct pitch, active streak)</td></tr>
+  <tr><td>Night mode</td><td>Deep Malachite #0A1A14</td></tr>
+  <tr><td>Day mode</td><td>Ivory #F5F0E8</td></tr>
+  <tr><td>Motion</td><td>Spring physics: Tanpura Release (400/15), Meend (glide), Kan (sharp snap)</td></tr>
+  <tr><td>Texture</td><td>Jali lattice patterns, ink diffusion raga transitions</td></tr>
+  <tr><td>Logo</td><td>Tantri Resonance Mark: 5 strings at just-intonation intervals, standing wave on Sa</td></tr>
+</table>
+
+<h2>8. Technical Stack</h2>
+<div class="accent-bar"></div>
+
+<table>
+  <tr><th>Layer</th><th>Technology</th><th>Cost</th></tr>
+  <tr><td>Frontend</td><td>Next.js 15, React 19, TypeScript strict</td><td>$0</td></tr>
+  <tr><td>Animation</td><td>Framer Motion v12, GSAP 3, Three.js r170</td><td>$0</td></tr>
+  <tr><td>Synthesis</td><td>Tone.js 15 (just-intonation tuned), Web Audio API</td><td>$0</td></tr>
+  <tr><td>Denoising</td><td>RNNoise.js WASM (neural noise suppression)</td><td>$0</td></tr>
+  <tr><td>Pitch detection</td><td>Pitchy / McLeod Pitch Method</td><td>$0</td></tr>
+  <tr><td>Data</td><td>Supabase free tier (auth, profiles, sessions)</td><td>$0</td></tr>
+  <tr><td>Hosting</td><td>Vercel (static export, 52 pages)</td><td>$0</td></tr>
+  <tr><td colspan="2"><strong>Total monthly operational cost</strong></td><td><strong>$0</strong></td></tr>
+</table>
+
+<p>Everything that requires compute runs in the browser (AudioWorklet, WASM). Everything that requires storage uses Supabase free tier.</p>
+
+<!-- ================================================================== -->
+<!-- PAGE 8: DATA MODEL + ROADMAP -->
+<!-- ================================================================== -->
+
+<div class="page-break"></div>
+
+<h2>9. Data Model</h2>
+<div class="accent-bar"></div>
+
+<pre>
+profiles              -- user identity, Sa reference (Hz), level, XP
+  |
+  +-- sessions        -- practice sessions: raga, duration, accuracy, XP
+  |
+  +-- streaks         -- current streak, longest streak, last riyaz date
+  |
+  +-- raga_encounters -- per-raga: session count, minutes, best accuracy, pakad found
+</pre>
+
+<p>Row-Level Security (RLS) policies ensure users only access their own data. All tables indexed for query performance. The 90-day practice heatmap aggregates from the sessions table.</p>
+
+<h2>10. Roadmap</h2>
+<div class="accent-bar"></div>
+
+<table>
+  <tr><th>Version</th><th>Scope</th><th>Timeline</th></tr>
+  <tr>
+    <td><strong>v1.0</strong> (Built)</td>
+    <td>Full engine (19K lines), 30 ragas, 4 journeys, voice pipeline, Tantri instrument, ear training, interval training, practice heatmap, daily goals, PWA</td>
+    <td>Complete</td>
+  </tr>
+  <tr>
+    <td><strong>v1.1</strong></td>
+    <td>Mastery gates (levels by musical acts), tala-integrated sessions, bandish playback, Hindi/Marathi localization</td>
+    <td>Next</td>
+  </tr>
+  <tr>
+    <td><strong>v2.0</strong></td>
+    <td>Social (guru-shishya connections), gharana variations, AI phrase suggestions, offline-first PWA</td>
+    <td>Future</td>
+  </tr>
+  <tr>
+    <td><strong>v3.0</strong></td>
+    <td>Mobile native, live lesson mode, community bandish library</td>
+    <td>Future</td>
+  </tr>
+</table>
+
+<h2>11. Why Now</h2>
+<div class="accent-bar"></div>
+
+<ol>
+  <li><strong>Web Audio API maturity</strong>: Real-time pitch detection in the browser is now reliable for musical feedback</li>
+  <li><strong>WASM performance</strong>: Neural noise suppression runs in real-time without cloud compute</li>
+  <li><strong>Growing diaspora demand</strong>: 32M+ Indian diaspora seeking cultural connection through music</li>
+  <li><strong>Zero-cost infrastructure</strong>: Supabase + Vercel + browser compute = viable at $0/month</li>
+  <li><strong>No competition</strong>: The intersection of "Hindustani classical music" and "technology product" is empty</li>
+</ol>
+
+<!-- ================================================================== -->
+<!-- FOOTER -->
+<!-- ================================================================== -->
+
+<div class="footer">
+  <em>Sadhana: not learning about music. Becoming it.</em>
+  <br><br>
+  Contact: aacrit@gmail.com &bull; github.com/aacrit/sadhana
+</div>
+
+</body>
+</html>

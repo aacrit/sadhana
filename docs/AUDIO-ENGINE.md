@@ -1,6 +1,6 @@
 # Audio Engine
 
-Last updated: 2026-04-13
+Last updated: 2026-04-14
 
 Voice capture, pitch detection, tanpura synthesis, and swara playback. Everything runs in the browser. $0 operational cost.
 
@@ -150,9 +150,13 @@ Coefficients for partials 1-10: `[1.0, 0.95, 0.85, 0.72, 0.58, 0.45, 0.33, 0.24,
 
 The jivari bridge excites higher partials far more than a normal plucked string, peaking at partials 2-4. This creates the characteristic "buzzing" shimmer.
 
+### Pluck Cycle
+
+Strings are plucked sequentially — Pa → Sa → Sa → low Sa — repeating on a configurable cycle. Each pluck applies a jivari amplitude envelope: sharp attack, then exponential decay with higher partials sustaining longer than lower ones. The `cycleDuration` parameter (default 7s) controls the full 4-string cycle; each string is plucked every `cycleDuration / 4` seconds. The scheduler uses `AudioContext.currentTime` for sample-accurate timing with 2-beat lookahead.
+
 ### Lifecycle
 
-- `start()`: creates AudioContext, builds oscillator graph. Requires user gesture on iOS.
+- `start()`: creates AudioContext, builds oscillator graph, begins pluck cycle. Requires user gesture on iOS.
 - `stop()`: 500ms linear fade-out, then cleanup.
 - `setSa(hz)`: rebuilds oscillators with new frequencies (300ms crossfade to old).
 - `setVolume(v)`: 50ms linear ramp to new level.

@@ -1,6 +1,6 @@
 # Design System -- Ragamala
 
-Last updated: 2026-04-13
+Last updated: 2026-04-14
 
 ---
 
@@ -397,6 +397,18 @@ The logo responds like a physical instrument. Every animation maps to a named sp
 | `className` | `string` | -- | Additional CSS class |
 | `style` | `CSSProperties` | -- | Additional inline styles |
 
+### PWA Icons
+
+SVG icons derived from the Tantri Resonance Mark. Stored in `frontend/public/icons/`.
+
+| File | Size | Detail | Use |
+|------|------|--------|-----|
+| `favicon.svg` | scalable | 3 strings (Sa, Pa, Dha), Sa point, no wave | Browser favicon |
+| `icon-192.svg` | 192px target | Full 5-string mark, standing wave, saffron terminus | PWA home screen icon |
+| `icon-512.svg` | 512px target | Full 5-string mark, enhanced glow, full wave articulation | PWA splash / app store |
+
+The `manifest.json` at `frontend/public/manifest.json` references all three. Icons are SVG (not rasterized) for infinite crispness at all device densities.
+
 **Math:**
 - Bhoopali ratios: Sa=1, Re=9/8, Ga=5/4, Pa=3/2, Dha=5/3
 - Vertical position: `log2(ratio) / log2(5/3)` normalized to field height
@@ -591,7 +603,29 @@ Sizes: 200px (hero/profile), 64px (badge), 16px (silhouette).
 
 Tantri (तन्त्री, Sanskrit: "string of a veena") is the universal swara visualization and interaction layer. It renders 12 horizontal strings -- one per chromatic swara (Sa, Re komal, Re, Ga komal, Ga, Ma, Ma tivra, Pa, Dha komal, Dha, Ni komal, Ni) -- positioned vertically by just-intonation frequency ratio on a logarithmic scale. The strings are simultaneously input (voice activates them) and output (touch/click produces sound via harmonium synth).
 
-Source: `frontend/app/components/Tantri.tsx` (when implemented).
+Source: `frontend/app/components/Tantri.tsx`. Canvas-based. 60fps render loop.
+
+### Canvas Performance
+
+The Tantri renderer has been optimized for zero-allocation hot paths:
+
+| Optimization | Detail |
+|---|---|
+| Pre-allocated waveform buffers | Each string owns a `Float32Array` (`_waveformBuffer`) allocated once at construction. `generateStringWaveform` writes into this buffer in place — no per-frame heap allocations. |
+| Font string caching | `ctx.font` is composed once per DPR change and cached as a module-level string (`_fontCacheDpr` guard). Setting `ctx.font` is expensive; the guard eliminates re-composition on every frame. |
+| Splice-based trail trimming | The pitch trail array uses `splice(0, excess)` rather than `slice` reassignment, avoiding a new array allocation each frame. |
+| Raga-aware skip | Strings outside the active raga are drawn at ghost opacity with a short-circuit path that skips waveform generation entirely. |
+
+### Keyboard Accessibility
+
+The Tantri canvas accepts keyboard focus. When focused:
+
+| Key | Action |
+|-----|--------|
+| `ArrowUp` / `ArrowDown` | Move focus between strings (adjacent swara) |
+| `Enter` / `Space` | Pluck the focused string (triggers synthesis + animation) |
+
+`role="application"` with `aria-label` describing the string field. Focused string announced via `aria-live` region.
 
 ### String Anatomy
 
