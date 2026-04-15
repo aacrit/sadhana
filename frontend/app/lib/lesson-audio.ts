@@ -67,6 +67,7 @@ export interface LessonAudioControls {
   // Tanpura
   startTanpura(): void;
   stopTanpura(): void;
+  setTanpuraVolume(volume: number): void;
   tanpuraActive: boolean;
 
   // Swara playback (for SwaraIntroduction + PhrasePlayback)
@@ -193,6 +194,12 @@ export function useLessonAudio(
       tanpuraRef.current.stop();
     }
     setTanpuraActive(false);
+  }, []);
+
+  const setTanpuraVolume = useCallback((volume: number) => {
+    if (tanpuraRef.current && tanpuraRef.current.isRunning()) {
+      tanpuraRef.current.setVolume(volume);
+    }
   }, []);
 
   // -----------------------------------------------------------------------
@@ -503,6 +510,7 @@ export function useLessonAudio(
   return {
     startTanpura,
     stopTanpura,
+    setTanpuraVolume,
     tanpuraActive,
     playSwara,
     playPhrase,

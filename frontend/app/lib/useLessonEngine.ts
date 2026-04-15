@@ -329,10 +329,13 @@ export function useLessonEngine(
     audio.stopVoicePipeline();
     audio.stopSaDetection();
 
-    // Gate tanpura: only active during drone and singing phases
-    const tanpuraPhases = ['tanpura_drone', 'pitch_exercise', 'phrase_exercise', 'passive_phrase_recognition'];
-    if (!tanpuraPhases.includes(currentPhase.type)) {
-      audio.stopTanpura();
+    // Gate tanpura volume: full during drone and singing, reduced during other phases
+    const tanpuraFullPhases = ['tanpura_drone', 'pitch_exercise', 'phrase_exercise', 'passive_phrase_recognition'];
+    if (tanpuraFullPhases.includes(currentPhase.type)) {
+      audio.setTanpuraVolume(0.3);
+    } else {
+      // Reduce to 30% of normal volume — ambient presence without interference
+      audio.setTanpuraVolume(0.09);
     }
 
     switch (currentPhase.type) {
