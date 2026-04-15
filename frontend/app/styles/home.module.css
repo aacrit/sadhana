@@ -1,12 +1,9 @@
 /**
  * home.module.css — Journey selection page styles
  *
- * Single-column, centered, cinematic entry. The tanpura waveform
- * fills the background. Journeys stack vertically on mobile,
- * 2x2 grid on desktop.
- *
- * Per-card color worlds: Beginner (saffron hairline), Explorer (Sadhaka green),
- * Scholar (lapis + gold), Master (gold glow), Freeform (void portal).
+ * Redesigned: compact status bar, accordion journey deck,
+ * freeform bottom strip. Ragamala aesthetic — royal, cultural,
+ * space-efficient.
  */
 
 .page {
@@ -15,11 +12,11 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: var(--space-6) var(--space-4) var(--space-6);
+  padding: var(--space-4) var(--space-4) var(--space-2);
   overflow: hidden;
 }
 
-/* Vignette overlay — radial darkening at edges like a Mughal miniature border */
+/* Vignette overlay — Mughal miniature border */
 .page::before {
   content: '';
   position: fixed;
@@ -35,69 +32,92 @@
   );
 }
 
-/* -- Header ---------------------------------------------------------- */
+/* =======================================================================
+   HEADER
+   ======================================================================= */
 
 .header {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--space-3);
-  margin-bottom: var(--space-10);
-  margin-top: var(--space-6);
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+  margin-top: var(--space-4);
   text-align: center;
   z-index: var(--z-base);
 }
 
-.tagline {
-  font-family: var(--font-serif);
-  font-size: var(--text-lg);
-  font-weight: var(--weight-light);
-  color: var(--text-2);
-  letter-spacing: var(--tracking-wide);
-  margin-top: var(--space-2);
-}
+/* =======================================================================
+   STATUS BAR — streak | today's raga | daily goal
+   ======================================================================= */
 
-/* -- Streak ---------------------------------------------------------- */
-
-.streak {
+.statusBar {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-2) var(--space-4);
-  border-radius: var(--radius-full);
-  background: var(--bg-3);
+  justify-content: space-between;
+  width: 100%;
+  max-width: var(--max-width);
+  padding: var(--space-3) var(--space-4);
+  margin-bottom: var(--space-4);
+  background: var(--bg-2);
   border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
   z-index: var(--z-base);
 }
 
-.streakCount {
-  font-family: var(--font-mono);
-  font-size: var(--text-sm);
-  color: var(--text-2);
+.statusCell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 48px;
 }
 
-.streakActive {
+.statusCenter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  flex: 1;
+}
+
+.statusValue {
+  font-family: var(--font-mono);
+  font-size: var(--text-lg);
+  font-weight: var(--weight-medium);
+  color: var(--text-2);
+  line-height: 1;
+}
+
+.statusValueAccent {
   color: var(--accent);
 }
 
-.streakLabel {
+.statusValueDone {
+  color: var(--correct);
+}
+
+.statusLabel {
   font-family: var(--font-sans);
-  font-size: var(--text-xs);
+  font-size: 10px;
+  font-weight: var(--weight-medium);
   color: var(--text-3);
   text-transform: uppercase;
   letter-spacing: var(--tracking-widest);
+  line-height: 1.2;
 }
 
-/* -- Daily goal ring ------------------------------------------------- */
-
-.dailyGoal {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  margin-top: var(--space-3);
-  margin-bottom: var(--space-4);
-  z-index: var(--z-base);
+.todayName {
+  font-family: var(--font-serif);
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-light);
+  color: var(--text);
+  letter-spacing: 0.06em;
+  line-height: 1.1;
+  text-shadow: 0 0 40px rgba(232, 135, 30, 0.08);
 }
+
+/* -- Goal ring --------------------------------------------------------- */
 
 .goalRing {
   flex-shrink: 0;
@@ -106,13 +126,13 @@
 .goalRingBg {
   fill: none;
   stroke: var(--border);
-  stroke-width: 3;
+  stroke-width: 2.5;
 }
 
 .goalRingFill {
   fill: none;
   stroke: var(--accent);
-  stroke-width: 3;
+  stroke-width: 2.5;
   stroke-linecap: round;
   transition: stroke-dashoffset 0.6s ease-out;
 }
@@ -121,108 +141,81 @@
   stroke: var(--correct);
 }
 
-.goalText {
+/* =======================================================================
+   RECENTLY PRACTICED — inline pills
+   ======================================================================= */
+
+.recentRagas {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.goalLabel {
-  font-family: var(--font-sans);
-  font-size: var(--text-xs);
-  color: var(--text-3);
-  text-transform: uppercase;
-  letter-spacing: var(--tracking-widest);
-}
-
-.goalStatus {
-  font-family: var(--font-sans);
-  font-size: var(--text-sm);
-  color: var(--text-2);
-}
-
-.goalStatusDone {
-  color: var(--correct);
-}
-
-/* -- Today's raga ---------------------------------------------------- */
-
-.todayRaga {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-1);
-  margin-bottom: var(--space-6);
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
   z-index: var(--z-base);
 }
 
-.todayLabel {
-  font-family: var(--font-sans);
-  font-size: var(--text-xs);
-  color: var(--text-3);
-  text-transform: uppercase;
-  letter-spacing: var(--tracking-widest);
-}
-
-.todayName {
+.recentRagaName {
   font-family: var(--font-serif);
-  font-size: var(--text-2xl);
-  font-weight: var(--weight-light);
-  color: var(--text);
-  letter-spacing: var(--tracking-tight);
+  font-size: var(--text-sm);
+  color: var(--text-3);
 }
 
-.todayDevanagari {
-  font-family: var(--font-devanagari);
-  font-size: var(--text-lg);
-  font-weight: var(--weight-regular);
-  color: var(--text-2);
-}
+/* =======================================================================
+   JOURNEY DECK — accordion card stack
+   ======================================================================= */
 
-/* -- Journey grid ---------------------------------------------------- */
-
-.journeyGrid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--space-4);
+.journeyDeck {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
   width: 100%;
   max-width: var(--max-width);
   z-index: var(--z-base);
+  flex: 1;
 }
 
-@media (min-width: 640px) {
-  .journeyGrid {
-    grid-template-columns: 1fr 1fr;
-  }
+.deckSlot {
+  width: 100%;
 }
 
-/* -- Journey card (base) --------------------------------------------- */
+/* -- Deck card (collapsed header) -------------------------------------- */
 
-.journeyCard {
+.deckCard {
   position: relative;
   display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  padding: var(--space-6);
-  border-radius: var(--radius-lg);
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
   background: var(--bg-3);
   border: 1px solid var(--border);
+  border-left: 3px solid var(--border);
   cursor: pointer;
-  overflow: hidden;
-  transition: transform var(--dur-fast) var(--ease-out),
-              border-color var(--dur-fast) var(--ease-out),
-              box-shadow var(--dur-fast) var(--ease-out);
-  text-decoration: none;
+  text-align: left;
   color: inherit;
-  min-height: var(--touch-min);
+  font: inherit;
+  overflow: hidden;
+  transition: border-color var(--dur-fast) var(--ease-out),
+              background var(--dur-fast) var(--ease-out);
 }
 
-/* Jali lattice texture on journey cards (default white) */
-.journeyCard::before {
+.deckCard:hover {
+  border-color: var(--text-3);
+}
+
+.deckCard:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.deckCardExpanded {
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  border-bottom-color: transparent;
+}
+
+/* Jali lattice — subtle on cards */
+.deckCard::before {
   content: '';
   position: absolute;
   inset: 0;
-  opacity: var(--jali-opacity, 0.04);
+  opacity: 0.03;
   pointer-events: none;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cpath d='M24 0L30 6L48 6L42 12L48 18L42 18L48 24L42 30L48 42L42 42L36 48L30 42L24 48L18 42L12 48L6 42L0 48L0 42L6 36L0 30L0 24L6 18L0 12L6 6L0 6L6 0L12 6L18 0L24 6L30 0Z' fill='none' stroke='%23ffffff' stroke-width='0.5'/%3E%3Cpath d='M24 12L30 18L36 12L42 18L36 24L42 30L36 36L30 30L24 36L18 30L12 36L6 30L12 24L6 18L12 12L18 18Z' fill='none' stroke='%23ffffff' stroke-width='0.5'/%3E%3C/svg%3E");
   background-size: var(--jali-size);
@@ -231,222 +224,238 @@
   z-index: 0;
 }
 
-.journeyCard:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
+.deckCardHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  position: relative;
+  z-index: 1;
 }
 
-/* Locked cards: NOT dimmed. Full visual richness. Aspirational. */
-.journeyCardLocked {
-  cursor: default;
-}
-
-.journeyIconWrap {
+.deckIcon {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: var(--space-2);
-  opacity: 0.8;
-  position: relative;
-  z-index: 1;
+  flex-shrink: 0;
+  color: var(--text-2);
 }
 
-.journeyName {
+.deckTitles {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.deckName {
   font-family: var(--font-serif);
-  font-size: var(--text-xl);
+  font-size: var(--text-lg);
   font-weight: var(--weight-regular);
   color: var(--text);
-  position: relative;
-  z-index: 1;
+  line-height: 1.2;
 }
 
-.journeyDevanagari {
-  font-family: var(--font-devanagari);
-  font-size: var(--text-base);
-  font-weight: var(--weight-regular);
-  color: var(--text-2);
-  position: relative;
-  z-index: 1;
+.deckCardExpanded .deckName {
+  font-size: var(--text-xl);
 }
 
-.journeyEnglish {
+.deckEnglish {
   font-family: var(--font-sans);
   font-size: var(--text-xs);
-  font-weight: var(--weight-regular);
+  font-weight: var(--weight-medium);
   color: var(--text-3);
   text-transform: uppercase;
   letter-spacing: var(--tracking-widest);
-  position: relative;
-  z-index: 1;
+  line-height: 1.4;
 }
 
-.journeyDescription {
+.deckChevron {
+  flex-shrink: 0;
+  color: var(--text-3);
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+
+.deckChevronOpen {
+  transform: rotate(180deg);
+}
+
+/* -- Deck body (expanded content) -------------------------------------- */
+
+.deckBody {
+  position: relative;
+  padding: 0 var(--space-4) var(--space-4);
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  border-top: none;
+  border-left: 3px solid var(--border);
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
+}
+
+.deckDescription {
   font-family: var(--font-sans);
   font-size: var(--text-sm);
   color: var(--text-2);
   line-height: var(--leading-relaxed);
-  position: relative;
-  z-index: 1;
+  margin-bottom: var(--space-3);
+  padding-top: var(--space-2);
 }
 
-.journeyLockMessage {
+.deckEnter {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
   font-family: var(--font-sans);
-  font-size: var(--text-xs);
-  color: var(--text-3);
-  margin-top: var(--space-2);
-  position: relative;
-  z-index: 1;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--text);
+  text-decoration: none;
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--text-3);
+  border-radius: var(--radius-full);
+  min-height: var(--touch-min);
+  transition: background var(--dur-fast) var(--ease-out),
+              border-color var(--dur-fast) var(--ease-out);
+}
+
+.deckEnter:hover {
+  background: var(--bg-4);
+  border-color: var(--text-2);
+}
+
+.deckEnter:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 /* =======================================================================
    PER-CARD COLOR WORLDS
    ======================================================================= */
 
-/* -- Beginner / Arambh -- Shishya palette ----------------------------- */
+/* -- Beginner / Shishya ------------------------------------------------ */
 
 .cardBeginner {
+  border-left-color: rgba(232, 135, 30, 0.4);
+}
+
+.cardBeginner.deckCardExpanded {
   background: var(--card-beginner-bg, #0A1A14);
-  border: 1px solid var(--card-beginner-border, rgba(232, 135, 30, 0.2));
+}
+
+.cardBeginner.deckBody {
+  background: var(--card-beginner-bg, #0A1A14);
+  border-left-color: rgba(232, 135, 30, 0.4);
 }
 
 .cardBeginner::before {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cpath d='M24 0L30 6L48 6L42 12L48 18L42 18L48 24L42 30L48 42L42 42L36 48L30 42L24 48L18 42L12 48L6 42L0 48L0 42L6 36L0 30L0 24L6 18L0 12L6 6L0 6L6 0L12 6L18 0L24 6L30 0Z' fill='none' stroke='%23E8871E' stroke-width='0.5'/%3E%3Cpath d='M24 12L30 18L36 12L42 18L36 24L42 30L36 36L30 30L24 36L18 30L12 36L6 30L12 24L6 18L12 12L18 18Z' fill='none' stroke='%23E8871E' stroke-width='0.5'/%3E%3C/svg%3E");
-  opacity: 0.03;
 }
 
-.cardBeginner .journeyDevanagari {
-  color: rgba(232, 135, 30, 0.5);
+.cardBeginner .deckIcon {
+  color: rgba(232, 135, 30, 0.7);
 }
 
-.cardBeginner:hover {
-  transform: translateY(-2px) scale(1.015);
-  border-color: rgba(232, 135, 30, 0.35);
-  box-shadow: inset 0 0 30px rgba(232, 135, 30, 0.04);
-}
-
-.cardBeginner:active {
-  transform: scale(0.98);
-  border-color: rgba(232, 135, 30, 0.5);
-}
-
-/* -- Explorer / Anveshana -- Sadhaka palette -------------------------- */
+/* -- Explorer / Sadhaka ------------------------------------------------ */
 
 .cardExplorer {
-  background:
-    radial-gradient(ellipse at 20% 80%, rgba(45, 106, 79, 0.08) 0%, transparent 60%),
-    linear-gradient(160deg, #0F241C 0%, #132E22 50%, #1A3A2E 100%);
-  border: 1px solid var(--card-explorer-border, rgba(45, 106, 79, 0.25));
+  border-left-color: rgba(45, 106, 79, 0.5);
+}
+
+.cardExplorer.deckCardExpanded {
+  background: linear-gradient(160deg, #0F241C 0%, #132E22 50%, #1A3A2E 100%);
+}
+
+.cardExplorer.deckBody {
+  background: linear-gradient(160deg, #0F241C 0%, #132E22 50%, #1A3A2E 100%);
+  border-left-color: rgba(45, 106, 79, 0.5);
 }
 
 .cardExplorer::before {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cpath d='M24 0L30 6L48 6L42 12L48 18L42 18L48 24L42 30L48 42L42 42L36 48L30 42L24 48L18 42L12 48L6 42L0 48L0 42L6 36L0 30L0 24L6 18L0 12L6 6L0 6L6 0L12 6L18 0L24 6L30 0Z' fill='none' stroke='%235C9E6E' stroke-width='0.5'/%3E%3Cpath d='M24 12L30 18L36 12L42 18L36 24L42 30L36 36L30 30L24 36L18 30L12 36L6 30L12 24L6 18L12 12L18 18Z' fill='none' stroke='%235C9E6E' stroke-width='0.5'/%3E%3C/svg%3E");
-  opacity: 0.04;
 }
 
-.cardExplorer .journeyDevanagari {
-  color: rgba(92, 158, 110, 0.6);
+.cardExplorer .deckIcon {
+  color: rgba(92, 158, 110, 0.7);
 }
 
-.cardExplorer:hover {
-  transform: translateY(-2px) scale(1.015);
-  border-color: rgba(45, 106, 79, 0.4);
-  box-shadow: inset 0 0 30px rgba(92, 158, 110, 0.04);
-}
-
-.cardExplorer:active {
-  transform: scale(0.98);
-  border-color: rgba(45, 106, 79, 0.5);
-}
-
-/* -- Scholar / Vidvan -- Varistha palette ----------------------------- */
+/* -- Scholar / Varistha ------------------------------------------------ */
 
 .cardScholar {
-  background:
-    radial-gradient(ellipse at 80% 20%, rgba(30, 58, 95, 0.12) 0%, transparent 50%),
-    linear-gradient(170deg, #0D1520 0%, #142235 50%, #1E3A5F 100%);
-  border: 1px solid var(--card-scholar-border, rgba(212, 175, 55, 0.15));
-  cursor: default;
+  border-left-color: rgba(212, 175, 55, 0.25);
+}
+
+.cardScholar.deckCardExpanded {
+  background: linear-gradient(170deg, #0D1520 0%, #142235 50%, #1E3A5F 100%);
+}
+
+.cardScholar.deckBody {
+  background: linear-gradient(170deg, #0D1520 0%, #142235 50%, #1E3A5F 100%);
+  border-left-color: rgba(212, 175, 55, 0.25);
 }
 
 .cardScholar::before {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cpath d='M24 0L30 6L48 6L42 12L48 18L42 18L48 24L42 30L48 42L42 42L36 48L30 42L24 48L18 42L12 48L6 42L0 48L0 42L6 36L0 30L0 24L6 18L0 12L6 6L0 6L6 0L12 6L18 0L24 6L30 0Z' fill='none' stroke='%237A9EC8' stroke-width='0.5'/%3E%3Cpath d='M24 12L30 18L36 12L42 18L36 24L42 30L36 36L30 30L24 36L18 30L12 36L6 30L12 24L6 18L12 12L18 18Z' fill='none' stroke='%237A9EC8' stroke-width='0.5'/%3E%3C/svg%3E");
-  opacity: 0.03;
 }
 
-.cardScholar .journeyName {
+.cardScholar .deckName {
   color: var(--card-scholar-text, #D8DEE8);
 }
 
-.cardScholar .journeyDevanagari {
-  color: rgba(212, 175, 55, 0.4);
+.cardScholar .deckIcon {
+  color: rgba(122, 158, 200, 0.7);
 }
 
-.cardScholar .journeyLockMessage {
-  border-top: 1px solid rgba(212, 175, 55, 0.15);
-  padding-top: var(--space-3);
-  margin-top: auto;
-}
-
-.cardScholar:hover {
-  box-shadow: inset 0 0 40px rgba(30, 58, 95, 0.06);
-}
-
-/* -- Master / Acharya -- Guru palette -------------------------------- */
+/* -- Master / Guru ----------------------------------------------------- */
 
 .cardMaster {
-  background:
-    radial-gradient(ellipse at 50% 50%, rgba(212, 175, 55, 0.06) 0%, transparent 50%),
-    linear-gradient(175deg, #12100A 0%, #1A1608 50%, #221E0E 100%);
-  border: 1px solid var(--card-master-border, rgba(212, 175, 55, 0.2));
-  cursor: default;
+  border-left-color: rgba(212, 175, 55, 0.35);
+}
+
+.cardMaster.deckCardExpanded {
+  background: linear-gradient(175deg, #12100A 0%, #1A1608 50%, #221E0E 100%);
+}
+
+.cardMaster.deckBody {
+  background: linear-gradient(175deg, #12100A 0%, #1A1608 50%, #221E0E 100%);
+  border-left-color: rgba(212, 175, 55, 0.35);
 }
 
 .cardMaster::before {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cpath d='M24 0L30 6L48 6L42 12L48 18L42 18L48 24L42 30L48 42L42 42L36 48L30 42L24 48L18 42L12 48L6 42L0 48L0 42L6 36L0 30L0 24L6 18L0 12L6 6L0 6L6 0L12 6L18 0L24 6L30 0Z' fill='none' stroke='%23D4AF37' stroke-width='0.5'/%3E%3Cpath d='M24 12L30 18L36 12L42 18L36 24L42 30L36 36L30 30L24 36L18 30L12 36L6 30L12 24L6 18L12 12L18 18Z' fill='none' stroke='%23D4AF37' stroke-width='0.5'/%3E%3C/svg%3E");
-  opacity: 0.025;
 }
 
-.cardMaster .journeyName {
+.cardMaster .deckName {
   color: var(--card-master-text, #E8DCC8);
 }
 
-.cardMaster .journeyDevanagari {
-  color: rgba(212, 175, 55, 0.5);
-}
-
-.cardMaster .journeyLockMessage {
-  border-top: 1px solid rgba(212, 175, 55, 0.2);
-  padding-top: var(--space-3);
-  margin-top: auto;
-}
-
-.cardMaster:hover {
-  box-shadow: inset 0 0 40px rgba(212, 175, 55, 0.04);
+.cardMaster .deckIcon {
+  color: rgba(212, 175, 55, 0.6);
 }
 
 /* =======================================================================
-   FREEFORM CARD -- The void portal
+   FREEFORM STRIP — compact bottom bar
    ======================================================================= */
 
-.freeformCard {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
+.freeformStrip {
   width: 100%;
   max-width: var(--max-width);
-  aspect-ratio: 16 / 7;
-  min-height: 160px;
-  margin-top: var(--space-6);
-  padding: var(--space-8) var(--space-6);
-  border-radius: var(--radius-xl);
-  border: none;
+  margin-top: auto;
+  padding-top: var(--space-3);
+  z-index: var(--z-base);
+}
+
+.freeformLink {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-lg);
+  text-decoration: none;
+  color: inherit;
   cursor: pointer;
   position: relative;
   overflow: hidden;
-  text-decoration: none;
-  color: inherit;
   background:
     radial-gradient(
       ellipse 120% 100% at 50% 50%,
@@ -457,26 +466,18 @@
     );
   background-size: 200% 200%;
   animation: freeformShift 30s ease-in-out infinite;
-  transition: transform var(--dur-fast) var(--ease-out);
+  border: 1px solid rgba(139, 92, 246, 0.12);
+  transition: border-color var(--dur-fast) var(--ease-out);
 }
 
-/* Edge glow -- emits rather than contains */
-.freeformCard::after {
-  content: '';
-  position: absolute;
-  inset: -1px;
-  border-radius: inherit;
-  background: linear-gradient(
-    135deg,
-    var(--freeform-violet-accent, rgba(139, 92, 246, 0.08)) 0%,
-    transparent 30%,
-    transparent 70%,
-    var(--freeform-sapphire-accent, rgba(59, 130, 246, 0.06)) 100%
-  );
-  pointer-events: none;
-  z-index: 0;
-  opacity: 0.5;
-  transition: opacity var(--dur-fast) var(--ease-out);
+.freeformLink:hover {
+  border-color: rgba(139, 92, 246, 0.3);
+  animation-duration: 12s;
+}
+
+.freeformLink:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 @keyframes freeformShift {
@@ -487,85 +488,30 @@
   100% { background-position: 0% 50%; }
 }
 
-.freeformCard:hover {
-  animation-duration: 12s;
-  transform: scale(1.01);
-}
-
-.freeformCard:hover::after {
-  opacity: 1;
-}
-
-.freeformCard:hover .freeformDescription {
-  animation: none;
-  opacity: 0.9;
-}
-
-.freeformCard:active {
-  transform: scale(0.99);
-  animation-play-state: paused;
-}
-
-.freeformCard:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-}
-
 .freeformName {
   font-family: var(--font-serif);
-  font-size: var(--text-xl);
+  font-size: var(--text-base);
   font-weight: var(--weight-light);
   color: var(--text);
-  letter-spacing: var(--tracking-wide);
-  position: relative;
-  z-index: 1;
+  flex: 1;
 }
 
-.freeformDevanagari {
-  font-family: var(--font-devanagari);
-  font-size: var(--text-base);
-  font-weight: var(--weight-regular);
-  color: var(--freeform-violet-accent, rgba(139, 92, 246, 0.5));
-  position: relative;
-  z-index: 1;
-}
-
-.freeformEnglish {
+.freeformLabel {
   font-family: var(--font-sans);
   font-size: var(--text-xs);
-  font-weight: var(--weight-regular);
   color: var(--text-3);
   text-transform: uppercase;
   letter-spacing: var(--tracking-widest);
-  position: relative;
-  z-index: 1;
 }
 
-.freeformDescription {
-  font-family: var(--font-sans);
-  font-size: var(--text-sm);
+.freeformArrow {
   color: var(--text-3);
-  line-height: var(--leading-relaxed);
-  animation: freeformBreathe 6s var(--ease-in-out) infinite;
-  position: relative;
-  z-index: 1;
+  flex-shrink: 0;
 }
 
-.freeformIconWrap {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: var(--space-3);
-  position: relative;
-  z-index: 1;
-}
-
-@keyframes freeformBreathe {
-  0%, 100% { opacity: 0.5; }
-  50%      { opacity: 0.8; }
-}
-
-/* -- Loading state --------------------------------------------------- */
+/* =======================================================================
+   LOADING
+   ======================================================================= */
 
 .loadingContainer {
   flex: 1;
@@ -588,69 +534,21 @@
   50% { opacity: 1; transform: scale(1.2); }
 }
 
-/* -- XP display ------------------------------------------------------ */
+/* =======================================================================
+   DAY MODE
+   ======================================================================= */
 
-.xpDisplay {
-  display: flex;
-  align-items: baseline;
-  gap: var(--space-1);
-  margin-bottom: var(--space-4);
-  z-index: var(--z-base);
-}
-
-.xpValue {
-  font-family: var(--font-mono);
-  font-size: var(--text-sm);
-  color: var(--text-2);
-}
-
-.xpUnit {
-  font-family: var(--font-sans);
-  font-size: var(--text-xs);
-  color: var(--text-3);
-  text-transform: uppercase;
-  letter-spacing: var(--tracking-widest);
-}
-
-/* -- Recently practiced ---------------------------------------------- */
-
-.recentRagas {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-2);
-  margin-bottom: var(--space-6);
-  z-index: var(--z-base);
-}
-
-.recentLabel {
-  font-family: var(--font-sans);
-  font-size: var(--text-xs);
-  color: var(--text-3);
-  text-transform: uppercase;
-  letter-spacing: var(--tracking-widest);
-}
-
-.recentList {
-  display: flex;
-  gap: var(--space-4);
-}
-
-.recentRagaName {
-  font-family: var(--font-serif);
-  font-size: var(--text-sm);
-  color: var(--text-2);
-}
-
-/* -- Reduced motion -------------------------------------------------- */
-
-/* -- Day mode: dark jali strokes ------------------------------------ */
-
-:global([data-theme="day"]) .journeyCard::before {
+:global([data-theme="day"]) .deckCard::before {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cpath d='M24 0L30 6L48 6L42 12L48 18L42 18L48 24L42 30L48 42L42 42L36 48L30 42L24 48L18 42L12 48L6 42L0 48L0 42L6 36L0 30L0 24L6 18L0 12L6 6L0 6L6 0L12 6L18 0L24 6L30 0Z' fill='none' stroke='%231A1A2E' stroke-width='0.5'/%3E%3Cpath d='M24 12L30 18L36 12L42 18L36 24L42 30L36 36L30 30L24 36L18 30L12 36L6 30L12 24L6 18L12 12L18 18Z' fill='none' stroke='%231A1A2E' stroke-width='0.5'/%3E%3C/svg%3E");
 }
 
-/* -- Reduced motion -------------------------------------------------- */
+:global([data-theme="day"]) .todayName {
+  text-shadow: 0 0 40px rgba(232, 135, 30, 0.05);
+}
+
+/* =======================================================================
+   REDUCED MOTION
+   ======================================================================= */
 
 @media (prefers-reduced-motion: reduce) {
   .loadingDot {
@@ -658,13 +556,30 @@
     opacity: 1;
   }
 
-  .freeformCard {
+  .freeformLink {
     animation: none;
     background-position: 50% 50%;
   }
+}
 
-  .freeformDescription {
-    animation: none;
-    opacity: 0.7;
+/* =======================================================================
+   RESPONSIVE
+   ======================================================================= */
+
+@media (min-width: 640px) {
+  .page {
+    padding: var(--space-6) var(--space-6) var(--space-4);
+  }
+
+  .todayName {
+    font-size: var(--text-3xl);
+  }
+
+  .deckName {
+    font-size: var(--text-xl);
+  }
+
+  .deckCardExpanded .deckName {
+    font-size: var(--text-2xl);
   }
 }

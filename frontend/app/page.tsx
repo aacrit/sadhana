@@ -1,18 +1,12 @@
 /**
  * page.tsx — Journey selection screen
  *
- * The entry point to Sadhana. Shows all four journeys in a color-world
- * grid, the Freeform void portal below, the current time-of-day raga,
- * the user's streak, and the tanpura waveform as an ambient background.
- *
- * Auth state is handled by the AuthPill (layout.tsx).
- * No inline auth banner.
- *
- * Per-card color worlds: Beginner (saffron), Explorer (green),
- * Scholar (lapis), Master (gold). Freeform breaks the grid.
+ * Redesigned: status bar + accordion journey deck + freeform strip.
+ * Stacked card deck — one expanded at a time, others collapsed.
+ * Icon inline left of title, Devanagari replaces romanized (not appends).
  *
  * Framer Motion spring physics:
- *   - Tanpura Release (400/15) for page-load card stagger
+ *   - Tanpura Release (400/15) for page-load stagger
  *   - Andolan (120/8) for hover
  *   - Kan (1000/30) for press/tap
  */
@@ -21,7 +15,7 @@
 
 import { useMemo, useState, useEffect } from 'react';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import Logo from './components/Logo';
 import BrandLoader from './components/BrandLoader';
 import TanpuraViz from './components/TanpuraViz';
@@ -96,21 +90,21 @@ const CARD_CLASS_MAP: Record<string, string | undefined> = {
 };
 
 // ---------------------------------------------------------------------------
-// Animation variants — Tanpura Release spring (400/15)
+// Animation variants
 // ---------------------------------------------------------------------------
 
 const containerVariants = {
   hidden: {},
   visible: {
     transition: {
-      staggerChildren: 0.08,
-      delayChildren: 0.15,
+      staggerChildren: 0.06,
+      delayChildren: 0.1,
     },
   },
 };
 
 const cardVariants = {
-  hidden: { opacity: 0, y: 24 },
+  hidden: { opacity: 0, y: 16 },
   visible: {
     opacity: 1,
     y: 0,
@@ -118,48 +112,6 @@ const cardVariants = {
       type: 'spring' as const,
       stiffness: 400,
       damping: 15,
-    },
-  },
-};
-
-const iconVariants = {
-  hidden: { opacity: 0, scale: 0.7 },
-  visible: (i: number) => ({
-    opacity: 1,
-    scale: 1,
-    transition: {
-      type: 'spring' as const,
-      stiffness: 400,
-      damping: 15,
-      delay: i * 0.08 + 0.04,
-    },
-  }),
-};
-
-const freeformVariants = {
-  hidden: { opacity: 0, y: 40 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      type: 'spring' as const,
-      stiffness: 400,
-      damping: 15,
-      delay: 0.15 + (4 * 0.08) + 0.12,
-    },
-  },
-};
-
-const freeformIconVariants = {
-  hidden: { opacity: 0, scale: 0.7 },
-  visible: {
-    opacity: 1,
-    scale: 1,
-    transition: {
-      type: 'spring' as const,
-      stiffness: 400,
-      damping: 15,
-      delay: 0.15 + (4 * 0.08) + 0.12 + 0.04,
     },
   },
 };
@@ -172,6 +124,25 @@ const headerVariants = {
     transition: {
       duration: 0.6,
       ease: [0.16, 1, 0.3, 1] as const,
+    },
+  },
+};
+
+const expandVariants = {
+  collapsed: {
+    height: 0,
+    opacity: 0,
+    transition: {
+      height: { type: 'spring' as const, stiffness: 400, damping: 30 },
+      opacity: { duration: 0.15 },
+    },
+  },
+  expanded: {
+    height: 'auto',
+    opacity: 1,
+    transition: {
+      height: { type: 'spring' as const, stiffness: 300, damping: 25 },
+      opacity: { duration: 0.25, delay: 0.05 },
     },
   },
 };
@@ -203,11 +174,25 @@ export default function HomePage() {
   const xp = profile?.xp ?? 0;
   const riyazDone = profile?.riyazDone ?? false;
 
-  // Suppress unused variable warnings — isGuest is consumed
-  // by the AuthPill (via layout.tsx), not on the page directly.
+  // Expanded journey card — default to beginner (Shishya), or current progress
+  const defaultJourney = useMemo(() => {
+    const level = profile?.level ?? 1;
+    if (level >= 7) return 'master';
+    if (level >= 4) return 'scholar';
+    if (level >= 2) return 'explorer';
+    return 'beginner';
+  }, [profile?.level]);
+
+  const [expandedId, setExpandedId] = useState<string>(defaultJourney);
+
+  // Update expanded card when profile loads
+  useEffect(() => {
+    setExpandedId(defaultJourney);
+  }, [defaultJourney]);
+
   void isGuest;
 
-  // Loading state -- branded loader with Tantri mark
+  // Loading state
   if (loading) {
     return (
       <BrandLoader loading={true} tagline="Disciplined practice toward mastery" />
@@ -219,7 +204,7 @@ export default function HomePage() {
       {/* Ambient tanpura waveform background */}
       <TanpuraViz active={false} />
 
-      {/* Header: prominent logo with Devanagari + string accent */}
+      {/* Header: logo */}
       <motion.header
         className={styles.header}
         variants={headerVariants}
@@ -227,79 +212,77 @@ export default function HomePage() {
         animate="visible"
       >
         <Logo size="xl" variant="full" animate />
-        <p className={styles.tagline}>
-          Disciplined practice toward mastery
-        </p>
       </motion.header>
 
-      {/* Streak indicator */}
-      <div className={styles.streak}>
-        <span
-          className={`${styles.streakCount} ${streak > 0 ? styles.streakActive : ''}`}
-        >
-          {streak}
-        </span>
-        <span className={styles.streakLabel}>day streak</span>
-      </div>
+      {/* Status bar: streak | today's raga | daily goal */}
+      <motion.div
+        className={styles.statusBar}
+        variants={headerVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        {/* Streak */}
+        <div className={styles.statusCell}>
+          <span className={`${styles.statusValue} ${streak > 0 ? styles.statusValueAccent : ''}`}>
+            {streak}
+          </span>
+          <span className={styles.statusLabel}>day streak</span>
+        </div>
 
-      {/* Daily goal ring */}
-      {user && (
-        <div className={styles.dailyGoal}>
-          <svg className={styles.goalRing} width="36" height="36" viewBox="0 0 36 36" aria-hidden="true">
-            <circle className={styles.goalRingBg} cx="18" cy="18" r="15" />
-            <circle
-              className={`${styles.goalRingFill} ${riyazDone ? styles.goalRingDone : ''}`}
-              cx="18"
-              cy="18"
-              r="15"
-              strokeDasharray={2 * Math.PI * 15}
-              strokeDashoffset={riyazDone ? 0 : 2 * Math.PI * 15 * 0.75}
-              transform="rotate(-90 18 18)"
-            />
-          </svg>
-          <div className={styles.goalText}>
-            <span className={styles.goalLabel}>Today&rsquo;s riyaz</span>
-            <span className={`${styles.goalStatus} ${riyazDone ? styles.goalStatusDone : ''}`}>
-              {riyazDone ? 'Complete' : 'Not yet — begin when ready'}
+        {/* Today's raga — center, prominent */}
+        <div className={styles.statusCenter}>
+          <span className={styles.statusLabel}>Today&rsquo;s raga</span>
+          <span className={styles.todayName}>
+            <span className="romanized-only raga-name">{todayRaga.name}</span>
+            {todayRaga.nameDevanagari && (
+              <span className="devanagari-only raga-name">{todayRaga.nameDevanagari}</span>
+            )}
+          </span>
+        </div>
+
+        {/* Daily goal / XP */}
+        <div className={styles.statusCell}>
+          {user ? (
+            <>
+              <svg className={styles.goalRing} width="28" height="28" viewBox="0 0 28 28" aria-hidden="true">
+                <circle className={styles.goalRingBg} cx="14" cy="14" r="11" />
+                <circle
+                  className={`${styles.goalRingFill} ${riyazDone ? styles.goalRingDone : ''}`}
+                  cx="14"
+                  cy="14"
+                  r="11"
+                  strokeDasharray={2 * Math.PI * 11}
+                  strokeDashoffset={riyazDone ? 0 : 2 * Math.PI * 11 * 0.75}
+                  transform="rotate(-90 14 14)"
+                />
+              </svg>
+              {xp > 0 && (
+                <span className={styles.statusLabel}>{xp} XP</span>
+              )}
+            </>
+          ) : (
+            <span className={`${styles.statusValue} ${riyazDone ? styles.statusValueDone : ''}`}>
+              {riyazDone ? 'Done' : 'Ready'}
             </span>
-          </div>
+          )}
+          <span className={styles.statusLabel}>riyaz</span>
         </div>
-      )}
+      </motion.div>
 
-      {/* Today's raga */}
-      <div className={styles.todayRaga}>
-        <span className={styles.todayLabel}>Today&rsquo;s raga</span>
-        <h2 className={`${styles.todayName} raga-name`}>{todayRaga.name}</h2>
-        {todayRaga.nameDevanagari && (
-          <span className={`${styles.todayDevanagari} devanagari-only`}>{todayRaga.nameDevanagari}</span>
-        )}
-      </div>
-
-      {/* XP display (only if signed in and has XP) */}
-      {user && xp > 0 && (
-        <div className={styles.xpDisplay}>
-          <span className={styles.xpValue}>{xp}</span>
-          <span className={styles.xpUnit}>XP</span>
-        </div>
-      )}
-
-      {/* Recently practiced ragas */}
+      {/* Recently practiced (inline pills) */}
       {recentRagas.length > 0 && (
         <div className={styles.recentRagas}>
-          <span className={styles.recentLabel}>Recently practiced</span>
-          <div className={styles.recentList}>
-            {recentRagas.map((raga) => (
-              <span key={raga.ragaId} className={styles.recentRagaName}>
-                {raga.ragaName}
-              </span>
-            ))}
-          </div>
+          {recentRagas.map((raga) => (
+            <span key={raga.ragaId} className={styles.recentRagaName}>
+              {raga.ragaName}
+            </span>
+          ))}
         </div>
       )}
 
-      {/* Journey selection grid */}
+      {/* Journey deck — accordion cards */}
       <motion.div
-        className={styles.journeyGrid}
+        className={styles.journeyDeck}
         variants={containerVariants}
         initial="hidden"
         animate="visible"
@@ -307,140 +290,133 @@ export default function HomePage() {
         aria-label="Choose your journey"
       >
         {JOURNEYS.map((journey, i) => {
-          const isLocked = !journey.accessible;
+          const isExpanded = expandedId === journey.id;
           const JourneyIcon = getJourneyIcon(journey.id);
           const cardClass = CARD_CLASS_MAP[journey.id] || '';
-
-          // Card content — shared between locked and linked states
-          const cardContent = (
-            <>
-              {JourneyIcon && (
-                <motion.div
-                  className={styles.journeyIconWrap}
-                  variants={iconVariants}
-                  initial="hidden"
-                  animate="visible"
-                  custom={i}
-                >
-                  <JourneyIcon
-                    size={48}
-                    color={isLocked ? 'var(--text-3)' : 'var(--text-2)'}
-                  />
-                </motion.div>
-              )}
-              <span className={`${styles.journeyName} raga-name`}>{journey.name}</span>
-              <span className={`${styles.journeyDevanagari} swara-text devanagari-only`}>
-                {journey.nameDevanagari}
-              </span>
-              <span className={styles.journeyEnglish}>
-                {journey.nameEnglish}
-              </span>
-              <p className={styles.journeyDescription}>
-                {journey.description}
-              </p>
-              {isLocked && (
-                <span className={styles.journeyLockMessage}>
-                  Coming soon — reach {journey.minLevel <= 4 ? 'Sadhaka' : 'Varistha'} level
-                </span>
-              )}
-            </>
-          );
-
-          if (isLocked) {
-            return (
-              <motion.div
-                key={journey.id}
-                variants={cardVariants}
-                role="listitem"
-              >
-                <Link
-                  href={journey.path}
-                  className={`${styles.journeyCard} ${styles.journeyCardLocked} ${cardClass}`}
-                  style={{ textDecoration: 'none', color: 'inherit' }}
-                >
-                  {cardContent}
-                </Link>
-              </motion.div>
-            );
-          }
 
           return (
             <motion.div
               key={journey.id}
               variants={cardVariants}
               role="listitem"
-              whileHover={{
-                scale: 1.015,
-                transition: {
-                  type: 'spring',
-                  stiffness: 120,
-                  damping: 8,
-                },
-              }}
-              whileTap={{
-                scale: 0.98,
-                y: 2,
-                transition: {
-                  type: 'spring',
-                  stiffness: 1000,
-                  damping: 30,
-                },
-              }}
+              className={styles.deckSlot}
             >
-              <Link
-                href={journey.path}
-                className={`${styles.journeyCard} ${cardClass}`}
-                style={{ textDecoration: 'none', color: 'inherit' }}
+              {/* Card header — always visible */}
+              <button
+                type="button"
+                className={`${styles.deckCard} ${cardClass} ${isExpanded ? styles.deckCardExpanded : ''}`}
+                onClick={() => setExpandedId(isExpanded ? '' : journey.id)}
+                aria-expanded={isExpanded}
+                aria-controls={`journey-${journey.id}`}
               >
-                {cardContent}
-              </Link>
+                <div className={styles.deckCardHeader}>
+                  {JourneyIcon && (
+                    <motion.div
+                      className={styles.deckIcon}
+                      initial={{ opacity: 0, scale: 0.7 }}
+                      animate={{ opacity: 0.8, scale: 1 }}
+                      transition={{
+                        type: 'spring',
+                        stiffness: 400,
+                        damping: 15,
+                        delay: i * 0.06 + 0.04,
+                      }}
+                    >
+                      <JourneyIcon
+                        size={isExpanded ? 32 : 24}
+                        color="currentColor"
+                      />
+                    </motion.div>
+                  )}
+
+                  <div className={styles.deckTitles}>
+                    {/* Primary name — romanized/devanagari swap */}
+                    <span className={styles.deckName}>
+                      <span className="romanized-only raga-name">{journey.name}</span>
+                      <span className="devanagari-only raga-name">{journey.nameDevanagari}</span>
+                    </span>
+
+                    {/* English subtitle */}
+                    <span className={styles.deckEnglish}>{journey.nameEnglish}</span>
+                  </div>
+
+                  {/* Expand chevron */}
+                  <svg
+                    className={`${styles.deckChevron} ${isExpanded ? styles.deckChevronOpen : ''}`}
+                    width="16"
+                    height="16"
+                    viewBox="0 0 16 16"
+                    fill="none"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M4 6L8 10L12 6"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </div>
+              </button>
+
+              {/* Expanded content */}
+              <AnimatePresence initial={false}>
+                {isExpanded && (
+                  <motion.div
+                    id={`journey-${journey.id}`}
+                    className={`${styles.deckBody} ${cardClass}`}
+                    variants={expandVariants}
+                    initial="collapsed"
+                    animate="expanded"
+                    exit="collapsed"
+                    style={{ overflow: 'hidden' }}
+                  >
+                    <p className={styles.deckDescription}>
+                      {journey.description}
+                    </p>
+                    <Link
+                      href={journey.path}
+                      className={styles.deckEnter}
+                    >
+                      Enter
+                      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                        <path d="M5 3L9 7L5 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </Link>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </motion.div>
           );
         })}
       </motion.div>
 
-      {/* Freeform Riyaz — standalone card, full-width void portal */}
+      {/* Freeform strip — always accessible at the bottom */}
       <motion.div
-        variants={freeformVariants}
-        initial="hidden"
-        animate="visible"
-        style={{ width: '100%', maxWidth: 'var(--max-width)', padding: '0 var(--space-4)' }}
-        whileHover={{
-          scale: 1.01,
-          transition: {
-            type: 'spring',
-            stiffness: 120,
-            damping: 8,
-          },
-        }}
-        whileTap={{
-          scale: 0.99,
-          transition: {
-            type: 'spring',
-            stiffness: 1000,
-            damping: 30,
-          },
+        className={styles.freeformStrip}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{
+          type: 'spring',
+          stiffness: 400,
+          damping: 15,
+          delay: 0.4,
         }}
       >
         <Link
           href="/journeys/freeform"
-          className={styles.freeformCard}
-          style={{ textDecoration: 'none', color: 'inherit' }}
+          className={styles.freeformLink}
         >
-          <motion.div
-            className={styles.freeformIconWrap}
-            variants={freeformIconVariants}
-            initial="hidden"
-            animate="visible"
-          >
-            <FreeformIcon size={40} color="var(--text-3)" />
-          </motion.div>
-          <span className={`${styles.freeformName} raga-name`}>Swatantra Riyaz</span>
-          <span className={`${styles.freeformDevanagari} swara-text devanagari-only`}>{'\u0938\u094D\u0935\u0924\u0902\u0924\u094D\u0930 \u0930\u093F\u092F\u093E\u091C\u093C'}</span>
-          <span className={styles.freeformEnglish}>Freeform</span>
-          <p className={styles.freeformDescription}>
-            No goals. No exercises. Just you and the raga.
-          </p>
+          <FreeformIcon size={24} color="var(--text-3)" />
+          <span className={styles.freeformName}>
+            <span className="romanized-only raga-name">Swatantra Riyaz</span>
+            <span className="devanagari-only raga-name">{'\u0938\u094D\u0935\u0924\u0902\u0924\u094D\u0930 \u0930\u093F\u092F\u093E\u091C\u093C'}</span>
+          </span>
+          <span className={styles.freeformLabel}>Freeform</span>
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true" className={styles.freeformArrow}>
+            <path d="M5 3L9 7L5 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
         </Link>
       </motion.div>
     </div>

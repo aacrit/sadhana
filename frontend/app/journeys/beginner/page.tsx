@@ -46,7 +46,7 @@ import SwaraIntroduction from '../../components/SwaraIntroduction';
 import PhrasePlayback from '../../components/PhrasePlayback';
 import PakadMoment from '../../components/PakadMoment';
 import VoiceVisualization from '../../components/VoiceVisualization';
-import VoiceWave from '../../components/VoiceWave';
+
 import Tantri from '../../components/Tantri';
 import type { TantriPlayEvent } from '@/engine/interaction/tantri';
 import { playSwaraNote, ensureAudioReady } from '@/engine/synthesis/swara-voice';
@@ -380,7 +380,7 @@ function hzToNoteName(hz: number): string {
   return `${noteNames[noteIndex]}${octave}`;
 }
 
-const SA_DETECTION_READINGS = 5;
+const SA_HOLDS_TOTAL = 5;
 
 function SaCalibrationPhase({
   onAdvance,
@@ -392,41 +392,40 @@ function SaCalibrationPhase({
   onSaDetected: (hz: number) => void;
 }) {
   const [state, setState] = useState<'listening' | 'detected' | 'timeout'>('listening');
-  const [readings, setReadings] = useState(0);
+  const [completedHolds, setCompletedHolds] = useState(0);
+  const [currentHz, setCurrentHz] = useState<number | null>(null);
   const [detectedHz, setDetectedHz] = useState<number | null>(null);
 
   useEffect(() => {
     let cancelled = false;
 
-    // Start Sa detection via the lesson audio hook
-    audio.startSaDetection((hz: number, _clarity: number) => {
-      if (cancelled) return;
-      setDetectedHz(hz);
-      setState('detected');
-      onSaDetected(hz);
-    });
+    // Start Sa detection with 5 sustained holds
+    audio.startSaDetection(
+      // onCandidate — called when all 5 holds complete
+      (hz: number, _clarity: number) => {
+        if (cancelled) return;
+        setDetectedHz(hz);
+        setState('detected');
+        onSaDetected(hz);
+      },
+      // onProgress — called after each sustained hold completes
+      (hold: number, _total: number, holdHz: number) => {
+        if (cancelled) return;
+        setCompletedHolds(hold);
+        setCurrentHz(holdHz);
+      },
+    );
 
-    // Timeout after 30 seconds — give user plenty of time
+    // Timeout after 90 seconds — 5 holds at ~1.5s each plus pauses
     const timer = setTimeout(() => {
       if (!cancelled && detectedHz === null) {
         setState('timeout');
       }
-    }, 30000);
-
-    // Track reading progress via a polling interval
-    // (the actual readings happen inside startSaDetection's onPitch callback)
-    const progressInterval = setInterval(() => {
-      // We can't directly read the internal readings count, so we increment
-      // on each interval tick while the pipeline is active
-      if (!cancelled) {
-        setReadings((prev) => Math.min(prev + 1, SA_DETECTION_READINGS - 1));
-      }
-    }, 2000);
+    }, 90000);
 
     return () => {
       cancelled = true;
       clearTimeout(timer);
-      clearInterval(progressInterval);
       audio.stopSaDetection();
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -484,13 +483,21 @@ function SaCalibrationPhase({
             className={lessonStyles.actionButton}
             onClick={() => {
               setState('listening');
-              setReadings(0);
+              setCompletedHolds(0);
+              setCurrentHz(null);
               setDetectedHz(null);
-              audio.startSaDetection((hz: number, _clarity: number) => {
-                setDetectedHz(hz);
-                setState('detected');
-                onSaDetected(hz);
-              });
+              audio.stopSaDetection();
+              audio.startSaDetection(
+                (hz: number, _clarity: number) => {
+                  setDetectedHz(hz);
+                  setState('detected');
+                  onSaDetected(hz);
+                },
+                (hold: number, _total: number, holdHz: number) => {
+                  setCompletedHolds(hold);
+                  setCurrentHz(holdHz);
+                },
+              );
             }}
             style={{ background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-2)' }}
           >
@@ -522,12 +529,21 @@ function SaCalibrationPhase({
             className={lessonStyles.actionButton}
             onClick={() => {
               setState('listening');
-              setReadings(0);
-              audio.startSaDetection((hz: number, _clarity: number) => {
-                setDetectedHz(hz);
-                setState('detected');
-                onSaDetected(hz);
-              });
+              setCompletedHolds(0);
+              setCurrentHz(null);
+              setDetectedHz(null);
+              audio.stopSaDetection();
+              audio.startSaDetection(
+                (hz: number, _clarity: number) => {
+                  setDetectedHz(hz);
+                  setState('detected');
+                  onSaDetected(hz);
+                },
+                (hold: number, _total: number, holdHz: number) => {
+                  setCompletedHolds(hold);
+                  setCurrentHz(holdHz);
+                },
+              );
             }}
           >
             Try again
@@ -545,7 +561,7 @@ function SaCalibrationPhase({
     );
   }
 
-  // Listening state — show progress
+  // Listening state — show 5-hold progress
   return (
     <motion.div key="sa_calibration" {...phaseTransition} className={lessonStyles.centeredMessage}>
       <p style={{
@@ -563,8 +579,42 @@ function SaCalibrationPhase({
         maxWidth: '320px',
         lineHeight: 1.6,
       }}>
-        Hum or sing a comfortable note. Hold it steady. This becomes your home note.
+        Sing a comfortable note and hold it steady. Do this 5 times &mdash; the app will listen to each one.
       </p>
+
+      {/* 5-hold progress dots */}
+      <div style={{
+        display: 'flex',
+        gap: 'var(--space-3)',
+        marginBottom: 'var(--space-4)',
+        alignItems: 'center',
+      }}>
+        {Array.from({ length: SA_HOLDS_TOTAL }, (_, i) => (
+          <div
+            key={i}
+            style={{
+              width: 16,
+              height: 16,
+              borderRadius: 'var(--radius-full)',
+              border: `2px solid ${i < completedHolds ? 'var(--accent)' : 'var(--border)'}`,
+              background: i < completedHolds ? 'var(--accent)' : 'transparent',
+              transition: 'all 0.3s ease',
+            }}
+          />
+        ))}
+      </div>
+
+      {/* Current state */}
+      {completedHolds > 0 && currentHz ? (
+        <p style={{
+          fontFamily: 'var(--font-mono)',
+          fontSize: 'var(--text-sm)',
+          color: 'var(--accent)',
+          marginBottom: 'var(--space-2)',
+        }}>
+          {Math.round(currentHz)} Hz &mdash; {hzToNoteName(currentHz)}
+        </p>
+      ) : null}
 
       {/* Pulsing listening indicator */}
       <div className={lessonStyles.saListeningPulse}>
@@ -577,7 +627,9 @@ function SaCalibrationPhase({
         color: 'var(--text-3)',
         marginBottom: 'var(--space-6)',
       }}>
-        Listening...
+        {completedHolds === 0
+          ? 'Sing and hold a steady note...'
+          : `${completedHolds} of ${SA_HOLDS_TOTAL} — sing again`}
       </p>
 
       <button
@@ -586,7 +638,7 @@ function SaCalibrationPhase({
         onClick={onAdvance}
         style={{ background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-3)', fontSize: 'var(--text-xs)' }}
       >
-        Skip
+        Skip (use default)
       </button>
     </motion.div>
   );
@@ -850,10 +902,15 @@ export default function BeginnerPage() {
       setVoiceFeedback(IDLE_VOICE_FEEDBACK);
     }
 
+    // Gate tanpura: only active during listen and singing phases
+    const tanpuraPhases: LessonPhase[] = ['listen', 'sing_sa', 'sing_aroha', 'pakad_watch'];
+    if (!tanpuraPhases.includes(phase)) {
+      audio.stopTanpura();
+    }
+
     // Phase-specific audio actions
     switch (phase) {
       case 'listen':
-        // Start tanpura — it stays active for all subsequent phases
         if (view === 'lesson') {
           audio.startTanpura();
         }
@@ -872,6 +929,8 @@ export default function BeginnerPage() {
 
       case 'sing_sa':
       case 'sing_aroha': {
+        // Start tanpura as reference drone for singing
+        audio.startTanpura();
         // Priority 8: Check mic permission before first voice phase
         const startVoice = async () => {
           if (phase === 'sing_sa' && !skipMic) {
@@ -892,6 +951,8 @@ export default function BeginnerPage() {
       }
 
       case 'pakad_watch': {
+        // Start tanpura as reference drone for singing
+        audio.startTanpura();
         // Priority 3: Wire PitchResult to VoiceFeedback + pakad detection + Tantri pitch
         const startPakadVoice = async () => {
           await safeStartVoicePipeline(

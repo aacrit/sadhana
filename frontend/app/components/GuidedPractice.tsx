@@ -18,7 +18,6 @@ import { PRACTICE_STAGES, STAGE_LABELS } from '@/engine/analysis/practice-scorin
 import type { StarRating, StageResult } from '@/engine/analysis/practice-scoring';
 import type { GuidedPracticeControls } from '../lib/useGuidedPractice';
 import VoiceVisualization from './VoiceVisualization';
-import VoiceWave from './VoiceWave';
 import Tantri from './Tantri';
 import type { TantriPlayEvent } from '@/engine/interaction/tantri';
 import { playSwaraNote, ensureAudioReady } from '@/engine/synthesis/swara-voice';
@@ -465,9 +464,6 @@ export default function GuidedPractice({
       role="region"
       aria-label={`Guided practice: ${raga.name}`}
     >
-      {/* Voice waveform background */}
-      <VoiceWave variant="full" style={{ opacity: 0.12 }} />
-
       {/* Exit button */}
       <button
         type="button"

@@ -14,16 +14,16 @@
  *   - ReducedMotion   sets data-reduced-motion on <html> for CSS + Framer Motion
  */
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 import { MotionConfig } from 'framer-motion';
 import { AuthProvider, useAuth } from './lib/auth';
-import { VoiceWaveProvider } from './lib/VoiceWaveContext';
+import { VoiceWaveProvider, useVoiceWave } from './lib/VoiceWaveContext';
 import { useReducedMotion } from './lib/useReducedMotion';
 import { getLevelTitle } from './lib/types';
 import ScriptToggle from './components/ScriptToggle';
 import ThemeToggle from './components/ThemeToggle';
-import VoiceWave from './components/VoiceWave';
+import SaCalibrator from './components/SaCalibrator';
 
 /**
  * ReducedMotionBridge — sets data-reduced-motion="true"|"false" on <html>.
@@ -77,12 +77,56 @@ export default function Providers({ children }: { children: ReactNode }) {
         <VoiceWaveProvider>
           <ReducedMotionBridge />
           <LevelBridge />
-          <VoiceWave variant="ambient" />
           {children}
+          <SaCalibratorGlobal />
           <ThemeToggle />
           <ScriptToggle />
         </VoiceWaveProvider>
       </AuthProvider>
     </MotionConfig>
+  );
+}
+
+/**
+ * SaCalibratorGlobal — floating recalibrate button + modal.
+ *
+ * Renders on every page. The button only appears after the user has
+ * a non-default Sa (i.e., they've calibrated at least once), or always
+ * on lesson/practice pages. Clicking opens the SaCalibrator modal.
+ */
+function SaCalibratorGlobal() {
+  const [open, setOpen] = useState(false);
+  const { saHz } = useVoiceWave();
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        aria-label={`Recalibrate Sa (currently ${Math.round(saHz)} Hz)`}
+        style={{
+          position: 'fixed',
+          bottom: 'calc(var(--space-4) + 88px)',
+          right: 'var(--space-4)',
+          zIndex: 50,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: 36,
+          height: 36,
+          borderRadius: 'var(--radius-full)',
+          background: 'var(--bg-3)',
+          border: '1px solid var(--border)',
+          color: 'var(--text-3)',
+          cursor: 'pointer',
+          fontFamily: 'var(--font-mono)',
+          fontSize: 'var(--text-xs)',
+          transition: 'color var(--dur-fast), border-color var(--dur-fast)',
+        }}
+      >
+        Sa
+      </button>
+      <SaCalibrator open={open} onClose={() => setOpen(false)} />
+    </>
   );
 }

@@ -26,7 +26,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Logo from '../../components/Logo';
-import VoiceWave from '../../components/VoiceWave';
+
 import Tantri from '../../components/Tantri';
 import type { TantriPlayEvent } from '@/engine/interaction/tantri';
 import { playSwaraNote, ensureAudioReady, stopHarmoniumPlayback } from '@/engine/synthesis/swara-voice';
@@ -405,7 +405,6 @@ export default function FreeformPage() {
   if (!hasStarted) {
     return (
       <div className={styles.page} data-raga={todayRaga.id}>
-        <VoiceWave variant="full" style={{ opacity: 0.15 }} />
 
         <Link href="/" className={styles.backLink}>
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
@@ -488,7 +487,6 @@ export default function FreeformPage() {
   if (session.micPermission === 'denied') {
     return (
       <div className={styles.page} data-raga={todayRaga.id}>
-        <VoiceWave variant="full" style={{ opacity: 0.15 }} />
 
         <motion.div
           className={styles.startContent}

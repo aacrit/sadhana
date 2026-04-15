@@ -306,8 +306,10 @@ export default function ExplorerPage() {
 
       {/* Header */}
       <motion.header className={styles.header} variants={fadeUp}>
-        <h1 className={`${styles.title} raga-name`}>Sadhaka</h1>
-        <span className={`${styles.titleDevanagari} swara-text devanagari-only`}>{'\u0938\u093E\u0927\u0915'}</span>
+        <h1 className={styles.title}>
+          <span className="romanized-only raga-name">Sadhaka</span>
+          <span className="devanagari-only raga-name">{'\u0938\u093E\u0927\u0915'}</span>
+        </h1>
         <span className={styles.titleEnglish}>Explorer</span>
         <p className={styles.subtitle}>
           Five ragas. Five moods. Five times of day.
@@ -408,10 +410,10 @@ export default function ExplorerPage() {
                     <RagaIcon size={40} color="var(--text-2)" />
                   </div>
                 )}
-                <h2 className={`${styles.ragaName} raga-name`}>{raga.name}</h2>
-                <span className={`${styles.ragaDevanagari} devanagari-only`}>
-                  {raga.nameDevanagari}
-                </span>
+                <h2 className={styles.ragaName}>
+                  <span className="romanized-only raga-name">{raga.name}</span>
+                  <span className="devanagari-only raga-name">{raga.nameDevanagari}</span>
+                </h2>
 
                 <div className={styles.ragaMeta}>
                   <span className={styles.ragaMetaTag}>

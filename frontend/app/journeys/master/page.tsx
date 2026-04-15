@@ -120,15 +120,11 @@ export default function MasterPage() {
           <span className="romanized-only">Guru</span>
         </span>
 
-        {/* Hindustani primary name — raga-name global class, responds to script toggle */}
-        <h1 className={`${styles.journeyName} raga-name`}>
-          Guru
+        {/* Primary name — romanized/devanagari swap (replace, not append) */}
+        <h1 className={styles.journeyName}>
+          <span className="romanized-only raga-name">Guru</span>
+          <span className="devanagari-only raga-name">गुरु</span>
         </h1>
-
-        {/* Devanagari secondary — hidden in romanized script mode */}
-        <span className={`${styles.journeyDevanagari} swara-text devanagari-only`} aria-hidden="true">
-          गुरु
-        </span>
 
         {/* English tertiary */}
         <span className={styles.journeyEnglish}>Master</span>
@@ -156,13 +152,12 @@ export default function MasterPage() {
       {/* Horizon panel — what this journey will contain */}
       <motion.div className={styles.gatePanel} variants={fadeUp} role="region" aria-label="Journey status">
         <p className={styles.gateTitle}>
-          This journey is being built.
+          Arriving soon
         </p>
 
         <p className={styles.gateDescription}>
-          The Master journey will contain composition tools, phrase generation,
-          teaching mode, and the full 22-shruti palette. The engine becomes
-          your instrument. Content is arriving with each update.
+          Composition tools, phrase generation, teaching mode, and the full
+          22-shruti palette. The engine becomes your instrument.
         </p>
 
         <Link href="/" className={styles.practiceLink}>

@@ -215,8 +215,10 @@ export default function RagaDetailClient({ ragaId }: RagaDetailClientProps) {
       </motion.div>
 
       <motion.header className={styles.ragaHeader} variants={fadeUp}>
-        <h1 className={`${styles.ragaName} raga-name`}>{raga.name}</h1>
-        <p className={`${styles.ragaDevanagari} devanagari-only`}>{raga.nameDevanagari}</p>
+        <h1 className={styles.ragaName}>
+          <span className="romanized-only raga-name">{raga.name}</span>
+          <span className="devanagari-only raga-name">{raga.nameDevanagari}</span>
+        </h1>
       </motion.header>
 
       <motion.div className={styles.metaRow} variants={fadeUp}>
