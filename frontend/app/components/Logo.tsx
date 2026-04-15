@@ -672,13 +672,13 @@ function FullLogo({
       <text
         x={vbWidth / 2}
         y={primaryY}
-        fontFamily="'Cormorant Garamond', Georgia, serif"
         fontSize={primaryFontSize}
         fontWeight="400"
         letterSpacing="0.08em"
         fill="var(--text, #F0E6D3)"
         textAnchor="middle"
         dominantBaseline="auto"
+        style={{ fontFamily: 'var(--font-serif), Georgia, serif' }}
       >
         S&#x101;dhan&#x101;
       </text>
@@ -687,7 +687,6 @@ function FullLogo({
       <text
         x={vbWidth / 2}
         y={primaryY}
-        fontFamily="'Cormorant Garamond', Georgia, serif"
         fontSize={primaryFontSize}
         fontWeight="400"
         letterSpacing="0.08em"
@@ -695,7 +694,7 @@ function FullLogo({
         textAnchor="middle"
         dominantBaseline="auto"
         opacity={0.04}
-        style={{ animation: textGlowPulse }}
+        style={{ fontFamily: 'var(--font-serif), Georgia, serif', animation: textGlowPulse }}
         aria-hidden="true"
       />
 
@@ -704,14 +703,13 @@ function FullLogo({
         <motion.text
           x={vbWidth / 2}
           y={primaryY}
-          fontFamily="'Cormorant Garamond', Georgia, serif"
           fontSize={primaryFontSize}
           fontWeight="400"
           letterSpacing="0.08em"
           fill="#E8871E"
           textAnchor="middle"
           dominantBaseline="auto"
-          style={{ opacity: textGlowOpacity }}
+          style={{ fontFamily: 'var(--font-serif), Georgia, serif', opacity: textGlowOpacity }}
           aria-hidden="true"
         >
           S&#x101;dhan&#x101;
@@ -732,7 +730,6 @@ function FullLogo({
         <text
           x={vbWidth / 2}
           y={devanagariY}
-          fontFamily="'Noto Serif Devanagari', serif"
           fontSize={devanagariFontSize}
           fontWeight="400"
           letterSpacing="0.12em"
@@ -740,6 +737,7 @@ function FullLogo({
           textAnchor="middle"
           dominantBaseline="auto"
           opacity={0.75}
+          style={{ fontFamily: 'var(--font-devanagari), serif' }}
         >
           {'\u0938\u093E\u0927\u0928\u093E'}
         </text>
