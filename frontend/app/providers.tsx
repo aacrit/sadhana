@@ -111,20 +111,25 @@ function SaCalibratorGlobal() {
           zIndex: 50,
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'center',
-          width: 36,
-          height: 36,
+          gap: '6px',
+          padding: '6px 14px',
+          height: 40,
           borderRadius: 'var(--radius-full)',
           background: 'var(--bg-3)',
-          border: '1px solid var(--border)',
-          color: 'var(--text-3)',
+          border: '1px solid rgba(232, 135, 30, 0.3)',
+          color: 'var(--text-2)',
           cursor: 'pointer',
           fontFamily: 'var(--font-mono)',
-          fontSize: 'var(--text-xs)',
-          transition: 'color var(--dur-fast), border-color var(--dur-fast)',
+          fontSize: 'var(--text-sm)',
+          letterSpacing: '0.02em',
+          transition: 'color var(--dur-fast), border-color var(--dur-fast), background var(--dur-fast)',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
         }}
       >
-        Sa
+        <span style={{ color: '#E8871E', fontWeight: 600 }}>Sa</span>
+        <span style={{ color: 'var(--text-3)', fontSize: 'var(--text-xs)' }}>
+          {Math.round(saHz)} Hz
+        </span>
       </button>
       <SaCalibrator open={open} onClose={() => setOpen(false)} />
     </>
