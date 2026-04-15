@@ -607,6 +607,8 @@ The `useLessonAudio` hook accepts a `timbre: TantriTimbre` parameter (`'harmoniu
 
 Signature: `useLessonAudio(sa_hz?, ragaId, timbre?): LessonAudioControls`. All journey pages pass `timbre` from `useTimbreSelection()`.
 
+`LessonAudioControls` includes a `setTanpuraVolume(volume: number)` method that ramps the tanpura drone master gain. `useLessonEngine` calls this on every phase transition: full volume (0.3) during singing phases (`tanpura_drone`, `pitch_exercise`, `phrase_exercise`, `passive_phrase_recognition`), reduced to 30% of normal (0.09) during all other phase types (listen, read, speak). The tanpura never stops between phases — it persists as an ambient presence throughout the lesson.
+
 ### PWA Offline Caching
 
 The service worker (`frontend/public/sw.js`) implements cache-first strategy for audio assets:
