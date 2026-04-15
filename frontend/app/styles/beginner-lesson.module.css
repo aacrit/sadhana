@@ -47,6 +47,8 @@
 /* -- Phase header ---------------------------------------------------- */
 
 .phaseHeader {
+  position: relative;
+  z-index: var(--z-base, 1);
   text-align: center;
   margin-bottom: var(--space-6);
 }
@@ -400,6 +402,8 @@
 /* -- Lesson nav bar (back/skip) -------------------------------------- */
 
 .lessonNav {
+  position: relative;
+  z-index: var(--z-base, 1);
   display: flex;
   justify-content: space-between;
   align-items: center;
