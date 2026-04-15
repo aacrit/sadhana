@@ -78,12 +78,35 @@ export default function Providers({ children }: { children: ReactNode }) {
           <ReducedMotionBridge />
           <LevelBridge />
           {children}
-          <SaCalibratorGlobal />
-          <ThemeToggle />
-          <ScriptToggle />
+          <FloatingChrome />
         </VoiceWaveProvider>
       </AuthProvider>
     </MotionConfig>
+  );
+}
+
+/**
+ * FloatingChrome — Sa calibrator, ThemeToggle, ScriptToggle.
+ *
+ * Auto-hides when a practice session is active (analyser registered)
+ * so the student's attention stays on Tantri and the music.
+ */
+function FloatingChrome() {
+  const { analyser } = useVoiceWave();
+  const isSessionActive = analyser !== null;
+
+  return (
+    <div
+      style={{
+        opacity: isSessionActive ? 0 : 1,
+        pointerEvents: isSessionActive ? 'none' : 'auto',
+        transition: 'opacity 0.6s ease-out',
+      }}
+    >
+      <SaCalibratorGlobal />
+      <ThemeToggle />
+      <ScriptToggle />
+    </div>
   );
 }
 

@@ -151,8 +151,8 @@ function getLabelFont(isActive: boolean, dpr: number): string {
     const family = CANVAS_SCRIPT_MODE === 'devanagari'
       ? CANVAS_FONT_DEVANAGARI
       : CANVAS_FONT_SANS;
-    _fontActive = `600 ${12.5 * dpr}px ${family}`;
-    _fontInactive = `400 ${11 * dpr}px ${family}`;
+    _fontActive = `600 ${15 * dpr}px ${family}`;
+    _fontInactive = `500 ${13 * dpr}px ${family}`;
   }
   return isActive ? _fontActive : _fontInactive;
 }
@@ -248,7 +248,7 @@ function getAccuracyColor(band: AccuracyBand): string {
 const PADDING_X = 48;
 const PADDING_Y_TOP = 24;
 const PADDING_Y_BOTTOM = 24;
-const LABEL_WIDTH = 40;
+const LABEL_WIDTH = 52;
 
 // ---------------------------------------------------------------------------
 // Pitch trail (voice → flowing line between strings)
@@ -700,14 +700,28 @@ function renderString(
   ctx.font = getLabelFont(isActive, dpr);
   ctx.textAlign = 'right';
   ctx.textBaseline = 'middle';
-  ctx.fillStyle = isActive ? color : resolveColor('--text-3', '#7A6B5E');
-  ctx.globalAlpha = s.visibility === 'ghost' ? 0.3 : opacity;
+
+  // Label color: achala (Sa/Pa) always use their accent color even at rest
+  const labelColor = isActive
+    ? color
+    : s.achala
+      ? (s.swara === 'Sa' ? resolveColor('--accent', '#E8871E') : resolveColor('--text-2', '#B8A99A'))
+      : resolveColor('--text-3', '#7A6B5E');
+  ctx.fillStyle = labelColor;
+
+  // Labels are more opaque than strings — always readable
+  const labelOpacity = s.visibility === 'ghost'
+    ? 0.35
+    : isActive
+      ? 1
+      : s.achala ? 0.7 : 0.55;
+  ctx.globalAlpha = labelOpacity;
 
   // Use Devanagari or romanized sargam abbreviation based on script mode
   const label = CANVAS_SCRIPT_MODE === 'devanagari'
     ? s.definition.sargamAbbrDevanagari
     : s.definition.sargamAbbr;
-  ctx.fillText(label, x0 - 8, y);
+  ctx.fillText(label, x0 - 10, y);
   ctx.restore();
 }
 

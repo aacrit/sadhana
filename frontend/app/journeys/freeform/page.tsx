@@ -30,6 +30,7 @@ import Logo from '../../components/Logo';
 import Tantri from '../../components/Tantri';
 import type { TantriPlayEvent } from '@/engine/interaction/tantri';
 import { playSwaraNote, ensureAudioReady, stopHarmoniumPlayback } from '@/engine/synthesis/swara-voice';
+import { TalaPlayer } from '@/engine/synthesis/tala-engine';
 import VoiceTimbreSelector, { useTimbreSelection } from '../../components/VoiceTimbreSelector';
 import { useFreeformSession } from '../../lib/useFreeformSession';
 import type { SwaraEvent } from '../../lib/useFreeformSession';
@@ -216,6 +217,10 @@ export default function FreeformPage() {
   // Cinematic defocus: true when Tantri strings are vibrating
   const [tantriActive, setTantriActive] = useState(false);
 
+  // Tala (tabla) state
+  const [talaActive, setTalaActive] = useState(false);
+  const talaPlayerRef = useRef<TalaPlayer | null>(null);
+
   // Raga selection — defaults to time-of-day, user can override
   const [selectedRagaId, setSelectedRagaId] = useState<string | null>(todayRaga.id);
   const selectedRaga: Raga | null = useMemo(
@@ -337,9 +342,32 @@ export default function FreeformPage() {
 
   const handleEnd = useCallback(() => {
     session.stopListening();
+    if (talaPlayerRef.current) {
+      talaPlayerRef.current.stopTheka();
+      talaPlayerRef.current.dispose();
+      talaPlayerRef.current = null;
+    }
     session.dispose();
     router.push('/');
   }, [session, router]);
+
+  const toggleTala = useCallback(async () => {
+    if (talaActive) {
+      if (talaPlayerRef.current) {
+        talaPlayerRef.current.stopTheka();
+        talaPlayerRef.current.dispose();
+        talaPlayerRef.current = null;
+      }
+      setTalaActive(false);
+    } else {
+      await ensureAudioReady();
+      const ctx = new AudioContext();
+      if (ctx.state === 'suspended') await ctx.resume();
+      talaPlayerRef.current = new TalaPlayer(ctx, userSaHz);
+      talaPlayerRef.current.startTheka('teentaal', 80);
+      setTalaActive(true);
+    }
+  }, [talaActive, userSaHz]);
 
   // Track when the current note started (for minimum duration on release)
   const noteStartRef = useRef<number>(0);
@@ -686,6 +714,21 @@ export default function FreeformPage() {
             />
           </svg>
           <span className={styles.tanpuraLabel}>Tanpura</span>
+        </button>
+
+        <button
+          className={`${styles.tanpuraToggle} ${talaActive ? styles.tanpuraToggleActive : ''}`}
+          onClick={toggleTala}
+          type="button"
+          aria-label={talaActive ? 'Stop tabla' : 'Play tabla'}
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            {/* Tabla icon — two circles (bayan + dayan) */}
+            <circle cx="9" cy="13" r="5" stroke="currentColor" strokeWidth="1.5" />
+            <circle cx="15" cy="11" r="4" stroke="currentColor" strokeWidth="1.5" />
+            <path d="M9 10v6M15 8.5v5" stroke="currentColor" strokeWidth="1" strokeLinecap="round" opacity="0.5" />
+          </svg>
+          <span className={styles.tanpuraLabel}>Tabla</span>
         </button>
 
         <button
