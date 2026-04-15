@@ -18,10 +18,10 @@ The root page shows all four journeys as cards with Framer Motion stagger animat
 |---------|----------|-----------------|-----------|-------------|
 | Beginner | Shishya | Yes | 0 | Guided daily riyaz. Discover your Sa, sing with the tanpura, learn to hear the swaras. |
 | Explorer | Sadhaka | Yes | 0 | Browse ragas by time and emotion. Ear training exercises. Build your phrase library. |
-| Scholar | Varistha | Yes | 0 | Full raga grammar. Shruti analysis. Deep theory. The engine speaks to you directly. |
-| Master | Guru | Yes | 0 | Composition. Phrase generation. Teaching tools. The engine becomes your instrument. |
+| Scholar | Varistha | Level-gated | 2 | Full raga grammar. Shruti analysis. Deep theory. The engine speaks to you directly. |
+| Master | Guru | Level-gated | 4 | Composition. Phrase generation. Teaching tools. The engine becomes your instrument. |
 
-All four journeys are accessible from day one (`accessible: true, minLevel: 0`). Scholar and Master pages show "being built" messaging. All cards link to `/journeys/{id}`.
+Journey cards are filtered by user level via `visibleJourneys = JOURNEYS.filter(j => userLevel >= j.minLevel)`. New users (level 1) see only Beginner and Explorer. Scholar appears at level 2; Master at level 4. Scholar and Master pages show "being built" messaging when reached. All cards link to `/journeys/{id}`.
 
 Today's raga (from `getRagaForTimeOfDay(hour)`) and streak count displayed above the grid.
 
@@ -35,9 +35,9 @@ An SVG ring displayed on the home page shows today's riyaz completion status. Th
 
 Source: `frontend/app/journeys/beginner/page.tsx`
 
-### Daily Riyaz Entry
+### Home View (~230 lines)
 
-The Beginner home page is the daily riyaz entry point. Sections:
+The Beginner page is a clean home view. All lessons (including Bhoopali) route to `/journeys/beginner/lessons/[id]` and are rendered by the YAML-driven `LessonClient` + `useLessonEngine` + `LessonRenderer` system. There is no inline lesson system in `page.tsx`. Sections:
 
 1. **Today's riyaz card** -- raga selected by time of day via `getRagaForTimeOfDay`. Shows raga name, description, prahara number, time label (Dawn/Morning/Afternoon/etc.). "Begin" button when riyaz not done, "Today's riyaz complete" when finished. The "Begin" link resolves the correct YAML lesson via `RAGA_TO_LESSON` map (e.g., `yaman` -> `beginner-03-yaman`, `bhairav` -> `beginner-04-bhairav`). Ragas without a dedicated lesson fall back to `beginner-01-bhoopali`.
 
@@ -45,7 +45,9 @@ The Beginner home page is the daily riyaz entry point. Sections:
 
 3. **Recently practiced** -- list of raga cards with name and best accuracy percentage. Empty state: "No practice sessions yet."
 
-4. **First-time callout** -- shown when `lastPractice === null`. Explains Sadhana philosophy: practice, not explanation. 5-15 minutes. One raga at a time.
+4. **Lesson catalog** -- all 8 beginner lessons listed as links to `/journeys/beginner/lessons/[id]`: beginner-01-bhoopali (Your First Raga), beginner-02-sa-pa-drone (Sa and Pa), beginner-03-yaman (Evening Light), beginner-04-bhairav (Dawn Austerity), beginner-05-bhimpalasi (Afternoon Longing), beginner-06-bageshri (Night Intimacy), beginner-07-consolidation (Five Ragas), beginner-08-challenge (Shishya Challenge).
+
+5. **First-time callout** -- shown when `lastPractice === null`. Explains Sadhana philosophy: practice, not explanation. 5-15 minutes. One raga at a time.
 
 Framer Motion stagger container with fadeUp animation (opacity 0->1, y 16->0, 0.08s stagger, ease-out).
 

@@ -243,6 +243,21 @@ Modular, base 16px, ratio ~1.25 (major third).
 | `--text-2xl` | 32px | Page titles |
 | `--text-3xl` | 40px | Raga name in practice |
 | `--text-4xl` | 56px | Cinematic raga reveal (pakad moment) |
+| `--text-5xl` | 72px | Hero raga name, ceremony |
+
+### Letter-spacing Tokens
+
+| Token | Value | Use |
+|-------|-------|-----|
+| `--tracking-tighter` | (default tight) | — |
+| `--tracking-wider` | 0.06em | Card names, elevated UI titles |
+| `--tracking-royal` | 0.12em | Mughal inscription spacing — journey titles only |
+
+### Line-height Token
+
+| Token | Value | Use |
+|-------|-------|-----|
+| `--leading-snug` | 1.25 | Multi-line serif headings (raga names, journey card names) |
 
 ---
 
