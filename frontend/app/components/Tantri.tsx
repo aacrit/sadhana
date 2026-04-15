@@ -96,9 +96,8 @@ export interface TantriProps {
   onStringRelease?: (event: TantriPlayEvent) => void;
 
   /**
-   * TantriVoice(TM) — Instrument timbre for string touch playback.
-   * 'harmonium' (default): existing harmonium synthesis
-   * 'voice-male' / 'voice-female': vocal formant synthesis
+   * Instrument timbre for string touch playback.
+   * 'harmonium' (default) / 'piano' / 'guitar'
    */
   timbre?: TantriTimbre;
 

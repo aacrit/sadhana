@@ -195,6 +195,7 @@ export {
 export type {
   PlaySwaraOptions,
   PlayPhraseOptions,
+  InstrumentTimbre,
 } from './synthesis/swara-voice';
 
 // ============================================================================

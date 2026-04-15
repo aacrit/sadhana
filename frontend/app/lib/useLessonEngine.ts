@@ -280,6 +280,7 @@ export function useLessonEngine(
       timerRef.current = null;
     }
     audio.stopTanpura();
+    audio.stopTala();
     audio.stopVoicePipeline();
     audio.stopPlayback();
     setVoiceFeedback(IDLE_VOICE_FEEDBACK);
@@ -330,12 +331,10 @@ export function useLessonEngine(
     audio.stopSaDetection();
     setVoiceFeedback(IDLE_VOICE_FEEDBACK);
 
-    // Tanpura is always off — student controls it manually if desired
-    audio.stopTanpura();
-
     switch (currentPhase.type) {
       case 'tanpura_drone': {
-        // Auto-advance after duration_s (no tanpura auto-start)
+        // Start the tanpura drone — this also resumes the AudioContext
+        audio.startTanpura();
         if (currentPhase.duration_s) {
           timerRef.current = setTimeout(() => {
             advancePhase();
@@ -400,9 +399,10 @@ export function useLessonEngine(
       }
 
       case 'session_summary': {
-        // Stop all audio
+        // Stop all audio — lesson is over
         audio.stopVoicePipeline();
         audio.stopTanpura();
+        audio.stopTala();
         setVoiceFeedback(IDLE_VOICE_FEEDBACK);
         break;
       }

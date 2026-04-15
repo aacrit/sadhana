@@ -26,10 +26,9 @@ import {
   playSwaraNote as enginePlaySwaraNote,
   ensureAudioReady,
 } from '@/engine/synthesis/swara-voice';
-import {
-  playVocalSwaraNote,
-  ensureVocalAudioReady,
-} from '@/engine/synthesis/voice';
+import type { InstrumentTimbre } from '@/engine/synthesis/swara-voice';
+import { TalaPlayer } from '@/engine/synthesis/tala-engine';
+import type { TalaId } from '@/engine/synthesis/tala-engine';
 import { VoicePipeline } from '@/engine/voice/pipeline';
 import type { VoiceEvent } from '@/engine/voice/pipeline';
 import type { PitchResult } from '@/engine/analysis/pitch-mapping';
@@ -69,6 +68,11 @@ export interface LessonAudioControls {
   stopTanpura(): void;
   setTanpuraVolume(volume: number): void;
   tanpuraActive: boolean;
+
+  // Tabla / Tala
+  startTala(talaId?: TalaId, tempo?: number): void;
+  stopTala(): void;
+  talaActive: boolean;
 
   // Swara playback (for SwaraIntroduction + PhrasePlayback)
   playSwara(swara: string, durationMs?: number): Promise<void>;
@@ -140,7 +144,7 @@ function sleep(ms: number): Promise<void> {
  *
  * @param sa_hz - The student's Sa frequency in Hz (default: C4 = 261.6256)
  * @param ragaId - The raga being practiced (e.g. 'bhoopali')
- * @param timbre - Voice timbre: 'harmonium' (default), 'voice-male', or 'voice-female'
+ * @param timbre - Instrument timbre: 'harmonium' (default), 'piano', or 'guitar'
  * @returns LessonAudioControls for the lesson UI to drive
  */
 export function useLessonAudio(
@@ -152,12 +156,14 @@ export function useLessonAudio(
   // State — only booleans the UI needs to render
   // -----------------------------------------------------------------------
   const [tanpuraActive, setTanpuraActive] = useState(false);
+  const [talaActive, setTalaActive] = useState(false);
   const [pipelineActive, setPipelineActive] = useState(false);
 
   // -----------------------------------------------------------------------
   // Refs — audio objects must not trigger re-renders
   // -----------------------------------------------------------------------
   const tanpuraRef = useRef<TanpuraDrone | null>(null);
+  const talaPlayerRef = useRef<TalaPlayer | null>(null);
   const voicePipelineRef = useRef<VoicePipeline | null>(null);
   const saDetectionPipelineRef = useRef<VoicePipeline | null>(null);
   const playbackAbortRef = useRef<AbortController | null>(null);
@@ -203,6 +209,41 @@ export function useLessonAudio(
   }, []);
 
   // -----------------------------------------------------------------------
+  // Tabla / Tala
+  // -----------------------------------------------------------------------
+
+  const startTala = useCallback((talaId: TalaId = 'teentaal', tempo: number = 80) => {
+    if (disposedRef.current) return;
+
+    // Need an AudioContext — create via ensureAudioReady pattern
+    const startAsync = async () => {
+      await ensureAudioReady();
+      // Get the shared AudioContext from swara-voice
+      const ctx = new AudioContext();
+      if (ctx.state === 'suspended') await ctx.resume();
+
+      if (talaPlayerRef.current) {
+        talaPlayerRef.current.dispose();
+      }
+      talaPlayerRef.current = new TalaPlayer(ctx, saHzRef.current);
+      talaPlayerRef.current.startTheka(talaId, tempo);
+      if (!disposedRef.current) {
+        setTalaActive(true);
+      }
+    };
+    startAsync();
+  }, []);
+
+  const stopTala = useCallback(() => {
+    if (talaPlayerRef.current) {
+      talaPlayerRef.current.stopTheka();
+      talaPlayerRef.current.dispose();
+      talaPlayerRef.current = null;
+    }
+    setTalaActive(false);
+  }, []);
+
+  // -----------------------------------------------------------------------
   // Swara playback
   // -----------------------------------------------------------------------
 
@@ -215,30 +256,18 @@ export function useLessonAudio(
       if (disposedRef.current) return;
 
       const { swara: swaraSymbol, octave } = parseSwaraName(swara);
-      const currentTimbre = timbreRef.current;
+      const currentTimbre = timbreRef.current as InstrumentTimbre;
 
-      if (currentTimbre === 'voice-male' || currentTimbre === 'voice-female') {
-        await ensureVocalAudioReady();
-        await playVocalSwaraNote(
-          { swara: swaraSymbol, octave },
-          saHzRef.current,
-          {
-            duration: durationMs / 1000,
-            volume: 0.5,
-            voiceType: currentTimbre === 'voice-male' ? 'baritone' : 'soprano',
-          },
-        );
-      } else {
-        await ensureAudioReady();
-        await enginePlaySwaraNote(
-          { swara: swaraSymbol, octave },
-          saHzRef.current,
-          {
-            duration: durationMs / 1000,
-            volume: 0.5,
-          },
-        );
-      }
+      await ensureAudioReady();
+      await enginePlaySwaraNote(
+        { swara: swaraSymbol, octave },
+        saHzRef.current,
+        {
+          duration: durationMs / 1000,
+          volume: 0.5,
+          timbre: currentTimbre,
+        },
+      );
     },
     [],
   );
@@ -251,44 +280,26 @@ export function useLessonAudio(
     ): Promise<void> => {
       if (disposedRef.current) return;
 
-      // Create an AbortController so stopPlayback can interrupt the sequence
       const abort = new AbortController();
       playbackAbortRef.current = abort;
 
-      const currentTimbre = timbreRef.current;
-      const useVoice = currentTimbre === 'voice-male' || currentTimbre === 'voice-female';
-
-      if (useVoice) {
-        await ensureVocalAudioReady();
-      } else {
-        await ensureAudioReady();
-      }
+      const currentTimbre = timbreRef.current as InstrumentTimbre;
+      await ensureAudioReady();
 
       for (const swaraName of swaras) {
         if (abort.signal.aborted || disposedRef.current) break;
 
         const { swara: swaraSymbol, octave } = parseSwaraName(swaraName);
 
-        if (useVoice) {
-          await playVocalSwaraNote(
-            { swara: swaraSymbol, octave },
-            saHzRef.current,
-            {
-              duration: noteDurationMs / 1000,
-              volume: 0.5,
-              voiceType: currentTimbre === 'voice-male' ? 'baritone' : 'soprano',
-            },
-          );
-        } else {
-          await enginePlaySwaraNote(
-            { swara: swaraSymbol, octave },
-            saHzRef.current,
-            {
-              duration: noteDurationMs / 1000,
-              volume: 0.5,
-            },
-          );
-        }
+        await enginePlaySwaraNote(
+          { swara: swaraSymbol, octave },
+          saHzRef.current,
+          {
+            duration: noteDurationMs / 1000,
+            volume: 0.5,
+            timbre: currentTimbre,
+          },
+        );
 
         if (gapMs > 0 && !abort.signal.aborted && !disposedRef.current) {
           await sleep(gapMs);
@@ -481,13 +492,15 @@ export function useLessonAudio(
     stopSaDetection();
     stopVoicePipeline();
     stopTanpura();
+    stopTala();
 
     // Null out refs
     tanpuraRef.current = null;
+    talaPlayerRef.current = null;
     voicePipelineRef.current = null;
     saDetectionPipelineRef.current = null;
     playbackAbortRef.current = null;
-  }, [stopPlayback, stopSaDetection, stopVoicePipeline, stopTanpura]);
+  }, [stopPlayback, stopSaDetection, stopVoicePipeline, stopTanpura, stopTala]);
 
   // -----------------------------------------------------------------------
   // Auto-cleanup on unmount
@@ -512,6 +525,9 @@ export function useLessonAudio(
     stopTanpura,
     setTanpuraVolume,
     tanpuraActive,
+    startTala,
+    stopTala,
+    talaActive,
     playSwara,
     playPhrase,
     stopPlayback,

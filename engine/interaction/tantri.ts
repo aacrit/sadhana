@@ -188,7 +188,7 @@ export interface TantriField {
  * Instrument timbre for synthesis selection.
  * Controls which synthesis engine responds to the play event.
  */
-export type TantriTimbre = 'harmonium' | 'voice-male' | 'voice-female';
+export type TantriTimbre = 'harmonium' | 'piano' | 'guitar';
 
 export interface TantriPlayEvent {
   readonly swara: Swara;
