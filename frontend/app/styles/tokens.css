@@ -170,13 +170,28 @@
   --spring-kan-damping: 30;
 
   /* -- Texture --------------------------------------------------------- */
-  --jali-opacity: 0.04;
-  --jali-opacity-raga: 0.08;
-  --jali-opacity-pitch: 0.12;
-  --jali-opacity-settle: 0.15;
-  --jali-opacity-level: 0.20;
-  --jali-opacity-reveal: 1;
+  /* Textile opacity ramp: from threshold-of-perception to full reveal */
+  --textile-opacity: 0.04;
+  --textile-opacity-raga: 0.08;
+  --textile-opacity-pitch: 0.12;
+  --textile-opacity-settle: 0.15;
+  --textile-opacity-level: 0.20;
+  --textile-opacity-reveal: 1;
+  /* Legacy aliases (referenced by GSAP timelines, Tantri renderer) */
+  --jali-opacity: var(--textile-opacity);
+  --jali-opacity-raga: var(--textile-opacity-raga);
+  --jali-opacity-pitch: var(--textile-opacity-pitch);
+  --jali-opacity-settle: var(--textile-opacity-settle);
+  --jali-opacity-level: var(--textile-opacity-level);
+  --jali-opacity-reveal: var(--textile-opacity-reveal);
   --jali-size: 48px 48px;
+
+  /* Pattern tile sizes */
+  --textile-card-size: 96px 96px;
+  --textile-taar-size: 80px 80px;
+  --textile-bg-size: 120px 120px;
+  --textile-mehrab-size: 140px 140px;
+
   --ink-diffusion-duration: 2400ms;
   --ink-diffusion-feather: 20%;
 
@@ -285,13 +300,13 @@
 
 }
 
-/* Day mode: canvas textures need dark strokes instead of white */
+/* Day mode: canvas textures with dark strokes on ivory */
 [data-theme="day"] body::before {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cpath d='M10 120 L10 50 Q10 10 60 10 Q110 10 110 50 L110 120' fill='none' stroke='%231A1A2E' stroke-width='0.5'/%3E%3Cpath d='M25 120 L25 55 Q25 22 60 22 Q95 22 95 55 L95 120' fill='none' stroke='%231A1A2E' stroke-width='0.3'/%3E%3Ccircle cx='60' cy='12' r='1.5' fill='none' stroke='%231A1A2E' stroke-width='0.3'/%3E%3Cline x1='10' y1='120' x2='110' y2='120' stroke='%231A1A2E' stroke-width='0.3'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140' viewBox='0 0 140 140'%3E%3Cdefs%3E%3CclipPath id='a'%3E%3Crect width='140' height='140'/%3E%3C/clipPath%3E%3C/defs%3E%3Cg clip-path='url(%23a)' fill='none' stroke='%231A1A2E'%3E%3Cpath d='M0 7 L7 0 M14 7 L7 14 L0 7 M14 7 L21 0 M28 7 L21 14 L14 7 M28 7 L35 0 M42 7 L35 14 L28 7 M42 7 L49 0 M56 7 L49 14 L42 7 M56 7 L63 0 M70 7 L63 14 L56 7 M70 7 L77 0 M84 7 L77 14 L70 7 M84 7 L91 0 M98 7 L91 14 L84 7 M98 7 L105 0 M112 7 L105 14 L98 7 M112 7 L119 0 M126 7 L119 14 L112 7 M126 7 L133 0 M140 7 L133 14 L126 7' stroke-width='0.3'/%3E%3Cpath d='M0 133 L7 140 M0 133 L7 126 L14 133 L7 140 M14 133 L21 126 L28 133 L21 140 M28 133 L35 126 L42 133 L35 140 M42 133 L49 126 L56 133 L49 140 M56 133 L63 126 L70 133 L63 140 M70 133 L77 126 L84 133 L77 140 M84 133 L91 126 L98 133 L91 140 M98 133 L105 126 L112 133 L105 140 M112 133 L119 126 L126 133 L119 140 M126 133 L133 126 L140 133 L133 140' stroke-width='0.3'/%3E%3Cpath d='M7 14 L0 21 L7 28 L0 35 L7 42 L0 49 L7 56 L0 63 L7 70 L0 77 L7 84 L0 91 L7 98 L0 105 L7 112 L0 119 L7 126' stroke-width='0.3'/%3E%3Cpath d='M133 14 L140 21 L133 28 L140 35 L133 42 L140 49 L133 56 L140 63 L133 70 L140 77 L133 84 L140 91 L133 98 L140 105 L133 112 L140 119 L133 126' stroke-width='0.3'/%3E%3Cpath d='M18 130 L18 62 Q18 22 70 22 Q122 22 122 62 L122 130' stroke-width='0.5'/%3E%3Cpath d='M30 130 L30 66 Q30 34 70 34 Q110 34 110 66 L110 130' stroke-width='0.3'/%3E%3Ccircle cx='70' cy='24' r='3' stroke-width='0.3'/%3E%3Ccircle cx='70' cy='24' r='1' stroke-width='0.4'/%3E%3Cpath d='M40 50 Q48 46 55 50 Q63 54 70 50 Q78 46 85 50 Q93 54 100 50' stroke-width='0.4'/%3E%3Cpath d='M40 65 Q46 62 52 65 Q58 68 64 65 Q70 62 76 65 Q82 68 88 65 Q94 62 100 65' stroke-width='0.3'/%3E%3Cpath d='M40 80 Q45 78 50 80 Q55 82 60 80 Q65 78 70 80 Q75 82 80 80 Q85 78 90 80 Q95 82 100 80' stroke-width='0.25'/%3E%3Cpath d='M40 95 Q44 93.5 48 95 Q52 96.5 56 95 Q60 93.5 64 95 Q68 96.5 72 95 Q76 93.5 80 95 Q84 96.5 88 95 Q92 93.5 96 95 Q100 96.5 100 95' stroke-width='0.2'/%3E%3Ccircle cx='25' cy='130' r='1.2' stroke-width='0.3'/%3E%3Ccircle cx='37' cy='130' r='0.7' stroke-width='0.3'/%3E%3Ccircle cx='49' cy='130' r='0.7' stroke-width='0.3'/%3E%3Ccircle cx='61' cy='130' r='0.7' stroke-width='0.3'/%3E%3Ccircle cx='73' cy='130' r='1.2' stroke-width='0.3'/%3E%3Ccircle cx='85' cy='130' r='0.7' stroke-width='0.3'/%3E%3Ccircle cx='97' cy='130' r='0.7' stroke-width='0.3'/%3E%3Ccircle cx='109' cy='130' r='0.7' stroke-width='0.3'/%3E%3Ccircle cx='22' cy='22' r='4' stroke-width='0.2'/%3E%3Cpath d='M22 18 L22 26 M18 22 L26 22 M19.2 19.2 L24.8 24.8 M24.8 19.2 L19.2 24.8' stroke-width='0.2'/%3E%3Ccircle cx='118' cy='22' r='4' stroke-width='0.2'/%3E%3Cpath d='M118 18 L118 26 M114 22 L122 22 M115.2 19.2 L120.8 24.8 M120.8 19.2 L115.2 24.8' stroke-width='0.2'/%3E%3Cline x1='14' y1='130' x2='126' y2='130' stroke-width='0.3'/%3E%3C/g%3E%3C/svg%3E");
 }
 
 [data-theme="day"] body::after {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4' viewBox='0 0 4 4'%3E%3Ccircle cx='1' cy='1' r='0.5' fill='%231A1A2E'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'%3E%3Cpath d='M1 1 L3 3 M3 1 L1 3' fill='none' stroke='%231A1A2E' stroke-width='0.4'/%3E%3Cpath d='M5 5 L7 7 M7 5 L5 7' fill='none' stroke='%231A1A2E' stroke-width='0.3'/%3E%3C/svg%3E");
 }
 
 /* =======================================================================
@@ -460,7 +475,11 @@ body {
               color var(--dur-slow) var(--ease-out);
 }
 
-/* Canvas texture — Layer 1: Mehrab arch lattice (structural) */
+/* Canvas texture -- Layer 1: Mehrab arch with tanpura strings and carpet border
+   Inspired by Mughal arch screens layered with vibrating string motifs.
+   The arch contains standing-wave curves (tanpura overtones), framed by
+   a woven carpet-border of interlocking diamond chain (zanjir pattern).
+   140x140 viewBox for detail density. */
 body::before {
   content: '';
   position: fixed;
@@ -468,12 +487,14 @@ body::before {
   z-index: -2;
   pointer-events: none;
   opacity: var(--canvas-pattern-opacity, 0.035);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cpath d='M10 120 L10 50 Q10 10 60 10 Q110 10 110 50 L110 120' fill='none' stroke='white' stroke-width='0.5'/%3E%3Cpath d='M25 120 L25 55 Q25 22 60 22 Q95 22 95 55 L95 120' fill='none' stroke='white' stroke-width='0.3'/%3E%3Ccircle cx='60' cy='12' r='1.5' fill='none' stroke='white' stroke-width='0.3'/%3E%3Cline x1='10' y1='120' x2='110' y2='120' stroke='white' stroke-width='0.3'/%3E%3C/svg%3E");
-  background-size: var(--canvas-pattern-size, 120px) var(--canvas-pattern-size, 120px);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140' viewBox='0 0 140 140'%3E%3Cdefs%3E%3CclipPath id='a'%3E%3Crect width='140' height='140'/%3E%3C/clipPath%3E%3C/defs%3E%3Cg clip-path='url(%23a)' fill='none' stroke='white'%3E%3C!-- Outer carpet border: zanjir diamond chain --%3E%3Cpath d='M0 7 L7 0 M14 7 L7 14 L0 7 M14 7 L21 0 M28 7 L21 14 L14 7 M28 7 L35 0 M42 7 L35 14 L28 7 M42 7 L49 0 M56 7 L49 14 L42 7 M56 7 L63 0 M70 7 L63 14 L56 7 M70 7 L77 0 M84 7 L77 14 L70 7 M84 7 L91 0 M98 7 L91 14 L84 7 M98 7 L105 0 M112 7 L105 14 L98 7 M112 7 L119 0 M126 7 L119 14 L112 7 M126 7 L133 0 M140 7 L133 14 L126 7' stroke-width='0.3'/%3E%3Cpath d='M0 133 L7 140 M0 133 L7 126 L14 133 L7 140 M14 133 L21 126 L28 133 L21 140 M28 133 L35 126 L42 133 L35 140 M42 133 L49 126 L56 133 L49 140 M56 133 L63 126 L70 133 L63 140 M70 133 L77 126 L84 133 L77 140 M84 133 L91 126 L98 133 L91 140 M98 133 L105 126 L112 133 L105 140 M112 133 L119 126 L126 133 L119 140 M126 133 L133 126 L140 133 L133 140' stroke-width='0.3'/%3E%3C!-- Side borders --%3E%3Cpath d='M7 14 L0 21 L7 28 L0 35 L7 42 L0 49 L7 56 L0 63 L7 70 L0 77 L7 84 L0 91 L7 98 L0 105 L7 112 L0 119 L7 126' stroke-width='0.3'/%3E%3Cpath d='M133 14 L140 21 L133 28 L140 35 L133 42 L140 49 L133 56 L140 63 L133 70 L140 77 L133 84 L140 91 L133 98 L140 105 L133 112 L140 119 L133 126' stroke-width='0.3'/%3E%3C!-- Mehrab arch: outer --%3E%3Cpath d='M18 130 L18 62 Q18 22 70 22 Q122 22 122 62 L122 130' stroke-width='0.5'/%3E%3C!-- Mehrab arch: inner --%3E%3Cpath d='M30 130 L30 66 Q30 34 70 34 Q110 34 110 66 L110 130' stroke-width='0.3'/%3E%3C!-- Keystone lotus --%3E%3Ccircle cx='70' cy='24' r='3' stroke-width='0.3'/%3E%3Ccircle cx='70' cy='24' r='1' stroke-width='0.4'/%3E%3C!-- Tanpura strings inside arch: 4 strings with standing waves --%3E%3C!-- Sa fundamental --%3E%3Cpath d='M40 50 Q48 46 55 50 Q63 54 70 50 Q78 46 85 50 Q93 54 100 50' stroke-width='0.4'/%3E%3C!-- Pa: 3:2 harmonic --%3E%3Cpath d='M40 65 Q46 62 52 65 Q58 68 64 65 Q70 62 76 65 Q82 68 88 65 Q94 62 100 65' stroke-width='0.3'/%3E%3C!-- Upper Sa: octave --%3E%3Cpath d='M40 80 Q45 78 50 80 Q55 82 60 80 Q65 78 70 80 Q75 82 80 80 Q85 78 90 80 Q95 82 100 80' stroke-width='0.25'/%3E%3C!-- Ma/Ni drone string --%3E%3Cpath d='M40 95 Q44 93.5 48 95 Q52 96.5 56 95 Q60 93.5 64 95 Q68 96.5 72 95 Q76 93.5 80 95 Q84 96.5 88 95 Q92 93.5 96 95 Q100 96.5 100 95' stroke-width='0.2'/%3E%3C!-- Tala dots: 16-beat teentaal along base --%3E%3Ccircle cx='25' cy='130' r='1.2' stroke-width='0.3'/%3E%3Ccircle cx='37' cy='130' r='0.7' stroke-width='0.3'/%3E%3Ccircle cx='49' cy='130' r='0.7' stroke-width='0.3'/%3E%3Ccircle cx='61' cy='130' r='0.7' stroke-width='0.3'/%3E%3Ccircle cx='73' cy='130' r='1.2' stroke-width='0.3'/%3E%3Ccircle cx='85' cy='130' r='0.7' stroke-width='0.3'/%3E%3Ccircle cx='97' cy='130' r='0.7' stroke-width='0.3'/%3E%3Ccircle cx='109' cy='130' r='0.7' stroke-width='0.3'/%3E%3C!-- Spandrel rosettes in arch corners --%3E%3Ccircle cx='22' cy='22' r='4' stroke-width='0.2'/%3E%3Cpath d='M22 18 L22 26 M18 22 L26 22 M19.2 19.2 L24.8 24.8 M24.8 19.2 L19.2 24.8' stroke-width='0.2'/%3E%3Ccircle cx='118' cy='22' r='4' stroke-width='0.2'/%3E%3Cpath d='M118 18 L118 26 M114 22 L122 22 M115.2 19.2 L120.8 24.8 M120.8 19.2 L115.2 24.8' stroke-width='0.2'/%3E%3C!-- Horizontal baseline --%3E%3Cline x1='14' y1='130' x2='126' y2='130' stroke-width='0.3'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: var(--textile-mehrab-size);
   background-repeat: repeat;
 }
 
-/* Canvas texture — Layer 2: Handmade paper grain (surface) */
+/* Canvas texture -- Layer 2: Cross-stitch grain (handloom surface)
+   Tiny cross marks that evoke the warp-weft intersection points
+   of handwoven fabric. Subtler than dots, more textile. */
 body::after {
   content: '';
   position: fixed;
@@ -481,8 +502,8 @@ body::after {
   z-index: -1;
   pointer-events: none;
   opacity: var(--canvas-grain-opacity, 0.02);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4' viewBox='0 0 4 4'%3E%3Ccircle cx='1' cy='1' r='0.5' fill='white'/%3E%3C/svg%3E");
-  background-size: 4px 4px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'%3E%3Cpath d='M1 1 L3 3 M3 1 L1 3' fill='none' stroke='white' stroke-width='0.4'/%3E%3Cpath d='M5 5 L7 7 M7 5 L5 7' fill='none' stroke='white' stroke-width='0.3'/%3E%3C/svg%3E");
+  background-size: 8px 8px;
   background-repeat: repeat;
 }
 
@@ -554,10 +575,12 @@ body::after {
   inset: 0;
   opacity: var(--jali-opacity, 0.04);
   pointer-events: none;
-  /* Jali pattern: geometric lattice inspired by Mughal stone screens.
-     8-pointed star / octagonal grid — thin lines forming a diamond/cross. */
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cpath d='M24 0L30 6L48 6L42 12L48 18L42 18L48 24L42 30L48 42L42 42L36 48L30 42L24 48L18 42L12 48L6 42L0 48L0 42L6 36L0 30L0 24L6 18L0 12L6 6L0 6L6 0L12 6L18 0L24 6L30 0Z' fill='none' stroke='%23ffffff' stroke-width='0.5'/%3E%3Cpath d='M24 12L30 18L36 12L42 18L36 24L42 30L36 36L30 30L24 36L18 30L12 36L6 30L12 24L6 18L12 12L18 18Z' fill='none' stroke='%23ffffff' stroke-width='0.5'/%3E%3C/svg%3E");
-  background-size: var(--jali-size);
+  /* Bunkar (Weaver) pattern: Varanasi brocade meets tanpura strings.
+     Central medallion with radiating swara-interval lines, framed by
+     interlocking warp-weft grid with embedded tala rhythm dots.
+     96x96 viewBox -- 4x the detail density of the old 48x48 jali. */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96' viewBox='0 0 96 96'%3E%3Cg fill='none' stroke='white'%3E%3C!-- Warp threads (vertical, slightly irregular like handloom) --%3E%3Cpath d='M12 0 L12 96' stroke-width='0.2'/%3E%3Cpath d='M24 0 L24 96' stroke-width='0.15'/%3E%3Cpath d='M36 0 L36 96' stroke-width='0.2'/%3E%3Cpath d='M48 0 L48 96' stroke-width='0.25'/%3E%3Cpath d='M60 0 L60 96' stroke-width='0.2'/%3E%3Cpath d='M72 0 L72 96' stroke-width='0.15'/%3E%3Cpath d='M84 0 L84 96' stroke-width='0.2'/%3E%3C!-- Weft threads (horizontal, sine-wave to suggest string vibration) --%3E%3Cpath d='M0 12 Q12 10 24 12 Q36 14 48 12 Q60 10 72 12 Q84 14 96 12' stroke-width='0.2'/%3E%3Cpath d='M0 24 Q12 22 24 24 Q36 26 48 24 Q60 22 72 24 Q84 26 96 24' stroke-width='0.15'/%3E%3Cpath d='M0 36 Q12 34 24 36 Q36 38 48 36 Q60 34 72 36 Q84 38 96 36' stroke-width='0.2'/%3E%3Cpath d='M0 48 Q12 46 24 48 Q36 50 48 48 Q60 46 72 48 Q84 50 96 48' stroke-width='0.25'/%3E%3Cpath d='M0 60 Q12 58 24 60 Q36 62 48 60 Q60 58 72 60 Q84 62 96 60' stroke-width='0.2'/%3E%3Cpath d='M0 72 Q12 70 24 72 Q36 74 48 72 Q60 70 72 72 Q84 74 96 72' stroke-width='0.15'/%3E%3Cpath d='M0 84 Q12 82 24 84 Q36 86 48 84 Q60 82 72 84 Q84 86 96 84' stroke-width='0.2'/%3E%3C!-- Central medallion: buta (paisley-origin) with swara geometry --%3E%3Ccircle cx='48' cy='48' r='14' stroke-width='0.3'/%3E%3Ccircle cx='48' cy='48' r='9' stroke-width='0.2'/%3E%3Ccircle cx='48' cy='48' r='3' stroke-width='0.35'/%3E%3C!-- Sa point at center --%3E%3Ccircle cx='48' cy='48' r='1' stroke-width='0.5'/%3E%3C!-- Radiating swara lines (7 shuddha swaras at equal angles) --%3E%3Cpath d='M48 34 L48 27' stroke-width='0.25'/%3E%3Cpath d='M58.5 37.5 L63.5 32.5' stroke-width='0.2'/%3E%3Cpath d='M62 48 L69 48' stroke-width='0.25'/%3E%3Cpath d='M58.5 58.5 L63.5 63.5' stroke-width='0.2'/%3E%3Cpath d='M48 62 L48 69' stroke-width='0.25'/%3E%3Cpath d='M37.5 58.5 L32.5 63.5' stroke-width='0.2'/%3E%3Cpath d='M34 48 L27 48' stroke-width='0.25'/%3E%3C!-- Corner buta motifs (quarter medallions at tile edges for seamless tiling) --%3E%3Cpath d='M0 0 Q6 3 6 9 Q3 6 0 6' stroke-width='0.2'/%3E%3Cpath d='M96 0 Q90 3 90 9 Q93 6 96 6' stroke-width='0.2'/%3E%3Cpath d='M0 96 Q6 93 6 87 Q3 90 0 90' stroke-width='0.2'/%3E%3Cpath d='M96 96 Q90 93 90 87 Q93 90 96 90' stroke-width='0.2'/%3E%3C!-- Tala rhythm dots: sam (beat 1) emphatic, others smaller --%3E%3Ccircle cx='12' cy='12' r='1.2' stroke-width='0.3'/%3E%3Ccircle cx='36' cy='12' r='0.5' stroke-width='0.2'/%3E%3Ccircle cx='60' cy='12' r='0.5' stroke-width='0.2'/%3E%3Ccircle cx='84' cy='12' r='0.8' stroke-width='0.25'/%3E%3Ccircle cx='12' cy='84' r='0.8' stroke-width='0.25'/%3E%3Ccircle cx='36' cy='84' r='0.5' stroke-width='0.2'/%3E%3Ccircle cx='60' cy='84' r='0.5' stroke-width='0.2'/%3E%3Ccircle cx='84' cy='84' r='1.2' stroke-width='0.3'/%3E%3C!-- Diagonal brocade threads (the rebellion: breaking the grid) --%3E%3Cpath d='M0 0 L24 24' stroke-width='0.12' stroke-dasharray='2 4'/%3E%3Cpath d='M96 0 L72 24' stroke-width='0.12' stroke-dasharray='2 4'/%3E%3Cpath d='M0 96 L24 72' stroke-width='0.12' stroke-dasharray='2 4'/%3E%3Cpath d='M96 96 L72 72' stroke-width='0.12' stroke-dasharray='2 4'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: var(--textile-card-size);
   background-repeat: repeat;
   transition: opacity var(--dur-ceremony) var(--ease-out);
   border-radius: inherit;

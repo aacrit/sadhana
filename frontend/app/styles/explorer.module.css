@@ -191,15 +191,15 @@
               transform var(--dur-fast) var(--spring);
 }
 
-/* Jali lattice texture on raga cards */
+/* Bunkar textile on raga cards */
 .ragaCard::before {
   content: '';
   position: absolute;
   inset: 0;
   opacity: var(--jali-opacity, 0.04);
   pointer-events: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cpath d='M24 0L30 6L48 6L42 12L48 18L42 18L48 24L42 30L48 42L42 42L36 48L30 42L24 48L18 42L12 48L6 42L0 48L0 42L6 36L0 30L0 24L6 18L0 12L6 6L0 6L6 0L12 6L18 0L24 6L30 0Z' fill='none' stroke='%23ffffff' stroke-width='0.5'/%3E%3Cpath d='M24 12L30 18L36 12L42 18L36 24L42 30L36 36L30 30L24 36L18 30L12 36L6 30L12 24L6 18L12 12L18 18Z' fill='none' stroke='%23ffffff' stroke-width='0.5'/%3E%3C/svg%3E");
-  background-size: var(--jali-size);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96' viewBox='0 0 96 96'%3E%3Cg fill='none' stroke='white'%3E%3Cpath d='M12 0 L12 96' stroke-width='0.2'/%3E%3Cpath d='M24 0 L24 96' stroke-width='0.15'/%3E%3Cpath d='M36 0 L36 96' stroke-width='0.2'/%3E%3Cpath d='M48 0 L48 96' stroke-width='0.25'/%3E%3Cpath d='M60 0 L60 96' stroke-width='0.2'/%3E%3Cpath d='M72 0 L72 96' stroke-width='0.15'/%3E%3Cpath d='M84 0 L84 96' stroke-width='0.2'/%3E%3Cpath d='M0 12 Q12 10 24 12 Q36 14 48 12 Q60 10 72 12 Q84 14 96 12' stroke-width='0.2'/%3E%3Cpath d='M0 24 Q12 22 24 24 Q36 26 48 24 Q60 22 72 24 Q84 26 96 24' stroke-width='0.15'/%3E%3Cpath d='M0 36 Q12 34 24 36 Q36 38 48 36 Q60 34 72 36 Q84 38 96 36' stroke-width='0.2'/%3E%3Cpath d='M0 48 Q12 46 24 48 Q36 50 48 48 Q60 46 72 48 Q84 50 96 48' stroke-width='0.25'/%3E%3Cpath d='M0 60 Q12 58 24 60 Q36 62 48 60 Q60 58 72 60 Q84 62 96 60' stroke-width='0.2'/%3E%3Cpath d='M0 72 Q12 70 24 72 Q36 74 48 72 Q60 70 72 72 Q84 74 96 72' stroke-width='0.15'/%3E%3Cpath d='M0 84 Q12 82 24 84 Q36 86 48 84 Q60 82 72 84 Q84 86 96 84' stroke-width='0.2'/%3E%3Ccircle cx='48' cy='48' r='14' stroke-width='0.3'/%3E%3Ccircle cx='48' cy='48' r='9' stroke-width='0.2'/%3E%3Ccircle cx='48' cy='48' r='3' stroke-width='0.35'/%3E%3Ccircle cx='48' cy='48' r='1' stroke-width='0.5'/%3E%3Cpath d='M48 34 L48 27' stroke-width='0.25'/%3E%3Cpath d='M58.5 37.5 L63.5 32.5' stroke-width='0.2'/%3E%3Cpath d='M62 48 L69 48' stroke-width='0.25'/%3E%3Cpath d='M58.5 58.5 L63.5 63.5' stroke-width='0.2'/%3E%3Cpath d='M48 62 L48 69' stroke-width='0.25'/%3E%3Cpath d='M37.5 58.5 L32.5 63.5' stroke-width='0.2'/%3E%3Cpath d='M34 48 L27 48' stroke-width='0.25'/%3E%3Cpath d='M0 0 Q6 3 6 9 Q3 6 0 6' stroke-width='0.2'/%3E%3Cpath d='M96 0 Q90 3 90 9 Q93 6 96 6' stroke-width='0.2'/%3E%3Cpath d='M0 96 Q6 93 6 87 Q3 90 0 90' stroke-width='0.2'/%3E%3Cpath d='M96 96 Q90 93 90 87 Q93 90 96 90' stroke-width='0.2'/%3E%3Ccircle cx='12' cy='12' r='1.2' stroke-width='0.3'/%3E%3Ccircle cx='36' cy='12' r='0.5' stroke-width='0.2'/%3E%3Ccircle cx='60' cy='12' r='0.5' stroke-width='0.2'/%3E%3Ccircle cx='84' cy='12' r='0.8' stroke-width='0.25'/%3E%3Ccircle cx='12' cy='84' r='0.8' stroke-width='0.25'/%3E%3Ccircle cx='36' cy='84' r='0.5' stroke-width='0.2'/%3E%3Ccircle cx='60' cy='84' r='0.5' stroke-width='0.2'/%3E%3Ccircle cx='84' cy='84' r='1.2' stroke-width='0.3'/%3E%3Cpath d='M0 0 L24 24' stroke-width='0.12' stroke-dasharray='2 4'/%3E%3Cpath d='M96 0 L72 24' stroke-width='0.12' stroke-dasharray='2 4'/%3E%3Cpath d='M0 96 L24 72' stroke-width='0.12' stroke-dasharray='2 4'/%3E%3Cpath d='M96 96 L72 72' stroke-width='0.12' stroke-dasharray='2 4'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: var(--textile-card-size);
   background-repeat: repeat;
   border-radius: inherit;
   z-index: 0;
