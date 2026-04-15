@@ -69,6 +69,8 @@ export interface SwaraDefinition {
   readonly nameDevanagari: string;
   /** Abbreviated sargam notation: S, r, R, g, G, m, M, P, d, D, n, N */
   readonly sargamAbbr: string;
+  /** Devanagari sargam abbreviation: सा, रे॒, रे, ग॒, ग, म, म॑, प, ध॒, ध, नि॒, नि */
+  readonly sargamAbbrDevanagari: string;
   /** Whether this is a shuddha (natural) swara. */
   readonly shuddha: boolean;
   /** Whether this swara is achala (immovable — Sa and Pa only). */

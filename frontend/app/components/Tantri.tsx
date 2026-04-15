@@ -124,28 +124,49 @@ export interface TantriProps {
 const COLOR_CACHE: Record<string, string> = {};
 
 /**
- * Resolved value of --font-sans (read once from computed style, cached).
- * Canvas cannot consume CSS variables directly; we read it once and store it.
- * Falls back to system-ui when the document is unavailable (SSR).
+ * Resolved font families for canvas label rendering.
+ * Canvas cannot consume CSS variables directly; we read them once and cache.
  */
-let CANVAS_FONT_FAMILY = 'system-ui, sans-serif';
+let CANVAS_FONT_SANS = 'system-ui, sans-serif';
+let CANVAS_FONT_DEVANAGARI = '"Noto Serif Devanagari", serif';
+
+/**
+ * Current script mode: 'devanagari' or 'romanized'.
+ * Read from document.documentElement.dataset.script.
+ */
+let CANVAS_SCRIPT_MODE: 'devanagari' | 'romanized' = 'devanagari';
 
 /**
  * Cached font strings for canvas label rendering.
- * Two variants (active / inactive) × DPR. Rebuilt on font/DPR change.
- * Eliminates template literal concatenation per string per frame.
+ * Rebuilt on font/DPR/script change.
  */
 let _fontCacheDpr = 0;
+let _fontCacheScript: 'devanagari' | 'romanized' = 'devanagari';
 let _fontActive = '';
 let _fontInactive = '';
 
 function getLabelFont(isActive: boolean, dpr: number): string {
-  if (dpr !== _fontCacheDpr) {
+  if (dpr !== _fontCacheDpr || CANVAS_SCRIPT_MODE !== _fontCacheScript) {
     _fontCacheDpr = dpr;
-    _fontActive = `600 ${12.5 * dpr}px ${CANVAS_FONT_FAMILY}`;
-    _fontInactive = `400 ${11 * dpr}px ${CANVAS_FONT_FAMILY}`;
+    _fontCacheScript = CANVAS_SCRIPT_MODE;
+    const family = CANVAS_SCRIPT_MODE === 'devanagari'
+      ? CANVAS_FONT_DEVANAGARI
+      : CANVAS_FONT_SANS;
+    _fontActive = `600 ${12.5 * dpr}px ${family}`;
+    _fontInactive = `400 ${11 * dpr}px ${family}`;
   }
   return isActive ? _fontActive : _fontInactive;
+}
+
+function readFontsAndScript(): void {
+  if (typeof document === 'undefined') return;
+  const style = getComputedStyle(document.documentElement);
+  CANVAS_FONT_SANS =
+    style.getPropertyValue('--font-sans').trim() || 'system-ui, sans-serif';
+  CANVAS_FONT_DEVANAGARI =
+    style.getPropertyValue('--font-devanagari').trim() || '"Noto Serif Devanagari", serif';
+  CANVAS_SCRIPT_MODE =
+    (document.documentElement.dataset.script as 'devanagari' | 'romanized') || 'devanagari';
 }
 
 if (typeof document !== 'undefined') {
@@ -153,23 +174,16 @@ if (typeof document !== 'undefined') {
     for (const key of Object.keys(COLOR_CACHE)) {
       delete COLOR_CACHE[key];
     }
-    // Re-resolve font on theme/class change (Next.js may swap the variable)
-    CANVAS_FONT_FAMILY =
-      getComputedStyle(document.documentElement)
-        .getPropertyValue('--font-sans')
-        .trim() || 'system-ui, sans-serif';
-    // Invalidate font cache so it rebuilds with new family
+    readFontsAndScript();
+    // Invalidate font cache so it rebuilds
     _fontCacheDpr = 0;
   });
   observer.observe(document.documentElement, {
     attributes: true,
-    attributeFilter: ['data-theme', 'data-raga', 'class'],
+    attributeFilter: ['data-theme', 'data-raga', 'data-script', 'class'],
   });
-  // Initial read (executes after module load, before first render)
-  CANVAS_FONT_FAMILY =
-    getComputedStyle(document.documentElement)
-      .getPropertyValue('--font-sans')
-      .trim() || 'system-ui, sans-serif';
+  // Initial read
+  readFontsAndScript();
 }
 
 function resolveColor(cssVar: string, fallback: string): string {
@@ -690,8 +704,10 @@ function renderString(
   ctx.fillStyle = isActive ? color : resolveColor('--text-3', '#7A6B5E');
   ctx.globalAlpha = s.visibility === 'ghost' ? 0.3 : opacity;
 
-  // Use sargam abbreviation for compact, full name for full
-  const label = s.definition.sargamAbbr;
+  // Use Devanagari or romanized sargam abbreviation based on script mode
+  const label = CANVAS_SCRIPT_MODE === 'devanagari'
+    ? s.definition.sargamAbbrDevanagari
+    : s.definition.sargamAbbr;
   ctx.fillText(label, x0 - 8, y);
   ctx.restore();
 }

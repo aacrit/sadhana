@@ -27,6 +27,7 @@ import SwaraIntroduction from './SwaraIntroduction';
 import PhrasePlayback from './PhrasePlayback';
 import VoiceVisualization from './VoiceVisualization';
 import PakadMoment from './PakadMoment';
+import Tantri from './Tantri';
 import styles from '../styles/lesson-renderer.module.css';
 
 // ---------------------------------------------------------------------------
@@ -428,6 +429,8 @@ export default function LessonRenderer({
 
   const { phase, phaseIndex, totalPhases } = phaseContext;
 
+  const isVoicePhase = phaseContext?.isVoicePhase ?? false;
+
   return (
     <div
       className={styles.lessonPage}
@@ -435,6 +438,24 @@ export default function LessonRenderer({
       role="region"
       aria-label={`Lesson: ${lesson.meta.title}`}
     >
+      {/* Tantri — the instrument, background layer */}
+      <Tantri
+        saHz={engine.saHz}
+        ragaId={ragaId ?? lesson.raga_id}
+        level="shishya"
+        subLevel={phaseContext ? Math.min(Math.floor(phaseContext.phaseIndex / 3) + 1, 3) : 1}
+        variant="full"
+        pitchHz={isVoicePhase ? (engine.voiceFeedback.hz ?? undefined) : undefined}
+        pitchClarity={isVoicePhase ? engine.voiceFeedback.confidence : undefined}
+        analyser={engine.audio.pipelineActive ? engine.audio.getAnalyserNode() : null}
+        style={{
+          position: 'absolute',
+          inset: 0,
+          zIndex: 0,
+          pointerEvents: 'none',
+        }}
+      />
+
       {/* Exit button */}
       <button
         type="button"
