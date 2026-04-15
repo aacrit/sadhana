@@ -242,6 +242,22 @@ Pakad detection -- the "wow" feature.
 
 Algorithm: collapse consecutive repeats, sliding window subsequence match. Confidence based on extra-swara penalty. Minimum 3 swaras required.
 
+### practice-scoring.ts
+
+Star rating and XP model for guided practice sessions.
+
+| Export | Kind | Description |
+|--------|------|-------------|
+| `StarRating` | type | `0 \| 1 \| 2 \| 3` |
+| `StageResult` | interface | `{ stage, score, stars }` |
+| `PracticeResult` | interface | `{ stages, overallScore, overallStars, xpEarned }` |
+| `PRACTICE_STAGES` | const | `['swaras', 'aroha', 'avaroha', 'pakad']` -- the 4 guided practice stages |
+| `scoreToStars(score)` | fn | Map 0-1 score to 0-3 stars using fixed thresholds |
+| `starsToXp(stars)` | fn | XP earned per stage star rating |
+| `computePracticeResult(stageScores, previousStars?)` | fn | Aggregate stage results, compute overall stars and XP delta |
+
+Star thresholds: 0 stars < 0.40, 1 star >= 0.40, 2 stars >= 0.65, 3 stars >= 0.85. XP is awarded as the delta above the student's previous best for that raga (no repeat grinding).
+
 ---
 
 ## synthesis/
@@ -260,7 +276,7 @@ Additive synthesis drone from first principles.
 
 Architecture: 4 strings x 10 partials = 40 sine oscillators. Third string detuned 2 cents for shimmer. String volume balance: Pa/Ma 0.7, low Sa 0.6, middle Sa 1.0. 500ms fade-out on stop. Web Audio API directly (no Tone.js).
 
-Pluck cycle model: strings are not sustained continuously but plucked sequentially (Pa → Sa → Sa → low Sa → repeat) with a jivari amplitude envelope per pluck. The `cycleDuration` parameter controls the full 4-string pluck cycle in seconds (default 7s, yielding one pluck every 1.75s). Higher partials sustain longer than lower partials, matching the physical behaviour of the jivari bridge.
+Pluck cycle model: strings are plucked sequentially (Pa → Sa → Sa → low Sa → repeat) with a jivari amplitude envelope per pluck. The `cycleDuration` parameter controls the full 4-string pluck cycle in seconds (default 7s, yielding one pluck every 1.75s). String sustain overlaps the full cycle duration so successive plucks crossfade rather than gap, producing a continuous drone. Higher partials sustain longer than lower partials, matching the physical behaviour of the jivari bridge.
 
 ### swara-voice.ts
 
@@ -294,7 +310,7 @@ Real-time voice capture and analysis pipeline.
 | `VoicePipelineConfig` | interface | sa_hz, ragaId?, level?, onPitch, onSilence, onPakadDetected?, clarityThreshold?, fftSize?, swaraBufferSize? |
 | `VoicePipeline` | class | `start()`, `stop()`, `updateSa(hz)`, `updateRaga(ragaId)`, `updateLevel(level)`, `getSwaraBuffer()` |
 
-Chain: `getUserMedia -> AnalyserNode -> Pitchy (McLeod) -> mapPitchToSwara -> pakad check -> events`. Target <50ms mic-to-visual. Detection via `requestAnimationFrame`. Rolling swara buffer (default 20) for pakad detection with 5s cooldown. RMS < 0.01 = silence. Clarity threshold default 0.85. FFT size default 2048.
+Chain: `getUserMedia -> AnalyserNode -> Pitchy (McLeod) -> mapPitchToSwara -> pakad check -> events`. Target <50ms mic-to-visual. Detection via `requestAnimationFrame`. Rolling swara buffer (default 20) for pakad detection with 5s cooldown. RMS < 0.01 = silence. Clarity threshold default **0.80**. FFT size default 2048. Pitch ceiling: `min(sa_hz * 8, 4200)` Hz (covers full vocal range for low Sa references).
 
 ### accuracy.ts
 

@@ -41,11 +41,13 @@ Runs on `requestAnimationFrame`. Each frame:
 1. Read time-domain data from AnalyserNode into Float32Array
 2. Compute RMS -- if < 0.01, emit silence
 3. Call `pitchDetector.findPitch(buffer, sampleRate)` -- returns [hz, clarity]
-4. If clarity >= threshold (default 0.85) and 50 < hz < 2000: valid pitch
+4. If clarity >= threshold (default 0.80) and 50 < hz < `sa_hz * 8` (max ~4200 Hz): valid pitch
 5. Map pitch via `mapPitchToSwara(hz, saHz, clarity, ragaId, level)`
 6. Add detected swara to rolling buffer (default size 20)
 7. Check buffer for pakad match (5s cooldown between detections)
 8. Emit VoiceEvent
+
+**Threshold notes:** `clarityThreshold` defaults to 0.80 (not 0.85 -- corrected). There is no separate NOISE_RMS threshold; Pitchy runs whenever RMS > SILENCE_RMS (0.01) and clarity alone distinguishes valid pitch from noise. The pitch ceiling is `min(sa_hz * 8, 4200)` to accommodate the full vocal range for students with low Sa references (e.g., Sa = G2 at 98 Hz, ceiling = 784 Hz without the multiplier extension).
 
 ### VoicePipeline Class
 
@@ -81,7 +83,7 @@ audio: {
 
 ### VoiceEvent Pitch History
 
-Each VoiceEvent includes a rolling `pitchHistory: [timestamp, hz][]` (last ~30 readings). This feeds the waveform visualization canvas in VoiceVisualization.
+Each VoiceEvent includes a `pitchHistory: readonly [number, number][]` (last ~30 readings) passed as a readonly reference to the internal ring buffer -- not a spread copy. This eliminates ~60 array allocations per second in the render hot path. Consumers must not mutate the array. Feeds the waveform visualization canvas in VoiceVisualization.
 
 ---
 
@@ -152,7 +154,7 @@ The jivari bridge excites higher partials far more than a normal plucked string,
 
 ### Pluck Cycle
 
-Strings are plucked sequentially — Pa → Sa → Sa → low Sa — repeating on a configurable cycle. Each pluck applies a jivari amplitude envelope: sharp attack, then exponential decay with higher partials sustaining longer than lower ones. The `cycleDuration` parameter (default 7s) controls the full 4-string cycle; each string is plucked every `cycleDuration / 4` seconds. The scheduler uses `AudioContext.currentTime` for sample-accurate timing with 2-beat lookahead.
+Strings are plucked sequentially — Pa → Sa → Sa → low Sa — repeating on a configurable cycle. Each pluck applies a jivari amplitude envelope: sharp attack, then exponential decay with higher partials sustaining longer than lower ones. The `cycleDuration` parameter (default 7s) controls the full 4-string cycle; each string is plucked every `cycleDuration / 4` seconds (1.75s at 7s cycle). String sustain is extended to overlap across the full cycle so successive plucks crossfade rather than gap -- producing a continuous drone rather than discrete clicks. The scheduler uses `AudioContext.currentTime` for sample-accurate timing with 2-beat lookahead.
 
 ### Lifecycle
 

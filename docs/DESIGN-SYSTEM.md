@@ -517,6 +517,8 @@ Three depths plus accent glow and gold glow.
 | `--z-modal` | 200 |
 | `--z-toast` | 300 |
 
+**Stacking context rule for lesson pages:** VoiceWave renders a `position: fixed` canvas that spans the viewport. Any lesson page or practice screen that sits above VoiceWave must apply `isolation: isolate` on its page container and `position: relative; z-index: var(--z-base)` on each content section. This is implemented in `beginner-lesson.module.css`, `beginner.module.css`, and `lesson-renderer.module.css`. Do not use bare `z-index` integers -- always use tokens.
+
 ---
 
 ## Accessibility
@@ -524,10 +526,11 @@ Three depths plus accent glow and gold glow.
 - Focus: 2px solid `--accent`, 2px offset, `--radius-sm` border-radius
 - Selection: `--accent-dim` background
 - `prefers-reduced-motion`: all animation durations set to 0ms, spring functions fall back to `ease`. Enforced at two layers: (1) CSS token collapse via `[data-reduced-motion="true"]` (set by `ReducedMotionBridge` in `providers.tsx`), and (2) Framer Motion's global `<MotionConfig reducedMotion="user">` wrapper, which disables all spring animations app-wide when the OS preference is set.
-- Touch targets: minimum 44px (`--touch-min`)
+- Touch targets: minimum 44px (`--touch-min`). Enforced on `navButton`, `ragaChip`, `swaraDot`, and all interactive controls via `min-height: var(--touch-min); min-width: var(--touch-min)`. Meets WCAG 2.5.5.
 - Scrollbar: 6px wide, transparent track, `--border` thumb
 - Raga color worlds maintain WCAG AA contrast ratios for all text/background combinations
 - Script toggle preserves all semantic meaning -- Devanagari and romanized content are equivalent, not decorative
+- Token compliance: hardcoded border-radius values (`50%`, raw `px`), transition durations, and font-size values below the type scale must not appear in CSS modules -- use design tokens only.
 
 ---
 
