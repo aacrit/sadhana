@@ -39,7 +39,7 @@ Source: `frontend/app/journeys/beginner/page.tsx`
 
 The Beginner home page is the daily riyaz entry point. Sections:
 
-1. **Today's riyaz card** -- raga selected by time of day via `getRagaForTimeOfDay`. Shows raga name, description, prahara number, time label (Dawn/Morning/Afternoon/etc.). "Begin" button when riyaz not done, "Today's riyaz complete" when finished.
+1. **Today's riyaz card** -- raga selected by time of day via `getRagaForTimeOfDay`. Shows raga name, description, prahara number, time label (Dawn/Morning/Afternoon/etc.). "Begin" button when riyaz not done, "Today's riyaz complete" when finished. The "Begin" link resolves the correct YAML lesson via `RAGA_TO_LESSON` map (e.g., `yaman` -> `beginner-03-yaman`, `bhairav` -> `beginner-04-bhairav`). Ragas without a dedicated lesson fall back to `beginner-01-bhoopali`.
 
 2. **Progress** -- current level badge (Shishya/Sadhaka/Varistha/Guru with color from `--level-*` tokens), XP bar (tracks consistency, 100 XP per level), day streak count (saffron when > 0).
 
@@ -181,9 +181,10 @@ Props: `partialFrequencies?`, `voiceAmplitude?`, `active?`, `className?`, `style
 | `VoiceVisualization` | components/VoiceVisualization.tsx | 3-layer voice feedback |
 | `PracticeSession` | components/PracticeSession.tsx | Core practice session with phase machine |
 | `ScriptToggle` | components/ScriptToggle.tsx | Global Devanagari/romanized toggle (fixed bottom-right) |
-| `Tantri` | components/Tantri.tsx | 12-string swara field renderer. Canvas-based. Reads CSS tokens via `resolveNum()`. Wired to voice pipeline (pitchHz/pitchClarity) and synthesis via `onPlayString` / `timbre`. Three display variants: `full` (default, all 12 strings), `portal` (centered ~40vh band, guitar-like, with integrated pitch trail), `compact`. |
+| `Tantri` | components/Tantri.tsx | 12-string swara field renderer. Canvas-based. Reads CSS tokens via `resolveNum()`. Wired to voice pipeline (pitchHz/pitchClarity) and synthesis via `onPlayString` / `timbre`. Three display variants: `full` (default, all 12 strings), `portal` (centered ~40vh band, guitar-like, with integrated pitch trail), `compact`. Performance: pre-allocated `Float32Array` pool for oscilloscope (zero-alloc hot path); animation loop pauses when `document.hidden` (tab visibility guard). Pointer events disabled in beginner lesson context (visual-only). |
 | `VoiceTimbreSelector` | components/VoiceTimbreSelector.tsx | Harmonium / voice-male / voice-female selector. Drives `timbre` prop on `useLessonAudio`. |
-| `VoiceWave` | components/VoiceWave.tsx | Ambient voice waveform visualization. Uses VoiceWaveContext for cross-component pitch data. |
+| `VoiceWave` | components/VoiceWave.tsx | Ambient voice waveform visualization. Uses VoiceWaveContext for cross-component pitch data. Fixed canvas, `position: fixed`. Animation loop pauses when `document.hidden` (tab visibility guard). |
+| `GuidedPractice` | components/GuidedPractice.tsx | 4-stage guided raga practice with 0-3 star scoring per stage. Used in Explorer raga detail practice route. Driven by `useGuidedPractice` hook. |
 
 ---
 
@@ -308,6 +309,25 @@ Source: `frontend/app/profile/page.tsx`
 ## Explorer, Scholar, Master
 
 v1 state: Explorer has a full page at `frontend/app/journeys/explorer/page.tsx` with raga browser, ear training (`/ear-training`), interval training (`/interval-training`), and raga detail (`/[ragaId]`) routes. Scholar and Master have pages at `frontend/app/journeys/{scholar,master}/page.tsx` with "being built" messaging. All three are navigable from the home page.
+
+### Explorer — Guided Practice (Star Scoring)
+
+Source: `frontend/app/components/GuidedPractice.tsx`, `frontend/app/lib/useGuidedPractice.ts`, `engine/analysis/practice-scoring.ts`
+
+The Explorer raga detail pages link to `/journeys/explorer/[ragaId]/practice`, which renders the `GuidedPractice` component via `PracticeClient.tsx`.
+
+4 stages in sequence: Individual Swaras → Aroha → Avaroha → Pakad. Each stage has 3 phases: `listen` (guide tone plays), `sing` (voice pipeline active, events collected), `result` (0-3 stars displayed).
+
+| Stage | Target |
+|-------|--------|
+| swaras | Each swara in the raga's aroha, one at a time |
+| aroha | Full ascending scale |
+| avaroha | Full descending scale |
+| pakad | The raga's characteristic phrase |
+
+Stars per stage are computed by `scoreToStars(score)`: 0 stars < 0.40, 1 star >= 0.40, 2 stars >= 0.65, 3 stars >= 0.85. XP is the delta above the student's previous best for that raga (no repeat grinding). Overall result is a `PracticeResult` from `engine/analysis/practice-scoring.ts`.
+
+Hook: `useGuidedPractice(raga, saHz, level)` returns `GuidedPracticeControls`. Uses `useLessonAudio` for tanpura and voice pipeline.
 
 ### Explorer — Tantri Integration
 
