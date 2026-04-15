@@ -329,6 +329,12 @@ export function useLessonEngine(
     audio.stopVoicePipeline();
     audio.stopSaDetection();
 
+    // Gate tanpura: only active during drone and singing phases
+    const tanpuraPhases = ['tanpura_drone', 'pitch_exercise', 'phrase_exercise', 'passive_phrase_recognition'];
+    if (!tanpuraPhases.includes(currentPhase.type)) {
+      audio.stopTanpura();
+    }
+
     switch (currentPhase.type) {
       case 'tanpura_drone': {
         audio.startTanpura();
@@ -359,6 +365,9 @@ export function useLessonEngine(
       case 'pitch_exercise':
       case 'phrase_exercise':
       case 'passive_phrase_recognition': {
+        // Start tanpura as a reference drone for singing phases
+        audio.startTanpura();
+
         if (skipMicFlag) break;
 
         const startVoice = async () => {

@@ -44,8 +44,17 @@ import type { TantriTimbre } from '@/engine/interaction/tantri';
 /** Default Sa frequency: C4 in Hz. */
 const DEFAULT_SA_HZ = 261.6256;
 
-/** Number of stable pitch readings needed for Sa detection. */
-const SA_DETECTION_READINGS = 5;
+/**
+ * Number of sustained holds needed for Sa detection.
+ * The student sings Sa 5 times, each hold sustained for SA_HOLD_FRAMES.
+ */
+const SA_DETECTION_HOLDS = 5;
+
+/** Frames (at ~60fps) of stable pitch to count as one sustained hold (~1.5s). */
+const SA_HOLD_FRAMES = 90;
+
+/** Maximum cents deviation within a hold to remain "stable". */
+const SA_HOLD_STABILITY_CENTS = 80;
 
 /** Minimum clarity for Sa detection readings. */
 const SA_DETECTION_CLARITY = 0.70;
@@ -69,9 +78,10 @@ export interface LessonAudioControls {
   ): Promise<void>;
   stopPlayback(): void;
 
-  // Sa detection
+  // Sa detection — 5 sustained holds
   startSaDetection(
     onCandidate: (hz: number, clarity: number) => void,
+    onProgress?: (hold: number, total: number, currentHz: number) => void,
   ): Promise<void>;
   stopSaDetection(): void;
 
@@ -295,7 +305,10 @@ export function useLessonAudio(
   // -----------------------------------------------------------------------
 
   const startSaDetection = useCallback(
-    async (onCandidate: (hz: number, clarity: number) => void): Promise<void> => {
+    async (
+      onCandidate: (hz: number, clarity: number) => void,
+      onProgress?: (hold: number, total: number, currentHz: number) => void,
+    ): Promise<void> => {
       if (disposedRef.current) return;
 
       // Stop any existing Sa detection pipeline
@@ -304,7 +317,13 @@ export function useLessonAudio(
         saDetectionPipelineRef.current = null;
       }
 
-      const readings: { hz: number; clarity: number }[] = [];
+      // Completed holds — each is the average Hz of a sustained tone
+      const completedHolds: number[] = [];
+
+      // Current hold tracking
+      let holdFrames = 0;
+      let holdSum = 0;
+      let holdAnchorHz = 0; // first Hz of current hold attempt
 
       const pipeline = new VoicePipeline({
         sa_hz: saHzRef.current,
@@ -323,26 +342,57 @@ export function useLessonAudio(
           // Only accept readings within a reasonable vocal range (80-1000 Hz)
           if (event.hz < 80 || event.hz > 1000) return;
 
-          readings.push({ hz: event.hz, clarity: event.clarity });
+          // Check if this frame is stable relative to the hold anchor
+          if (holdFrames === 0) {
+            // Start a new hold attempt
+            holdAnchorHz = event.hz;
+            holdSum = event.hz;
+            holdFrames = 1;
+          } else {
+            // Check stability: is this pitch within tolerance of the anchor?
+            const cents = 1200 * Math.log2(event.hz / holdAnchorHz);
+            if (Math.abs(cents) <= SA_HOLD_STABILITY_CENTS) {
+              // Still stable — accumulate
+              holdSum += event.hz;
+              holdFrames++;
+            } else {
+              // Pitch drifted too far — restart hold
+              holdAnchorHz = event.hz;
+              holdSum = event.hz;
+              holdFrames = 1;
+            }
+          }
 
-          if (readings.length >= SA_DETECTION_READINGS) {
-            // Average the readings
-            const avgHz =
-              readings.reduce((sum, r) => sum + r.hz, 0) / readings.length;
-            const avgClarity =
-              readings.reduce((sum, r) => sum + r.clarity, 0) / readings.length;
+          // Check if we have enough frames for a complete hold
+          if (holdFrames >= SA_HOLD_FRAMES) {
+            const avgHz = holdSum / holdFrames;
+            completedHolds.push(avgHz);
+            onProgress?.(completedHolds.length, SA_DETECTION_HOLDS, avgHz);
 
-            // Stop the detection pipeline
-            pipeline.stop();
-            saDetectionPipelineRef.current = null;
+            // Reset for next hold
+            holdFrames = 0;
+            holdSum = 0;
+            holdAnchorHz = 0;
 
-            // Report the candidate
-            onCandidate(avgHz, avgClarity);
+            if (completedHolds.length >= SA_DETECTION_HOLDS) {
+              // All holds complete — compute final Sa as median of holds
+              const sorted = [...completedHolds].sort((a, b) => a - b);
+              const median = sorted[Math.floor(sorted.length / 2)]!;
+
+              // Stop the detection pipeline
+              pipeline.stop();
+              saDetectionPipelineRef.current = null;
+
+              // Report the candidate
+              onCandidate(median, 1.0);
+            }
           }
         },
         onSilence: () => {
-          // Silence during Sa detection is normal — student is preparing.
-          // No action needed.
+          // Silence resets the current hold — student paused between attempts
+          holdFrames = 0;
+          holdSum = 0;
+          holdAnchorHz = 0;
         },
       });
 

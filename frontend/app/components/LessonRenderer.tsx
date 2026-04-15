@@ -26,7 +26,6 @@ import type { LessonEngineControls } from '../lib/useLessonEngine';
 import SwaraIntroduction from './SwaraIntroduction';
 import PhrasePlayback from './PhrasePlayback';
 import VoiceVisualization from './VoiceVisualization';
-import VoiceWave from './VoiceWave';
 import PakadMoment from './PakadMoment';
 import styles from '../styles/lesson-renderer.module.css';
 
@@ -436,9 +435,6 @@ export default function LessonRenderer({
       role="region"
       aria-label={`Lesson: ${lesson.meta.title}`}
     >
-      {/* Voice waveform background */}
-      <VoiceWave variant="full" style={{ opacity: 0.15 }} />
-
       {/* Exit button */}
       <button
         type="button"

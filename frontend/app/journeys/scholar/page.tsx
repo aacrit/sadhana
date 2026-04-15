@@ -117,15 +117,11 @@ export default function ScholarPage() {
           <span className="romanized-only">Varistha</span>
         </span>
 
-        {/* Hindustani primary name — raga-name global class, responds to script toggle */}
-        <h1 className={`${styles.journeyName} raga-name`}>
-          Varistha
+        {/* Primary name — romanized/devanagari swap (replace, not append) */}
+        <h1 className={styles.journeyName}>
+          <span className="romanized-only raga-name">Varistha</span>
+          <span className="devanagari-only raga-name">वरिष्ठ</span>
         </h1>
-
-        {/* Devanagari secondary — hidden in romanized script mode */}
-        <span className={`${styles.journeyDevanagari} swara-text devanagari-only`} aria-hidden="true">
-          वरिष्ठ
-        </span>
 
         {/* English tertiary */}
         <span className={styles.journeyEnglish}>Scholar</span>
@@ -152,13 +148,12 @@ export default function ScholarPage() {
       {/* Horizon panel — what this journey will contain */}
       <motion.div className={styles.gatePanel} variants={fadeUp} role="region" aria-label="Journey status">
         <p className={styles.gateTitle}>
-          This journey is being built.
+          Arriving soon
         </p>
 
         <p className={styles.gateDescription}>
-          The Scholar journey will contain full raga grammar analysis, shruti-level
-          pitch exploration, and deep theory rendered directly from the engine.
-          Content is arriving with each update.
+          Full raga grammar analysis, shruti-level pitch exploration, and deep
+          theory rendered directly from the engine. Each update brings it closer.
         </p>
 
         <Link href="/" className={styles.practiceLink}>
