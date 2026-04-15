@@ -371,6 +371,55 @@
   --raga-glow: rgba(122, 158, 184, 0.2);
 }
 
+/* -- Extended raga color worlds ---------------------------------------- */
+/* Derived from thaat families and traditional rasa associations.
+   These provide subtle differentiation on raga browser cards. */
+
+/* Bilawal family — bright morning, clear sky, cheerful */
+[data-raga="bilawal"] { --raga-accent: #8CB870; --raga-glow: rgba(140, 184, 112, 0.15); }
+[data-raga="pahadi"]  { --raga-accent: #7AAF6A; --raga-glow: rgba(122, 175, 106, 0.15); }
+
+/* Khamaj family — romantic dusk, warm pink-coral */
+[data-raga="khamaj"]  { --raga-accent: #C87A8A; --raga-glow: rgba(200, 122, 138, 0.15); }
+[data-raga="desh"]    { --raga-accent: #D08A72; --raga-glow: rgba(208, 138, 114, 0.15); }
+[data-raga="tilak_kamod"] { --raga-accent: #D4966A; --raga-glow: rgba(212, 150, 106, 0.15); }
+
+/* Kafi family — afternoon wistfulness, earthy amber */
+[data-raga="kafi"]    { --raga-accent: #A8855C; --raga-glow: rgba(168, 133, 92, 0.15); }
+[data-raga="jog"]     { --raga-accent: #9A7A58; --raga-glow: rgba(154, 122, 88, 0.15); }
+
+/* Asavari family — pathos, grey-blue sorrow */
+[data-raga="asavari"]  { --raga-accent: #8A9AAC; --raga-glow: rgba(138, 154, 172, 0.15); }
+[data-raga="jaunpuri"] { --raga-accent: #7E90A6; --raga-glow: rgba(126, 144, 166, 0.15); }
+[data-raga="darbari_kanada"] { --raga-accent: #6A7A96; --raga-glow: rgba(106, 122, 150, 0.18); }
+
+/* Bhairavi family — devotional morning, soft rose */
+[data-raga="bhairavi"] { --raga-accent: #C09090; --raga-glow: rgba(192, 144, 144, 0.15); }
+
+/* Kalyan family — yaman siblings, warm gold tones */
+[data-raga="kedar"]   { --raga-accent: #C4A050; --raga-glow: rgba(196, 160, 80, 0.15); }
+[data-raga="hameer"]  { --raga-accent: #B8984C; --raga-glow: rgba(184, 152, 76, 0.15); }
+
+/* Marwa family — twilight tension, deep amber-rust */
+[data-raga="marwa"]   { --raga-accent: #B86C4A; --raga-glow: rgba(184, 108, 74, 0.15); }
+[data-raga="puriya"]  { --raga-accent: #A86048; --raga-glow: rgba(168, 96, 72, 0.15); }
+[data-raga="puriya_dhanashri"] { --raga-accent: #B07050; --raga-glow: rgba(176, 112, 80, 0.15); }
+[data-raga="sohini"]  { --raga-accent: #C09068; --raga-glow: rgba(192, 144, 104, 0.15); }
+
+/* Todi family — pre-dawn gravity, cool indigo-steel */
+[data-raga="todi"]     { --raga-accent: #7080A0; --raga-glow: rgba(112, 128, 160, 0.15); }
+[data-raga="multani"]  { --raga-accent: #687898; --raga-glow: rgba(104, 120, 152, 0.15); }
+[data-raga="madhuvanti"] { --raga-accent: #6A8898; --raga-glow: rgba(106, 136, 152, 0.15); }
+[data-raga="lalit"]    { --raga-accent: #8878A0; --raga-glow: rgba(136, 120, 160, 0.15); }
+
+/* Pentatonic — warm earth, open simplicity */
+[data-raga="durga"]       { --raga-accent: #B8956A; --raga-glow: rgba(184, 149, 106, 0.15); }
+[data-raga="hamsadhwani"] { --raga-accent: #A0B878; --raga-glow: rgba(160, 184, 120, 0.15); }
+[data-raga="malkauns"]    { --raga-accent: #6870A0; --raga-glow: rgba(104, 112, 160, 0.18); }
+
+/* Shree — majestic evening, rich burgundy-plum */
+[data-raga="shree"]  { --raga-accent: #A06878; --raga-glow: rgba(160, 104, 120, 0.15); }
+
 /* =======================================================================
    LEVEL-BASED INTERFACE DEEPENING
    No announcements. The interface warms and gains authority silently.

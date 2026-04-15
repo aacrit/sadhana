@@ -404,6 +404,7 @@ export default function ExplorerPage() {
                 className={styles.ragaCard}
                 variants={fadeUp}
                 role="listitem"
+                data-raga={raga.id}
               >
                 {RagaIcon && (
                   <div className={styles.ragaIconWrap}>
