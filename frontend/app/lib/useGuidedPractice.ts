@@ -230,9 +230,6 @@ export function useGuidedPractice(
     voiceEventsRef.current = [];
     swaraAccuraciesRef.current = [];
 
-    // Start tanpura
-    audio.startTanpura();
-
     // Play the first stage's guide tone after a brief pause
     setTimeout(() => {
       const target = getStageTarget('swaras', raga);
