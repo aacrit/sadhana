@@ -78,35 +78,76 @@ const BELLOWS_LFO_DEPTH = 1.5;   // Hz deviation
 // ---------------------------------------------------------------------------
 
 /**
- * Amplitude weights for 12 harmonics of a piano string (hammer strike).
- * Even harmonics are slightly weaker (hammer position ~1/7 string length).
- * Rapid high-partial decay gives the characteristic brightness.
+ * Amplitude weights for 12 harmonics of a felt-hammer piano string.
+ *
+ * Modeled for the Sa range (C3-C5, 130-520 Hz) where piano timbre is warm
+ * and full. A felt hammer striking at ~1/7 of the string length creates a
+ * notch at the 7th harmonic and its multiples. The spectrum shows:
+ *   - Strong fundamental and 2nd partial (hammer excites low modes well)
+ *   - Gradual rolloff from the 3rd partial onward (felt damping)
+ *   - Noticeable dip at partial 7 (hammer position null)
+ *   - Very weak partials above 9 (felt absorption of high frequencies)
+ *
+ * Note: Real piano strings exhibit inharmonicity (upper partials are
+ * slightly sharp due to string stiffness), which we cannot model with
+ * the current integer-harmonic synthesis. The partial weights are
+ * tuned to sound musical despite perfectly harmonic partials.
  */
 const PIANO_PARTIALS: readonly number[] = [
-  1.00, 0.55, 0.70, 0.30, 0.45, 0.15, 0.22, 0.08, 0.12, 0.05, 0.04, 0.02,
+  1.00, 0.75, 0.55, 0.40, 0.30, 0.20, 0.05, 0.12, 0.08, 0.04, 0.02, 0.01,
 ] as const;
 
-const PIANO_ATTACK = 0.005;   // hammer strike — near-instant
-const PIANO_DECAY = 0.3;      // brightness fade
-const PIANO_SUSTAIN = 0.25;   // sustain level after decay
-const PIANO_RELEASE = 0.6;    // damper lift release
+/**
+ * Piano ADSR envelope for the Sa range (C3-C5).
+ *   Attack:  ~3ms hammer impact — near-instantaneous but not a click
+ *   Decay:   ~1.2s initial brightness fade as upper partials die
+ *   Sustain: 0.55 — piano strings sustain well in the middle register
+ *   Release: ~0.5s damper fall with brief resonance tail
+ */
+const PIANO_ATTACK = 0.003;   // hammer impact — near-instant percussive onset
+const PIANO_DECAY = 1.2;      // long brightness fade (upper partials die first)
+const PIANO_SUSTAIN = 0.55;   // middle-register strings sustain strongly
+const PIANO_RELEASE = 0.5;    // damper fall with brief resonance tail
 
 // ---------------------------------------------------------------------------
 // Guitar spectral model
 // ---------------------------------------------------------------------------
 
 /**
- * Amplitude weights for 12 harmonics of a nylon-string guitar pluck.
- * Strong fundamental and 2nd partial, quick rolloff above 6th.
+ * Amplitude weights for 12 harmonics of a nylon-string classical guitar.
+ *
+ * Nylon strings produce a warm, round tone with these characteristics:
+ *   - Very strong fundamental (nylon's mass emphasizes the lowest mode)
+ *   - Prominent 2nd partial (the octave, gives body and fullness)
+ *   - Moderate 3rd partial (the fifth, adds depth without harshness)
+ *   - Secondary brightness from 4th-5th partials (nail contact shimmer)
+ *   - Pluck position null at ~6th partial (typical right-hand position
+ *     over the sound hole is ~1/6 of the string length)
+ *   - Rapid rolloff above 7th partial (nylon absorbs high frequencies
+ *     much faster than steel; this is the hallmark warm tone)
+ *
+ * Compared to steel-string guitar, nylon has ~6 dB less energy above
+ * the 5th partial, producing the characteristic mellow classical sound.
  */
 const GUITAR_PARTIALS: readonly number[] = [
-  1.00, 0.80, 0.50, 0.35, 0.25, 0.18, 0.10, 0.06, 0.03, 0.02, 0.01, 0.005,
+  1.00, 0.72, 0.45, 0.30, 0.22, 0.06, 0.12, 0.07, 0.03, 0.015, 0.008, 0.004,
 ] as const;
 
-const GUITAR_ATTACK = 0.003;  // pluck — very fast
-const GUITAR_DECAY = 0.15;    // initial brightness
-const GUITAR_SUSTAIN = 0.40;  // body resonance sustain
-const GUITAR_RELEASE = 0.8;   // natural string decay
+/**
+ * Guitar ADSR envelope for nylon-string pluck in the Sa range (C3-C5).
+ *   Attack:  ~8ms — nylon has a softer transient than steel or hammer;
+ *            the fingertip/nail releases the string with a brief ramp
+ *   Decay:   ~2s long initial decay as the string loses energy to air
+ *            and soundboard; nylon sustains 2-4s in the middle register
+ *   Sustain: 0.15 — plucked strings have no sustain mechanism; the note
+ *            decays to a quiet tail (no bowing, no bellows, no hammers)
+ *   Release: ~1.0s — when the player lifts off, the remaining vibration
+ *            dies naturally through the bridge and soundboard
+ */
+const GUITAR_ATTACK = 0.008;  // nylon pluck — softer onset than steel
+const GUITAR_DECAY = 2.0;     // long natural decay (nylon sustains well)
+const GUITAR_SUSTAIN = 0.15;  // plucked string — no sustain mechanism
+const GUITAR_RELEASE = 1.0;   // natural tail through bridge and body
 
 // ---------------------------------------------------------------------------
 // Types
@@ -237,12 +278,20 @@ const INSTRUMENT_CONFIGS: Record<InstrumentTimbre, InstrumentConfig> = {
     decay: PIANO_DECAY,
     sustain: PIANO_SUSTAIN,
     release: PIANO_RELEASE,
-    filterLowFreq: 300,
-    filterLowQ: 0.8,
-    filterLowGain: 2,
-    filterHighFreq: 2500,
-    filterHighQ: 1.0,
-    filterHighGain: -2, // slight high-end rolloff for warmth
+    // Piano soundboard resonance model:
+    //   Low filter:  ~220 Hz, Q 1.0, +3 dB — soundboard bass bar resonance.
+    //     Warms the lower partials without muddiness. Lower Q than harmonium
+    //     because the piano soundboard is larger and has a broader resonance.
+    //   High filter: ~2800 Hz, Q 1.2, +2 dB — presence/clarity peak.
+    //     Piano has a bright presence band from the bridge and soundboard
+    //     that gives notes definition without harshness. The slight boost
+    //     compensates for the felt hammer's absorption of high frequencies.
+    filterLowFreq: 220,
+    filterLowQ: 1.0,
+    filterLowGain: 3,
+    filterHighFreq: 2800,
+    filterHighQ: 1.2,
+    filterHighGain: 2,
     lfoRate: 0,
     lfoDepth: 0,
   },
@@ -252,12 +301,23 @@ const INSTRUMENT_CONFIGS: Record<InstrumentTimbre, InstrumentConfig> = {
     decay: GUITAR_DECAY,
     sustain: GUITAR_SUSTAIN,
     release: GUITAR_RELEASE,
-    filterLowFreq: 250,
-    filterLowQ: 1.2,
-    filterLowGain: 3,  // body resonance
-    filterHighFreq: 3000,
-    filterHighQ: 0.7,
-    filterHighGain: -3, // nylon string rolloff
+    // Classical guitar body resonance model:
+    //   Low filter:  ~110 Hz, Q 1.8, +5 dB — Helmholtz air resonance.
+    //     The guitar body's sound hole acts as a Helmholtz resonator at
+    //     ~95-110 Hz. This gives classical guitar its deep, warm bass
+    //     character. Higher Q and gain than piano because the guitar body
+    //     has a much more pronounced and narrower air resonance.
+    //   High filter: ~350 Hz, Q 1.4, +3 dB — top plate resonance.
+    //     The spruce top vibrates most strongly at ~350-400 Hz, adding
+    //     body and fullness to the mid-range. This is the "wood" tone.
+    //     We place this lower than the piano presence peak because
+    //     classical guitar has very little energy above 3 kHz.
+    filterLowFreq: 110,
+    filterLowQ: 1.8,
+    filterLowGain: 5,
+    filterHighFreq: 350,
+    filterHighQ: 1.4,
+    filterHighGain: 3,
     lfoRate: 0,
     lfoDepth: 0,
   },
@@ -305,18 +365,34 @@ function createInstrumentNote(
   filterHigh.connect(masterGain);
   masterGain.connect(ctx.destination);
 
-  // ADSR envelope
+  // ADSR envelope — handles short notes gracefully.
+  //
+  // When note duration < attack + decay + release (common with piano/guitar
+  // whose decay constants are longer than typical swara durations), the decay
+  // phase is truncated: we compute the volume level the decay would have
+  // reached by releaseStart and ramp from there to zero.
   const peakVolume = volume;
   const sustainVolume = volume * config.sustain;
 
+  const releaseStart = Math.max(startTime + attack, startTime + duration - release);
+  const decayEnd = startTime + attack + config.decay;
+
   masterGain.gain.setValueAtTime(0, startTime);
   masterGain.gain.linearRampToValueAtTime(peakVolume, startTime + attack);
-  masterGain.gain.linearRampToValueAtTime(sustainVolume, startTime + attack + config.decay);
 
-  // Hold sustain until release begins
-  const releaseStart = startTime + duration - release;
-  if (releaseStart > startTime + attack + config.decay) {
+  if (decayEnd <= releaseStart) {
+    // Normal case: full decay completes before release begins.
+    // Decay ramp -> sustain hold -> release ramp.
+    masterGain.gain.linearRampToValueAtTime(sustainVolume, decayEnd);
     masterGain.gain.setValueAtTime(sustainVolume, releaseStart);
+  } else {
+    // Short note: decay is still in progress when release must begin.
+    // Compute the linear interpolation of where the decay would be at
+    // releaseStart, then start the release from that level.
+    const decayElapsed = releaseStart - (startTime + attack);
+    const decayFraction = config.decay > 0 ? decayElapsed / config.decay : 1;
+    const levelAtRelease = peakVolume + (sustainVolume - peakVolume) * decayFraction;
+    masterGain.gain.linearRampToValueAtTime(levelAtRelease, releaseStart);
   }
   masterGain.gain.linearRampToValueAtTime(0, startTime + duration);
 
