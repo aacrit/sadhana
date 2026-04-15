@@ -198,6 +198,37 @@ export type {
 } from './synthesis/swara-voice';
 
 // ============================================================================
+// INTERACTION (Tantri)
+// ============================================================================
+
+export {
+  ACCURACY_THRESHOLDS,
+  SPRING_PRESETS,
+  createTantriField,
+  mapVoiceToStrings,
+  updateFieldFromVoice,
+  triggerString,
+  releaseString,
+  updateRagaContext,
+  getVisibleStrings,
+  applyLevelVisibility,
+  accuracyToOpacity,
+  accuracyToColor,
+  stringDisplacement,
+  generateStringWaveform,
+} from './interaction/tantri';
+
+export type {
+  AccuracyBand,
+  StringVisibility,
+  TantriStringState,
+  TantriField,
+  TantriTimbre,
+  TantriPlayEvent,
+  VoiceMapResult,
+} from './interaction/tantri';
+
+// ============================================================================
 // VOICE
 // ============================================================================
 
