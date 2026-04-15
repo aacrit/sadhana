@@ -310,15 +310,58 @@ All durations collapse to 0ms when `prefers-reduced-motion: reduce` is active.
 
 ## Texture Language
 
-Three texture elements give the interface the material quality of a Mughal manuscript. They operate at the threshold of perception -- visible in aggregate, invisible in isolation.
+Five texture elements give the interface the material quality of handwoven textile and Mughal manuscript. They operate at the threshold of perception -- visible in aggregate, invisible in isolation. The aesthetic is "handmade carpetry with poetic rebellion": intricate warp-weft grids carry musical motifs (tanpura standing waves, tala rhythm dots, swara-interval geometry), and diagonal dashed lines break the orthogonal grid like a musician bending a note.
 
-### Jali Pattern
+### Bunkar (Weaver) -- Default Card Textile
 
-A geometric lattice pattern inspired by the stone jali screens of Mughal architecture. Rendered as SVG, applied as a background pattern on cards and containers.
+Named after the Banarasi bunkar (weaver) tradition. The primary card texture across all surfaces.
 
-- **Default state:** 4% opacity. A barely-visible geometric rhythm underlying content.
-- **Pakad recognition moment:** Full reveal. The jali pattern scales to 100% opacity over 1200ms (GSAP timeline), then settles back to 15% and slowly fades to 4%. The architecture of the music becomes briefly visible.
-- **Implementation:** SVG pattern defined in tokens. Applied via `background-image` on `.jali-surface` class. Opacity controlled via `--jali-opacity` custom property, animated via GSAP.
+**Structure (96x96 SVG viewBox):**
+- **Warp threads** (vertical): 7 straight lines at 12px intervals, varying stroke-width (0.15-0.25) to simulate handloom irregularity. The central thread (x=48) is thickest -- the Sa axis.
+- **Weft threads** (horizontal): 7 sine-wave paths (quadratic Bezier curves) that undulate gently, simulating tanpura string vibration woven into fabric. The central weft is thickest.
+- **Central medallion**: Concentric circles (r=14, 9, 3, 1) radiating outward from a Sa point -- the buta motif that anchors every Varanasi brocade, here reinterpreted as a swara-geometry mandala.
+- **Swara rays**: 7 short radiating lines from the medallion at equal angles, representing the 7 shuddha swaras.
+- **Corner buta**: Quarter-circle paisley-origin curves at each corner ensure seamless tiling across tile boundaries.
+- **Tala rhythm dots**: 8 circles at the top and bottom edges, sized to represent sam (beat 1, larger) vs. inner beats (smaller) in a teentaal pattern.
+- **Rebellion diagonals**: Dashed diagonal lines from each corner toward center, breaking the orthogonal grid -- the poetic rebellion, music refusing to be contained by geometry.
+
+- **Default state:** 4% opacity (`--textile-opacity`). Felt, not seen.
+- **Pakad recognition moment:** Full reveal (100% opacity over 1200ms GSAP timeline), then settles to 15% and fades to 4%. The weave of the music becomes briefly visible.
+- **Implementation:** SVG data URI in CSS `background-image`. Applied via `.jali-surface` class (legacy name retained for GSAP compatibility). Opacity controlled via `--jali-opacity` (aliased to `--textile-opacity`). Tile size: `--textile-card-size` (96px 96px).
+- **Day/Night:** White strokes on night mode (#0A1A14 bg), dark strokes (#1A1A2E) on day mode (#F5F0E8 bg).
+
+### Taar (String) -- Journey-Specific Card Textiles
+
+Each journey card gets a unique variation of the textile that reflects its musical character. All share the Bunkar warp-weft base but replace the central motif:
+
+| Journey | Pattern Name | Central Motif | Character |
+|---------|-------------|---------------|-----------|
+| **Beginner** | Aroha Taar | Ascending dashed curve (Sa to Sa') with pentatonic interval nodes | Open, simple, rising. Fewer weft threads = beginner's openness. Saffron strokes. |
+| **Explorer** | Vistaar Taar | Three branching dashed paths diverging from a single Sa point | Discovery, forking melodic paths. Forest-green strokes. |
+| **Scholar** | Shruti Taar | 22-shruti density grid (11x11 warp/weft), concentric harmonic circles, diamond overlay | Analytical precision. Irrational diagonals cut through the rational grid. Lapis-blue strokes. |
+| **Master** | Zarr-kashi Taar | Eight-pointed star (ashtadala padma) interlocking with the full 12-chromatic grid | Authority, complete mastery. Gold strokes at lowest opacity (2.5%). |
+
+### Mehrab (Arch) -- Page Background Textile
+
+The full-page background texture (applied to `body::before`). A 140x140 SVG that combines:
+
+- **Carpet border frame**: Zanjir (chain) diamond pattern running along all four edges -- the border motif of every Persian-Indian carpet, rendered as interlocking zigzag paths.
+- **Side borders**: Continuous zigzag chevrons along left and right edges.
+- **Mehrab arch**: Two concentric pointed arches (outer + inner) rising from the base -- the mihrab/mehrab form from Mughal architecture.
+- **Keystone lotus**: Concentric circles at the arch apex.
+- **Tanpura strings**: Four standing-wave curves inside the arch at different harmonic densities (fundamental, 3:2, octave, higher partial) -- the same overtone series that creates the tanpura's shimmer, now woven into architecture.
+- **Tala baseline**: 8 rhythm dots along the arch base marking teentaal beats.
+- **Spandrel rosettes**: Eight-pointed star motifs in the spandrel corners above the arch.
+
+- **Opacity:** 3.5% (`--canvas-pattern-opacity`).
+- **Tile size:** `--textile-mehrab-size` (140px 140px).
+
+### Cross-Stitch Grain -- Surface Texture
+
+The finest layer (applied to `body::after`). Tiny cross-stitch marks (X shapes) at 8px intervals, evoking the warp-weft intersection points of handwoven fabric. Subtler than the old dot-grain pattern, more textile in character. Staggered placement (offset grid) prevents visual monotony.
+
+- **Opacity:** 2% (`--canvas-grain-opacity`).
+- **Tile size:** 8px 8px.
 
 ### Ink Diffusion
 
@@ -336,6 +379,25 @@ Named after the Mughal metalwork technique of inlaying gold wire into steel. In 
 - **Hairline rules:** 1px horizontal or vertical lines separating sections. Only at Guru level.
 - **Single-point accents:** The Sa convergence point in the logo. A dot marking a mastered raga in the raga browser.
 - **Never:** Filled backgrounds, gradient components, large text, button backgrounds, decorative borders.
+
+### Texture Token Reference
+
+| Token | Value | Purpose |
+|-------|-------|---------|
+| `--textile-opacity` | `0.04` | Default card textile opacity |
+| `--textile-opacity-raga` | `0.08` | Textile when raga context active |
+| `--textile-opacity-pitch` | `0.12` | Textile during sustained perfect pitch |
+| `--textile-opacity-settle` | `0.15` | Textile settling after pakad reveal |
+| `--textile-opacity-level` | `0.20` | Textile at level ceremony |
+| `--textile-opacity-reveal` | `1` | Full textile reveal (pakad moment peak) |
+| `--textile-card-size` | `96px 96px` | Bunkar/Taar card tile size |
+| `--textile-taar-size` | `80px 80px` | Taar string variant tile size |
+| `--textile-bg-size` | `120px 120px` | Background textile tile size |
+| `--textile-mehrab-size` | `140px 140px` | Mehrab arch page texture tile size |
+| `--canvas-pattern-opacity` | `0.035` | Page background texture opacity |
+| `--canvas-grain-opacity` | `0.02` | Cross-stitch grain layer opacity |
+
+Legacy aliases (`--jali-*`) are preserved for backward compatibility with GSAP timelines and the Tantri renderer.
 
 ---
 

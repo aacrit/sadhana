@@ -165,6 +165,7 @@
 }
 
 /* Jali lattice — gold-tinted, barely visible */
+/* Master Taar textile: zarr-kashi gold geometry */
 .gatePanel::before {
   content: '';
   position: absolute;
@@ -172,8 +173,8 @@
   pointer-events: none;
   border-radius: inherit;
   opacity: 0.025;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cpath d='M24 0L30 6L48 6L42 12L48 18L42 18L48 24L42 30L48 42L42 42L36 48L30 42L24 48L18 42L12 48L6 42L0 48L0 42L6 36L0 30L0 24L6 18L0 12L6 6L0 6L6 0L12 6L18 0L24 6L30 0Z' fill='none' stroke='%23D4AF37' stroke-width='0.5'/%3E%3Cpath d='M24 12L30 18L36 12L42 18L36 24L42 30L36 36L30 30L24 36L18 30L12 36L6 30L12 24L6 18L12 12L18 18Z' fill='none' stroke='%23D4AF37' stroke-width='0.5'/%3E%3C/svg%3E");
-  background-size: var(--jali-size);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96' viewBox='0 0 96 96'%3E%3Cg fill='none' stroke='%23D4AF37'%3E%3Cpath d='M8 0 L8 96' stroke-width='0.12'/%3E%3Cpath d='M16 0 L16 96' stroke-width='0.1'/%3E%3Cpath d='M24 0 L24 96' stroke-width='0.12'/%3E%3Cpath d='M32 0 L32 96' stroke-width='0.1'/%3E%3Cpath d='M40 0 L40 96' stroke-width='0.12'/%3E%3Cpath d='M48 0 L48 96' stroke-width='0.15'/%3E%3Cpath d='M56 0 L56 96' stroke-width='0.12'/%3E%3Cpath d='M64 0 L64 96' stroke-width='0.1'/%3E%3Cpath d='M72 0 L72 96' stroke-width='0.12'/%3E%3Cpath d='M80 0 L80 96' stroke-width='0.1'/%3E%3Cpath d='M88 0 L88 96' stroke-width='0.12'/%3E%3Cpath d='M0 8 Q48 6 96 8' stroke-width='0.1'/%3E%3Cpath d='M0 16 Q48 14.5 96 16' stroke-width='0.08'/%3E%3Cpath d='M0 24 Q48 22.5 96 24' stroke-width='0.1'/%3E%3Cpath d='M0 32 Q48 30.5 96 32' stroke-width='0.08'/%3E%3Cpath d='M0 40 Q48 38.5 96 40' stroke-width='0.1'/%3E%3Cpath d='M0 48 Q48 46 96 48' stroke-width='0.15'/%3E%3Cpath d='M0 56 Q48 54.5 96 56' stroke-width='0.1'/%3E%3Cpath d='M0 64 Q48 62.5 96 64' stroke-width='0.08'/%3E%3Cpath d='M0 72 Q48 70.5 96 72' stroke-width='0.1'/%3E%3Cpath d='M0 80 Q48 78.5 96 80' stroke-width='0.08'/%3E%3Cpath d='M0 88 Q48 86.5 96 88' stroke-width='0.1'/%3E%3Cpath d='M48 18 L66 32 L78 48 L66 64 L48 78 L30 64 L18 48 L30 32 Z' stroke-width='0.25'/%3E%3Cpath d='M48 26 L60 36 L68 48 L60 60 L48 70 L36 60 L28 48 L36 36 Z' stroke-width='0.18'/%3E%3Ccircle cx='48' cy='48' r='6' stroke-width='0.2'/%3E%3Ccircle cx='48' cy='48' r='2' stroke-width='0.3'/%3E%3Ccircle cx='48' cy='18' r='1' stroke-width='0.2'/%3E%3Ccircle cx='78' cy='48' r='1' stroke-width='0.2'/%3E%3Ccircle cx='48' cy='78' r='1' stroke-width='0.2'/%3E%3Ccircle cx='18' cy='48' r='1' stroke-width='0.2'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: var(--textile-card-size);
   background-repeat: repeat;
   z-index: 0;
 }
