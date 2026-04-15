@@ -23,14 +23,14 @@ import homeStyles from '../../styles/beginner.module.css';
 // ---------------------------------------------------------------------------
 
 const BEGINNER_LESSONS = [
-  { id: 'beginner-01-bhoopali', title: 'Your First Raga', raga: 'Bhoopali' },
-  { id: 'beginner-02-sa-pa-drone', title: 'Sa and Pa', raga: 'Drone' },
-  { id: 'beginner-03-yaman', title: 'Evening Light', raga: 'Yaman' },
-  { id: 'beginner-04-bhairav', title: 'Dawn Austerity', raga: 'Bhairav' },
-  { id: 'beginner-05-bhimpalasi', title: 'Afternoon Longing', raga: 'Bhimpalasi' },
-  { id: 'beginner-06-bageshri', title: 'Night Intimacy', raga: 'Bageshri' },
-  { id: 'beginner-07-consolidation', title: 'Five Ragas', raga: 'Review' },
-  { id: 'beginner-08-challenge', title: 'Shishya Challenge', raga: 'Mastery' },
+  { id: 'beginner-01-bhoopali', num: 1, title: 'Your First Raga', subtitle: 'Meet the five notes of Bhoopali', raga: 'Bhoopali', accent: '#E8871E' },
+  { id: 'beginner-02-sa-pa-drone', num: 2, title: 'Sa and Pa', subtitle: 'The anchor and its perfect fifth', raga: 'Drone', accent: '#B8A99A' },
+  { id: 'beginner-03-yaman', num: 3, title: 'Evening Light', subtitle: 'Tivra Ma opens the evening sky', raga: 'Yaman', accent: '#C17817' },
+  { id: 'beginner-04-bhairav', num: 4, title: 'Dawn Austerity', subtitle: 'Komal Re and Dha at first light', raga: 'Bhairav', accent: '#A0522D' },
+  { id: 'beginner-05-bhimpalasi', num: 5, title: 'Afternoon Longing', subtitle: 'The pull of komal Ni and Ga', raga: 'Bhimpalasi', accent: '#8B6914' },
+  { id: 'beginner-06-bageshri', num: 6, title: 'Night Intimacy', subtitle: 'Soft curves in the dark hours', raga: 'Bageshri', accent: '#4A6741' },
+  { id: 'beginner-07-consolidation', num: 7, title: 'Five Ragas', subtitle: 'Hear them side by side', raga: 'Review', accent: '#7A6B5E' },
+  { id: 'beginner-08-challenge', num: 8, title: 'Shishya Challenge', subtitle: 'Prove your ear', raga: 'Mastery', accent: '#D4AF37' },
 ] as const;
 
 // ---------------------------------------------------------------------------
@@ -257,24 +257,34 @@ export default function BeginnerPage() {
 
       {/* Lesson catalog */}
       <motion.section
-        className={homeStyles.recentSection}
+        className={homeStyles.lessonSection}
         variants={fadeUp}
         aria-label="Beginner lessons"
       >
         <h3 className={homeStyles.sectionTitle}>Lessons</h3>
-        {BEGINNER_LESSONS.map((lesson) => (
-          <Link
-            key={lesson.id}
-            href={`/journeys/beginner/lessons/${lesson.id}`}
-            className={homeStyles.recentCard}
-            style={{ textDecoration: 'none', cursor: 'pointer' }}
-          >
-            <span className={homeStyles.recentRagaName}>{lesson.title}</span>
-            <span className={homeStyles.recentAccuracy} style={{ fontSize: 'var(--text-xs)', color: 'var(--text-3)' }}>
-              {lesson.raga}
-            </span>
-          </Link>
-        ))}
+        <div className={homeStyles.lessonGrid}>
+          {BEGINNER_LESSONS.map((lesson) => (
+            <Link
+              key={lesson.id}
+              href={`/journeys/beginner/lessons/${lesson.id}`}
+              className={homeStyles.lessonTile}
+            >
+              <span
+                className={homeStyles.lessonAccent}
+                style={{ background: lesson.accent }}
+              />
+              <span className={homeStyles.lessonNum}>{String(lesson.num).padStart(2, '0')}</span>
+              <div className={homeStyles.lessonText}>
+                <span className={homeStyles.lessonTitle}>{lesson.title}</span>
+                <span className={homeStyles.lessonSubtitle}>{lesson.subtitle}</span>
+              </div>
+              <span className={homeStyles.lessonRaga}>{lesson.raga}</span>
+              <svg className={homeStyles.lessonArrow} width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                <path d="M5 3L9 7L5 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </Link>
+          ))}
+        </div>
       </motion.section>
 
       {/* First-time user callout */}

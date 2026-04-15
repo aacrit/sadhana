@@ -65,7 +65,7 @@ export interface LessonSessionData {
 const IDLE_VOICE_FEEDBACK: VoiceFeedback = {
   hz: null,
   centsDeviation: 0,
-  targetSwara: 'Sa',
+  targetSwara: '',
   detectedSwara: null,
   confidence: 0,
   amplitude: 0,
@@ -325,23 +325,17 @@ export function useLessonEngine(
     if (prevPhaseIndexRef.current === phaseIndex) return;
     prevPhaseIndexRef.current = phaseIndex;
 
-    // Stop previous voice pipeline
+    // Stop previous voice pipeline and reset feedback
     audio.stopVoicePipeline();
     audio.stopSaDetection();
+    setVoiceFeedback(IDLE_VOICE_FEEDBACK);
 
-    // Gate tanpura volume: full during drone and singing, reduced during other phases
-    const tanpuraFullPhases = ['tanpura_drone', 'pitch_exercise', 'phrase_exercise', 'passive_phrase_recognition'];
-    if (tanpuraFullPhases.includes(currentPhase.type)) {
-      audio.setTanpuraVolume(0.3);
-    } else {
-      // Reduce to 30% of normal volume — ambient presence without interference
-      audio.setTanpuraVolume(0.09);
-    }
+    // Tanpura is always off — student controls it manually if desired
+    audio.stopTanpura();
 
     switch (currentPhase.type) {
       case 'tanpura_drone': {
-        audio.startTanpura();
-        // Auto-advance after duration_s
+        // Auto-advance after duration_s (no tanpura auto-start)
         if (currentPhase.duration_s) {
           timerRef.current = setTimeout(() => {
             advancePhase();
@@ -368,9 +362,6 @@ export function useLessonEngine(
       case 'pitch_exercise':
       case 'phrase_exercise':
       case 'passive_phrase_recognition': {
-        // Start tanpura as a reference drone for singing phases
-        audio.startTanpura();
-
         if (skipMicFlag) break;
 
         const startVoice = async () => {
@@ -411,8 +402,7 @@ export function useLessonEngine(
       case 'session_summary': {
         // Stop all audio
         audio.stopVoicePipeline();
-        // Fade tanpura over 2 seconds
-        setTimeout(() => audio.stopTanpura(), 2000);
+        audio.stopTanpura();
         setVoiceFeedback(IDLE_VOICE_FEEDBACK);
         break;
       }
