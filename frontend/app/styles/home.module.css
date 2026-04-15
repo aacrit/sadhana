@@ -134,36 +134,33 @@
 }
 
 /* =======================================================================
-   CARD DECK — stacked like playing cards
+   CARD STACK — simple vertical list, all four journeys visible
    ======================================================================= */
 
-.deckContainer {
-  position: relative;
+.cardStack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
   width: 100%;
   max-width: var(--max-width);
   z-index: var(--z-base);
-  flex: 1;
-  /* min-height set dynamically via padding */
 }
 
 /* -- Individual card --------------------------------------------------- */
 
-.deckCard {
-  position: absolute;
-  left: 0;
-  right: 0;
+.stackCard {
+  position: relative;
   border-radius: var(--radius-lg);
   background: var(--bg-3);
   border: 1px solid var(--border);
   overflow: hidden;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15),
               0 1px 3px rgba(0, 0, 0, 0.1);
-  will-change: transform;
-  /* Inactive cards: only show the header (~44px) */
+  padding-bottom: var(--space-3);
 }
 
 /* Jali lattice on cards */
-.deckCard::before {
+.stackCard::before {
   content: '';
   position: absolute;
   inset: 0;
@@ -176,9 +173,11 @@
   z-index: 0;
 }
 
-.deckCardActive {
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25),
-              0 2px 8px rgba(0, 0, 0, 0.15);
+/* Locked/disabled cards */
+.stackCardLocked {
+  opacity: 0.4;
+  pointer-events: none;
+  filter: grayscale(0.6);
 }
 
 /* -- Card header (always visible, acts as peek tab) -------------------- */
@@ -218,10 +217,6 @@
   letter-spacing: var(--tracking-wider);
 }
 
-.deckCardActive .cardName {
-  font-size: var(--text-2xl);
-  letter-spacing: var(--tracking-royal);
-}
 
 .cardEnglish {
   font-family: var(--font-sans);
@@ -232,51 +227,64 @@
   letter-spacing: var(--tracking-widest);
 }
 
-/* -- Card body (only on active card) ----------------------------------- */
-
-.cardBody {
-  padding: 0 var(--space-4) var(--space-5);
-  position: relative;
-  z-index: 1;
-}
+/* -- Card description -------------------------------------------------- */
 
 .cardDescription {
   font-family: var(--font-serif);
-  font-size: var(--text-base);
+  font-size: var(--text-sm);
   font-weight: var(--weight-light);
   font-style: italic;
-  color: var(--text-2);
+  color: var(--text-3);
   line-height: var(--leading-relaxed);
-  margin-bottom: var(--space-4);
+  padding: 0 var(--space-4);
+  margin: 0;
+  position: relative;
+  z-index: 1;
   letter-spacing: 0.01em;
 }
 
-.cardEnter {
+/* -- Card enter (inline, right-aligned in header) ---------------------- */
+
+.cardEnterSmall {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-2);
+  gap: 4px;
   font-family: var(--font-serif);
-  font-size: var(--text-md);
+  font-size: var(--text-sm);
   font-weight: var(--weight-light);
-  color: var(--text);
+  color: var(--text-2);
   text-decoration: none;
-  padding: var(--space-3) var(--space-8);
-  border: 1px solid var(--text-3);
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--border);
   border-radius: var(--radius-full);
-  min-height: var(--touch-min);
   letter-spacing: var(--tracking-wider);
+  white-space: nowrap;
   transition: background var(--dur-fast) var(--ease-out),
-              border-color var(--dur-fast) var(--ease-out);
+              border-color var(--dur-fast) var(--ease-out),
+              color var(--dur-fast) var(--ease-out);
 }
 
-.cardEnter:hover {
+.cardEnterSmall:hover {
   background: var(--bg-4);
   border-color: var(--text-2);
+  color: var(--text);
 }
 
-.cardEnter:focus-visible {
+.cardEnterSmall:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
+}
+
+/* -- Lock label for gated journeys ------------------------------------- */
+
+.cardLockLabel {
+  font-family: var(--font-sans);
+  font-size: 10px;
+  font-weight: var(--weight-medium);
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-widest);
+  white-space: nowrap;
 }
 
 /* =======================================================================
@@ -286,11 +294,6 @@
 .cardBeginner {
   border-left: 3px solid rgba(232, 135, 30, 0.4);
 }
-.cardBeginner.deckCardActive {
-  background: var(--card-beginner-bg, #0A1A14);
-  box-shadow: 0 8px 32px rgba(232, 135, 30, 0.08),
-              0 2px 8px rgba(0, 0, 0, 0.15);
-}
 .cardBeginner .cardIcon { color: rgba(232, 135, 30, 0.7); }
 .cardBeginner::before {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cpath d='M24 0L30 6L48 6L42 12L48 18L42 18L48 24L42 30L48 42L42 42L36 48L30 42L24 48L18 42L12 48L6 42L0 48L0 42L6 36L0 30L0 24L6 18L0 12L6 6L0 6L6 0L12 6L18 0L24 6L30 0Z' fill='none' stroke='%23E8871E' stroke-width='0.5'/%3E%3Cpath d='M24 12L30 18L36 12L42 18L36 24L42 30L36 36L30 30L24 36L18 30L12 36L6 30L12 24L6 18L12 12L18 18Z' fill='none' stroke='%23E8871E' stroke-width='0.5'/%3E%3C/svg%3E");
@@ -299,23 +302,13 @@
 .cardExplorer {
   border-left: 3px solid rgba(45, 106, 79, 0.5);
 }
-.cardExplorer.deckCardActive {
-  background: linear-gradient(160deg, #0F241C 0%, #132E22 50%, #1A3A2E 100%);
-  box-shadow: 0 8px 32px rgba(45, 106, 79, 0.08),
-              0 2px 8px rgba(0, 0, 0, 0.15);
-}
 .cardExplorer .cardIcon { color: rgba(92, 158, 110, 0.7); }
 .cardExplorer::before {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cpath d='M24 0L30 6L48 6L42 12L48 18L42 18L48 24L42 30L48 42L42 42L36 48L30 42L24 48L18 42L12 48L6 42L0 48L0 42L6 36L0 30L0 24L6 18L0 12L6 6L0 6L6 0L12 6L18 0L24 6L30 0Z' fill='none' stroke='%235C9E6E' stroke-width='0.5'/%3E%3Cpath d='M24 12L30 18L36 12L42 18L36 24L42 30L36 36L30 30L24 36L18 30L12 36L6 30L12 24L6 18L12 12L18 18Z' fill='none' stroke='%235C9E6E' stroke-width='0.5'/%3E%3C/svg%3E");
 }
 
 .cardScholar {
-  border-left: 3px solid rgba(212, 175, 55, 0.25);
-}
-.cardScholar.deckCardActive {
-  background: linear-gradient(170deg, #0D1520 0%, #142235 50%, #1E3A5F 100%);
-  box-shadow: 0 8px 32px rgba(30, 58, 95, 0.1),
-              0 2px 8px rgba(0, 0, 0, 0.15);
+  border-left: 3px solid rgba(30, 58, 95, 0.4);
 }
 .cardScholar .cardName { color: var(--card-scholar-text, #D8DEE8); }
 .cardScholar .cardIcon { color: rgba(122, 158, 200, 0.7); }
@@ -325,11 +318,6 @@
 
 .cardMaster {
   border-left: 3px solid rgba(212, 175, 55, 0.35);
-}
-.cardMaster.deckCardActive {
-  background: linear-gradient(175deg, #12100A 0%, #1A1608 50%, #221E0E 100%);
-  box-shadow: 0 8px 32px rgba(212, 175, 55, 0.06),
-              0 2px 8px rgba(0, 0, 0, 0.15);
 }
 .cardMaster .cardName { color: var(--card-master-text, #E8DCC8); }
 .cardMaster .cardIcon { color: rgba(212, 175, 55, 0.6); }
@@ -443,7 +431,7 @@
    DAY MODE
    ======================================================================= */
 
-:global([data-theme="day"]) .deckCard::before {
+:global([data-theme="day"]) .stackCard::before {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cpath d='M24 0L30 6L48 6L42 12L48 18L42 18L48 24L42 30L48 42L42 42L36 48L30 42L24 48L18 42L12 48L6 42L0 48L0 42L6 36L0 30L0 24L6 18L0 12L6 6L0 6L6 0L12 6L18 0L24 6L30 0Z' fill='none' stroke='%231A1A2E' stroke-width='0.5'/%3E%3Cpath d='M24 12L30 18L36 12L42 18L36 24L42 30L36 36L30 30L24 36L18 30L12 36L6 30L12 24L6 18L12 12L18 18Z' fill='none' stroke='%231A1A2E' stroke-width='0.5'/%3E%3C/svg%3E");
 }
 
@@ -467,5 +455,5 @@
 @media (min-width: 640px) {
   .page { padding: var(--space-6) var(--space-6) var(--space-4); }
   .todayName { font-size: var(--text-3xl); }
-  .deckCardActive .cardName { font-size: var(--text-2xl); }
+  .cardName { font-size: var(--text-xl); }
 }

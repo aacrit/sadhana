@@ -1,11 +1,10 @@
 /**
  * page.tsx — Journey selection screen
  *
- * Stacked card deck: cards layered like playing cards with physical depth.
- * The active card is on top, fully visible. Others peek out below showing
- * just their title strip. Click a peeking card to bring it to top.
- *
- * Framer Motion spring physics for card transitions.
+ * Simple vertical card stack: all four journeys visible.
+ * Beginner and Explorer are accessible. Scholar and Master
+ * are shown but grayed out / disabled until the user reaches
+ * the required level.
  */
 
 'use client';
@@ -82,9 +81,6 @@ const CARD_CLASS_MAP: Record<string, string | undefined> = {
   master: styles.cardMaster,
 };
 
-/** Height of a peeking card tab in px */
-const PEEK_HEIGHT = 44;
-
 // ---------------------------------------------------------------------------
 // Animation
 // ---------------------------------------------------------------------------
@@ -122,36 +118,14 @@ export default function HomePage() {
   const xp = profile?.xp ?? 0;
   const riyazDone = profile?.riyazDone ?? false;
 
-  // Active card index — default to the highest visible journey for the user's level
-  const defaultIndex = useMemo(() => {
-    const level = profile?.level ?? 1;
-    const visible = JOURNEYS.filter((j) => level >= j.minLevel);
-    return Math.max(0, visible.length - 1);
-  }, [profile?.level]);
-
-  const [activeIndex, setActiveIndex] = useState(defaultIndex);
-
-  useEffect(() => {
-    setActiveIndex(defaultIndex);
-  }, [defaultIndex]);
-
   void isGuest;
 
-  // Filter journeys by user level — Scholar/Master hidden for new users
+  // All journeys always visible; Scholar/Master shown but locked for low-level users
   const userLevel = profile?.level ?? 1;
-  const visibleJourneys = useMemo(
-    () => JOURNEYS.filter((j) => userLevel >= j.minLevel),
-    [userLevel],
-  );
 
   if (loading) {
     return <BrandLoader loading={true} tagline="Disciplined practice toward mastery" />;
   }
-
-  // Calculate how many cards are below the active one (peeking out)
-  const safeIndex = Math.min(activeIndex, visibleJourneys.length - 1);
-  const cardsBelow = visibleJourneys.length - 1 - safeIndex;
-  const cardsAbove = safeIndex;
 
   return (
     <div className={styles.page} data-raga={todayRaga.id}>
@@ -227,78 +201,37 @@ export default function HomePage() {
       )}
 
       {/* ================================================================
-          CARD DECK — stacked like playing cards
-          Active card is fully visible. Cards above/below peek out as tabs.
+          JOURNEY CARDS — simple vertical stack, all four visible
+          Scholar/Master shown but locked for users below level gate
           ================================================================ */}
       <div
-        className={styles.deckContainer}
+        className={styles.cardStack}
         role="list"
         aria-label="Choose your journey"
-        style={{
-          // Reserve space: active card + peek tabs above + peek tabs below
-          paddingBottom: cardsBelow * PEEK_HEIGHT,
-          paddingTop: cardsAbove * PEEK_HEIGHT,
-        }}
       >
-        {visibleJourneys.map((journey, i) => {
-          const isActive = i === safeIndex;
+        {JOURNEYS.map((journey, i) => {
           const JourneyIcon = getJourneyIcon(journey.id);
           const cardClass = CARD_CLASS_MAP[journey.id] || '';
-
-          // Position: cards above active peek upward, cards below peek downward
-          let yOffset = 0;
-          let zIndex = 0;
-
-          if (i < safeIndex) {
-            // Card above active — peek tab at the top
-            yOffset = (i - safeIndex) * PEEK_HEIGHT;
-            zIndex = i;
-          } else if (i === safeIndex) {
-            // Active card — centered
-            yOffset = 0;
-            zIndex = visibleJourneys.length;
-          } else {
-            // Card below active — peek tab at the bottom
-            yOffset = (i - safeIndex) * PEEK_HEIGHT;
-            zIndex = visibleJourneys.length - i;
-          }
+          const locked = userLevel < journey.minLevel;
 
           return (
             <motion.div
               key={journey.id}
               role="listitem"
-              className={`${styles.deckCard} ${cardClass} ${isActive ? styles.deckCardActive : ''}`}
-              animate={{
-                y: yOffset,
-                scale: isActive ? 1 : 0.97,
-                opacity: 1,
-              }}
-              initial={{ y: 60, opacity: 0, scale: 0.95 }}
+              className={`${styles.stackCard} ${cardClass} ${locked ? styles.stackCardLocked : ''}`}
+              initial={{ y: 30, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
               transition={{
                 type: 'spring',
                 stiffness: 350,
                 damping: 28,
-              }}
-              style={{
-                zIndex,
-                position: 'absolute',
-                top: cardsAbove * PEEK_HEIGHT,
-                left: 0,
-                right: 0,
-                cursor: isActive ? 'default' : 'pointer',
-              }}
-              onClick={() => {
-                if (!isActive) setActiveIndex(i);
+                delay: i * 0.06,
               }}
             >
-              {/* Card header — visible on both active and peeking states */}
               <div className={styles.cardHeader}>
                 {JourneyIcon && (
                   <div className={styles.cardIcon}>
-                    <JourneyIcon
-                      size={isActive ? 28 : 22}
-                      color="currentColor"
-                    />
+                    <JourneyIcon size={24} color="currentColor" />
                   </div>
                 )}
                 <div className={styles.cardTitles}>
@@ -308,27 +241,21 @@ export default function HomePage() {
                   </span>
                   <span className={styles.cardEnglish}>{journey.nameEnglish}</span>
                 </div>
-              </div>
-
-              {/* Card body — only rendered on the active card */}
-              {isActive && (
-                <motion.div
-                  className={styles.cardBody}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.15, duration: 0.3 }}
-                >
-                  <p className={styles.cardDescription}>
-                    {journey.description}
-                  </p>
-                  <Link href={journey.path} className={styles.cardEnter}>
+                {locked ? (
+                  <span className={styles.cardLockLabel}>Coming soon</span>
+                ) : (
+                  <Link href={journey.path} className={styles.cardEnterSmall} aria-label={`Enter ${journey.nameEnglish} journey`}>
                     Enter
                     <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
                       <path d="M5 3L9 7L5 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                   </Link>
-                </motion.div>
-              )}
+                )}
+              </div>
+
+              <p className={styles.cardDescription}>
+                {journey.description}
+              </p>
             </motion.div>
           );
         })}
