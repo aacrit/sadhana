@@ -187,6 +187,7 @@ function ActiveScreen({
     finishSinging,
     nextStage,
     retryStage,
+    audio,
   } = controls;
 
   const currentResult = stageResults.find((r) => r.stage === currentStage);
@@ -266,6 +267,9 @@ function ActiveScreen({
               level="shishya"
               subLevel={2}
               variant="compact"
+              pitchHz={voiceFeedback.hz ?? undefined}
+              pitchClarity={voiceFeedback.confidence}
+              analyser={audio.pipelineActive ? audio.getAnalyserNode() : null}
               onStringTrigger={handleStringTrigger}
             />
           </div>
