@@ -191,6 +191,18 @@ const phaseTransition = {
 // Helper: time-of-day label
 // ---------------------------------------------------------------------------
 
+/**
+ * Map raga ID → YAML lesson ID for daily riyaz routing.
+ * When a raga has a beginner lesson, we route there instead of the inline Bhoopali lesson.
+ */
+const RAGA_TO_LESSON: Record<string, string> = {
+  bhoopali: 'beginner-01-bhoopali',
+  yaman: 'beginner-03-yaman',
+  bhairav: 'beginner-04-bhairav',
+  bhimpalasi: 'beginner-05-bhimpalasi',
+  bageshri: 'beginner-06-bageshri',
+};
+
 function getTimeOfDayLabel(hour: number): string {
   if (hour >= 6 && hour < 9) return 'Dawn';
   if (hour >= 9 && hour < 12) return 'Morning';
@@ -656,6 +668,7 @@ export default function BeginnerPage() {
   // Home view state
   const hour = new Date().getHours();
   const todayRaga = useMemo(() => getRagaForTimeOfDay(hour), [hour]);
+  const todayLessonId = RAGA_TO_LESSON[todayRaga.id] ?? 'beginner-01-bhoopali';
   const timeLabel = getTimeOfDayLabel(hour);
   const user = profile ?? DEFAULT_USER;
   const levelTitle = getLevelTitle(user.level);
@@ -1455,6 +1468,14 @@ export default function BeginnerPage() {
           <span className={homeStyles.riyazDone}>
             Today&rsquo;s riyaz complete &mdash; well done
           </span>
+        ) : todayRaga.id !== 'bhoopali' ? (
+          <Link
+            href={`/journeys/beginner/lessons/${todayLessonId}`}
+            className={homeStyles.beginButton}
+            aria-label={`Begin practice with raga ${todayRaga.name}`}
+          >
+            Begin
+          </Link>
         ) : (
           <button
             className={homeStyles.beginButton}
