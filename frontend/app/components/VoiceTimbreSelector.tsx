@@ -1,7 +1,7 @@
 /**
- * VoiceTimbreSelector — Toggle between harmonium and TantriVoice(TM) timbres.
+ * VoiceTimbreSelector — Toggle between instrument timbres.
  *
- * Three states: harmonium (default), voice-male, voice-female.
+ * Three instruments: harmonium (default), piano, guitar.
  * Compact pill UI that sits in the bottom controls area.
  * Selection persists to localStorage.
  */
@@ -15,8 +15,8 @@ const STORAGE_KEY = 'sadhana:timbre';
 
 const TIMBRES: { value: TantriTimbre; label: string; icon: string }[] = [
   { value: 'harmonium', label: 'Harmonium', icon: '𝄢' },
-  { value: 'voice-male', label: 'Male voice', icon: '♂' },
-  { value: 'voice-female', label: 'Female voice', icon: '♀' },
+  { value: 'piano', label: 'Piano', icon: '𝄞' },
+  { value: 'guitar', label: 'Guitar', icon: '𝄫' },
 ];
 
 interface VoiceTimbreSelectorProps {
@@ -73,7 +73,7 @@ export function useTimbreSelection(): [TantriTimbre, (t: TantriTimbre) => void] 
   useEffect(() => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored === 'harmonium' || stored === 'voice-male' || stored === 'voice-female') {
+      if (stored === 'harmonium' || stored === 'piano' || stored === 'guitar') {
         setTimbre(stored);
       }
     } catch {

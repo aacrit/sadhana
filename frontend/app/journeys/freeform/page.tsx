@@ -30,7 +30,6 @@ import Logo from '../../components/Logo';
 import Tantri from '../../components/Tantri';
 import type { TantriPlayEvent } from '@/engine/interaction/tantri';
 import { playSwaraNote, ensureAudioReady, stopHarmoniumPlayback } from '@/engine/synthesis/swara-voice';
-import { playVocalSwaraNote, ensureVocalAudioReady, stopVocalPlayback } from '@/engine/synthesis/voice';
 import VoiceTimbreSelector, { useTimbreSelection } from '../../components/VoiceTimbreSelector';
 import { useFreeformSession } from '../../lib/useFreeformSession';
 import type { SwaraEvent } from '../../lib/useFreeformSession';
@@ -348,7 +347,7 @@ export default function FreeformPage() {
 
   // Tantri string trigger — touch a string to hear the swara.
   // Uses long duration for sustained (long-press) playback.
-  // Dispatches to harmonium or TantriVoice(TM) based on timbre selection.
+  // Dispatches to harmonium/piano/guitar based on timbre selection.
   const handleStringTrigger = useCallback(async (event: TantriPlayEvent) => {
     // Clear any pending delayed release from a previous tap
     if (releaseTimerRef.current) {
@@ -361,21 +360,10 @@ export default function FreeformPage() {
     try {
       const note = { swara: event.swara, octave: event.octave };
       const vol = event.velocity * 0.6;
+      const instrumentTimbre = (event.timbre ?? 'harmonium') as import('@/engine/synthesis/swara-voice').InstrumentTimbre;
 
-      if (event.timbre === 'voice-male' || event.timbre === 'voice-female') {
-        await ensureVocalAudioReady();
-        // Long duration — stopped on release via handleStringRelease.
-        // Not awaited (30s note); catch silences any late rejections.
-        playVocalSwaraNote(note, userSaHz, {
-          duration: 30,
-          volume: vol,
-          voiceType: event.timbre === 'voice-male' ? 'baritone' : 'soprano',
-        }).catch(() => {});
-      } else {
-        await ensureAudioReady();
-        // Long duration — stopped on release via handleStringRelease
-        playSwaraNote(note, userSaHz, { duration: 30, volume: vol });
-      }
+      await ensureAudioReady();
+      playSwaraNote(note, userSaHz, { duration: 30, volume: vol, timbre: instrumentTimbre });
     } catch {
       // Audio not ready — silently fail
     }
@@ -386,7 +374,6 @@ export default function FreeformPage() {
   const handleStringRelease = useCallback(() => {
     const elapsed = Date.now() - noteStartRef.current;
     const doStop = () => {
-      stopVocalPlayback();
       stopHarmoniumPlayback();
     };
 

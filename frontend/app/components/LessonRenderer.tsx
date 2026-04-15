@@ -499,7 +499,7 @@ export default function LessonRenderer({
       )}
 
       {/* Lesson navigation — back / skip */}
-      {state !== 'lesson_complete' && phase.type !== 'session_summary' && phase.type !== 'tanpura_drone' && (
+      {state !== 'lesson_complete' && phase.type !== 'session_summary' && (
         <div className={styles.lessonNav}>
           <button
             type="button"

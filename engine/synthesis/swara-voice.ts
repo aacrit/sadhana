@@ -74,8 +74,45 @@ const BELLOWS_LFO_RATE = 4.5;    // Hz
 const BELLOWS_LFO_DEPTH = 1.5;   // Hz deviation
 
 // ---------------------------------------------------------------------------
+// Piano spectral model
+// ---------------------------------------------------------------------------
+
+/**
+ * Amplitude weights for 12 harmonics of a piano string (hammer strike).
+ * Even harmonics are slightly weaker (hammer position ~1/7 string length).
+ * Rapid high-partial decay gives the characteristic brightness.
+ */
+const PIANO_PARTIALS: readonly number[] = [
+  1.00, 0.55, 0.70, 0.30, 0.45, 0.15, 0.22, 0.08, 0.12, 0.05, 0.04, 0.02,
+] as const;
+
+const PIANO_ATTACK = 0.005;   // hammer strike — near-instant
+const PIANO_DECAY = 0.3;      // brightness fade
+const PIANO_SUSTAIN = 0.25;   // sustain level after decay
+const PIANO_RELEASE = 0.6;    // damper lift release
+
+// ---------------------------------------------------------------------------
+// Guitar spectral model
+// ---------------------------------------------------------------------------
+
+/**
+ * Amplitude weights for 12 harmonics of a nylon-string guitar pluck.
+ * Strong fundamental and 2nd partial, quick rolloff above 6th.
+ */
+const GUITAR_PARTIALS: readonly number[] = [
+  1.00, 0.80, 0.50, 0.35, 0.25, 0.18, 0.10, 0.06, 0.03, 0.02, 0.01, 0.005,
+] as const;
+
+const GUITAR_ATTACK = 0.003;  // pluck — very fast
+const GUITAR_DECAY = 0.15;    // initial brightness
+const GUITAR_SUSTAIN = 0.40;  // body resonance sustain
+const GUITAR_RELEASE = 0.8;   // natural string decay
+
+// ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
+
+export type InstrumentTimbre = 'harmonium' | 'piano' | 'guitar';
 
 /**
  * Options for playing a single swara.
@@ -83,14 +120,16 @@ const BELLOWS_LFO_DEPTH = 1.5;   // Hz deviation
 export interface PlaySwaraOptions {
   /** Duration in seconds. Default: 0.5. */
   readonly duration?: number;
-  /** Attack time in seconds (fade in). Default: 0.08 (harmonium bellows). */
+  /** Attack time in seconds (fade in). Uses instrument default if omitted. */
   readonly attack?: number;
-  /** Release time in seconds (fade out). Default: 0.20 (air pressure release). */
+  /** Release time in seconds (fade out). Uses instrument default if omitted. */
   readonly release?: number;
   /** Volume (0 to 1). Default: 0.5. */
   readonly volume?: number;
   /** Ornament to apply. */
   readonly ornament?: OrnamentDefinition;
+  /** Instrument timbre. Default: 'harmonium'. */
+  readonly timbre?: InstrumentTimbre;
 }
 
 /**
@@ -157,50 +196,106 @@ export async function ensureAudioReady(): Promise<void> {
 }
 
 // ---------------------------------------------------------------------------
-// Harmonium synthesis core
+// Instrument config — timbre-specific spectral and envelope parameters
+// ---------------------------------------------------------------------------
+
+interface InstrumentConfig {
+  partials: readonly number[];
+  attack: number;
+  decay: number;
+  sustain: number; // fraction of peak
+  release: number;
+  filterLowFreq: number;
+  filterLowQ: number;
+  filterLowGain: number;
+  filterHighFreq: number;
+  filterHighQ: number;
+  filterHighGain: number;
+  lfoRate: number;  // 0 = no LFO
+  lfoDepth: number; // Hz deviation
+}
+
+const INSTRUMENT_CONFIGS: Record<InstrumentTimbre, InstrumentConfig> = {
+  harmonium: {
+    partials: HARMONIUM_PARTIALS,
+    attack: HARMONIUM_ATTACK,
+    decay: HARMONIUM_DECAY,
+    sustain: HARMONIUM_SUSTAIN,
+    release: HARMONIUM_RELEASE,
+    filterLowFreq: ENCLOSURE_LOW_FREQ,
+    filterLowQ: ENCLOSURE_LOW_Q,
+    filterLowGain: ENCLOSURE_LOW_GAIN,
+    filterHighFreq: ENCLOSURE_HIGH_FREQ,
+    filterHighQ: ENCLOSURE_HIGH_Q,
+    filterHighGain: ENCLOSURE_HIGH_GAIN,
+    lfoRate: BELLOWS_LFO_RATE,
+    lfoDepth: BELLOWS_LFO_DEPTH,
+  },
+  piano: {
+    partials: PIANO_PARTIALS,
+    attack: PIANO_ATTACK,
+    decay: PIANO_DECAY,
+    sustain: PIANO_SUSTAIN,
+    release: PIANO_RELEASE,
+    filterLowFreq: 300,
+    filterLowQ: 0.8,
+    filterLowGain: 2,
+    filterHighFreq: 2500,
+    filterHighQ: 1.0,
+    filterHighGain: -2, // slight high-end rolloff for warmth
+    lfoRate: 0,
+    lfoDepth: 0,
+  },
+  guitar: {
+    partials: GUITAR_PARTIALS,
+    attack: GUITAR_ATTACK,
+    decay: GUITAR_DECAY,
+    sustain: GUITAR_SUSTAIN,
+    release: GUITAR_RELEASE,
+    filterLowFreq: 250,
+    filterLowQ: 1.2,
+    filterLowGain: 3,  // body resonance
+    filterHighFreq: 3000,
+    filterHighQ: 0.7,
+    filterHighGain: -3, // nylon string rolloff
+    lfoRate: 0,
+    lfoDepth: 0,
+  },
+};
+
+// ---------------------------------------------------------------------------
+// Additive synthesis core (timbre-agnostic)
 // ---------------------------------------------------------------------------
 
 /**
- * Creates a harmonium note with 12-partial additive synthesis,
- * enclosure resonance filters, bellows LFO, and ADSR envelope.
- *
- * Architecture:
- *   12 OscillatorNode (partials) -> individual GainNode (amplitude weight)
- *     -> BiquadFilter (low formant) -> BiquadFilter (high formant)
- *       -> master GainNode (ADSR envelope) -> destination
- *
- *   1 OscillatorNode (LFO) -> 12 GainNode (depth scaler) -> each partial's frequency
- *
- * @param ctx - AudioContext
- * @param hz - Fundamental frequency in Hz
- * @param startTime - AudioContext time to start the note
- * @param duration - Note duration in seconds
- * @param volume - Volume (0 to 1)
- * @param attack - Attack time in seconds
- * @param release - Release time in seconds
- * @returns HarmoniumNote handle with dispose() for cleanup
+ * Creates an instrument note using additive synthesis with configurable
+ * spectral profile, resonance filters, and optional LFO.
  */
-function createHarmoniumNote(
+function createInstrumentNote(
   ctx: AudioContext,
   hz: number,
   startTime: number,
   duration: number,
   volume: number,
-  attack: number,
-  release: number,
+  attackOverride: number | undefined,
+  releaseOverride: number | undefined,
+  config: InstrumentConfig,
 ): HarmoniumNote {
-  // Enclosure resonance: two biquad peaking filters in series
+  const attack = attackOverride ?? config.attack;
+  const release = releaseOverride ?? config.release;
+
+  // Resonance: two biquad peaking filters in series
   const filterLow = ctx.createBiquadFilter();
   filterLow.type = 'peaking';
-  filterLow.frequency.value = ENCLOSURE_LOW_FREQ;
-  filterLow.Q.value = ENCLOSURE_LOW_Q;
-  filterLow.gain.value = ENCLOSURE_LOW_GAIN;
+  filterLow.frequency.value = config.filterLowFreq;
+  filterLow.Q.value = config.filterLowQ;
+  filterLow.gain.value = config.filterLowGain;
 
   const filterHigh = ctx.createBiquadFilter();
   filterHigh.type = 'peaking';
-  filterHigh.frequency.value = ENCLOSURE_HIGH_FREQ;
-  filterHigh.Q.value = ENCLOSURE_HIGH_Q;
-  filterHigh.gain.value = ENCLOSURE_HIGH_GAIN;
+  filterHigh.frequency.value = config.filterHighFreq;
+  filterHigh.Q.value = config.filterHighQ;
+  filterHigh.gain.value = config.filterHighGain;
 
   filterLow.connect(filterHigh);
 
@@ -212,47 +307,47 @@ function createHarmoniumNote(
 
   // ADSR envelope
   const peakVolume = volume;
-  const sustainVolume = volume * HARMONIUM_SUSTAIN;
+  const sustainVolume = volume * config.sustain;
 
   masterGain.gain.setValueAtTime(0, startTime);
   masterGain.gain.linearRampToValueAtTime(peakVolume, startTime + attack);
-  masterGain.gain.linearRampToValueAtTime(sustainVolume, startTime + attack + HARMONIUM_DECAY);
+  masterGain.gain.linearRampToValueAtTime(sustainVolume, startTime + attack + config.decay);
 
   // Hold sustain until release begins
   const releaseStart = startTime + duration - release;
-  if (releaseStart > startTime + attack + HARMONIUM_DECAY) {
+  if (releaseStart > startTime + attack + config.decay) {
     masterGain.gain.setValueAtTime(sustainVolume, releaseStart);
   }
   masterGain.gain.linearRampToValueAtTime(0, startTime + duration);
 
-  // Bellows LFO — shared across all partials
+  // LFO — only if the instrument uses one
   const lfo = ctx.createOscillator();
   lfo.type = 'sine';
-  lfo.frequency.value = BELLOWS_LFO_RATE;
+  lfo.frequency.value = config.lfoRate || 1; // min 1Hz to avoid issues
 
-  // Create 12 partials
+  // Create partials
   const oscillators: OscillatorNode[] = [];
   const partialGains: GainNode[] = [];
   const lfoGains: GainNode[] = [];
 
-  for (let i = 0; i < HARMONIUM_PARTIALS.length; i++) {
+  for (let i = 0; i < config.partials.length; i++) {
     const partialIndex = i + 1; // 1-based harmonic number
     const partialHz = hz * partialIndex;
-    const amplitude = HARMONIUM_PARTIALS[i]!;
+    const amplitude = config.partials[i]!;
 
     const osc = ctx.createOscillator();
     osc.type = 'sine';
     osc.frequency.value = partialHz;
 
-    // LFO modulation: scale depth by partial index for natural effect
+    // LFO modulation (only if depth > 0)
     const lfoGain = ctx.createGain();
-    lfoGain.gain.value = BELLOWS_LFO_DEPTH * partialIndex;
+    lfoGain.gain.value = config.lfoDepth > 0 ? config.lfoDepth * partialIndex : 0;
     lfo.connect(lfoGain);
     lfoGain.connect(osc.frequency);
 
     // Per-partial amplitude
     const gain = ctx.createGain();
-    gain.gain.value = amplitude * 0.15; // Scale to prevent clipping with 12 partials
+    gain.gain.value = amplitude * 0.15; // Scale to prevent clipping
 
     osc.connect(gain);
     gain.connect(filterLow);
@@ -337,10 +432,11 @@ export async function playSwara(
 ): Promise<void> {
   const {
     duration = 0.5,
-    attack = HARMONIUM_ATTACK,
-    release = HARMONIUM_RELEASE,
+    attack,
+    release,
     volume = 0.5,
     ornament,
+    timbre = 'harmonium',
   } = options;
 
   const ctx = getContext();
@@ -348,8 +444,9 @@ export async function playSwara(
 
   const hz = getSwaraFrequency(swara, saHz, 'madhya');
   const now = ctx.currentTime;
+  const config = INSTRUMENT_CONFIGS[timbre];
 
-  const note = createHarmoniumNote(ctx, hz, now, duration, volume, attack, release);
+  const note = createInstrumentNote(ctx, hz, now, duration, volume, attack, release, config);
 
   // Apply ornament if specified — modulate all partials' frequencies
   if (ornament) {
@@ -385,10 +482,11 @@ export async function playSwaraNote(
 ): Promise<void> {
   const {
     duration = 0.5,
-    attack = HARMONIUM_ATTACK,
-    release = HARMONIUM_RELEASE,
+    attack,
+    release,
     volume = 0.5,
     ornament,
+    timbre = 'harmonium',
   } = options;
 
   const ctx = getContext();
@@ -403,7 +501,8 @@ export async function playSwaraNote(
     _activeHarmoniumNote = null;
   }
 
-  const note = createHarmoniumNote(ctx, hz, now, duration, volume, attack, release);
+  const config = INSTRUMENT_CONFIGS[timbre];
+  const note = createInstrumentNote(ctx, hz, now, duration, volume, attack, release, config);
   _activeHarmoniumNote = note;
 
   if (ornament) {

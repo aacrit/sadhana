@@ -148,7 +148,7 @@ export default function EarTrainingPage() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [sessionComplete, setSessionComplete] = useState(false);
 
-  // Audio — uses timbre from user preference (harmonium / voice-male / voice-female)
+  // Audio — uses timbre from user preference (harmonium / piano / guitar)
   const [timbre] = useTimbreSelection();
   const audio = useLessonAudio(261.63, raga.id, timbre);
   const feedbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
