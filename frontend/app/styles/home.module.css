@@ -1,9 +1,8 @@
 /**
- * home.module.css — Journey selection page styles
+ * home.module.css — Journey selection page
  *
- * Redesigned: compact status bar, accordion journey deck,
- * freeform bottom strip. Ragamala aesthetic — royal, cultural,
- * space-efficient.
+ * Stacked card deck: cards layered like playing cards with physical depth.
+ * Active card on top, fully visible. Others peek out as title tabs.
  */
 
 .page {
@@ -16,7 +15,7 @@
   overflow: hidden;
 }
 
-/* Vignette overlay — Mughal miniature border */
+/* Vignette */
 .page::before {
   content: '';
   position: fixed;
@@ -48,7 +47,7 @@
 }
 
 /* =======================================================================
-   STATUS BAR — streak | today's raga | daily goal
+   STATUS BAR
    ======================================================================= */
 
 .statusBar {
@@ -89,13 +88,8 @@
   line-height: 1;
 }
 
-.statusValueAccent {
-  color: var(--accent);
-}
-
-.statusValueDone {
-  color: var(--correct);
-}
+.statusValueAccent { color: var(--accent); }
+.statusValueDone { color: var(--correct); }
 
 .statusLabel {
   font-family: var(--font-sans);
@@ -117,32 +111,13 @@
   text-shadow: 0 0 40px rgba(232, 135, 30, 0.08);
 }
 
-/* -- Goal ring --------------------------------------------------------- */
-
-.goalRing {
-  flex-shrink: 0;
-}
-
-.goalRingBg {
-  fill: none;
-  stroke: var(--border);
-  stroke-width: 2.5;
-}
-
-.goalRingFill {
-  fill: none;
-  stroke: var(--accent);
-  stroke-width: 2.5;
-  stroke-linecap: round;
-  transition: stroke-dashoffset 0.6s ease-out;
-}
-
-.goalRingDone {
-  stroke: var(--correct);
-}
+.goalRing { flex-shrink: 0; }
+.goalRingBg { fill: none; stroke: var(--border); stroke-width: 2.5; }
+.goalRingFill { fill: none; stroke: var(--accent); stroke-width: 2.5; stroke-linecap: round; transition: stroke-dashoffset 0.6s ease-out; }
+.goalRingDone { stroke: var(--correct); }
 
 /* =======================================================================
-   RECENTLY PRACTICED — inline pills
+   RECENTLY PRACTICED
    ======================================================================= */
 
 .recentRagas {
@@ -159,58 +134,35 @@
 }
 
 /* =======================================================================
-   JOURNEY DECK — accordion card stack
+   CARD DECK — stacked like playing cards
    ======================================================================= */
 
-.journeyDeck {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
+.deckContainer {
+  position: relative;
   width: 100%;
   max-width: var(--max-width);
   z-index: var(--z-base);
   flex: 1;
+  /* min-height set dynamically via padding */
 }
 
-.deckSlot {
-  width: 100%;
-}
-
-/* -- Deck card (collapsed header) -------------------------------------- */
+/* -- Individual card --------------------------------------------------- */
 
 .deckCard {
-  position: relative;
-  display: flex;
-  width: 100%;
-  padding: var(--space-3) var(--space-4);
-  border-radius: var(--radius-md);
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-radius: var(--radius-lg);
   background: var(--bg-3);
   border: 1px solid var(--border);
-  border-left: 3px solid var(--border);
-  cursor: pointer;
-  text-align: left;
-  color: inherit;
-  font: inherit;
   overflow: hidden;
-  transition: border-color var(--dur-fast) var(--ease-out),
-              background var(--dur-fast) var(--ease-out);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15),
+              0 1px 3px rgba(0, 0, 0, 0.1);
+  will-change: transform;
+  /* Inactive cards: only show the header (~44px) */
 }
 
-.deckCard:hover {
-  border-color: var(--text-3);
-}
-
-.deckCard:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-}
-
-.deckCardExpanded {
-  border-radius: var(--radius-md) var(--radius-md) 0 0;
-  border-bottom-color: transparent;
-}
-
-/* Jali lattice — subtle on cards */
+/* Jali lattice on cards */
 .deckCard::before {
   content: '';
   position: absolute;
@@ -224,16 +176,24 @@
   z-index: 0;
 }
 
-.deckCardHeader {
+.deckCardActive {
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25),
+              0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* -- Card header (always visible, acts as peek tab) -------------------- */
+
+.cardHeader {
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  width: 100%;
+  padding: var(--space-3) var(--space-4);
   position: relative;
   z-index: 1;
+  min-height: 44px;
 }
 
-.deckIcon {
+.cardIcon {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -241,14 +201,15 @@
   color: var(--text-2);
 }
 
-.deckTitles {
+.cardTitles {
   display: flex;
-  flex-direction: column;
+  align-items: baseline;
+  gap: var(--space-2);
   flex: 1;
   min-width: 0;
 }
 
-.deckName {
+.cardName {
   font-family: var(--font-serif);
   font-size: var(--text-lg);
   font-weight: var(--weight-regular);
@@ -256,74 +217,59 @@
   line-height: 1.2;
 }
 
-.deckCardExpanded .deckName {
+.deckCardActive .cardName {
   font-size: var(--text-xl);
 }
 
-.deckEnglish {
+.cardEnglish {
   font-family: var(--font-sans);
   font-size: var(--text-xs);
   font-weight: var(--weight-medium);
   color: var(--text-3);
   text-transform: uppercase;
   letter-spacing: var(--tracking-widest);
-  line-height: 1.4;
 }
 
-.deckChevron {
-  flex-shrink: 0;
-  color: var(--text-3);
-  transition: transform var(--dur-fast) var(--ease-out);
-}
+/* -- Card body (only on active card) ----------------------------------- */
 
-.deckChevronOpen {
-  transform: rotate(180deg);
-}
-
-/* -- Deck body (expanded content) -------------------------------------- */
-
-.deckBody {
+.cardBody {
+  padding: 0 var(--space-4) var(--space-5);
   position: relative;
-  padding: 0 var(--space-4) var(--space-4);
-  background: var(--bg-3);
-  border: 1px solid var(--border);
-  border-top: none;
-  border-left: 3px solid var(--border);
-  border-radius: 0 0 var(--radius-md) var(--radius-md);
+  z-index: 1;
 }
 
-.deckDescription {
+.cardDescription {
   font-family: var(--font-sans);
   font-size: var(--text-sm);
   color: var(--text-2);
   line-height: var(--leading-relaxed);
-  margin-bottom: var(--space-3);
-  padding-top: var(--space-2);
+  margin-bottom: var(--space-4);
 }
 
-.deckEnter {
+.cardEnter {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
   font-family: var(--font-sans);
-  font-size: var(--text-sm);
+  font-size: var(--text-base);
   font-weight: var(--weight-medium);
   color: var(--text);
   text-decoration: none;
-  padding: var(--space-2) var(--space-4);
+  padding: var(--space-3) var(--space-6);
   border: 1px solid var(--text-3);
   border-radius: var(--radius-full);
   min-height: var(--touch-min);
+  letter-spacing: var(--tracking-wide);
   transition: background var(--dur-fast) var(--ease-out),
               border-color var(--dur-fast) var(--ease-out);
 }
 
-.deckEnter:hover {
+.cardEnter:hover {
   background: var(--bg-4);
   border-color: var(--text-2);
 }
 
-.deckEnter:focus-visible {
+.cardEnter:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
@@ -332,108 +278,62 @@
    PER-CARD COLOR WORLDS
    ======================================================================= */
 
-/* -- Beginner / Shishya ------------------------------------------------ */
-
 .cardBeginner {
-  border-left-color: rgba(232, 135, 30, 0.4);
+  border-left: 3px solid rgba(232, 135, 30, 0.4);
 }
-
-.cardBeginner.deckCardExpanded {
+.cardBeginner.deckCardActive {
   background: var(--card-beginner-bg, #0A1A14);
+  box-shadow: 0 8px 32px rgba(232, 135, 30, 0.08),
+              0 2px 8px rgba(0, 0, 0, 0.15);
 }
-
-.cardBeginner.deckBody {
-  background: var(--card-beginner-bg, #0A1A14);
-  border-left-color: rgba(232, 135, 30, 0.4);
-}
-
+.cardBeginner .cardIcon { color: rgba(232, 135, 30, 0.7); }
 .cardBeginner::before {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cpath d='M24 0L30 6L48 6L42 12L48 18L42 18L48 24L42 30L48 42L42 42L36 48L30 42L24 48L18 42L12 48L6 42L0 48L0 42L6 36L0 30L0 24L6 18L0 12L6 6L0 6L6 0L12 6L18 0L24 6L30 0Z' fill='none' stroke='%23E8871E' stroke-width='0.5'/%3E%3Cpath d='M24 12L30 18L36 12L42 18L36 24L42 30L36 36L30 30L24 36L18 30L12 36L6 30L12 24L6 18L12 12L18 18Z' fill='none' stroke='%23E8871E' stroke-width='0.5'/%3E%3C/svg%3E");
 }
 
-.cardBeginner .deckIcon {
-  color: rgba(232, 135, 30, 0.7);
-}
-
-/* -- Explorer / Sadhaka ------------------------------------------------ */
-
 .cardExplorer {
-  border-left-color: rgba(45, 106, 79, 0.5);
+  border-left: 3px solid rgba(45, 106, 79, 0.5);
 }
-
-.cardExplorer.deckCardExpanded {
+.cardExplorer.deckCardActive {
   background: linear-gradient(160deg, #0F241C 0%, #132E22 50%, #1A3A2E 100%);
+  box-shadow: 0 8px 32px rgba(45, 106, 79, 0.08),
+              0 2px 8px rgba(0, 0, 0, 0.15);
 }
-
-.cardExplorer.deckBody {
-  background: linear-gradient(160deg, #0F241C 0%, #132E22 50%, #1A3A2E 100%);
-  border-left-color: rgba(45, 106, 79, 0.5);
-}
-
+.cardExplorer .cardIcon { color: rgba(92, 158, 110, 0.7); }
 .cardExplorer::before {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cpath d='M24 0L30 6L48 6L42 12L48 18L42 18L48 24L42 30L48 42L42 42L36 48L30 42L24 48L18 42L12 48L6 42L0 48L0 42L6 36L0 30L0 24L6 18L0 12L6 6L0 6L6 0L12 6L18 0L24 6L30 0Z' fill='none' stroke='%235C9E6E' stroke-width='0.5'/%3E%3Cpath d='M24 12L30 18L36 12L42 18L36 24L42 30L36 36L30 30L24 36L18 30L12 36L6 30L12 24L6 18L12 12L18 18Z' fill='none' stroke='%235C9E6E' stroke-width='0.5'/%3E%3C/svg%3E");
 }
 
-.cardExplorer .deckIcon {
-  color: rgba(92, 158, 110, 0.7);
-}
-
-/* -- Scholar / Varistha ------------------------------------------------ */
-
 .cardScholar {
-  border-left-color: rgba(212, 175, 55, 0.25);
+  border-left: 3px solid rgba(212, 175, 55, 0.25);
 }
-
-.cardScholar.deckCardExpanded {
+.cardScholar.deckCardActive {
   background: linear-gradient(170deg, #0D1520 0%, #142235 50%, #1E3A5F 100%);
+  box-shadow: 0 8px 32px rgba(30, 58, 95, 0.1),
+              0 2px 8px rgba(0, 0, 0, 0.15);
 }
-
-.cardScholar.deckBody {
-  background: linear-gradient(170deg, #0D1520 0%, #142235 50%, #1E3A5F 100%);
-  border-left-color: rgba(212, 175, 55, 0.25);
-}
-
+.cardScholar .cardName { color: var(--card-scholar-text, #D8DEE8); }
+.cardScholar .cardIcon { color: rgba(122, 158, 200, 0.7); }
 .cardScholar::before {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cpath d='M24 0L30 6L48 6L42 12L48 18L42 18L48 24L42 30L48 42L42 42L36 48L30 42L24 48L18 42L12 48L6 42L0 48L0 42L6 36L0 30L0 24L6 18L0 12L6 6L0 6L6 0L12 6L18 0L24 6L30 0Z' fill='none' stroke='%237A9EC8' stroke-width='0.5'/%3E%3Cpath d='M24 12L30 18L36 12L42 18L36 24L42 30L36 36L30 30L24 36L18 30L12 36L6 30L12 24L6 18L12 12L18 18Z' fill='none' stroke='%237A9EC8' stroke-width='0.5'/%3E%3C/svg%3E");
 }
 
-.cardScholar .deckName {
-  color: var(--card-scholar-text, #D8DEE8);
-}
-
-.cardScholar .deckIcon {
-  color: rgba(122, 158, 200, 0.7);
-}
-
-/* -- Master / Guru ----------------------------------------------------- */
-
 .cardMaster {
-  border-left-color: rgba(212, 175, 55, 0.35);
+  border-left: 3px solid rgba(212, 175, 55, 0.35);
 }
-
-.cardMaster.deckCardExpanded {
+.cardMaster.deckCardActive {
   background: linear-gradient(175deg, #12100A 0%, #1A1608 50%, #221E0E 100%);
+  box-shadow: 0 8px 32px rgba(212, 175, 55, 0.06),
+              0 2px 8px rgba(0, 0, 0, 0.15);
 }
-
-.cardMaster.deckBody {
-  background: linear-gradient(175deg, #12100A 0%, #1A1608 50%, #221E0E 100%);
-  border-left-color: rgba(212, 175, 55, 0.35);
-}
-
+.cardMaster .cardName { color: var(--card-master-text, #E8DCC8); }
+.cardMaster .cardIcon { color: rgba(212, 175, 55, 0.6); }
 .cardMaster::before {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cpath d='M24 0L30 6L48 6L42 12L48 18L42 18L48 24L42 30L48 42L42 42L36 48L30 42L24 48L18 42L12 48L6 42L0 48L0 42L6 36L0 30L0 24L6 18L0 12L6 6L0 6L6 0L12 6L18 0L24 6L30 0Z' fill='none' stroke='%23D4AF37' stroke-width='0.5'/%3E%3Cpath d='M24 12L30 18L36 12L42 18L36 24L42 30L36 36L30 30L24 36L18 30L12 36L6 30L12 24L6 18L12 12L18 18Z' fill='none' stroke='%23D4AF37' stroke-width='0.5'/%3E%3C/svg%3E");
 }
 
-.cardMaster .deckName {
-  color: var(--card-master-text, #E8DCC8);
-}
-
-.cardMaster .deckIcon {
-  color: rgba(212, 175, 55, 0.6);
-}
-
 /* =======================================================================
-   FREEFORM STRIP — compact bottom bar
+   FREEFORM STRIP
    ======================================================================= */
 
 .freeformStrip {
@@ -551,15 +451,8 @@
    ======================================================================= */
 
 @media (prefers-reduced-motion: reduce) {
-  .loadingDot {
-    animation: none;
-    opacity: 1;
-  }
-
-  .freeformLink {
-    animation: none;
-    background-position: 50% 50%;
-  }
+  .loadingDot { animation: none; opacity: 1; }
+  .freeformLink { animation: none; background-position: 50% 50%; }
 }
 
 /* =======================================================================
@@ -567,19 +460,7 @@
    ======================================================================= */
 
 @media (min-width: 640px) {
-  .page {
-    padding: var(--space-6) var(--space-6) var(--space-4);
-  }
-
-  .todayName {
-    font-size: var(--text-3xl);
-  }
-
-  .deckName {
-    font-size: var(--text-xl);
-  }
-
-  .deckCardExpanded .deckName {
-    font-size: var(--text-2xl);
-  }
+  .page { padding: var(--space-6) var(--space-6) var(--space-4); }
+  .todayName { font-size: var(--text-3xl); }
+  .deckCardActive .cardName { font-size: var(--text-2xl); }
 }

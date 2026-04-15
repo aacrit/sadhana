@@ -1,21 +1,18 @@
 /**
  * page.tsx — Journey selection screen
  *
- * Redesigned: status bar + accordion journey deck + freeform strip.
- * Stacked card deck — one expanded at a time, others collapsed.
- * Icon inline left of title, Devanagari replaces romanized (not appends).
+ * Stacked card deck: cards layered like playing cards with physical depth.
+ * The active card is on top, fully visible. Others peek out below showing
+ * just their title strip. Click a peeking card to bring it to top.
  *
- * Framer Motion spring physics:
- *   - Tanpura Release (400/15) for page-load stagger
- *   - Andolan (120/8) for hover
- *   - Kan (1000/30) for press/tap
+ * Framer Motion spring physics for card transitions.
  */
 
 'use client';
 
 import { useMemo, useState, useEffect } from 'react';
 import Link from 'next/link';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import Logo from './components/Logo';
 import BrandLoader from './components/BrandLoader';
 import TanpuraViz from './components/TanpuraViz';
@@ -78,10 +75,6 @@ const JOURNEYS: JourneyMeta[] = [
   },
 ];
 
-// ---------------------------------------------------------------------------
-// Per-card CSS class map
-// ---------------------------------------------------------------------------
-
 const CARD_CLASS_MAP: Record<string, string | undefined> = {
   beginner: styles.cardBeginner,
   explorer: styles.cardExplorer,
@@ -89,61 +82,19 @@ const CARD_CLASS_MAP: Record<string, string | undefined> = {
   master: styles.cardMaster,
 };
 
-// ---------------------------------------------------------------------------
-// Animation variants
-// ---------------------------------------------------------------------------
+/** Height of a peeking card tab in px */
+const PEEK_HEIGHT = 44;
 
-const containerVariants = {
-  hidden: {},
-  visible: {
-    transition: {
-      staggerChildren: 0.06,
-      delayChildren: 0.1,
-    },
-  },
-};
-
-const cardVariants = {
-  hidden: { opacity: 0, y: 16 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      type: 'spring' as const,
-      stiffness: 400,
-      damping: 15,
-    },
-  },
-};
+// ---------------------------------------------------------------------------
+// Animation
+// ---------------------------------------------------------------------------
 
 const headerVariants = {
   hidden: { opacity: 0, y: -12 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: {
-      duration: 0.6,
-      ease: [0.16, 1, 0.3, 1] as const,
-    },
-  },
-};
-
-const expandVariants = {
-  collapsed: {
-    height: 0,
-    opacity: 0,
-    transition: {
-      height: { type: 'spring' as const, stiffness: 400, damping: 30 },
-      opacity: { duration: 0.15 },
-    },
-  },
-  expanded: {
-    height: 'auto',
-    opacity: 1,
-    transition: {
-      height: { type: 'spring' as const, stiffness: 300, damping: 25 },
-      opacity: { duration: 0.25, delay: 0.05 },
-    },
+    transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] as const },
   },
 };
 
@@ -154,13 +105,11 @@ const expandVariants = {
 export default function HomePage() {
   const { user, profile, loading, isGuest } = useAuth();
 
-  // Determine today's raga based on the current hour
   const todayRaga = useMemo(() => {
     const hour = new Date().getHours();
     return getRagaForTimeOfDay(hour);
   }, []);
 
-  // Recent ragas (fetched from Supabase for signed-in users)
   const [recentRagas, setRecentRagas] = useState<RecentRaga[]>([]);
 
   useEffect(() => {
@@ -169,42 +118,40 @@ export default function HomePage() {
     }
   }, [user]);
 
-  // Use profile data if available, otherwise fall back to defaults
   const streak = profile?.streak ?? 0;
   const xp = profile?.xp ?? 0;
   const riyazDone = profile?.riyazDone ?? false;
 
-  // Expanded journey card — default to beginner (Shishya), or current progress
-  const defaultJourney = useMemo(() => {
+  // Active card index — default based on user level
+  const defaultIndex = useMemo(() => {
     const level = profile?.level ?? 1;
-    if (level >= 7) return 'master';
-    if (level >= 4) return 'scholar';
-    if (level >= 2) return 'explorer';
-    return 'beginner';
+    if (level >= 7) return 3; // master
+    if (level >= 4) return 2; // scholar
+    if (level >= 2) return 1; // explorer
+    return 0; // beginner
   }, [profile?.level]);
 
-  const [expandedId, setExpandedId] = useState<string>(defaultJourney);
+  const [activeIndex, setActiveIndex] = useState(defaultIndex);
 
-  // Update expanded card when profile loads
   useEffect(() => {
-    setExpandedId(defaultJourney);
-  }, [defaultJourney]);
+    setActiveIndex(defaultIndex);
+  }, [defaultIndex]);
 
   void isGuest;
 
-  // Loading state
   if (loading) {
-    return (
-      <BrandLoader loading={true} tagline="Disciplined practice toward mastery" />
-    );
+    return <BrandLoader loading={true} tagline="Disciplined practice toward mastery" />;
   }
+
+  // Calculate how many cards are below the active one (peeking out)
+  const cardsBelow = JOURNEYS.length - 1 - activeIndex;
+  const cardsAbove = activeIndex;
 
   return (
     <div className={styles.page} data-raga={todayRaga.id}>
-      {/* Ambient tanpura waveform background */}
       <TanpuraViz active={false} />
 
-      {/* Header: logo */}
+      {/* Header */}
       <motion.header
         className={styles.header}
         variants={headerVariants}
@@ -214,14 +161,13 @@ export default function HomePage() {
         <Logo size="xl" variant="full" animate />
       </motion.header>
 
-      {/* Status bar: streak | today's raga | daily goal */}
+      {/* Status bar */}
       <motion.div
         className={styles.statusBar}
         variants={headerVariants}
         initial="hidden"
         animate="visible"
       >
-        {/* Streak */}
         <div className={styles.statusCell}>
           <span className={`${styles.statusValue} ${streak > 0 ? styles.statusValueAccent : ''}`}>
             {streak}
@@ -229,7 +175,6 @@ export default function HomePage() {
           <span className={styles.statusLabel}>day streak</span>
         </div>
 
-        {/* Today's raga — center, prominent */}
         <div className={styles.statusCenter}>
           <span className={styles.statusLabel}>Today&rsquo;s raga</span>
           <span className={styles.todayName}>
@@ -240,7 +185,6 @@ export default function HomePage() {
           </span>
         </div>
 
-        {/* Daily goal / XP */}
         <div className={styles.statusCell}>
           {user ? (
             <>
@@ -248,17 +192,13 @@ export default function HomePage() {
                 <circle className={styles.goalRingBg} cx="14" cy="14" r="11" />
                 <circle
                   className={`${styles.goalRingFill} ${riyazDone ? styles.goalRingDone : ''}`}
-                  cx="14"
-                  cy="14"
-                  r="11"
+                  cx="14" cy="14" r="11"
                   strokeDasharray={2 * Math.PI * 11}
                   strokeDashoffset={riyazDone ? 0 : 2 * Math.PI * 11 * 0.75}
                   transform="rotate(-90 14 14)"
                 />
               </svg>
-              {xp > 0 && (
-                <span className={styles.statusLabel}>{xp} XP</span>
-              )}
+              {xp > 0 && <span className={styles.statusLabel}>{xp} XP</span>}
             </>
           ) : (
             <span className={`${styles.statusValue} ${riyazDone ? styles.statusValueDone : ''}`}>
@@ -269,7 +209,7 @@ export default function HomePage() {
         </div>
       </motion.div>
 
-      {/* Recently practiced (inline pills) */}
+      {/* Recently practiced */}
       {recentRagas.length > 0 && (
         <div className={styles.recentRagas}>
           {recentRagas.map((raga) => (
@@ -280,134 +220,122 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* Journey deck — accordion cards */}
-      <motion.div
-        className={styles.journeyDeck}
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
+      {/* ================================================================
+          CARD DECK — stacked like playing cards
+          Active card is fully visible. Cards above/below peek out as tabs.
+          ================================================================ */}
+      <div
+        className={styles.deckContainer}
         role="list"
         aria-label="Choose your journey"
+        style={{
+          // Reserve space: active card + peek tabs above + peek tabs below
+          paddingBottom: cardsBelow * PEEK_HEIGHT,
+          paddingTop: cardsAbove * PEEK_HEIGHT,
+        }}
       >
         {JOURNEYS.map((journey, i) => {
-          const isExpanded = expandedId === journey.id;
+          const isActive = i === activeIndex;
           const JourneyIcon = getJourneyIcon(journey.id);
           const cardClass = CARD_CLASS_MAP[journey.id] || '';
+
+          // Position: cards above active peek upward, cards below peek downward
+          let yOffset = 0;
+          let zIndex = 0;
+
+          if (i < activeIndex) {
+            // Card above active — peek tab at the top
+            yOffset = (i - activeIndex) * PEEK_HEIGHT;
+            zIndex = i;
+          } else if (i === activeIndex) {
+            // Active card — centered
+            yOffset = 0;
+            zIndex = JOURNEYS.length;
+          } else {
+            // Card below active — peek tab at the bottom
+            yOffset = (i - activeIndex) * PEEK_HEIGHT;
+            zIndex = JOURNEYS.length - i;
+          }
 
           return (
             <motion.div
               key={journey.id}
-              variants={cardVariants}
               role="listitem"
-              className={styles.deckSlot}
+              className={`${styles.deckCard} ${cardClass} ${isActive ? styles.deckCardActive : ''}`}
+              animate={{
+                y: yOffset,
+                scale: isActive ? 1 : 0.97,
+                opacity: 1,
+              }}
+              initial={{ y: 60, opacity: 0, scale: 0.95 }}
+              transition={{
+                type: 'spring',
+                stiffness: 350,
+                damping: 28,
+              }}
+              style={{
+                zIndex,
+                position: 'absolute',
+                top: cardsAbove * PEEK_HEIGHT,
+                left: 0,
+                right: 0,
+                cursor: isActive ? 'default' : 'pointer',
+              }}
+              onClick={() => {
+                if (!isActive) setActiveIndex(i);
+              }}
             >
-              {/* Card header — always visible */}
-              <button
-                type="button"
-                className={`${styles.deckCard} ${cardClass} ${isExpanded ? styles.deckCardExpanded : ''}`}
-                onClick={() => setExpandedId(isExpanded ? '' : journey.id)}
-                aria-expanded={isExpanded}
-                aria-controls={`journey-${journey.id}`}
-              >
-                <div className={styles.deckCardHeader}>
-                  {JourneyIcon && (
-                    <motion.div
-                      className={styles.deckIcon}
-                      initial={{ opacity: 0, scale: 0.7 }}
-                      animate={{ opacity: 0.8, scale: 1 }}
-                      transition={{
-                        type: 'spring',
-                        stiffness: 400,
-                        damping: 15,
-                        delay: i * 0.06 + 0.04,
-                      }}
-                    >
-                      <JourneyIcon
-                        size={isExpanded ? 32 : 24}
-                        color="currentColor"
-                      />
-                    </motion.div>
-                  )}
-
-                  <div className={styles.deckTitles}>
-                    {/* Primary name — romanized/devanagari swap */}
-                    <span className={styles.deckName}>
-                      <span className="romanized-only raga-name">{journey.name}</span>
-                      <span className="devanagari-only raga-name">{journey.nameDevanagari}</span>
-                    </span>
-
-                    {/* English subtitle */}
-                    <span className={styles.deckEnglish}>{journey.nameEnglish}</span>
-                  </div>
-
-                  {/* Expand chevron */}
-                  <svg
-                    className={`${styles.deckChevron} ${isExpanded ? styles.deckChevronOpen : ''}`}
-                    width="16"
-                    height="16"
-                    viewBox="0 0 16 16"
-                    fill="none"
-                    aria-hidden="true"
-                  >
-                    <path
-                      d="M4 6L8 10L12 6"
-                      stroke="currentColor"
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
+              {/* Card header — visible on both active and peeking states */}
+              <div className={styles.cardHeader}>
+                {JourneyIcon && (
+                  <div className={styles.cardIcon}>
+                    <JourneyIcon
+                      size={isActive ? 28 : 22}
+                      color="currentColor"
                     />
-                  </svg>
-                </div>
-              </button>
-
-              {/* Expanded content */}
-              <AnimatePresence initial={false}>
-                {isExpanded && (
-                  <motion.div
-                    id={`journey-${journey.id}`}
-                    className={`${styles.deckBody} ${cardClass}`}
-                    variants={expandVariants}
-                    initial="collapsed"
-                    animate="expanded"
-                    exit="collapsed"
-                    style={{ overflow: 'hidden' }}
-                  >
-                    <p className={styles.deckDescription}>
-                      {journey.description}
-                    </p>
-                    <Link
-                      href={journey.path}
-                      className={styles.deckEnter}
-                    >
-                      Enter
-                      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-                        <path d="M5 3L9 7L5 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
-                    </Link>
-                  </motion.div>
+                  </div>
                 )}
-              </AnimatePresence>
+                <div className={styles.cardTitles}>
+                  <span className={styles.cardName}>
+                    <span className="romanized-only raga-name">{journey.name}</span>
+                    <span className="devanagari-only raga-name">{journey.nameDevanagari}</span>
+                  </span>
+                  <span className={styles.cardEnglish}>{journey.nameEnglish}</span>
+                </div>
+              </div>
+
+              {/* Card body — only rendered on the active card */}
+              {isActive && (
+                <motion.div
+                  className={styles.cardBody}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.15, duration: 0.3 }}
+                >
+                  <p className={styles.cardDescription}>
+                    {journey.description}
+                  </p>
+                  <Link href={journey.path} className={styles.cardEnter}>
+                    Enter
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                      <path d="M5 3L9 7L5 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </Link>
+                </motion.div>
+              )}
             </motion.div>
           );
         })}
-      </motion.div>
+      </div>
 
-      {/* Freeform strip — always accessible at the bottom */}
+      {/* Freeform strip */}
       <motion.div
         className={styles.freeformStrip}
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{
-          type: 'spring',
-          stiffness: 400,
-          damping: 15,
-          delay: 0.4,
-        }}
+        transition={{ type: 'spring', stiffness: 400, damping: 15, delay: 0.4 }}
       >
-        <Link
-          href="/journeys/freeform"
-          className={styles.freeformLink}
-        >
+        <Link href="/journeys/freeform" className={styles.freeformLink}>
           <FreeformIcon size={24} color="var(--text-3)" />
           <span className={styles.freeformName}>
             <span className="romanized-only raga-name">Swatantra Riyaz</span>

@@ -50,14 +50,14 @@ const DEFAULT_SA_HZ = 261.6256;
  */
 const SA_DETECTION_HOLDS = 5;
 
-/** Frames (at ~60fps) of stable pitch to count as one sustained hold (~1.5s). */
-const SA_HOLD_FRAMES = 90;
+/** Frames (at ~60fps) of stable pitch to count as one sustained hold (~0.75s). */
+const SA_HOLD_FRAMES = 45;
 
 /** Maximum cents deviation within a hold to remain "stable". */
-const SA_HOLD_STABILITY_CENTS = 80;
+const SA_HOLD_STABILITY_CENTS = 120;
 
 /** Minimum clarity for Sa detection readings. */
-const SA_DETECTION_CLARITY = 0.70;
+const SA_DETECTION_CLARITY = 0.50;
 
 // ---------------------------------------------------------------------------
 // Types
