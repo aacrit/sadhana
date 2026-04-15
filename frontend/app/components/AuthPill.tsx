@@ -17,17 +17,22 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '../lib/auth';
+import { useVoiceWave } from '../lib/VoiceWaveContext';
 import { getLevelColor } from '../lib/types';
 
 export default function AuthPill() {
   const pathname = usePathname();
   const { user, profile, loading, isGuest } = useAuth();
+  const { analyser } = useVoiceWave();
 
   // Hide on auth pages
   if (pathname.startsWith('/auth')) return null;
 
   // Don't render while loading
   if (loading) return null;
+
+  // Hide during active practice sessions (Tantri takes center stage)
+  const sessionActive = analyser !== null;
 
   const levelColor = profile ? getLevelColor(profile.level) : 'var(--level-shishya)';
   const displayName = profile?.displayName || user?.email || 'S';
@@ -45,7 +50,9 @@ export default function AuthPill() {
     justifyContent: 'center',
     borderRadius: 'var(--radius-full)',
     textDecoration: 'none',
-    transition: 'opacity 0.2s ease',
+    transition: 'opacity 0.6s ease-out',
+    opacity: sessionActive ? 0 : 1,
+    pointerEvents: sessionActive ? 'none' : 'auto',
   };
 
   if (user) {
@@ -101,12 +108,12 @@ export default function AuthPill() {
       aria-label="Sign in"
       style={{
         ...baseStyle,
-        background: 'transparent',
-        border: '1px solid rgba(232, 135, 30, 0.4)',
+        background: 'var(--bg-2)',
+        border: '1px solid var(--border)',
         padding: '0 var(--space-3)',
         fontFamily: 'var(--font-sans)',
         fontSize: 'var(--text-xs)',
-        color: 'var(--accent)',
+        color: 'var(--text-3)',
       }}
     >
       Sign in
