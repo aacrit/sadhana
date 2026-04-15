@@ -13,11 +13,14 @@
   max-width: var(--max-width);
   margin: 0 auto;
   padding: var(--space-4);
+  isolation: isolate;
 }
 
 /* -- Back link (exit lesson) ----------------------------------------- */
 
 .backLink {
+  position: relative;
+  z-index: var(--z-base, 1);
   align-self: flex-start;
   display: flex;
   align-items: center;
@@ -69,12 +72,16 @@
 /* -- Phase content area ---------------------------------------------- */
 
 .phaseContent {
+  position: relative;
+  z-index: var(--z-base, 1);
   flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: var(--space-4);
+  min-height: 0;
+  overflow-y: auto;
 }
 
 /* -- Generic centered message (listen, sa_calibration, sing phases) --- */
@@ -143,7 +150,10 @@
 /* -- Progress dots (bottom) ------------------------------------------ */
 
 .progressDots {
+  position: relative;
+  z-index: var(--z-base, 1);
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: center;
   gap: var(--space-2);
@@ -365,7 +375,7 @@
 .saListeningPulse {
   width: 48px;
   height: 48px;
-  border-radius: 50%;
+  border-radius: var(--radius-full);
   border: 2px solid var(--accent);
   margin: 0 auto var(--space-4);
   display: flex;
@@ -377,7 +387,7 @@
 .saListeningPulseInner {
   width: 12px;
   height: 12px;
-  border-radius: 50%;
+  border-radius: var(--radius-full);
   background: var(--accent);
   opacity: 0.8;
 }
@@ -409,8 +419,9 @@
   border: none;
   cursor: pointer;
   padding: var(--space-2) var(--space-3);
-  border-radius: 6px;
-  transition: color 0.15s, background 0.15s;
+  min-height: var(--touch-min);
+  border-radius: var(--radius-sm);
+  transition: color var(--dur-fast), background var(--dur-fast);
 }
 
 .navButton:hover {

@@ -13,11 +13,15 @@
   max-width: var(--max-width);
   margin: 0 auto;
   padding: var(--space-4);
+  /* Isolate stacking context so VoiceWave (z:0 fixed) stays behind content */
+  isolation: isolate;
 }
 
 /* -- Back link (exit lesson) ----------------------------------------- */
 
 .backLink {
+  position: relative;
+  z-index: var(--z-base, 1);
   align-self: flex-start;
   display: flex;
   align-items: center;
@@ -44,6 +48,8 @@
 /* -- Phase header ---------------------------------------------------- */
 
 .phaseHeader {
+  position: relative;
+  z-index: var(--z-base, 1);
   text-align: center;
   margin-bottom: var(--space-6);
 }
@@ -69,12 +75,16 @@
 /* -- Phase content area ---------------------------------------------- */
 
 .phaseContent {
+  position: relative;
+  z-index: var(--z-base, 1);
   flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: var(--space-4);
+  min-height: 0;
+  overflow-y: auto;
 }
 
 /* -- Generic centered message (listen, sa_calibration, sing phases) --- */
@@ -143,6 +153,8 @@
 /* -- Lesson navigation (back/skip) ------------------------------------ */
 
 .lessonNav {
+  position: relative;
+  z-index: var(--z-base, 1);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -161,8 +173,9 @@
   border: none;
   cursor: pointer;
   padding: var(--space-2) var(--space-3);
-  border-radius: 6px;
-  transition: color 0.15s, background 0.15s;
+  min-height: var(--touch-min);
+  border-radius: var(--radius-sm);
+  transition: color var(--dur-fast), background var(--dur-fast);
 }
 
 .navButton:hover {
@@ -178,7 +191,10 @@
 /* -- Progress dots (bottom) ------------------------------------------ */
 
 .progressDots {
+  position: relative;
+  z-index: var(--z-base, 1);
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: center;
   gap: var(--space-2);

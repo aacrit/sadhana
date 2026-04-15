@@ -106,7 +106,7 @@ export interface VoicePipelineConfig {
   readonly onSilence: () => void;
   /** Callback when a pakad is detected. */
   readonly onPakadDetected?: (match: PakadMatch) => void;
-  /** Minimum clarity threshold for pitch detection. Default: 0.85. */
+  /** Minimum clarity threshold for pitch detection. Default: 0.80. */
   readonly clarityThreshold?: number;
   /** FFT size for the AnalyserNode. Default: 2048. */
   readonly fftSize?: number;
@@ -388,15 +388,15 @@ export class VoicePipeline {
 
     // Silence threshold — below this, no meaningful audio
     const SILENCE_RMS = 0.01;
-    // Noise floor — sound present but no clear pitch (speech, ambient, etc.)
-    const NOISE_RMS = 0.015;
-    // Dynamic pitch ceiling: 2 octaves above Sa (covers soprano range)
-    const pitchCeiling = Math.min(this.config.sa_hz * 4, 4200);
+    // Dynamic pitch ceiling: ~3 octaves above Sa (covers full vocal range)
+    const pitchCeiling = Math.min(this.config.sa_hz * 8, 4200);
 
     if (rms < SILENCE_RMS) {
       this.emitSilence(now);
     } else {
-      // Attempt pitch detection
+      // Always attempt pitch detection when RMS > silence — let clarity
+      // distinguish pitched sound from noise, not the RMS level.
+      // This prevents soft singers from being misclassified as noise.
       const [pitch, clarity] = this.pitchDetector.findPitch(
         buffer,
         this.audioContext.sampleRate,
@@ -407,12 +407,9 @@ export class VoicePipeline {
       if (clarity >= threshold && pitch > 50 && pitch < pitchCeiling) {
         // Valid pitch detected
         this.emitPitch(pitch, clarity, now);
-      } else if (rms > NOISE_RMS) {
+      } else {
         // Sound present but no clear pitch — noise/speech
         this.emitNoise(now);
-      } else {
-        // RMS in [SILENCE_RMS, NOISE_RMS) with low clarity — treat as silence
-        this.emitSilence(now);
       }
     }
 
@@ -445,7 +442,7 @@ export class VoicePipeline {
       inRaga: result.inRagaContext,
       accuracy: result.accuracy,
       pitchResult: result,
-      pitchHistory: [...this.pitchHistory],
+      pitchHistory: this.pitchHistory as readonly [number, number][],
       timestamp,
     };
 

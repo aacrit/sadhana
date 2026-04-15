@@ -289,6 +289,12 @@ export default function VoiceWave({
         return;
       }
 
+      // Skip draw when tab is hidden — save CPU/battery on mobile
+      if (document.hidden) {
+        animationRef.current = requestAnimationFrame(animate);
+        return;
+      }
+
       timeRef.current += 0.016;
       draw();
       animationRef.current = requestAnimationFrame(animate);

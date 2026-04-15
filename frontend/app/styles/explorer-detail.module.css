@@ -159,8 +159,8 @@
 }
 
 .swaraDot {
-  width: 36px;
-  height: 36px;
+  width: var(--touch-min);
+  height: var(--touch-min);
   border-radius: var(--radius-full);
   border: 2px solid var(--border);
   background: transparent;
@@ -402,11 +402,6 @@
 /* -- Responsive ------------------------------------------------------ */
 
 @media (min-width: 640px) {
-  .swaraDot {
-    width: 44px;
-    height: 44px;
-  }
-
   .swaraLabel {
     font-size: var(--text-sm);
   }
