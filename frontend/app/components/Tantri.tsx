@@ -729,6 +729,9 @@ const Tantri = memo(function Tantri({
   const pitchTrailRef = useRef<PitchTrailPoint[]>([]);
   /** Voice oscilloscope rolling buffer — scrolling heart-rate-monitor waveform. */
   const oscilloscopeRef = useRef<OscilloscopeFrame[]>([]);
+  /** Pre-allocated pool of Float32Array buffers for oscilloscope (zero-alloc hot path). */
+  const oscPoolRef = useRef<Float32Array[] | null>(null);
+  const oscPoolIndexRef = useRef<number>(0);
 
   // Keep pitch refs in sync with props
   pitchHzRef.current = pitchHz;
@@ -776,6 +779,12 @@ const Tantri = memo(function Tantri({
     const canvas = canvasRef.current;
     const field = fieldRef.current;
     if (!canvas || !field) return;
+
+    // Skip canvas work when tab is hidden — save CPU/battery on mobile
+    if (document.hidden) {
+      animFrameRef.current = requestAnimationFrame(render);
+      return;
+    }
 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
@@ -920,14 +929,22 @@ const Tantri = memo(function Tantri({
         amp = Math.max(voiceAmplitude, 0.015);
       }
 
-      // Downsample the raw analyser data
-      const downsampled = new Float32Array(OSCILLOSCOPE_SAMPLES_PER_FRAME);
+      // Downsample the raw analyser data into pre-allocated ring buffer
+      if (!oscPoolRef.current) {
+        oscPoolRef.current = Array.from(
+          { length: OSCILLOSCOPE_MAX_FRAMES },
+          () => new Float32Array(OSCILLOSCOPE_SAMPLES_PER_FRAME),
+        );
+        oscPoolIndexRef.current = 0;
+      }
+      const poolBuf = oscPoolRef.current[oscPoolIndexRef.current % OSCILLOSCOPE_MAX_FRAMES]!;
+      oscPoolIndexRef.current++;
       const step = voiceWaveData.length / OSCILLOSCOPE_SAMPLES_PER_FRAME;
       for (let i = 0; i < OSCILLOSCOPE_SAMPLES_PER_FRAME; i++) {
-        downsampled[i] = voiceWaveData[Math.floor(i * step)] ?? 0;
+        poolBuf[i] = voiceWaveData[Math.floor(i * step)] ?? 0;
       }
       oscilloscopeRef.current.push({
-        samples: downsampled,
+        samples: poolBuf,
         y: oscY,
         band,
         amp,
