@@ -23,9 +23,9 @@ import { updateSa } from '../lib/supabase';
 // ---------------------------------------------------------------------------
 
 const HOLDS_REQUIRED = 5;
-const HOLD_FRAMES = 90; // ~1.5s at 60fps
-const HOLD_STABILITY_CENTS = 80;
-const CLARITY_THRESHOLD = 0.70;
+const HOLD_FRAMES = 45; // ~0.75s at 60fps — responsive detection
+const HOLD_STABILITY_CENTS = 120; // allow natural pitch wobble
+const CLARITY_THRESHOLD = 0.50; // lower threshold for wider mic support
 const TIMEOUT_MS = 120_000; // 2 minutes
 
 // ---------------------------------------------------------------------------
