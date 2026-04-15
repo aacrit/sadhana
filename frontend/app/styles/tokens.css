@@ -32,9 +32,11 @@
   --text-2xl: 2rem;       /* 32px -- page titles */
   --text-3xl: 2.5rem;     /* 40px -- raga name in practice */
   --text-4xl: 3.5rem;     /* 56px -- cinematic raga reveal */
+  --text-5xl: 4.5rem;     /* 72px -- hero raga name, ceremony */
 
   /* Line heights */
   --leading-tight: 1.15;
+  --leading-snug: 1.25;
   --leading-normal: 1.5;
   --leading-relaxed: 1.75;
 
@@ -48,7 +50,9 @@
   --tracking-tight: -0.02em;
   --tracking-normal: 0;
   --tracking-wide: 0.04em;
+  --tracking-wider: 0.06em;
   --tracking-widest: 0.08em;
+  --tracking-royal: 0.12em;  /* Mughal inscription spacing — titles only */
 
   /* -- Colors: Night mode (default) ------------------------------------ */
   /* Deep Malachite -- the color of a practice room before dawn */
