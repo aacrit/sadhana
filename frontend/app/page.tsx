@@ -59,7 +59,7 @@ const JOURNEYS: JourneyMeta[] = [
     description:
       'Full raga grammar. Shruti analysis. Deep theory. The engine speaks to you directly.',
     accessible: true,
-    minLevel: 0,
+    minLevel: 2,
     path: '/journeys/scholar',
   },
   {
@@ -70,7 +70,7 @@ const JOURNEYS: JourneyMeta[] = [
     description:
       'Composition. Phrase generation. Teaching tools. The engine becomes your instrument.',
     accessible: true,
-    minLevel: 0,
+    minLevel: 4,
     path: '/journeys/master',
   },
 ];
@@ -122,13 +122,11 @@ export default function HomePage() {
   const xp = profile?.xp ?? 0;
   const riyazDone = profile?.riyazDone ?? false;
 
-  // Active card index — default based on user level
+  // Active card index — default to the highest visible journey for the user's level
   const defaultIndex = useMemo(() => {
     const level = profile?.level ?? 1;
-    if (level >= 7) return 3; // master
-    if (level >= 4) return 2; // scholar
-    if (level >= 2) return 1; // explorer
-    return 0; // beginner
+    const visible = JOURNEYS.filter((j) => level >= j.minLevel);
+    return Math.max(0, visible.length - 1);
   }, [profile?.level]);
 
   const [activeIndex, setActiveIndex] = useState(defaultIndex);
@@ -139,13 +137,21 @@ export default function HomePage() {
 
   void isGuest;
 
+  // Filter journeys by user level — Scholar/Master hidden for new users
+  const userLevel = profile?.level ?? 1;
+  const visibleJourneys = useMemo(
+    () => JOURNEYS.filter((j) => userLevel >= j.minLevel),
+    [userLevel],
+  );
+
   if (loading) {
     return <BrandLoader loading={true} tagline="Disciplined practice toward mastery" />;
   }
 
   // Calculate how many cards are below the active one (peeking out)
-  const cardsBelow = JOURNEYS.length - 1 - activeIndex;
-  const cardsAbove = activeIndex;
+  const safeIndex = Math.min(activeIndex, visibleJourneys.length - 1);
+  const cardsBelow = visibleJourneys.length - 1 - safeIndex;
+  const cardsAbove = safeIndex;
 
   return (
     <div className={styles.page} data-raga={todayRaga.id}>
@@ -234,8 +240,8 @@ export default function HomePage() {
           paddingTop: cardsAbove * PEEK_HEIGHT,
         }}
       >
-        {JOURNEYS.map((journey, i) => {
-          const isActive = i === activeIndex;
+        {visibleJourneys.map((journey, i) => {
+          const isActive = i === safeIndex;
           const JourneyIcon = getJourneyIcon(journey.id);
           const cardClass = CARD_CLASS_MAP[journey.id] || '';
 
@@ -243,18 +249,18 @@ export default function HomePage() {
           let yOffset = 0;
           let zIndex = 0;
 
-          if (i < activeIndex) {
+          if (i < safeIndex) {
             // Card above active — peek tab at the top
-            yOffset = (i - activeIndex) * PEEK_HEIGHT;
+            yOffset = (i - safeIndex) * PEEK_HEIGHT;
             zIndex = i;
-          } else if (i === activeIndex) {
+          } else if (i === safeIndex) {
             // Active card — centered
             yOffset = 0;
-            zIndex = JOURNEYS.length;
+            zIndex = visibleJourneys.length;
           } else {
             // Card below active — peek tab at the bottom
-            yOffset = (i - activeIndex) * PEEK_HEIGHT;
-            zIndex = JOURNEYS.length - i;
+            yOffset = (i - safeIndex) * PEEK_HEIGHT;
+            zIndex = visibleJourneys.length - i;
           }
 
           return (
