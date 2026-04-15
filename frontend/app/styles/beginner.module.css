@@ -139,28 +139,27 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: var(--space-3) var(--space-10, 3rem);
+  padding: var(--space-4) var(--space-12, 4rem);
   min-height: var(--touch-min);
-  min-width: 140px;
-  border: 1px solid var(--text-3);
+  min-width: 180px;
+  border: none;
   border-radius: var(--radius-full);
-  background: transparent;
-  color: var(--text);
+  background: linear-gradient(135deg, #E8871E 0%, #D07518 100%);
+  color: #fff;
   font-family: var(--font-serif);
   font-size: var(--text-lg);
-  font-weight: var(--weight-light);
+  font-weight: var(--weight-medium);
   letter-spacing: var(--tracking-wider);
   cursor: pointer;
   text-decoration: none;
-  transition: background var(--dur-fast) var(--ease-out),
-              border-color var(--dur-fast) var(--ease-out),
-              transform var(--dur-fast) var(--spring);
+  box-shadow: 0 2px 12px rgba(232, 135, 30, 0.25);
+  transition: transform var(--dur-fast) var(--ease-out),
+              box-shadow var(--dur-fast) var(--ease-out);
 }
 
 .beginButton:hover {
-  background: var(--bg-4);
-  border-color: var(--text-2);
   transform: translateY(-1px);
+  box-shadow: 0 4px 20px rgba(232, 135, 30, 0.35);
 }
 
 .beginButton:focus-visible {
