@@ -165,11 +165,11 @@ Strings are plucked sequentially — Pa → Sa → Sa → low Sa — repeating o
 
 ---
 
-## Swara Playback — Harmonium Additive Model
+## Swara Playback — Multi-Instrument Additive Synthesis
 
 Source: `engine/synthesis/swara-voice.ts`
 
-12-partial additive harmonium synthesis with enclosure resonance and bellows LFO. Separate AudioContext from tanpura drone for independent control.
+12-partial additive synthesis with configurable spectral profiles, body resonance filters, and optional LFO. Three instrument timbres: harmonium (default), piano, and guitar. All share the same `createInstrumentNote()` core with per-instrument `InstrumentConfig`. Separate AudioContext from tanpura drone for independent control.
 
 ### Architecture
 
@@ -253,6 +253,86 @@ Applied via `OscillatorNode.frequency` scheduling across all 12 partials. Each p
 | logarithmic | meend | `exponentialRampToValueAtTime` (0.7 * duration) on all partials |
 | impulse | kan, sparsh | `setValueAtTime` to adjacent frequency for 30ms on all partials |
 | sequence | murki, khatka, zamzama | Multiple `playSwaraNote` calls (not oscillator modulation) |
+
+### ADSR Short-Note Handling
+
+When note duration < attack + decay + release (common with piano/guitar whose decay constants exceed typical 0.5s swara durations), the ADSR logic truncates the decay phase. It computes where the linear decay ramp would be at release-start time and begins the release from that interpolated level. This prevents conflicting Web Audio `linearRampToValueAtTime` targets that would cause audible artifacts.
+
+### Piano Spectral Model
+
+Felt-hammer piano optimized for Sa range (C3-C5, 130-520 Hz):
+
+| Partial | Amplitude | Note |
+|---------|-----------|------|
+| 1 | 1.00 | Strong fundamental |
+| 2 | 0.75 | Hammer excites low modes |
+| 3 | 0.55 | |
+| 4 | 0.40 | |
+| 5 | 0.30 | |
+| 6 | 0.20 | |
+| 7 | 0.05 | **Hammer position null** (~1/7 string length) |
+| 8 | 0.12 | Recovery after null |
+| 9 | 0.08 | |
+| 10 | 0.04 | Felt absorption |
+| 11 | 0.02 | |
+| 12 | 0.01 | |
+
+Note: Real piano strings have inharmonic partials (higher partials are slightly sharp due to string stiffness). The current integer-harmonic synthesis cannot model this. Partial weights are tuned to sound musical despite perfectly harmonic oscillators.
+
+**Piano ADSR:**
+
+| Phase | Duration | Level |
+|-------|----------|-------|
+| Attack | 0.003s | Hammer impact |
+| Decay | 1.2s | Long brightness fade |
+| Sustain | 0.55 * peak | Middle-register sustain |
+| Release | 0.5s | Damper fall |
+
+**Piano Body Resonance:**
+
+| Filter | Frequency | Q | Gain | Model |
+|--------|-----------|---|------|-------|
+| Low | 220 Hz | 1.0 | +3 dB | Soundboard bass bar |
+| High | 2800 Hz | 1.2 | +2 dB | Bridge presence peak |
+
+No LFO (piano has stable pitch).
+
+### Guitar Spectral Model (Nylon-String Classical)
+
+| Partial | Amplitude | Note |
+|---------|-----------|------|
+| 1 | 1.00 | Dominant fundamental (nylon mass) |
+| 2 | 0.72 | Octave — body and fullness |
+| 3 | 0.45 | Fifth — depth |
+| 4 | 0.30 | Nail contact shimmer |
+| 5 | 0.22 | |
+| 6 | 0.06 | **Pluck position null** (~1/6 string length) |
+| 7 | 0.12 | Recovery after null |
+| 8 | 0.07 | |
+| 9 | 0.03 | Nylon absorption |
+| 10 | 0.015 | |
+| 11 | 0.008 | |
+| 12 | 0.004 | |
+
+Compared to steel-string guitar, nylon has ~6 dB less energy above the 5th partial.
+
+**Guitar ADSR:**
+
+| Phase | Duration | Level |
+|-------|----------|-------|
+| Attack | 0.008s | Nylon pluck (softer than steel) |
+| Decay | 2.0s | Long natural decay |
+| Sustain | 0.15 * peak | No sustain mechanism |
+| Release | 1.0s | Natural tail through bridge |
+
+**Guitar Body Resonance:**
+
+| Filter | Frequency | Q | Gain | Model |
+|--------|-----------|---|------|-------|
+| Low | 110 Hz | 1.8 | +5 dB | Helmholtz air resonance |
+| High | 350 Hz | 1.4 | +3 dB | Spruce top plate |
+
+No LFO (classical guitar has stable pitch).
 
 ---
 
