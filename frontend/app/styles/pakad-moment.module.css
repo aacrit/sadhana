@@ -21,6 +21,20 @@
   pointer-events: none;
 }
 
+/* Devanagari raga name — shown above the romanised name */
+.ragaNameDevanagari {
+  font-family: var(--font-devanagari);
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-light);
+  color: var(--accent);
+  letter-spacing: var(--tracking-normal);
+  line-height: var(--leading-tight);
+  text-align: center;
+  padding: 0 var(--space-4);
+  margin-bottom: var(--space-2);
+  opacity: 0.55;
+}
+
 .ragaName {
   font-family: var(--font-serif);
   font-size: var(--text-4xl);

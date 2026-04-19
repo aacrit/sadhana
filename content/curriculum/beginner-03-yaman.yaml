@@ -138,7 +138,7 @@ phases:
     repeat: 2
     show_labels: false
 
-  # 10. PAKAD WATCH — free singing with recognition
+  # 10. PAKAD WATCH — primed free singing (set-up, not lottery)
   - id: pakad_watch
     type: passive_phrase_recognition
     enabled: true
@@ -147,6 +147,10 @@ phases:
       The tanpura is with you. Take your time.
     duration_s: 60
     watch_for_pakad: true
+    prime_pakad:
+      raga_id: yaman
+      phrase: [Ni, Re, Ga, Ma_t, Ga, Re, Sa]  # Yaman's characteristic pakad
+      window_s: 45
     pakad_reward:
       xp_bonus: 10
       ceremony: gsap_pakad_moment

@@ -34,6 +34,117 @@ import { SWARA_MAP } from '../theory/swaras';
 import { RAGA_LIST, RAGAS } from '../theory/ragas';
 
 // ---------------------------------------------------------------------------
+// Primed expected phrase — lesson set-up, not lottery
+// ---------------------------------------------------------------------------
+
+/**
+ * Represents a primed expected phrase: a specific pakad the lesson has
+ * asked the engine to watch for within a time window.
+ *
+ * When primed, pakad recognition fires if the student produces the phrase
+ * within `windowMs` milliseconds of the prime call. This turns pakad
+ * recognition from a lottery into a pedagogically structured "set-up moment":
+ * the lesson silently prepares the engine, then lets the student sing freely.
+ * If they naturally return to the phrase within the window, Layer 1 fires.
+ */
+export interface PrimedPhrase {
+  /** The phrase swaras to watch for. */
+  readonly phrase: readonly SwaraNote[];
+  /** The raga this phrase belongs to (for display). */
+  readonly ragaId: string;
+  /** Timestamp (ms since epoch) when the prime was set. */
+  readonly primedAt: number;
+  /** Window in milliseconds from primedAt during which the match can fire. */
+  readonly windowMs: number;
+  /** Whether the phrase has already been matched (prevents re-firing). */
+  matched: boolean;
+}
+
+/** Module-level primed phrase state. One phrase primed at a time. */
+let _primedPhrase: PrimedPhrase | null = null;
+
+/**
+ * Primes the engine to watch for a specific pakad phrase within a time window.
+ *
+ * Called by lesson phases (e.g., the final free-singing phase of each beginner
+ * lesson) to set up the pakad recognition moment. The lesson silently loads the
+ * expected phrase; if the student sings it within `windowMs` ms, the match fires.
+ *
+ * This is not a guarantee — the student must actually sing the phrase. But the
+ * lesson context means the student has just been practising exactly these swaras,
+ * so a natural return within 45s is likely for students who are engaged.
+ *
+ * @param phrase  - The pakad phrase to watch for (array of SwaraNote)
+ * @param ragaId  - The raga this phrase belongs to
+ * @param windowMs - Detection window in ms (default: 45000 — 45 seconds)
+ */
+export function primeExpectedPhrase(
+  phrase: readonly SwaraNote[],
+  ragaId: string,
+  windowMs: number = 45_000,
+): void {
+  _primedPhrase = {
+    phrase,
+    ragaId,
+    primedAt: Date.now(),
+    windowMs,
+    matched: false,
+  };
+}
+
+/**
+ * Clears any currently primed phrase.
+ * Call when a phase ends or when the lesson transitions.
+ */
+export function clearPrimedPhrase(): void {
+  _primedPhrase = null;
+}
+
+/**
+ * Returns the currently primed phrase, or null if none is set.
+ */
+export function getPrimedPhrase(): PrimedPhrase | null {
+  return _primedPhrase;
+}
+
+/**
+ * Checks whether the recently sung swaras match the primed expected phrase,
+ * and the prime is still within its window.
+ *
+ * If matched, marks the phrase as matched (won't fire again) and returns
+ * the PakadMatch. Returns null if no prime is set, the window has expired,
+ * the phrase was already matched, or the swaras don't match.
+ *
+ * @param recentSwaras - Recently sung swaras (newest last)
+ * @param minConfidence - Minimum match confidence (default: 0.65)
+ */
+export function checkPrimedPhrase(
+  recentSwaras: readonly Swara[],
+  minConfidence: number = 0.65,
+): PakadMatch | null {
+  if (!_primedPhrase) return null;
+  if (_primedPhrase.matched) return null;
+
+  const elapsed = Date.now() - _primedPhrase.primedAt;
+  if (elapsed > _primedPhrase.windowMs) {
+    // Window expired — clear to avoid stale state
+    _primedPhrase = null;
+    return null;
+  }
+
+  const raga = RAGAS[_primedPhrase.ragaId];
+  if (!raga) return null;
+
+  const result = recognizePakad(recentSwaras, [raga], minConfidence);
+  if (result) {
+    _primedPhrase.matched = true;
+    return result;
+  }
+
+  return null;
+}
+
+// ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
