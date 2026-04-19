@@ -53,28 +53,19 @@ phases:
     presentation: sequential
     audio_first: true
 
-  # 4. HEAR THE ASCENT — Re is absent
-  - id: aroha_listen
-    type: phrase_playback
-    phrase: [Sa, Ga_k, Ma, Dha, Ni_k, Sa_upper]
-    instruction: |
-      Listen to Bageshri climbing. It leaps from Sa to komal Ga.
-      Re is absent. That gap is deliberate. The leap creates urgency.
-    repeat: 2
-    show_labels: true
-
-  # 5. HEAR THE SIGNATURE PHRASE — Sa Ma Ga Ma, circling
+  # 4. HEAR THE SIGNATURE PHRASE — Sa Ma Ga Ma, circling
   - id: pakad_listen
     type: phrase_playback
     phrase: [Sa, Ma, Ga_k, Ma]
     instruction: |
-      This is Bageshri's signature. Sa Ma Ga Ma.
+      Bageshri leaps from Sa to komal Ga — Re is absent in the ascent.
+      This is the signature phrase. Sa Ma Ga Ma.
       It circles Ma. Obsessive. A different kind of longing than Bhimpalasi.
       Same swaras. Different world.
     repeat: 3
     show_labels: true
 
-  # 6. SING ALONG — the pakad phrase
+  # 5. SING ALONG — the pakad phrase
   - id: sing_pakad
     type: sing_along
     phrase: [Sa, Ma, Ga_k, Ma]
@@ -84,7 +75,7 @@ phases:
     guide_tone: true
     feedback_layer: minimal
 
-  # 7. COMPLETION
+  # 6. COMPLETION
   - id: complete
     type: session_summary
     show_accuracy: true

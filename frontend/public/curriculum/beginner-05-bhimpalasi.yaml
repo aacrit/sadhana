@@ -63,18 +63,7 @@ phases:
     repeat: 2
     show_labels: true
 
-  # 5. HEAR THE DESCENT — all seven notes appear
-  - id: avaroha_listen
-    type: phrase_playback
-    phrase: [Sa_upper, Ni_k, Dha, Pa, Ma, Ga_k, Re, Sa]
-    instruction: |
-      Now descending. All seven notes appear.
-      Five up, seven down. The asymmetry is the raga.
-      The descent is where Bhimpalasi opens up and speaks.
-    repeat: 2
-    show_labels: true
-
-  # 6. SING ALONG — the signature phrase
+  # 5. SING ALONG — the signature phrase
   - id: sing_pakad
     type: sing_along
     phrase: [Ni_k_mandra, Sa, Ga_k, Ma]
@@ -85,7 +74,7 @@ phases:
     guide_tone: true
     feedback_layer: minimal
 
-  # 7. COMPLETION
+  # 6. COMPLETION
   - id: complete
     type: session_summary
     show_accuracy: true
