@@ -58,20 +58,31 @@ const ENCLOSURE_HIGH_GAIN = 3; // dB
 
 /**
  * Harmonium ADSR envelope parameters.
- * Models the bellows-to-reed delay and air pressure release.
+ *
+ * Music-director spec (confirmed 2026-04-19):
+ *   Attack:  40ms — reed responds to bellows pressure within ~40ms
+ *   Decay:   0.15s — slight brightness reduction as reed settles
+ *   Sustain: 1.0 (infinite while held) — reed sustains at full amplitude
+ *            for as long as the bellows push air; no natural decay on held notes
+ *   Release: 300ms — air pressure bleeds off through the reed chamber
+ *
+ * The 12-partial model is retained (richer than the minimum 3-partial spec):
+ * more partials produce the reedy, nasal timbre that distinguishes an Indian
+ * harmonium from a Western reed organ. The amplitude weights are already
+ * musically accurate (confirmed against spectral analysis).
  */
-const HARMONIUM_ATTACK = 0.08;   // bellows-to-reed delay
-const HARMONIUM_DECAY = 0.15;    // initial brightness fade
-const HARMONIUM_SUSTAIN = 0.85;  // sustain level (fraction of peak)
-const HARMONIUM_RELEASE = 0.20;  // air pressure release
+const HARMONIUM_ATTACK = 0.04;   // 40ms reed-to-bellows delay (music-director spec)
+const HARMONIUM_DECAY = 0.15;    // initial brightness fade as reed settles
+const HARMONIUM_SUSTAIN = 1.0;   // sustained reed — full amplitude while held
+const HARMONIUM_RELEASE = 0.30;  // 300ms air pressure release (music-director spec)
 
 /**
  * Bellows LFO parameters for subtle pitch instability.
- * 4.5 Hz is a typical hand-pump rate.
- * 1.5 Hz deviation is ~10 cents at 261 Hz.
+ * 4.5 Hz is a typical hand-pump rate. Tremolo rate matches a slow bellows
+ * cycle. 1.5 Hz deviation is ~10 cents at 261 Hz — audible but musical.
  */
-const BELLOWS_LFO_RATE = 4.5;    // Hz
-const BELLOWS_LFO_DEPTH = 1.5;   // Hz deviation
+const BELLOWS_LFO_RATE = 4.5;    // Hz (slow hand-pump cycle)
+const BELLOWS_LFO_DEPTH = 1.5;   // Hz deviation (~10 cents at Sa/C4)
 
 // ---------------------------------------------------------------------------
 // Piano spectral model
