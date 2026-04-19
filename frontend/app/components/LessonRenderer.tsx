@@ -21,6 +21,7 @@
  */
 
 import { motion, AnimatePresence } from 'framer-motion';
+import { useEffect, useRef, useState } from 'react';
 import type { LessonPhase } from '../lib/lesson-loader';
 import type { LessonEngineControls } from '../lib/useLessonEngine';
 import SwaraIntroduction from './SwaraIntroduction';
@@ -28,7 +29,22 @@ import PhrasePlayback from './PhrasePlayback';
 import VoiceVisualization from './VoiceVisualization';
 import PakadMoment from './PakadMoment';
 import Tantri from './Tantri';
+import {
+  evaluateOrnament,
+  type OrnamentAttempt,
+  type OrnamentId,
+  type OrnamentPitchSample,
+  type OrnamentScore,
+} from '@/engine/voice/ornament-evaluator';
 import styles from '../styles/lesson-renderer.module.css';
+
+const ORNAMENT_IDS: readonly OrnamentId[] = [
+  'meend', 'andolan', 'gamak', 'kan', 'murki', 'khatka', 'zamzama',
+];
+
+function isOrnamentId(s: string | undefined): s is OrnamentId {
+  return !!s && (ORNAMENT_IDS as readonly string[]).includes(s);
+}
 
 // ---------------------------------------------------------------------------
 // Props
@@ -184,23 +200,101 @@ function FreeSingingPhase({
 }
 
 /**
- * Ornament exercise — meend, andolan, gamak.
- * Shows from/to swara info and voice visualization.
- * Full ornament trajectory evaluation is a Cluster F item.
+ * Ornament exercise — meend, andolan, gamak, kan, murki, khatka, zamzama.
+ *
+ * Buffers pitch samples from voiceFeedback for the duration of the attempt,
+ * then calls evaluateOrnament() on "Continue" to produce a score. The score
+ * is surfaced back through the same feedback text slot (phase body → note).
  */
 function OrnamentExercisePhase({
   phase,
   onAdvance,
   voiceFeedback,
+  saHz,
+  ragaId,
 }: {
   phase: LessonPhase;
   onAdvance: () => void;
   voiceFeedback: LessonEngineControls['voiceFeedback'];
+  saHz: number;
+  ragaId: string;
 }) {
   const ornamentLabel = phase.ornament_type
     ? phase.ornament_type.charAt(0).toUpperCase() + phase.ornament_type.slice(1)
     : 'Ornament';
   const hasRoute = phase.from_swara && phase.to_swara;
+
+  // Resolve ornament id: phase.ornament_type, else phase.type if it is itself
+  // an ornament id (e.g. 'andolan' or 'meend' dispatched as their own types).
+  const resolvedOrnamentId: OrnamentId | undefined = isOrnamentId(phase.ornament_type)
+    ? (phase.ornament_type as OrnamentId)
+    : isOrnamentId(phase.type)
+      ? (phase.type as OrnamentId)
+      : undefined;
+
+  // Buffer pitch samples as voiceFeedback updates. We dedupe by timestamp so
+  // that the rolling pitchHistory (which redelivers the same samples many
+  // times) contributes each sample only once.
+  const samplesRef = useRef<OrnamentPitchSample[]>([]);
+  const seenTsRef = useRef<Set<number>>(new Set());
+  const [score, setScore] = useState<OrnamentScore | null>(null);
+
+  // Reset per-phase: any change in phase id clears the sample buffer.
+  useEffect(() => {
+    samplesRef.current = [];
+    seenTsRef.current = new Set();
+    setScore(null);
+  }, [phase.id]);
+
+  // Ingest new samples from the pitchHistory on each voiceFeedback update.
+  useEffect(() => {
+    const history = voiceFeedback.pitchHistory;
+    if (!history || history.length === 0) return;
+    const confidence = voiceFeedback.confidence ?? 0;
+    for (const [ts, hz] of history) {
+      if (!Number.isFinite(ts) || !Number.isFinite(hz) || hz <= 0) continue;
+      if (seenTsRef.current.has(ts)) continue;
+      seenTsRef.current.add(ts);
+      samplesRef.current.push({ t: ts, hz, confidence });
+    }
+  }, [voiceFeedback]);
+
+  const handleContinue = () => {
+    if (score) {
+      onAdvance();
+      return;
+    }
+    const targetSwara =
+      phase.to_swara ??
+      phase.target_swara ??
+      phase.from_swara ??
+      'Sa';
+
+    if (!resolvedOrnamentId || samplesRef.current.length < 2) {
+      // No ornament id or no voice — just advance without evaluation.
+      onAdvance();
+      return;
+    }
+
+    const attempt: OrnamentAttempt = {
+      ornamentId: resolvedOrnamentId,
+      targetSwara,
+      fromSwara: phase.from_swara,
+      pitchSamples: samplesRef.current,
+      ragaContext: ragaId,
+      saHz,
+    };
+    try {
+      const result = evaluateOrnament(attempt);
+      setScore(result);
+    } catch {
+      // Invalid swara symbol or other unexpected input — fall back to advance.
+      onAdvance();
+    }
+  };
+
+  const buttonLabel = score ? 'Continue' : 'Done';
+
   return (
     <motion.div key={phase.id} {...phaseTransition} className={styles.centeredMessage}>
       {hasRoute && (
@@ -210,13 +304,28 @@ function OrnamentExercisePhase({
       )}
       <p className={styles.ornamentLabel}>{ornamentLabel}</p>
       <VoiceVisualization feedback={voiceFeedback} className={styles.voiceViz} />
+      {score && (
+        <div className={styles.ornamentScore} role="status" aria-live="polite">
+          <p className={styles.ornamentScoreValue}>
+            {Math.round(score.overall * 100)}
+            <span className={styles.ornamentScoreUnit}> / 100</span>
+          </p>
+          {score.notes.length > 0 && (
+            <ul className={styles.ornamentScoreNotes}>
+              {score.notes.map((n) => (
+                <li key={n}>{n}</li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
       <button
         type="button"
         className={styles.actionButton}
-        onClick={onAdvance}
+        onClick={handleContinue}
         style={{ marginTop: 'var(--space-4)' }}
       >
-        Continue
+        {buttonLabel}
       </button>
     </motion.div>
   );
@@ -451,10 +560,12 @@ function PhaseDispatcher({
   phase,
   engine,
   user,
+  ragaId,
 }: {
   phase: LessonPhase;
   engine: LessonEngineControls;
   user?: { streak: number; xp: number };
+  ragaId: string;
 }) {
   // If mic gate is active and this is a voice phase, show the gate
   if (engine.micGateActive && engine.phaseContext?.isVoicePhase) {
@@ -558,6 +669,8 @@ function PhaseDispatcher({
           phase={phase}
           onAdvance={engine.advancePhase}
           voiceFeedback={engine.voiceFeedback}
+          saHz={engine.saHz}
+          ragaId={phase.raga ?? ragaId}
         />
       );
 
@@ -732,6 +845,7 @@ export default function LessonRenderer({
             phase={phase}
             engine={engine}
             user={user}
+            ragaId={ragaId ?? lesson.raga_id}
           />
         </AnimatePresence>
       </div>

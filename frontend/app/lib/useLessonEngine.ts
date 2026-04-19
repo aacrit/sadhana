@@ -79,6 +79,9 @@ const VOICE_PHASE_TYPES: readonly PhaseType[] = [
   'phrase_exercise',
   'call_response',
   'passive_phrase_recognition',
+  'ornament_exercise',
+  'andolan',
+  'meend',
 ];
 
 export interface LessonEngineControls {
