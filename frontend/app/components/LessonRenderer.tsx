@@ -179,6 +179,176 @@ function FreeSingingPhase({
   );
 }
 
+/**
+ * Ornament exercise — meend, andolan, gamak.
+ * Shows from/to swara info and voice visualization.
+ * Full ornament trajectory evaluation is a Cluster F item.
+ */
+function OrnamentExercisePhase({
+  phase,
+  onAdvance,
+  voiceFeedback,
+}: {
+  phase: LessonPhase;
+  onAdvance: () => void;
+  voiceFeedback: LessonEngineControls['voiceFeedback'];
+}) {
+  const ornamentLabel = phase.ornament_type
+    ? phase.ornament_type.charAt(0).toUpperCase() + phase.ornament_type.slice(1)
+    : 'Ornament';
+  const hasRoute = phase.from_swara && phase.to_swara;
+  return (
+    <motion.div key={phase.id} {...phaseTransition} className={styles.centeredMessage}>
+      {hasRoute && (
+        <p className={styles.ornamentRoute}>
+          {phase.from_swara} <span className={styles.ornamentArrow}>&rarr;</span> {phase.to_swara}
+        </p>
+      )}
+      <p className={styles.ornamentLabel}>{ornamentLabel}</p>
+      <VoiceVisualization feedback={voiceFeedback} className={styles.voiceViz} />
+      <button
+        type="button"
+        className={styles.actionButton}
+        onClick={onAdvance}
+        style={{ marginTop: 'var(--space-4)' }}
+      >
+        Continue
+      </button>
+    </motion.div>
+  );
+}
+
+/**
+ * Raga identification — engine plays pakad, student sings in response.
+ * Full engine integration (pakad playback + response evaluation) is Cluster F.
+ */
+function RagaIdentificationPhase({
+  phase,
+  onAdvance,
+  voiceFeedback,
+}: {
+  phase: LessonPhase;
+  onAdvance: () => void;
+  voiceFeedback: LessonEngineControls['voiceFeedback'];
+}) {
+  return (
+    <motion.div key={phase.id} {...phaseTransition} className={styles.centeredMessage}>
+      <p className={styles.phaseHint}>
+        Listen, then sing.
+      </p>
+      <VoiceVisualization feedback={voiceFeedback} className={styles.voiceViz} />
+      <button
+        type="button"
+        className={styles.actionButton}
+        onClick={onAdvance}
+        style={{ marginTop: 'var(--space-4)' }}
+      >
+        Continue
+      </button>
+    </motion.div>
+  );
+}
+
+/**
+ * Raga comparison — two ragas played side by side.
+ * Shows raga name and plays pakad phrase via audio.
+ */
+function RagaComparisonPhase({
+  phase,
+  onAdvance,
+  onPlayPhrase,
+}: {
+  phase: LessonPhase;
+  onAdvance: () => void;
+  onPlayPhrase: (phrase: readonly string[]) => void;
+}) {
+  const phrase = phase.pakad_phrase ?? phase.phrase ?? [];
+  return (
+    <motion.div key={phase.id} {...phaseTransition} className={styles.centeredMessage}>
+      {phase.raga && (
+        <p className={`${styles.ragaCompareLabel} raga-name`}>
+          {phase.raga.charAt(0).toUpperCase() + phase.raga.slice(1)}
+        </p>
+      )}
+      {phrase.length > 0 && (
+        <button
+          type="button"
+          className={styles.actionButtonSecondary}
+          onClick={() => onPlayPhrase(phrase)}
+          style={{ marginBottom: 'var(--space-4)' }}
+        >
+          Listen
+        </button>
+      )}
+      <button
+        type="button"
+        className={styles.actionButton}
+        onClick={onAdvance}
+      >
+        Continue
+      </button>
+    </motion.div>
+  );
+}
+
+/**
+ * Mastery challenge — structured assessment phase.
+ * Shows targets and accepts voice input. Full auto-scoring is Cluster F.
+ */
+function MasteryChallengePhase({
+  phase,
+  onAdvance,
+  voiceFeedback,
+}: {
+  phase: LessonPhase;
+  onAdvance: () => void;
+  voiceFeedback: LessonEngineControls['voiceFeedback'];
+}) {
+  return (
+    <motion.div key={phase.id} {...phaseTransition} className={styles.centeredMessage}>
+      {phase.targets && phase.targets.length > 0 && (
+        <div className={styles.challengeTargets}>
+          {phase.targets.map((t) => (
+            <span key={t.swara} className={styles.challengeTarget}>
+              {t.swara}
+            </span>
+          ))}
+        </div>
+      )}
+      <VoiceVisualization feedback={voiceFeedback} className={styles.voiceViz} />
+      <button
+        type="button"
+        className={styles.actionButton}
+        onClick={onAdvance}
+        style={{ marginTop: 'var(--space-4)' }}
+      >
+        Continue
+      </button>
+    </motion.div>
+  );
+}
+
+/**
+ * Generic structured phase — for tala_exercise, grammar_exercise, interval_exercise,
+ * swara_comparison, and other Cluster F phase types.
+ * Shows instruction and Continue.
+ */
+function StructuredPhase({
+  phase,
+  onAdvance,
+}: {
+  phase: LessonPhase;
+  onAdvance: () => void;
+}) {
+  return (
+    <motion.div key={phase.id} {...phaseTransition} className={styles.centeredMessage}>
+      <button type="button" className={styles.actionButton} onClick={onAdvance}>
+        Continue
+      </button>
+    </motion.div>
+  );
+}
+
 /** Session summary — completion screen. */
 function SessionSummaryPhase({
   phase,
@@ -346,7 +516,7 @@ function PhaseDispatcher({
       );
 
     case 'call_response':
-      // Placeholder — call_response is not in v1 lesson set
+      // Placeholder — full call_response is Cluster F
       return (
         <motion.div key={phase.id} {...phaseTransition} className={styles.centeredMessage}>
           <p>Call and response coming soon.</p>
@@ -371,6 +541,77 @@ function PhaseDispatcher({
           phase={phase}
           onExit={engine.exitLesson}
           user={user}
+        />
+      );
+
+    // --- Ornament phases ---------------------------------------------------
+
+    case 'ornament_exercise':
+    case 'andolan':
+    case 'meend':
+      return (
+        <OrnamentExercisePhase
+          phase={phase}
+          onAdvance={engine.advancePhase}
+          voiceFeedback={engine.voiceFeedback}
+        />
+      );
+
+    // --- Raga recognition / comparison ------------------------------------
+
+    case 'raga_identification':
+    case 'raga_identification_advanced':
+      return (
+        <RagaIdentificationPhase
+          phase={phase}
+          onAdvance={engine.advancePhase}
+          voiceFeedback={engine.voiceFeedback}
+        />
+      );
+
+    case 'raga_comparison':
+    case 'raga_comparison_advanced':
+      return (
+        <RagaComparisonPhase
+          phase={phase}
+          onAdvance={engine.advancePhase}
+          onPlayPhrase={(phrase) => {
+            for (const s of phrase) engine.audio.playSwara(s);
+          }}
+        />
+      );
+
+    // --- Assessment -------------------------------------------------------
+
+    case 'mastery_challenge':
+      return (
+        <MasteryChallengePhase
+          phase={phase}
+          onAdvance={engine.advancePhase}
+          voiceFeedback={engine.voiceFeedback}
+        />
+      );
+
+    // --- Structured phases (Cluster F full engine) ------------------------
+
+    case 'swara_comparison':
+    case 'interval_exercise':
+    case 'tala_exercise':
+    case 'tala_melody_exercise':
+    case 'grammar_exercise':
+    case 'bandish_exercise':
+    case 'composition_exercise':
+    case 'taan_exercise':
+    case 'teaching_exercise':
+    case 'raga_rendering':
+    case 'modulation_awareness':
+    case 'controlled_deviation':
+    case 'shruti_exercise':
+    case 'ornament_context_exercise':
+      return (
+        <StructuredPhase
+          phase={phase}
+          onAdvance={engine.advancePhase}
         />
       );
 
