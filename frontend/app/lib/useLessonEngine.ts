@@ -161,17 +161,46 @@ function pitchResultToFeedback(
 // Hook
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// Warmup phase factory
+// ---------------------------------------------------------------------------
+
+/**
+ * Builds a synthetic pitch_exercise phase for the Return Note warmup.
+ * Silent: no screenTitle, no body, no instruction — the swara appears on
+ * Tantri without announcement. 60-second duration with mastery auto-advance
+ * at 8 consecutive seconds within ±25 cents.
+ */
+function buildWarmupPhase(swara: string): LessonPhase {
+  return {
+    id: `__warmup_${swara}`,
+    type: 'pitch_exercise',
+    target_swara: swara,
+    duration_s: 60,
+    screenTitle: undefined,
+    body: undefined,
+    instruction: undefined,
+  } as LessonPhase;
+}
+
+// ---------------------------------------------------------------------------
+// Hook
+// ---------------------------------------------------------------------------
+
 /**
  * React hook that drives the lesson state machine.
  *
  * @param lessonYaml - Raw YAML string for the lesson
  * @param copyYaml - Optional copy overlay YAML string
  * @param initialSaHz - Student's Sa frequency (default C4)
+ * @param warmupSwara - Optional swara from ?warmup= URL param — injects a
+ *   silent 60-second pitch_exercise at phase index 0 (Return Note feature).
  */
 export function useLessonEngine(
   lessonYaml: string,
   copyYaml?: string,
   initialSaHz: number = 261.63,
+  warmupSwara?: string,
 ): LessonEngineControls {
   // -----------------------------------------------------------------------
   // Core state
@@ -190,20 +219,30 @@ export function useLessonEngine(
   const startTimeRef = useRef<Date | null>(null);
   const prevPhaseIndexRef = useRef(-1);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Warmup mastery tracking — consecutive milliseconds within ±25 cents
+  const warmupMasteryMsRef = useRef(0);
+  const warmupLastTickRef = useRef<number | null>(null);
 
   // -----------------------------------------------------------------------
-  // Parse YAML
+  // Parse YAML (+ optional warmup injection)
   // -----------------------------------------------------------------------
   useEffect(() => {
     try {
       const def = loadLesson(lessonYaml, copyYaml);
-      setLesson(def);
+      if (warmupSwara) {
+        const warmupPhase = buildWarmupPhase(warmupSwara);
+        // Prepend the warmup phase; LessonDef.phases is readonly so spread into new array
+        const patchedDef = { ...def, phases: [warmupPhase, ...def.phases] };
+        setLesson(patchedDef as typeof def);
+      } else {
+        setLesson(def);
+      }
       setState('ready');
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to load lesson');
       setState('error');
     }
-  }, [lessonYaml, copyYaml]);
+  }, [lessonYaml, copyYaml, warmupSwara]);
 
   // -----------------------------------------------------------------------
   // Audio hook
@@ -363,6 +402,13 @@ export function useLessonEngine(
       case 'passive_phrase_recognition': {
         if (skipMicFlag) break;
 
+        // Reset warmup mastery tracking when a new phase starts
+        warmupMasteryMsRef.current = 0;
+        warmupLastTickRef.current = null;
+        const isWarmupPhase = currentPhase.id.startsWith('__warmup_');
+        const WARMUP_MASTERY_MS = 8000; // 8 consecutive seconds
+        const WARMUP_CENTS_TOLERANCE = 25;
+
         const startVoice = async () => {
           const perm = await queryMicPermission();
           setMicPermission(perm);
@@ -377,6 +423,33 @@ export function useLessonEngine(
               (result: PitchResult, pitchHistory?: readonly [number, number][]) => {
                 const target = currentPhase.target_swara ?? result.nearestSwara;
                 setVoiceFeedback(pitchResultToFeedback(result, target, pitchHistory));
+
+                // Warmup mastery: track consecutive time within ±25 cents
+                if (isWarmupPhase) {
+                  const now = Date.now();
+                  const withinBand = Math.abs(result.deviationCents) <= WARMUP_CENTS_TOLERANCE
+                    && result.clarity > 0.4;
+                  if (withinBand) {
+                    if (warmupLastTickRef.current !== null) {
+                      warmupMasteryMsRef.current += now - warmupLastTickRef.current;
+                    }
+                    warmupLastTickRef.current = now;
+                    if (warmupMasteryMsRef.current >= WARMUP_MASTERY_MS) {
+                      // Mastery achieved — clear the 60s fallback timer and advance
+                      if (timerRef.current) {
+                        clearTimeout(timerRef.current);
+                        timerRef.current = null;
+                      }
+                      warmupMasteryMsRef.current = 0;
+                      warmupLastTickRef.current = null;
+                      advancePhase();
+                    }
+                  } else {
+                    // Reset streak — must be consecutive
+                    warmupMasteryMsRef.current = 0;
+                    warmupLastTickRef.current = null;
+                  }
+                }
               },
               currentPhase.watch_for_pakad
                 ? () => setPakadTriggered(true)
@@ -389,7 +462,7 @@ export function useLessonEngine(
         };
         startVoice();
 
-        // Auto-advance for timed phases
+        // Auto-advance for timed phases (warmup: 60s fallback if no mastery)
         if (currentPhase.duration_s) {
           timerRef.current = setTimeout(() => {
             advancePhase();
