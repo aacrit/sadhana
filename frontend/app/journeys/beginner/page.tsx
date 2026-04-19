@@ -10,12 +10,12 @@
 
 import { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { getRagaForTimeOfDay } from '@/engine/theory';
 import { DEFAULT_USER, getLevelTitle, getLevelColor } from '../../lib/types';
 import type { RecentRaga } from '../../lib/types';
 import { useAuth } from '../../lib/auth';
-import { getRecentRagas } from '../../lib/supabase';
+import { getRecentRagas, getYesterdayWorstSwara } from '../../lib/supabase';
 import homeStyles from '../../styles/beginner.module.css';
 
 // ---------------------------------------------------------------------------
@@ -46,6 +46,20 @@ const RAGA_TO_LESSON: Record<string, string> = {
 };
 
 // ---------------------------------------------------------------------------
+// Swara display names (for Return Note warmup — no announcement, just the name)
+// ---------------------------------------------------------------------------
+
+const SWARA_DISPLAY: Record<string, string> = {
+  Sa: 'Sa', Re_k: 'Komal Re', Re: 'Re', Ga_k: 'Komal Ga', Ga: 'Ga',
+  Ma: 'Ma', Ma_t: 'Tivra Ma', Pa: 'Pa', Dha_k: 'Komal Dha', Dha: 'Dha',
+  Ni_k: 'Komal Ni', Ni: 'Ni',
+};
+
+function swaraDisplayName(symbol: string): string {
+  return SWARA_DISPLAY[symbol] ?? symbol;
+}
+
+// ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
@@ -61,6 +75,7 @@ function getTimeOfDayLabel(hour: number): string {
 }
 
 const RIYAZ_DATE_KEY = 'sadhana_riyaz_date';
+const ARRIVING_SHOWN_KEY = 'sadhana_arriving_shown';
 
 function getTodayString(): string {
   const d = new Date();
@@ -77,6 +92,52 @@ function isRiyazCompleteToday(): boolean {
   } catch {
     return false;
   }
+}
+
+/** Returns true if the arriving moment has already been shown today. */
+function isArrivingShownToday(): boolean {
+  if (typeof window === 'undefined') return false;
+  try {
+    return localStorage.getItem(ARRIVING_SHOWN_KEY) === getTodayString();
+  } catch {
+    return false;
+  }
+}
+
+function markArrivingShown(): void {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.setItem(ARRIVING_SHOWN_KEY, getTodayString());
+  } catch { /* ignore */ }
+}
+
+/**
+ * Returns the prahar label and raga phrase for the arriving moment overlay.
+ * e.g. "Dawn. Bhairav opens."
+ */
+function getArrivingText(hour: number, ragaName: string): { prahar: string; line: string } {
+  let prahar: string;
+  if (hour >= 4 && hour < 6) prahar = 'Pre-dawn';
+  else if (hour >= 6 && hour < 9) prahar = 'Dawn';
+  else if (hour >= 9 && hour < 12) prahar = 'Morning';
+  else if (hour >= 12 && hour < 15) prahar = 'Afternoon';
+  else if (hour >= 15 && hour < 18) prahar = 'Late afternoon';
+  else if (hour >= 18 && hour < 21) prahar = 'Evening';
+  else if (hour >= 21) prahar = 'Night';
+  else prahar = 'Midnight';
+  return { prahar, line: `${ragaName} opens.` };
+}
+
+/** Returns the Devanagari prahar label. */
+function getPraharDevanagari(hour: number): string {
+  if (hour >= 4 && hour < 6) return '\u0AA7\u0AEB\u0AAB\u0ABF\u0AAF\u0ABE\u0AB0\u0ABE \u092A\u0939\u0947\u0932\u093E';  // use simpler version
+  if (hour >= 6 && hour < 9) return '\u092A\u094D\u0930\u092D\u093E\u0924';   // Prabhat (dawn)
+  if (hour >= 9 && hour < 12) return '\u092A\u0942\u0930\u094D\u0935\u093E\u0939\u094D\u0928'; // Purvahna (forenoon)
+  if (hour >= 12 && hour < 15) return '\u092E\u0927\u094D\u092F\u093E\u0939\u094D\u0928'; // Madhyahna (noon)
+  if (hour >= 15 && hour < 18) return '\u0905\u092A\u0930\u093E\u0939\u094D\u0928'; // Aparahna (afternoon)
+  if (hour >= 18 && hour < 21) return '\u0938\u0902\u0927\u094D\u092F\u093E'; // Sandhya (dusk)
+  if (hour >= 21) return '\u0930\u093E\u0924\u094D\u0930\u093F';  // Ratri (night)
+  return '\u0928\u093F\u0936\u0940\u0925';  // Nishith (midnight)
 }
 
 // ---------------------------------------------------------------------------
@@ -117,6 +178,21 @@ export default function BeginnerPage() {
     }
   }, [profile?.riyazDone]);
 
+  // Arriving moment: 6s cinematic intro on first daily open (not if riyaz done)
+  // Shows prahar name in Devanagari + "Dawn. Bhairav opens." — then fades.
+  const [showArriving, setShowArriving] = useState(false);
+  useEffect(() => {
+    // Only show if riyaz is not done yet and not already shown today
+    if (!isRiyazCompleteToday() && !isArrivingShownToday()) {
+      setShowArriving(true);
+      markArrivingShown();
+      // Auto-dismiss after 6000ms
+      const t = setTimeout(() => setShowArriving(false), 6000);
+      return () => clearTimeout(t);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // run once on mount
+
   // Today's raga and lesson
   const hour = new Date().getHours();
   const todayRaga = useMemo(() => getRagaForTimeOfDay(hour), [hour]);
@@ -138,6 +214,14 @@ export default function BeginnerPage() {
     }
   }, [authUser]);
 
+  // Return Note: yesterday's worst swara for warmup (no announcement — silent prep)
+  const [yesterdayWorstSwara, setYesterdayWorstSwara] = useState<string | null>(null);
+  useEffect(() => {
+    if (authUser && !riyazDone) {
+      getYesterdayWorstSwara(authUser.id).then(setYesterdayWorstSwara);
+    }
+  }, [authUser, riyazDone]);
+
   // ---------------------------------------------------------------------------
   // Render
   // ---------------------------------------------------------------------------
@@ -150,6 +234,78 @@ export default function BeginnerPage() {
       initial="hidden"
       animate="visible"
     >
+      {/* Arriving moment — 6s cinematic intro on first daily open */}
+      <AnimatePresence>
+        {showArriving && (() => {
+          const { prahar, line } = getArrivingText(hour, todayRaga.name);
+          const praharDev = getPraharDevanagari(hour);
+          return (
+            <motion.div
+              key="arriving"
+              className={homeStyles.arrivingOverlay}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.8, ease: [0.22, 0.61, 0.36, 1] }}
+              aria-live="polite"
+              role="status"
+            >
+              {/* Sun/Moon glyph — simple inline SVG, zero new assets */}
+              <motion.div
+                className={homeStyles.arrivingGlyph}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 0.6, scale: 1 }}
+                transition={{ duration: 1.2, delay: 0.3, ease: [0.22, 0.61, 0.36, 1] }}
+              >
+                {hour >= 6 && hour < 18 ? (
+                  <svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+                    <circle cx="16" cy="16" r="7" stroke="currentColor" strokeWidth="1.5"/>
+                    <line x1="16" y1="2" x2="16" y2="6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                    <line x1="16" y1="26" x2="16" y2="30" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                    <line x1="2" y1="16" x2="6" y2="16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                    <line x1="26" y1="16" x2="30" y2="16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                    <line x1="6.34" y1="6.34" x2="9.17" y2="9.17" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                    <line x1="22.83" y1="22.83" x2="25.66" y2="25.66" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                    <line x1="25.66" y1="6.34" x2="22.83" y2="9.17" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                    <line x1="9.17" y1="22.83" x2="6.34" y2="25.66" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                  </svg>
+                ) : (
+                  <svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+                    <path d="M24 17C22 23 16 27 10 25C4 23 1 17 3 11C7 14 13 14 18 10C21 8 22 5 21 2C23 4 25 8 25 12C25 13.7 24.7 15.4 24 17Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                )}
+              </motion.div>
+              {/* Prahar name in Devanagari */}
+              <motion.p
+                className={`${homeStyles.arrivingPraharDev} devanagari-only`}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 0.5, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.5, ease: [0.22, 0.61, 0.36, 1] }}
+              >
+                {praharDev}
+              </motion.p>
+              {/* Prahar name in romanised + raga line */}
+              <motion.p
+                className={homeStyles.arrivingPrahar}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 0.8, y: 0 }}
+                transition={{ duration: 1.0, delay: 0.7, ease: [0.22, 0.61, 0.36, 1] }}
+              >
+                {prahar}.
+              </motion.p>
+              <motion.p
+                className={`${homeStyles.arrivingLine} raga-name`}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 0.6, y: 0 }}
+                transition={{ duration: 1.0, delay: 1.2, ease: [0.22, 0.61, 0.36, 1] }}
+              >
+                {line}
+              </motion.p>
+            </motion.div>
+          );
+        })()}
+      </AnimatePresence>
+
       {/* Back navigation */}
       <motion.div variants={fadeUp}>
         <Link href="/" className={homeStyles.backLink} aria-label="Back to journeys">
@@ -185,13 +341,20 @@ export default function BeginnerPage() {
             Today&rsquo;s riyaz complete &mdash; well done
           </span>
         ) : (
-          <Link
-            href={`/journeys/beginner/lessons/${todayLessonId}`}
-            className={homeStyles.beginButton}
-            aria-label={`Begin practice with raga ${todayRaga.name}`}
-          >
-            Begin
-          </Link>
+          <>
+            {yesterdayWorstSwara && (
+              <span className={homeStyles.riyazWarmup}>
+                {swaraDisplayName(yesterdayWorstSwara)}
+              </span>
+            )}
+            <Link
+              href={`/journeys/beginner/lessons/${todayLessonId}${yesterdayWorstSwara ? `?warmup=${yesterdayWorstSwara}` : ''}`}
+              className={homeStyles.beginButton}
+              aria-label={`Begin practice with raga ${todayRaga.name}`}
+            >
+              Begin
+            </Link>
+          </>
         )}
       </motion.section>
 

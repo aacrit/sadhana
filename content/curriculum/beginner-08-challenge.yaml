@@ -25,6 +25,18 @@ session_rules:
   progress_persists: true       # passed challenges carry across sessions
   partial_credit: true          # individual challenges scored independently
 
+  # Three dawns gate (locked level-system requirement):
+  # The 3 qualifying Bhairav renditions must occur in Bhairav's prahara window
+  # (04:00–07:00 local time, corresponding to prahara 8 and prahara 1) on
+  # 3 different calendar dates. Engine uses getRagaForTimeOfDay() logic.
+  # Sessions outside this window count toward session total but not dawn gate.
+  dawn_gate:
+    raga_id: bhairav
+    prahara_window: [8, 1]           # prahara 8: 03-06, prahara 1: 06-09
+    local_hour_range: [4, 7]         # 04:00–07:00 as a more precise window
+    required_dawn_sessions: 3        # distinct calendar dates
+    gate_challenge_id: pakad_singing # only pakad_singing applies to dawn gate
+
 # --- PHASES -------------------------------------------------------
 
 phases:

@@ -198,6 +198,35 @@ function CentsNeedle({ centsDev }: CentsNeedleProps) {
 // Page component
 // ---------------------------------------------------------------------------
 
+/**
+ * Map a clock hour (0–23) to a prahara (1–8).
+ * Each prahara is a 3-hour block starting at 6am.
+ *   1: 06–09 | 2: 09–12 | 3: 12–15 | 4: 15–18
+ *   5: 18–21 | 6: 21–00 | 7: 00–03 | 8: 03–06
+ */
+function hourToPrahara(hour: number): number {
+  const h = ((hour - 6) + 24) % 24; // offset to 6am = 0
+  return Math.floor(h / 3) + 1;
+}
+
+/**
+ * Returns the prahara label for a prahara number.
+ * Used for the "belongs to [prahar]" hint.
+ */
+function praharaLabel(praharas: readonly number[]): string {
+  const names: Record<number, string> = {
+    1: 'dawn (6–9am)',
+    2: 'morning (9am–noon)',
+    3: 'afternoon (noon–3pm)',
+    4: 'late afternoon (3–6pm)',
+    5: 'early evening (6–9pm)',
+    6: 'late evening (9pm–midnight)',
+    7: 'deep night (midnight–3am)',
+    8: 'pre-dawn (3–6am)',
+  };
+  return praharas.map((p) => names[p] ?? `prahara ${p}`).join(' or ');
+}
+
 export default function FreeformPage() {
   const router = useRouter();
   const { profile } = useAuth();
@@ -208,6 +237,9 @@ export default function FreeformPage() {
     const hour = new Date().getHours();
     return getRagaForTimeOfDay(hour);
   }, []);
+
+  // Current prahara for off-prahar gating
+  const currentPrahara = useMemo(() => hourToPrahara(new Date().getHours()), []);
 
   const session = useFreeformSession(userSaHz);
   const { setAnalyser, setSaHz } = useVoiceWave();
@@ -457,21 +489,36 @@ export default function FreeformPage() {
               >
                 Open
               </button>
-              {RAGA_LIST.map((r) => (
-                <button
-                  key={r.id}
-                  type="button"
-                  className={`${styles.ragaChip} ${selectedRagaId === r.id ? styles.ragaChipActive : ''}`}
-                  onClick={() => setSelectedRagaId(r.id)}
-                >
-                  <span className="raga-name">{r.name}</span>
-                </button>
-              ))}
+              {RAGA_LIST.map((r) => {
+                // Prahara gating: ragas outside their traditional time window
+                // render at 40% opacity with a soft hint. Not blocked — honored.
+                const isOffPrahar = r.prahara.length > 0 && !r.prahara.includes(currentPrahara as (typeof r.prahara)[number]);
+                return (
+                  <button
+                    key={r.id}
+                    type="button"
+                    className={`${styles.ragaChip} ${selectedRagaId === r.id ? styles.ragaChipActive : ''} ${isOffPrahar ? styles.ragaChipOffPrahar : ''}`}
+                    onClick={() => setSelectedRagaId(r.id)}
+                    title={isOffPrahar ? `This raga belongs to ${praharaLabel(r.prahara)} — return then.` : undefined}
+                  >
+                    <span className="raga-name">{r.name}</span>
+                  </button>
+                );
+              })}
             </div>
             {selectedRaga && (
-              <p className={styles.ragaHint}>
-                {selectedRaga.description?.split('.')[0]}.
-              </p>
+              <>
+                <p className={styles.ragaHint}>
+                  {selectedRaga.description?.split('.')[0]}.
+                </p>
+                {/* Off-prahar notice: gentle, not blocking */}
+                {selectedRaga.prahara.length > 0 &&
+                  !selectedRaga.prahara.includes(currentPrahara as (typeof selectedRaga.prahara)[number]) && (
+                  <p className={styles.ragaOffPraharHint}>
+                    This raga belongs to {praharaLabel(selectedRaga.prahara)} — return then.
+                  </p>
+                )}
+              </>
             )}
           </div>
 

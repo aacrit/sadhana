@@ -366,3 +366,43 @@ export async function getPracticeHistory(
     sessions: v.sessions,
   }));
 }
+
+/**
+ * Returns the swara the student struggled most with yesterday.
+ *
+ * Reads the `worst_swara` column from the most recent session that was
+ * completed yesterday (not today). This field is populated by the client
+ * at session end.
+ *
+ * Returns null if: no yesterday session exists, no worst_swara recorded,
+ * or the user is unauthenticated.
+ *
+ * Used by the Return Note warmup feature (Cluster D).
+ *
+ * @param userId - Supabase user ID
+ * @returns Swara symbol string or null
+ */
+export async function getYesterdayWorstSwara(
+  userId: string,
+): Promise<string | null> {
+  const now = new Date();
+  // Yesterday's start and end in ISO
+  const yesterdayStart = new Date(now);
+  yesterdayStart.setDate(now.getDate() - 1);
+  yesterdayStart.setHours(0, 0, 0, 0);
+  const yesterdayEnd = new Date(now);
+  yesterdayEnd.setHours(0, 0, 0, 0);
+
+  const { data, error } = await supabase
+    .from('sessions')
+    .select('worst_swara')
+    .eq('user_id', userId)
+    .not('worst_swara', 'is', null)
+    .gte('started_at', yesterdayStart.toISOString())
+    .lt('started_at', yesterdayEnd.toISOString())
+    .order('started_at', { ascending: false })
+    .limit(1);
+
+  if (error || !data || data.length === 0) return null;
+  return (data[0]?.worst_swara as string) ?? null;
+}

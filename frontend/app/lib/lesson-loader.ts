@@ -27,7 +27,34 @@ export type PhaseType =
   | 'phrase_exercise'
   | 'call_response'
   | 'passive_phrase_recognition'
-  | 'session_summary';
+  | 'session_summary'
+  // Ornament phases
+  | 'ornament_exercise'
+  | 'andolan'
+  | 'meend'
+  // Raga recognition / comparison
+  | 'raga_identification'
+  | 'raga_comparison'
+  | 'raga_comparison_advanced'
+  | 'raga_identification_advanced'
+  // Assessment
+  | 'mastery_challenge'
+  // Swara / interval / tala / grammar
+  | 'swara_comparison'
+  | 'interval_exercise'
+  | 'tala_exercise'
+  | 'tala_melody_exercise'
+  | 'grammar_exercise'
+  // Advanced
+  | 'bandish_exercise'
+  | 'composition_exercise'
+  | 'taan_exercise'
+  | 'teaching_exercise'
+  | 'raga_rendering'
+  | 'modulation_awareness'
+  | 'controlled_deviation'
+  | 'shruti_exercise'
+  | 'ornament_context_exercise';
 
 /** A single phase definition, merged with copy overlay. */
 export interface LessonPhase {
@@ -89,6 +116,53 @@ export interface LessonPhase {
   readonly show_accuracy?: boolean;
   readonly show_streak?: boolean;
   readonly message?: string;
+
+  // ornament_exercise / andolan / meend
+  readonly ornament_type?: string;
+  readonly from_swara?: string;
+  readonly to_swara?: string;
+  readonly evaluation?: Readonly<Record<string, unknown>>;
+  readonly ornaments_shown?: boolean;
+
+  // raga_identification / raga_comparison
+  readonly raga_pool?: readonly string[];
+  readonly selection?: string;
+  readonly pakad_plays?: number;
+  readonly student_response?: string;
+  readonly response_duration_s?: number;
+  readonly raga?: string;
+  readonly pakad_phrase?: readonly string[];
+
+  // mastery_challenge
+  readonly challenge_id?: string;
+  readonly targets?: readonly Readonly<{
+    swara: string;
+    hold_duration_s: number;
+    tolerance_cents: number;
+  }>[];
+  readonly min_accuracy?: number;
+  readonly attempts_allowed?: number;
+  readonly student_chooses?: number;
+  readonly exercise_per_raga?: readonly Readonly<Record<string, unknown>>[];
+  readonly tolerance_cents?: number;
+
+  // tala_exercise
+  readonly tala?: string;
+  readonly beats?: number;
+
+  // grammar_exercise
+  readonly grammar_rule?: string;
+  readonly forbidden_swara?: string;
+
+  // interval_exercise
+  readonly interval?: string;
+  readonly from?: string;
+  readonly to?: string;
+
+  // swara_comparison
+  readonly swara_a?: string;
+  readonly swara_b?: string;
+  readonly compare_ragas?: readonly string[];
 
   // Copy overlay extras
   readonly swara_reveal_delay_ms?: number;

@@ -426,3 +426,69 @@
     flex-direction: row;
   }
 }
+
+/* ===================================================================
+   CLUSTER E — new phase type styles
+   =================================================================== */
+
+/* Ornament exercise: from → to route label */
+.ornamentRoute {
+  font-family: var(--font-mono);
+  font-size: var(--text-xl);
+  color: var(--text);
+  letter-spacing: var(--tracking-wider);
+  margin-bottom: var(--space-2);
+}
+
+.ornamentArrow {
+  color: var(--accent);
+  margin: 0 var(--space-2);
+}
+
+.ornamentLabel {
+  font-family: var(--font-serif);
+  font-size: var(--text-sm);
+  font-style: italic;
+  color: var(--text-3);
+  letter-spacing: var(--tracking-wider);
+  margin-bottom: var(--space-6);
+  text-transform: lowercase;
+}
+
+/* Raga identification: hint text */
+.phaseHint {
+  font-family: var(--font-serif);
+  font-size: var(--text-sm);
+  font-style: italic;
+  color: var(--text-3);
+  margin-bottom: var(--space-4);
+}
+
+/* Raga comparison: raga name label */
+.ragaCompareLabel {
+  font-family: var(--font-serif);
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-light);
+  color: var(--text);
+  letter-spacing: var(--tracking-royal);
+  margin-bottom: var(--space-4);
+}
+
+/* Mastery challenge: target swara chips */
+.challengeTargets {
+  display: flex;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-bottom: var(--space-6);
+}
+
+.challengeTarget {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--text-2);
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  letter-spacing: var(--tracking-wide);
+}
