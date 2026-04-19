@@ -277,7 +277,7 @@ Additive synthesis drone from first principles.
 |--------|------|-------------|
 | `TanpuraConfig` | interface | `{ sa_hz, volume, strings: 4, groundString?: 'Pa'\|'Ma'\|'Ni', useMa?, saDetuningCents?, cycleDuration? }` |
 | `DEFAULT_TANPURA_CONFIG` | const | 261.63 Hz, volume 0.3, 2 cents detuning, 7s pluck cycle, groundString 'Pa' |
-| `TanpuraDrone` | class | `start()`, `stop()`, `setSa(hz)`, `setVolume(v)`, `getPartialFrequencies()`, `getProfiles()` |
+| `TanpuraDrone` | class | `start()`, `stop()`, `setSa(hz)`, `setVolume(v, rampMs?)`, `getPartialFrequencies()`, `getProfiles()` |
 
 Architecture: 4 strings x 10 partials = 40 sine oscillators. Third string detuned 2 cents for shimmer. String volume balance: Pa/Ma/Ni 0.7, low Sa 0.6, middle Sa 1.0. 500ms fade-out on stop. Web Audio API directly (no Tone.js).
 
@@ -317,7 +317,7 @@ Real-time voice capture and analysis pipeline.
 |--------|------|-------------|
 | `VoiceEvent` | interface | `{ type: 'pitch'\|'silence'\|'noise', hz?, clarity?, swara?, deviationCents?, inRaga?, accuracy?, pitchResult?, timestamp }` |
 | `VoicePipelineConfig` | interface | sa_hz, ragaId?, level?, onPitch, onSilence, onPakadDetected?, clarityThreshold?, fftSize?, swaraBufferSize? |
-| `VoicePipeline` | class | `start()`, `stop()`, `updateSa(hz)`, `updateRaga(ragaId)`, `updateLevel(level)`, `getSwaraBuffer()` |
+| `VoicePipeline` | class | `start()`, `stop()`, `updateSa(hz)`, `updateRaga(ragaId)`, `updateLevel(level)`, `getSwaraBuffer()`, `setClarityThreshold(t)`, `getClarityThreshold()` |
 
 Chain: `getUserMedia -> AnalyserNode -> Pitchy (McLeod) -> mapPitchToSwara -> pakad check -> events`. Target <50ms mic-to-visual. Detection via `requestAnimationFrame`. Rolling swara buffer (default 20) for pakad detection with 5s cooldown. RMS < 0.01 = silence. Clarity threshold default **0.80**. FFT size default 2048. Pitch ceiling: `min(sa_hz * 8, 4200)` Hz (covers full vocal range for low Sa references).
 

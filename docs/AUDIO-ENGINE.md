@@ -73,7 +73,9 @@ await pipeline.start();  // Must be from user gesture on iOS
 pipeline.stop();
 ```
 
-Runtime methods: `updateSa(hz)`, `updateRaga(ragaId)`, `updateLevel(level)`, `getSwaraBuffer()`, `getPitchHistory()`.
+Runtime methods: `updateSa(hz)`, `updateRaga(ragaId)`, `updateLevel(level)`, `getSwaraBuffer()`, `getPitchHistory()`, `setClarityThreshold(t)`, `getClarityThreshold()`.
+
+**Sa detection auto-relaxation:** When the lesson engine's `sa_detection` phase begins, it starts `clarityThreshold` at 0.55 and relaxes by 0.05 every 2s down to a floor of 0.40 (~6s full relaxation span). A hold-stability gate (120 cents across 45 frames) prevents silent-mic false positives from passing as Sa. A `console.warn` fires at 5s with no candidate so regressions are loud. `setClarityThreshold(t)` / `getClarityThreshold()` allow runtime tuning without recreating the pipeline. The YAML `min_clarity` field is **documentation-only** — it is not read by the runtime.
 
 ### getUserMedia Constraints
 
@@ -171,7 +173,7 @@ Strings are plucked sequentially — ground-string → Sa → Sa → low Sa — 
 - `start()`: creates AudioContext, builds oscillator graph, begins pluck cycle. Requires user gesture on iOS.
 - `stop()`: 600ms linear fade-out, then cleanup. **Double-stop safety**: on entry, graph references (`voices`, `masterGain`, `audioContext`) are captured into locals and the instance fields are cleared immediately. The scheduled `cleanup()` closure operates on the captured snapshot, not the instance fields. This means a `start()` call during the 600ms fade installs a fresh graph without the stale cleanup tearing it down. A second `stop()` call on a cleared instance is a no-op.
 - `setSa(hz)`: rebuilds oscillators with new frequencies (300ms crossfade to old).
-- `setVolume(v)`: 50ms linear ramp to new level.
+- `setVolume(v, rampMs?)`: linear ramp to new level. Default ramp is 400ms (lesson ducking use); original 50ms preserved when `rampMs` is specified explicitly.
 
 ---
 
@@ -701,7 +703,16 @@ Signature: `useLessonAudio(sa_hz?, ragaId, timbre?): LessonAudioControls`. All j
 
 **Sa calibration clarity (real Pitchy values):** `lesson-audio.ts` previously called `onCandidate(median, 1.0)`, hardcoding clarity at 1.0 for all accepted holds — meaning the Sa calibrator could not distinguish a clean sung Sa from noise that happened to trigger. Clarity is now threaded through the hold accumulator (`holdClaritySum`) and reported as the mean clarity of accepted holds. The calibrator receives real Pitchy confidence, not a constant.
 
-`LessonAudioControls` includes a `setTanpuraVolume(volume: number)` method that ramps the tanpura drone master gain. `useLessonEngine` calls this on every phase transition: full volume (0.3) during singing phases (`tanpura_drone`, `pitch_exercise`, `phrase_exercise`, `passive_phrase_recognition`), reduced to 30% of normal (0.09) during all other phase types (listen, read, speak). The tanpura never stops between phases — it persists as an ambient presence throughout the lesson.
+`LessonAudioControls` includes a `setTanpuraGain(gain, rampMs?)` method (exposed by `useLessonAudio`) that ramps the tanpura drone master gain via `TanpuraDrone.setVolume(v, rampMs)`. `useLessonEngine` calls this on every phase transition using `PHASE_TANPURA_GAIN`:
+
+| Gain | Phase types |
+|------|-------------|
+| Full (1.0×) | `tanpura_drone`, `passive_phrase_recognition`, `session_summary` |
+| Ducked (0.35×) | `sa_detection`, `pitch_exercise`, `phrase_exercise`, `call_response`, `swara_introduction`, `phrase_playback`, `ornament_exercise`, `andolan`, `meend` |
+| Silent (0) | YAML flag `tanpura_presence: off` (optional field on any phase) |
+| Ducked (0.35×) | Unknown phase types (default) |
+
+The tanpura is **never stopped between phases** — only gain changes. Continuous drone is the premise of the lesson experience.
 
 ### PWA Offline Caching
 
