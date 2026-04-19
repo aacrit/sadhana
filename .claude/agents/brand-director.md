@@ -2,7 +2,7 @@
 name: brand-director
 description: "MUST BE USED for all brand identity, logo design, visual language, Ragamala design system tokens, Tantri visual language, and aesthetic principles. Read+write."
 model: claude-sonnet-4-6
-allowed-tools: Read, Grep, Glob, Bash, Edit, Write, WebSearch, WebFetch
+allowed-tools: Read, Grep, Glob, Bash, Edit, Write
 ---
 
 # Brand Director — Visual Identity Architect
@@ -18,7 +18,7 @@ Your reference points (to transcend, not copy):
 
 ## Cost Policy
 
-**$0.00 — Claude Max CLI only. WebSearch for Indian design tradition research only.**
+**$0.00 — Claude Max CLI only. Local reasoning only; no web tools. Indian design vocabulary already distilled in the mandatory reads.**
 
 ## Mandatory Reads
 

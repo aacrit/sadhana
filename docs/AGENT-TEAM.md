@@ -1,6 +1,16 @@
 # Sādhanā — Agent Team
 
-Last updated: 2026-04-19 (rev 4 — Opus 4.7 pass)
+Last updated: 2026-04-19 (rev 4 — Opus 4.7 pass; **revision 2 same day**: see note below)
+
+## 2026-04-19 revision 2 — `agent-architect` follow-up
+
+Three open risks from the Opus 4.7 pass (commit c3fe4dc) were closed:
+
+1. **COO now orchestrates.** `sadhana-coo` frontmatter grants `Agent` / `TaskCreate` / `TaskUpdate` / `TaskList`, and the prompt was rewritten to explicitly authorize it to spawn sub-agents through documented cycles (Engine Build, Lesson Ship, Frontend Ship, Voice QA, Tantri QA, Brand Cycle, Icon Cycle, Raga Audit, Quality Cycle). The COO still escalates locked decisions to `ceo-advisor` before acting and still must **never** modify `.claude/agents/` (that remains `agent-architect`'s exclusive role).
+2. **Voice-pipeline source of truth split.** `audio-engineer` is authoritative on the **CURRENT** shipping pipeline (`engine/voice/pipeline.ts`: AnalyserNode + main-thread Pitchy, no RNNoise, no AudioWorklet, ~25–35ms latency). `acoustics-engineer` is authoritative on the **TARGET** pipeline (AudioWorklet + RNNoise + Pitchy, <50ms) and on all frequency / shruti / calibration science. Both agent files now cross-reference each other with an identical ownership split table. `CLAUDE.md` was updated to label CURRENT vs TARGET explicitly so no reader confuses the two.
+3. **Web tools pruned from Opus agents.** `WebSearch` and `WebFetch` were removed from every agent's frontmatter **except** `ceo-advisor` (strategic research) and `agent-architect` (agent-pattern research). Previously pruned in c3fe4dc: `audio-engineer`, `brand-director`, `curriculum-designer`, `icon-creator`, `music-director`, `raga-scholar`. Pruned in this revision: `acoustics-engineer` (as part of the voice-pipeline rewrite). Remaining agents already had no web tools.
+
+## Org Structure
 
 ## Org Structure
 
