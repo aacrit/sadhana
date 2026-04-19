@@ -1,128 +1,56 @@
 # Lesson B-07: The Five Ragas — Consolidation
 # Journey: Beginner | Level: Shishya (1-3)
 # Presence Rule: you hear before you name.
-# No single raga — this lesson cycles through all five learned ragas.
-# NEW PHASE TYPE: raga_identification
+# Rewritten: 3 phases, ~8 min, Tantri-centric.
 
 id: beginner-07-consolidation
 journey: beginner
 level_range: [1, 3]          # Shishya
-raga_id: null                # multi-raga review — no single raga active
-duration_target_min: 10
+raga_id: null                # multi-raga review
+duration_target_min: 8
 xp_award: 50
 
 meta:
   title: "The Five Ragas"
   subtitle: "Consolidation"
-  time_of_day: null          # available any time
+  time_of_day: null
   rasa: null
 
 # --- PHASES -------------------------------------------------------
 
 phases:
 
-  # 1. LISTENING — tanpura drone, open context
+  # 1. LISTEN — brief settling, tanpura open context
   - id: listen
     type: tanpura_drone
-    duration_s: 20
+    duration_s: 15
     instruction: |
       Close your eyes. Listen.
-      The tanpura is with you. Today you revisit old friends.
+      Today you revisit the five ragas you have learned.
     tanpura:
       strings: [Pa, Sa, Sa, Sa_upper]
       sa_hz: null
 
-  # 2. SA DETECTION
-  - id: sa_calibration
-    type: sa_detection
-    skip_if: sa_already_set
-    instruction: |
-      Let's confirm your Sa.
-      Hum or sing a comfortable note. Hold it steady.
-    attempts: 5
-    min_clarity: 0.85
-    fallback_hz: 261.6256
-
-  # 3. RAGA IDENTIFICATION ROUNDS — hear pakad, identify and sing
-  # NEW PHASE TYPE: raga_identification
-  # Engine plays a pakad from one of the 5 learned ragas.
-  # Student listens, then sings 3-4 swaras in that raga's character.
-  # Engine evaluates whether sung swaras match the correct raga grammar.
-  # Tantri: all unique swaras across all 5 ragas visible.
-  #   Bhoopali: Sa, Re, Ga, Pa, Dha
-  #   Yaman: Sa, Re, Ga, Ma_t, Pa, Dha, Ni
-  #   Bhairav: Sa, Re_k, Ga, Ma, Pa, Dha_k, Ni
-  #   Bhimpalasi: Sa, Re, Ga_k, Ma, Pa, Dha, Ni_k
-  #   Bageshri: Sa, Re, Ga_k, Ma, Pa, Dha, Ni_k
-  # Unique set: Sa, Re, Re_k, Ga, Ga_k, Ma, Ma_t, Pa, Dha, Dha_k, Ni, Ni_k (all 12)
-
-  - id: round_1
-    type: raga_identification       # NEW PHASE TYPE
-    instruction: |
-      Listen. Which raga is this?
-      After you hear the phrase, sing a few notes in that raga.
-    raga_pool: [bhoopali, yaman, bhairav, bhimpalasi, bageshri]
-    selection: random_no_repeat
-    pakad_plays: 2                  # engine plays pakad twice
-    student_response: sing          # student sings 3-4 swaras in response
-    response_duration_s: 15
-    feedback_layer: standard
-    level_tolerance: shishya
-
-  - id: round_2
+  # 2. RAGA IDENTIFICATION — engine plays pakad, student echoes in that raga
+  # Three rounds. All five ragas in play. No repeat in a single session.
+  - id: identification
     type: raga_identification
     instruction: |
-      Another one. Listen carefully.
+      Listen to each phrase. Then sing a few notes in that raga's character.
     raga_pool: [bhoopali, yaman, bhairav, bhimpalasi, bageshri]
     selection: random_no_repeat
+    rounds: 3
     pakad_plays: 2
     student_response: sing
     response_duration_s: 15
     feedback_layer: standard
     level_tolerance: shishya
 
-  - id: round_3
-    type: raga_identification
-    instruction: |
-      And another. Let the phrase tell you.
-    raga_pool: [bhoopali, yaman, bhairav, bhimpalasi, bageshri]
-    selection: random_no_repeat
-    pakad_plays: 2
-    student_response: sing
-    response_duration_s: 15
-    feedback_layer: standard
-    level_tolerance: shishya
-
-  - id: round_4
-    type: raga_identification
-    instruction: |
-      Listen.
-    raga_pool: [bhoopali, yaman, bhairav, bhimpalasi, bageshri]
-    selection: random_no_repeat
-    pakad_plays: 2
-    student_response: sing
-    response_duration_s: 15
-    feedback_layer: standard
-    level_tolerance: shishya
-
-  - id: round_5
-    type: raga_identification
-    instruction: |
-      One more.
-    raga_pool: [bhoopali, yaman, bhairav, bhimpalasi, bageshri]
-    selection: random_no_repeat
-    pakad_plays: 2
-    student_response: sing
-    response_duration_s: 15
-    feedback_layer: standard
-    level_tolerance: shishya
-
-  # 4. COMPLETION
+  # 3. COMPLETION
   - id: complete
     type: session_summary
     show_accuracy: true
     show_streak: true
-    show_raga_scores: true         # per-raga identification accuracy
     message: |
       Five ragas. Five worlds.
       You carry them with you now.
@@ -130,7 +58,7 @@ phases:
 # --- ENGINE PARAMETERS --------------------------------------------
 
 engine:
-  raga_grammar_active: true      # switches per round to active raga
+  raga_grammar_active: true
   pakad_recognition: true
   ornaments_shown: false
   cents_display: hidden
@@ -142,4 +70,4 @@ unlock_next:
   lesson_id: beginner-08-challenge
   requires:
     min_sessions: 1
-    min_accuracy: 0.60           # 3 out of 5 correct identification
+    min_accuracy: 0.60

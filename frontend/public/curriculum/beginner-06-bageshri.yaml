@@ -1,14 +1,13 @@
 # Lesson B-06: Raga Bageshri — The Midnight Raga
 # Journey: Beginner | Level: Shishya (1-3)
 # Presence Rule: you hear before you name.
-# Engine source: engine/theory/ragas/bageshri.ts
-# Prahara: 7-8 (late night, midnight)
+# Rewritten: 6 phases, ~10 min, Tantri-centric.
 
 id: beginner-06-bageshri
 journey: beginner
 level_range: [1, 3]          # Shishya
 raga_id: bageshri
-duration_target_min: 12
+duration_target_min: 10
 xp_award: 40
 
 meta:
@@ -21,10 +20,10 @@ meta:
 
 phases:
 
-  # 1. LISTENING — tanpura drone, Bageshri context
+  # 1. LISTEN — midnight atmosphere
   - id: listen
     type: tanpura_drone
-    duration_s: 30
+    duration_s: 20
     instruction: |
       Close your eyes. Listen.
       The tanpura is with you. Midnight.
@@ -32,7 +31,7 @@ phases:
       strings: [Pa, Sa, Sa, Sa_upper]
       sa_hz: null
 
-  # 2. SA DETECTION
+  # 2. SA DETECTION — skipped if already done
   - id: sa_calibration
     type: sa_detection
     skip_if: sa_already_set
@@ -43,135 +42,55 @@ phases:
     min_clarity: 0.85
     fallback_hz: 261.6256
 
-  # 3. HEAR THE AROHA — Sa Ga(k) Ma Dha Ni(k) Sa' (Re omitted in ascent)
+  # 3. MEET BAGESHRI — komal Ga, komal Ni, the Sa-to-Ma leap
+  - id: meet_bageshri
+    type: swara_introduction
+    instruction: |
+      Bageshri shares two swaras with Bhimpalasi — komal Ga and komal Ni.
+      But here they feel different. More restless. More obsessive.
+      Listen to each note.
+    swaras: [Ga, Ga_k, Ni, Ni_k, Sa, Ga_k, Ma, Dha, Ni_k]
+    presentation: sequential
+    audio_first: true
+
+  # 4. HEAR THE ASCENT — Re is absent
   - id: aroha_listen
     type: phrase_playback
     phrase: [Sa, Ga_k, Ma, Dha, Ni_k, Sa_upper]
     instruction: |
-      Listen to Bageshri climbing. It skips a note on the way up.
-      You know these swaras. You have sung them before.
-      But this raga uses them differently.
-    repeat: 2
-    show_labels: false
-
-  - id: aroha_show
-    type: phrase_playback
-    phrase: [Sa, Ga_k, Ma, Dha, Ni_k, Sa_upper]
-    instruction: |
-      Sa Ga Ma Dha Ni Sa.
-      Five notes up. Re is absent in the ascent.
-    repeat: 1
-    show_labels: true
-
-  # 4. HEAR THE AVAROHA — Sa' Ni(k) Dha Pa Ma Ga(k) Re Sa (all seven)
-  - id: avaroha_listen
-    type: phrase_playback
-    phrase: [Sa_upper, Ni_k, Dha, Pa, Ma, Ga_k, Re, Sa]
-    instruction: |
-      Now descending. All seven notes appear.
-      Re returns. Pa returns. The descent is the fuller story.
-    repeat: 2
-    show_labels: false
-
-  - id: avaroha_show
-    type: phrase_playback
-    phrase: [Sa_upper, Ni_k, Dha, Pa, Ma, Ga_k, Re, Sa]
-    instruction: |
-      Sa Ni Dha Pa Ma Ga Re Sa.
-      Seven notes down. Like Bhimpalasi — spare ascent, full descent.
-    repeat: 1
-    show_labels: true
-
-  # 5. COMPARE WITH BHIMPALASI — same swaras, different world
-  - id: compare_bhimpalasi
-    type: phrase_playback
-    phrase: [Ni_k_mandra, Sa, Ga_k, Ma]
-    instruction: |
-      You know these swaras. In Bhimpalasi, they sound like this.
-      An upward arc. Yearning.
-    repeat: 1
-    show_labels: true
-
-  - id: compare_bageshri
-    type: phrase_playback
-    phrase: [Sa, Ma, Ga_k, Ma]
-    instruction: |
-      In Bageshri, the same swaras sound like this.
-      Circling. Obsessive. A different kind of longing.
-      Same notes. Different raga.
+      Listen to Bageshri climbing. It leaps from Sa to komal Ga.
+      Re is absent. That gap is deliberate. The leap creates urgency.
     repeat: 2
     show_labels: true
 
-  # 6. MEET THE SWARAS — emphasize Sa-Ma leap
-  - id: meet_bageshri
-    type: swara_introduction
-    instruction: |
-      Bageshri's ascent leaps from Sa straight to Ga.
-      Re is not part of the climb. That gap is deliberate.
-      Listen to each note.
-    swaras: [Sa, Ga_k, Ma, Pa, Dha, Ni_k]
-    presentation: sequential
-    audio_first: true
-
-  # 7. SING SA
-  - id: sing_sa
-    type: pitch_exercise
-    target_swara: Sa
-    duration_s: 15
-    instruction: |
-      Sing Sa. The anchor.
-    feedback_layer: minimal
-    level_tolerance: shishya
-
-  # 8. SING THE PAKAD PHRASE — Sa Ma Ga(k) Ma
-  - id: sing_pakad
-    type: phrase_exercise
-    phrase: [Sa, Ma, Ga_k, Ma]
-    instruction: |
-      Follow the guide tone. This is Bageshri's signature:
-      Sa Ma Ga Ma. It circles Ma, the heart of this raga.
-    guide_tone: true
-    feedback_layer: standard
-
-  # 9. HEAR MORE PAKAD
+  # 5. HEAR THE SIGNATURE PHRASE — Sa Ma Ga Ma, circling
   - id: pakad_listen
     type: phrase_playback
-    phrase: [Ma, Ga_k, Ma, Dha]
+    phrase: [Sa, Ma, Ga_k, Ma]
     instruction: |
-      Listen to how the raga orbits Ma.
-      Ma Ga Ma Dha. Circling, then rising.
-    repeat: 2
-    show_labels: false
+      This is Bageshri's signature. Sa Ma Ga Ma.
+      It circles Ma. Obsessive. A different kind of longing than Bhimpalasi.
+      Same swaras. Different world.
+    repeat: 3
+    show_labels: true
 
-  - id: pakad_listen_2
-    type: phrase_playback
-    phrase: [Dha, Ma, Ga_k, Re, Sa]
+  # 6. SING ALONG — the pakad phrase
+  - id: sing_pakad
+    type: sing_along
+    phrase: [Sa, Ma, Ga_k, Ma]
     instruction: |
-      And the descent. Dha Ma Ga Re Sa.
-      Re appears only when coming down. The descent reveals everything.
-    repeat: 2
-    show_labels: false
+      Follow the guide. Sa Ma Ga Ma.
+      Let the raga circle. Do not rush.
+    guide_tone: true
+    feedback_layer: minimal
 
-  # 10. PAKAD WATCH — free singing with recognition
-  - id: pakad_watch
-    type: passive_phrase_recognition
-    enabled: true
-    instruction: |
-      Now sing freely in Bageshri. Let the raga move through you.
-      The tanpura is with you. Midnight.
-    duration_s: 60
-    watch_for_pakad: true
-    pakad_reward:
-      xp_bonus: 15
-      ceremony: gsap_pakad_moment
-
-  # 11. COMPLETION
+  # 7. COMPLETION
   - id: complete
     type: session_summary
     show_accuracy: true
     show_streak: true
     message: |
-      You've met Bageshri.
+      You have met Bageshri.
       At midnight, when the world is asleep and longing is sharpest —
       this raga carries that ache.
 
@@ -179,10 +98,10 @@ phases:
 
 engine:
   raga_grammar_active: true
-  pakad_recognition: true
-  ornaments_shown: false       # Shishya: no ornament hints yet
+  pakad_recognition: false
+  ornaments_shown: false
   cents_display: hidden
-  accuracy_model: shishya      # +-50 cents tolerance
+  accuracy_model: shishya
 
 # --- UNLOCK CONDITION ---------------------------------------------
 
