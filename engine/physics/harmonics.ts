@@ -301,20 +301,23 @@ function buildTanpuraString(
 /**
  * Generates the complete tanpura drone profile for a given Sa frequency.
  *
- * Standard tanpura tuning (for most ragas):
- *   String 1: Pa (low) — 3/2 of Sa, one octave below middle Sa
- *   String 2: Sa (middle)
- *   String 3: Sa (middle) — doubled for richness
- *   String 4: Sa (low) — one octave below middle Sa
+ * Returns an array of up to 4 TanpuraStringProfile objects in order:
+ *   Index 0: Ground string — Pa (low), Ma (shuddha), or Ni (komal), one octave below Sa.
+ *            Raga-context override: Marwa/Malkauns → Ma, Bageshri → Ni, else Pa.
+ *   Index 1: Sa (middle)
+ *   Index 2: Sa (middle, slightly detuned for richness) — Sadhaka+ only
+ *   Index 3: Sa (low, one octave below) — Varistha+ only
  *
- * Some ragas (those using Ma as a strong note) replace the Pa string:
- *   String 1: Ma (shuddha) — 4/3 of Sa
+ * For 2-string mode (Shishya level): use `.slice(0, 2)` — ground + Sa.
+ * For 3-string mode (Sadhaka): use `.slice(0, 3)`.
+ * For 4-string mode (Varistha+): use all 4.
  *
- * Each string is modeled with 10 partials using the jivari amplitude model.
+ * This matches TanpuraDrone's stringCount config which calls .slice() in the
+ * constructor. Callers can also query profiles directly for visualization.
  *
  * @param saHz - Sa frequency in Hz (default: 261.63, C4)
- * @param useMa - If true, replace Pa string with Ma shuddha (default: false)
- * @returns Array of 4 TanpuraStringProfile objects
+ * @param useMaOrGroundString - Ground string selection: 'Pa', 'Ma', 'Ni', or legacy boolean
+ * @returns Array of 4 TanpuraStringProfile objects (slice to use fewer strings)
  */
 export function tanpuraPartials(
   saHz: number = 261.63,

@@ -179,6 +179,29 @@ function sleep(ms: number): Promise<void> {
 // ---------------------------------------------------------------------------
 
 /**
+ * Maps a student level to a tanpura string count.
+ * Shishya → 2 strings (cleaner, less harmonic overlap for beginners).
+ * Sadhaka → 3 strings (ground + Sa + Sa detuned).
+ * Varistha / Guru → 4 strings (full tanpura).
+ */
+function levelToStringCount(level: string): 2 | 3 | 4 {
+  if (level === 'varistha' || level === 'guru') return 4;
+  if (level === 'sadhaka') return 3;
+  return 2; // shishya default
+}
+
+/**
+ * Maps a raga ID to its tanpura ground string override.
+ * Ragas that use Ma or Ni as the ground string are defined here.
+ * All other ragas default to Pa.
+ */
+function ragaToGroundString(ragaId: string): 'Pa' | 'Ma' | 'Ni' {
+  if (ragaId === 'bageshri') return 'Ni';
+  if (ragaId === 'marwa' || ragaId === 'malkauns') return 'Ma';
+  return 'Pa';
+}
+
+/**
  * React hook providing audio controls for a lesson.
  *
  * Manages the lifecycle of the tanpura drone, swara playback, Sa detection,
@@ -188,12 +211,14 @@ function sleep(ms: number): Promise<void> {
  * @param sa_hz - The student's Sa frequency in Hz (default: C4 = 261.6256)
  * @param ragaId - The raga being practiced (e.g. 'bhoopali')
  * @param timbre - Instrument timbre: 'harmonium' (default), 'piano', or 'guitar'
+ * @param level - Student level for string count selection (default: 'shishya' → 2 strings)
  * @returns LessonAudioControls for the lesson UI to drive
  */
 export function useLessonAudio(
   sa_hz: number = DEFAULT_SA_HZ,
   ragaId: string,
   timbre: TantriTimbre = 'harmonium',
+  level: string = 'shishya',
 ): LessonAudioControls {
   // -----------------------------------------------------------------------
   // State — only booleans the UI needs to render
@@ -222,14 +247,22 @@ export function useLessonAudio(
   // Tanpura
   // -----------------------------------------------------------------------
 
+  // Store level ref so startTanpura always reads the latest value
+  const levelRef = useRef(level);
+  levelRef.current = level;
+
   const startTanpura = useCallback(() => {
     if (disposedRef.current) return;
 
     // Create a new TanpuraDrone if we do not have one or if it was stopped
     if (!tanpuraRef.current || !tanpuraRef.current.isRunning()) {
+      const stringCount = levelToStringCount(levelRef.current);
+      const groundString = ragaToGroundString(ragaId);
       tanpuraRef.current = new TanpuraDrone({
         sa_hz: saHzRef.current,
         volume: 0.3,
+        stringCount,
+        groundString,
       });
     }
 
@@ -238,7 +271,7 @@ export function useLessonAudio(
         setTanpuraActive(true);
       }
     });
-  }, []);
+  }, [ragaId]);
 
   const stopTanpura = useCallback(() => {
     if (tanpuraRef.current && tanpuraRef.current.isRunning()) {

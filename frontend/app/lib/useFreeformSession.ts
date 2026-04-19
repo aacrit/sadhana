@@ -401,9 +401,13 @@ export function useFreeformSession(
     if (disposedRef.current) return;
 
     if (!tanpuraRef.current || !tanpuraRef.current.isRunning()) {
+      // Freeform uses 2-string default (Sa + ground) for all users.
+      // groundString is resolved at session start — ragaId is stored in ref
+      // from the useFreeformSession params at call site.
       tanpuraRef.current = new TanpuraDrone({
         sa_hz: saHzRef.current,
         volume: 0.3,
+        stringCount: 2,
       });
     }
 
