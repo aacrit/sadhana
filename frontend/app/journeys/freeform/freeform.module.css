@@ -487,6 +487,15 @@
   background: rgba(232, 135, 30, 0.08);
 }
 
+/* Off-prahar raga chip: 40% opacity, not blocked */
+.ragaChipOffPrahar {
+  opacity: 0.4;
+}
+
+.ragaChipOffPrahar:hover {
+  opacity: 0.7;
+}
+
 .ragaHint {
   font-family: var(--font-sans);
   font-size: var(--text-xs);
@@ -496,6 +505,19 @@
   text-align: center;
   max-width: 300px;
   line-height: var(--leading-normal);
+}
+
+/* Off-prahar hint: gentler than ragaHint, italic */
+.ragaOffPraharHint {
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  color: var(--text-3);
+  opacity: 0.45;
+  margin: var(--space-1) 0 0;
+  text-align: center;
+  max-width: 300px;
+  line-height: var(--leading-normal);
+  font-style: italic;
 }
 
 /* -- Guide bar (active session, above bottom controls) ------------------ */
