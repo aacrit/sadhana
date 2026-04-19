@@ -252,6 +252,7 @@ export default function FreeformPage() {
   // Tala (tabla) state
   const [talaActive, setTalaActive] = useState(false);
   const talaPlayerRef = useRef<TalaPlayer | null>(null);
+  const talaCtxRef = useRef<AudioContext | null>(null);
 
   // Raga selection — defaults to time-of-day, user can override
   const [selectedRagaId, setSelectedRagaId] = useState<string | null>(todayRaga.id);
@@ -379,6 +380,10 @@ export default function FreeformPage() {
       talaPlayerRef.current.dispose();
       talaPlayerRef.current = null;
     }
+    if (talaCtxRef.current && talaCtxRef.current.state !== 'closed') {
+      talaCtxRef.current.close().catch(() => { /* ignore close errors */ });
+      talaCtxRef.current = null;
+    }
     session.dispose();
     router.push('/');
   }, [session, router]);
@@ -390,10 +395,20 @@ export default function FreeformPage() {
         talaPlayerRef.current.dispose();
         talaPlayerRef.current = null;
       }
+      // Release the OS audio resource so the browser doesn't accumulate
+      // stale AudioContexts across repeated tabla on/off cycles.
+      if (talaCtxRef.current && talaCtxRef.current.state !== 'closed') {
+        talaCtxRef.current.close().catch(() => { /* ignore close errors */ });
+        talaCtxRef.current = null;
+      }
       setTalaActive(false);
     } else {
       await ensureAudioReady();
-      const ctx = new AudioContext();
+      // Reuse the existing context if it is still open.
+      if (!talaCtxRef.current || talaCtxRef.current.state === 'closed') {
+        talaCtxRef.current = new AudioContext();
+      }
+      const ctx = talaCtxRef.current;
       if (ctx.state === 'suspended') await ctx.resume();
       talaPlayerRef.current = new TalaPlayer(ctx, userSaHz);
       talaPlayerRef.current.startTheka('teentaal', 80);
