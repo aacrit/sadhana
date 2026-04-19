@@ -113,17 +113,21 @@ function PitchExercisePhase({
   onAdvance: () => void;
   voiceFeedback: LessonEngineControls['voiceFeedback'];
 }) {
+  // Silent warmup phase — no copy, no button. Tantri shows the swara; engine auto-advances.
+  const isWarmup = phase.id.startsWith('__warmup_');
   return (
     <motion.div key={phase.id} {...phaseTransition} className={styles.centeredMessage}>
       <VoiceVisualization feedback={voiceFeedback} className={styles.voiceViz} />
-      <button
-        type="button"
-        className={styles.actionButton}
-        onClick={onAdvance}
-        style={{ marginTop: 'var(--space-4)' }}
-      >
-        Continue
-      </button>
+      {!isWarmup && (
+        <button
+          type="button"
+          className={styles.actionButton}
+          onClick={onAdvance}
+          style={{ marginTop: 'var(--space-4)' }}
+        >
+          Continue
+        </button>
+      )}
     </motion.div>
   );
 }
@@ -710,13 +714,15 @@ export default function LessonRenderer({
         Exit
       </button>
 
-      {/* Phase header */}
-      <header className={styles.phaseHeader} aria-live="polite">
-        <h1 className={styles.phaseTitle}>
-          {phase.screenTitle ?? phase.type.replace(/_/g, ' ')}
-        </h1>
-        {phase.body && <p className={styles.phaseBody}>{phase.body}</p>}
-      </header>
+      {/* Phase header — suppressed for silent warmup phase */}
+      {!phase.id.startsWith('__warmup_') && (
+        <header className={styles.phaseHeader} aria-live="polite">
+          <h1 className={styles.phaseTitle}>
+            {phase.screenTitle ?? phase.type.replace(/_/g, ' ')}
+          </h1>
+          {phase.body && <p className={styles.phaseBody}>{phase.body}</p>}
+        </header>
+      )}
 
       {/* Phase content */}
       <div className={styles.phaseContent}>

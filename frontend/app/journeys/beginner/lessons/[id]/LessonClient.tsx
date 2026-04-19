@@ -3,10 +3,14 @@
 /**
  * LessonClient — client component that loads a YAML lesson by ID
  * and renders it via useLessonEngine + LessonRenderer.
+ *
+ * useSearchParams() is used to read ?warmup= for the Return Note feature.
+ * It is isolated in LessonClientInner, which is wrapped in <Suspense> here
+ * so the static export stays at 83/83 pages.
  */
 
-import { useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
+import { Suspense, useState, useEffect, useCallback } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { useAuth } from '../../../../lib/auth';
 import { useLessonEngine } from '../../../../lib/useLessonEngine';
@@ -14,10 +18,41 @@ import LessonRenderer from '../../../../components/LessonRenderer';
 import Tantri from '../../../../components/Tantri';
 import styles from '../../../../styles/lesson-renderer.module.css';
 
+// ---------------------------------------------------------------------------
+// Shell — exported, wraps the search-params reader in Suspense
+// ---------------------------------------------------------------------------
+
 export default function LessonClient({ lessonId }: { lessonId: string }) {
+  return (
+    <Suspense
+      fallback={
+        <div className={styles.lessonPage}>
+          <div className={styles.centeredMessage}>
+            <p style={{ color: 'var(--text-3)', fontFamily: 'var(--font-sans)' }}>
+              Loading lesson...
+            </p>
+          </div>
+        </div>
+      }
+    >
+      <LessonClientInner lessonId={lessonId} />
+    </Suspense>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Inner — reads useSearchParams (must be inside Suspense)
+// ---------------------------------------------------------------------------
+
+function LessonClientInner({ lessonId }: { lessonId: string }) {
   const router = useRouter();
   const { profile } = useAuth();
   const saHz = profile?.saHz ?? 261.63;
+
+  // Read ?warmup= from client URL — keeps the page fully static for GitHub Pages export
+  const searchParams = useSearchParams();
+  const warmupParam = searchParams.get('warmup');
+  const warmupSwara = warmupParam && warmupParam.trim() !== '' ? warmupParam.trim() : undefined;
 
   // Fetch raw YAML strings
   const [lessonYaml, setLessonYaml] = useState<string | null>(null);
@@ -89,6 +124,7 @@ export default function LessonClient({ lessonId }: { lessonId: string }) {
       lessonYaml={lessonYaml}
       copyYaml={copyYaml}
       saHz={saHz}
+      warmupSwara={warmupSwara}
       onExit={() => router.push('/journeys/beginner')}
     />
   );
@@ -102,14 +138,16 @@ function LessonPageInner({
   lessonYaml,
   copyYaml,
   saHz,
+  warmupSwara,
   onExit,
 }: {
   lessonYaml: string;
   copyYaml?: string;
   saHz: number;
+  warmupSwara?: string;
   onExit: () => void;
 }) {
-  const engine = useLessonEngine(lessonYaml, copyYaml, saHz);
+  const engine = useLessonEngine(lessonYaml, copyYaml, saHz, warmupSwara);
   const { profile } = useAuth();
 
   const handleComplete = useCallback(() => {
