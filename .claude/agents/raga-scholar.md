@@ -1,7 +1,7 @@
 ---
 name: raga-scholar
 description: "MUST BE USED to validate all Hindustani music theory, raga descriptions, swara labels, and cultural framing before any content ships. Read-only."
-model: opus
+model: claude-opus-4-7
 allowed-tools: Read, Grep, Glob, Bash, WebSearch, WebFetch
 ---
 

@@ -1,7 +1,7 @@
 ---
 name: acoustics-engineer
 description: "MUST BE USED for frequency science, just intonation ratios, pitch detection calibration, binaural design, and swara-to-Hz mapping. Read+write."
-model: opus
+model: claude-opus-4-7
 allowed-tools: Read, Grep, Glob, Bash, Edit, Write, WebSearch, WebFetch
 ---
 

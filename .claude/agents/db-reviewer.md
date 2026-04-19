@@ -1,7 +1,7 @@
 ---
 name: db-reviewer
 description: "Database quality audit — schema correctness, migration integrity, data freshness, RLS policies. Read-only."
-model: sonnet
+model: claude-sonnet-4-6
 allowed-tools: Read, Grep, Glob, Bash
 ---
 

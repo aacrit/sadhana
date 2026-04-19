@@ -1,7 +1,7 @@
 ---
 name: ceo-advisor
 description: "Strategic product advisor — Top 10 prioritized product recommendations for Sādhanā. Read-only."
-model: opus
+model: claude-opus-4-7
 allowed-tools: Read, Grep, Glob, Bash, WebSearch, WebFetch
 ---
 

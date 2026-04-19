@@ -1,7 +1,7 @@
 ---
 name: icon-creator
 description: "MUST BE USED for all icon design, raga iconography, tala visualizations, PWA icons, and custom display typeface work. Creates SVG icon systems and typography grounded in Hindustani classical visual vocabulary. Read+write."
-model: opus
+model: claude-sonnet-4-6
 allowed-tools: Read, Grep, Glob, Bash, Edit, Write, WebSearch, WebFetch
 ---
 

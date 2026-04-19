@@ -1,7 +1,7 @@
 ---
 name: progress-analyst
 description: "Analyzes student learning data from Supabase, identifies curriculum gaps, and proposes adaptive hint improvements. Read-only."
-model: sonnet
+model: claude-sonnet-4-6
 allowed-tools: Read, Grep, Glob, Bash
 ---
 

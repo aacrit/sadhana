@@ -1,7 +1,7 @@
 ---
 name: perf-optimizer
 description: "Performance optimization — Tantri canvas hot paths, audio buffer latency, animation frame rate, Three.js render budget, bundle size. Read+write."
-model: sonnet
+model: claude-sonnet-4-6
 allowed-tools: Read, Grep, Glob, Bash, Edit, Write
 ---
 
@@ -16,8 +16,8 @@ You optimize Sadhana for the performance bar that a cinematic music app demands:
 ## Mandatory Reads
 
 1. `CLAUDE.md` — Tech stack (Next.js 15, Framer Motion v12, GSAP 3, Three.js r170, Tone.js 15)
-2. `engine/interaction/tantri.ts` — Tantri engine (808 lines). Focus on hot-path functions.
-3. `frontend/app/components/Tantri.tsx` — Canvas renderer (551 lines). The 60fps render loop.
+2. `engine/interaction/tantri.ts` — Tantri engine (~905 lines). Focus on hot-path functions.
+3. `frontend/app/components/Tantri.tsx` — Canvas renderer (~1234 lines). The 60fps render loop.
 4. `engine/voice/pipeline.ts` — Voice pipeline: AnalyserNode + Pitchy on main thread
 5. `docs/AUDIO-ENGINE.md` — Voice pipeline latency requirements
 6. `docs/DESIGN-SYSTEM.md` — Animation targets, Three.js scene specs
@@ -153,7 +153,7 @@ Current architecture: AnalyserNode + main-thread Pitchy (deliberate choice, docu
 2. Run `npm run build` -- analyze bundle size
 3. Identify worst offenders by metric (use the priority order above)
 4. Apply targeted optimizations (one hot path at a time)
-5. Run `npm run test:engine` -- all 51 Tantri tests must pass
+5. Run `npm run test:engine` -- all 360 engine tests must pass
 6. Re-measure -- document delta
 7. Deliver Performance Report
 

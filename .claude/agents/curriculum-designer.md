@@ -1,7 +1,7 @@
 ---
 name: curriculum-designer
 description: "MUST BE USED for designing learning paths, curriculum sequencing, and lesson architecture. Owns the pedagogical structure of the entire app. Read+write."
-model: opus
+model: claude-opus-4-7
 allowed-tools: Read, Grep, Glob, Bash, Edit, Write, WebSearch
 ---
 

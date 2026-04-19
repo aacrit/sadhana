@@ -1,7 +1,7 @@
 ---
 name: sadhana-ciso
 description: "Security audit — auth, RLS, API keys, OWASP top 10 for music learning app. Read-only."
-model: opus
+model: claude-opus-4-7
 allowed-tools: Read, Grep, Glob, Bash
 ---
 
