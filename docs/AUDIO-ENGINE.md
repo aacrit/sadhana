@@ -169,7 +169,7 @@ Strings are plucked sequentially — ground-string → Sa → Sa → low Sa — 
 ### Lifecycle
 
 - `start()`: creates AudioContext, builds oscillator graph, begins pluck cycle. Requires user gesture on iOS.
-- `stop()`: 500ms linear fade-out, then cleanup.
+- `stop()`: 600ms linear fade-out, then cleanup. **Double-stop safety**: on entry, graph references (`voices`, `masterGain`, `audioContext`) are captured into locals and the instance fields are cleared immediately. The scheduled `cleanup()` closure operates on the captured snapshot, not the instance fields. This means a `start()` call during the 600ms fade installs a fresh graph without the stale cleanup tearing it down. A second `stop()` call on a cleared instance is a no-op.
 - `setSa(hz)`: rebuilds oscillators with new frequencies (300ms crossfade to old).
 - `setVolume(v)`: 50ms linear ramp to new level.
 
@@ -698,6 +698,8 @@ The `useLessonAudio` hook accepts a `timbre: TantriTimbre` parameter (`'harmoniu
 Signature: `useLessonAudio(sa_hz?, ragaId, timbre?): LessonAudioControls`. All journey pages pass `timbre` from `useTimbreSelection()`.
 
 **AudioContext lifecycle for tabla (canonical pattern):** `useLessonAudio` holds a `talaCtxRef` alongside `talaPlayerRef`. `startTala()` reuses the existing `AudioContext` if it is still open (`state !== 'closed'`), creating a new one only when none exists. `stopTala()` closes `talaCtxRef` after disposing the player, releasing the OS audio resource. `dispose()` nulls the ref. This prevents hitting the browser's simultaneous-AudioContext cap after ~6 toggle cycles. The same pattern is applied in the freeform page (`talaCtxRef` co-managed with `talaPlayerRef`). Any new code that creates a `TalaPlayer` must follow this ref-reuse/close-on-teardown pattern.
+
+**Sa calibration clarity (real Pitchy values):** `lesson-audio.ts` previously called `onCandidate(median, 1.0)`, hardcoding clarity at 1.0 for all accepted holds — meaning the Sa calibrator could not distinguish a clean sung Sa from noise that happened to trigger. Clarity is now threaded through the hold accumulator (`holdClaritySum`) and reported as the mean clarity of accepted holds. The calibrator receives real Pitchy confidence, not a constant.
 
 `LessonAudioControls` includes a `setTanpuraVolume(volume: number)` method that ramps the tanpura drone master gain. `useLessonEngine` calls this on every phase transition: full volume (0.3) during singing phases (`tanpura_drone`, `pitch_exercise`, `phrase_exercise`, `passive_phrase_recognition`), reduced to 30% of normal (0.09) during all other phase types (listen, read, speak). The tanpura never stops between phases — it persists as an ambient presence throughout the lesson.
 
