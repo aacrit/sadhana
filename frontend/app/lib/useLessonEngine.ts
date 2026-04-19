@@ -84,6 +84,59 @@ const VOICE_PHASE_TYPES: readonly PhaseType[] = [
   'meend',
 ];
 
+/**
+ * Per-phase tanpura presence map.
+ *
+ * The tanpura is the harmonic reference field of every session — it must
+ * never stop, only change presence. During listening phases (tanpura_drone,
+ * passive_phrase_recognition, session_summary) it sits at full volume as
+ * the primary sound. During focus phases (sa_detection, pitch_exercise,
+ * phrase_exercise, ornament_exercise, call_response, ...) it ducks to
+ * 0.35× so the student can attend to instruction, playback, or their own
+ * voice without the drone competing.
+ *
+ * Gain values are relative multipliers applied to the tanpura's base
+ * volume (0.3). A gain of 1.0 = normal (0.3 absolute). A gain of 0.35 =
+ * ducked (~0.105 absolute). A gain of 0 = silent (ramp to 0).
+ *
+ * Any phase type not in the map defaults to DUCK_GAIN — i.e. assume the
+ * student is focused unless explicitly a listening phase.
+ */
+const FULL_GAIN = 1.0;
+const DUCK_GAIN = 0.35;
+const OFF_GAIN = 0.0;
+
+const PHASE_TANPURA_GAIN: Readonly<Partial<Record<PhaseType, number>>> = {
+  // Full presence — student is listening to the drone as the primary sound.
+  tanpura_drone: FULL_GAIN,
+  passive_phrase_recognition: FULL_GAIN,
+  session_summary: FULL_GAIN,
+
+  // Ducked — student is focusing on instruction, sample audio, or their voice.
+  sa_detection: DUCK_GAIN,
+  pitch_exercise: DUCK_GAIN,
+  phrase_exercise: DUCK_GAIN,
+  call_response: DUCK_GAIN,
+  swara_introduction: DUCK_GAIN,
+  phrase_playback: DUCK_GAIN,
+  ornament_exercise: DUCK_GAIN,
+  andolan: DUCK_GAIN,
+  meend: DUCK_GAIN,
+};
+
+/**
+ * Resolve the tanpura target gain for a phase. Honors the per-phase
+ * `tanpura_presence` YAML override, then falls back to the default map,
+ * then to DUCK_GAIN for unknown phase types.
+ */
+function resolveTanpuraGain(phase: LessonPhase): number {
+  if (phase.tanpura_presence === 'full') return FULL_GAIN;
+  if (phase.tanpura_presence === 'duck') return DUCK_GAIN;
+  if (phase.tanpura_presence === 'off') return OFF_GAIN;
+  const mapped = PHASE_TANPURA_GAIN[phase.type];
+  return mapped ?? DUCK_GAIN;
+}
+
 export interface LessonEngineControls {
   // State
   readonly state: LessonState;
@@ -387,6 +440,17 @@ export function useLessonEngine(
     audio.stopVoicePipeline();
     audio.stopSaDetection();
     setVoiceFeedback(IDLE_VOICE_FEEDBACK);
+
+    // Duck or restore the tanpura for this phase. No-op if the drone is not
+    // running — calling on every phase transition is safe. 400ms ramp so the
+    // shift in presence feels like a natural change in focus, not a cut.
+    //
+    // Note: the tanpura itself is started by the first `tanpura_drone` phase
+    // (typically phase 0) and plays continuously for the rest of the lesson.
+    // Only the gain changes as the student moves between listening and
+    // focus phases.
+    const targetGain = resolveTanpuraGain(currentPhase);
+    audio.setTanpuraGain(targetGain, 400);
 
     switch (currentPhase.type) {
       case 'tanpura_drone': {
