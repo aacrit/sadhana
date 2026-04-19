@@ -26,6 +26,7 @@ import type { LessonPhase } from '../lib/lesson-loader';
 import type { LessonEngineControls } from '../lib/useLessonEngine';
 import SwaraIntroduction from './SwaraIntroduction';
 import PhrasePlayback from './PhrasePlayback';
+import LessonPracticeSurface from './LessonPracticeSurface';
 // VoiceVisualization removed — Tantri is the primary visualization surface.
 // All phase components that previously mounted VoiceVisualization now rely
 // on the persistent Tantri layer which sits behind the phase content at z-index 0.
@@ -605,36 +606,52 @@ function PhaseDispatcher({
       );
 
     case 'pitch_exercise':
+      // Warmup phase renders nothing (engine auto-advances)
+      if (phase.id.startsWith('__warmup_')) return null;
       return (
-        <PitchExercisePhase
-          phase={phase}
+        <LessonPracticeSurface
+          phaseId={phase.id}
+          targetLabel={phase.target_swara ?? undefined}
+          voiceFeedback={engine.voiceFeedback}
           onAdvance={engine.advancePhase}
+          saHz={engine.saHz}
+          ragaId={ragaId}
         />
       );
 
     case 'phrase_exercise':
       return (
-        <PhraseExercisePhase
-          phase={phase}
+        <LessonPracticeSurface
+          phaseId={phase.id}
+          demoPhrase={phase.phrase ?? []}
+          voiceFeedback={engine.voiceFeedback}
           onAdvance={engine.advancePhase}
+          saHz={engine.saHz}
+          ragaId={ragaId}
         />
       );
 
     case 'call_response':
-      // Placeholder — full call_response is Cluster F
       return (
-        <motion.div key={phase.id} {...phaseTransition} className={styles.centeredMessage}>
-          <button type="button" className={styles.actionButton} onClick={engine.advancePhase}>
-            Continue
-          </button>
-        </motion.div>
+        <LessonPracticeSurface
+          phaseId={phase.id}
+          voiceFeedback={engine.voiceFeedback}
+          onAdvance={engine.advancePhase}
+          advanceLabel="Continue"
+          saHz={engine.saHz}
+          ragaId={ragaId}
+        />
       );
 
     case 'passive_phrase_recognition':
       return (
-        <FreeSingingPhase
-          phase={phase}
+        <LessonPracticeSurface
+          phaseId={phase.id}
+          voiceFeedback={engine.voiceFeedback}
           onAdvance={engine.advancePhase}
+          advanceLabel="Done"
+          saHz={engine.saHz}
+          ragaId={ragaId}
         />
       );
 
@@ -651,25 +668,44 @@ function PhaseDispatcher({
 
     case 'ornament_exercise':
     case 'andolan':
-    case 'meend':
+    case 'meend': {
+      const ornId = isOrnamentId(phase.ornament_type)
+        ? phase.ornament_type
+        : isOrnamentId(phase.type)
+          ? phase.type
+          : undefined;
+      const ornLabel = phase.ornament_type
+        ? phase.ornament_type.charAt(0).toUpperCase() + phase.ornament_type.slice(1)
+        : phase.type.charAt(0).toUpperCase() + phase.type.slice(1);
       return (
-        <OrnamentExercisePhase
-          phase={phase}
-          onAdvance={engine.advancePhase}
+        <LessonPracticeSurface
+          phaseId={phase.id}
+          ornamentName={ornLabel}
+          ornamentFrom={phase.from_swara}
+          ornamentTo={phase.to_swara}
+          ornamentId={ornId}
+          fromSwara={phase.from_swara}
           voiceFeedback={engine.voiceFeedback}
+          onAdvance={engine.advancePhase}
+          advanceLabel="Done"
           saHz={engine.saHz}
           ragaId={phase.raga ?? ragaId}
         />
       );
+    }
 
     // --- Raga recognition / comparison ------------------------------------
 
     case 'raga_identification':
     case 'raga_identification_advanced':
       return (
-        <RagaIdentificationPhase
-          phase={phase}
+        <LessonPracticeSurface
+          phaseId={phase.id}
+          targetLabel="Listen, then sing."
+          voiceFeedback={engine.voiceFeedback}
           onAdvance={engine.advancePhase}
+          saHz={engine.saHz}
+          ragaId={ragaId}
         />
       );
 
@@ -689,9 +725,13 @@ function PhaseDispatcher({
 
     case 'mastery_challenge':
       return (
-        <MasteryChallengePhase
-          phase={phase}
+        <LessonPracticeSurface
+          phaseId={phase.id}
+          challengeTargets={phase.targets}
+          voiceFeedback={engine.voiceFeedback}
           onAdvance={engine.advancePhase}
+          saHz={engine.saHz}
+          ragaId={ragaId}
         />
       );
 
