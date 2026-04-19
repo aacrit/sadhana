@@ -274,15 +274,15 @@ export default function VoiceWave({
     if (!canvas) return;
 
     const resizeObserver = new ResizeObserver(() => {
-      // Reset canvas dimensions on next draw
-      const c = canvasRef.current;
-      if (c) {
-        c.width = 0; // force re-init in draw()
-      }
+      // The draw() function already checks and resizes the canvas when
+      // rect dimensions change. Forcing canvas.width = 0 here would clear
+      // the canvas mid-frame and cause a visible flash on resize — don't.
     });
     resizeObserver.observe(canvas);
 
-    const animate = () => {
+    let lastRafTime = 0;
+
+    const animate = (rafTime: number) => {
       if (reducedMotionRef.current) {
         // Static render once
         draw();
@@ -291,16 +291,21 @@ export default function VoiceWave({
 
       // Skip draw when tab is hidden — save CPU/battery on mobile
       if (document.hidden) {
+        lastRafTime = rafTime;
         animationRef.current = requestAnimationFrame(animate);
         return;
       }
 
-      timeRef.current += 0.016;
+      // Use actual elapsed time so animation speed is consistent across
+      // refresh rates (60 Hz, 120 Hz) and slow devices.
+      const dt = lastRafTime > 0 ? Math.min((rafTime - lastRafTime) / 1000, 0.1) : 0.016;
+      lastRafTime = rafTime;
+      timeRef.current += dt;
       draw();
       animationRef.current = requestAnimationFrame(animate);
     };
 
-    animate();
+    animate(0);
 
     return () => {
       cancelAnimationFrame(animationRef.current);

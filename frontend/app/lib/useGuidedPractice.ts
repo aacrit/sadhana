@@ -189,6 +189,12 @@ export function useGuidedPractice(
   const voiceEventsRef = useRef<VoiceEvent[]>([]);
   const swaraAccuraciesRef = useRef<number[]>([]);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Extra timers scheduled during the swaras stage (one per swara progression).
+  // Kept separate from timerRef so clearTimer() can cancel all of them.
+  const swaraTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+  // Mirror of currentSwaraIndex for use inside pipeline callbacks (React state
+  // is stale inside closures captured at pipeline start time).
+  const currentSwaraIndexRef = useRef(0);
   const startTimeRef = useRef(0);
 
   // Audio
@@ -206,6 +212,14 @@ export function useGuidedPractice(
   );
   const ragaSwaras = useMemo(() => getRagaSwaras(raga), [raga]);
 
+  // Helper that keeps currentSwaraIndex state and ref in sync.
+  // The pipeline pitch callback captures the ref (not state), so it
+  // always sees the current swara even though the closure is stale.
+  const setSwaraIndex = useCallback((i: number) => {
+    currentSwaraIndexRef.current = i;
+    setCurrentSwaraIndex(i);
+  }, []);
+
   // -------------------------------------------------------------------
   // Clear timer helper
   // -------------------------------------------------------------------
@@ -214,6 +228,11 @@ export function useGuidedPractice(
       clearTimeout(timerRef.current);
       timerRef.current = null;
     }
+    // Cancel any in-progress swara-progression timers
+    for (const id of swaraTimersRef.current) {
+      clearTimeout(id);
+    }
+    swaraTimersRef.current = [];
   }, []);
 
   // -------------------------------------------------------------------
@@ -226,7 +245,7 @@ export function useGuidedPractice(
     setStageResults([]);
     setOverallResult(null);
     setVoiceFeedback(IDLE_FEEDBACK);
-    setCurrentSwaraIndex(0);
+    setSwaraIndex(0);
     voiceEventsRef.current = [];
     swaraAccuraciesRef.current = [];
 
@@ -318,7 +337,7 @@ export function useGuidedPractice(
   const startSinging = useCallback(() => {
     voiceEventsRef.current = [];
     swaraAccuraciesRef.current = [];
-    setCurrentSwaraIndex(0);
+    setSwaraIndex(0);
     setStagePhase('sing');
     startTimeRef.current = performance.now() / 1000;
 
@@ -331,10 +350,13 @@ export function useGuidedPractice(
         try {
           await audio.startVoicePipeline(
             (result: PitchResult) => {
+              // Read from ref — not state — so the callback always sees the
+              // swara that is currently highlighted, not the one at start time.
+              const activeSwara = swaras[currentSwaraIndexRef.current]?.swara ?? swaras[0]?.swara ?? 'Sa';
               setVoiceFeedback({
                 hz: result.hz,
                 centsDeviation: result.deviationCents,
-                targetSwara: swaras[0]?.swara ?? 'Sa',
+                targetSwara: activeSwara,
                 detectedSwara: result.nearestSwara,
                 confidence: result.clarity,
                 amplitude: result.accuracy,
@@ -360,12 +382,16 @@ export function useGuidedPractice(
         scoreCurrentStage();
       }, totalDuration * 1000);
 
-      // Track swara progression with intermediate timers
+      // Track swara progression with intermediate timers.
+      // Store the IDs in swaraTimersRef so clearTimer() can cancel them
+      // if the user exits or retries before they all fire.
+      swaraTimersRef.current = [];
       swaras.forEach((_, i) => {
         if (i > 0) {
-          setTimeout(() => {
-            setCurrentSwaraIndex(i);
+          const id = setTimeout(() => {
+            setSwaraIndex(i);
           }, i * SWARA_SING_DURATION * 1000);
+          swaraTimersRef.current.push(id);
         }
       });
     } else {
@@ -440,13 +466,13 @@ export function useGuidedPractice(
     setStageIndex(nextIdx);
     voiceEventsRef.current = [];
     swaraAccuraciesRef.current = [];
-    setCurrentSwaraIndex(0);
+    setSwaraIndex(0);
     setVoiceFeedback(IDLE_FEEDBACK);
 
     // Play guide for next stage
     const nextStageType = PRACTICE_STAGES[nextIdx]!;
     playGuide(nextStageType);
-  }, [stageIndex, previousStars, playGuide]);
+  }, [stageIndex, previousStars, playGuide, setSwaraIndex]);
 
   // -------------------------------------------------------------------
   // Retry stage
@@ -454,10 +480,10 @@ export function useGuidedPractice(
   const retryStage = useCallback(() => {
     voiceEventsRef.current = [];
     swaraAccuraciesRef.current = [];
-    setCurrentSwaraIndex(0);
+    setSwaraIndex(0);
     setVoiceFeedback(IDLE_FEEDBACK);
     playGuide(currentStage);
-  }, [currentStage, playGuide]);
+  }, [currentStage, playGuide, setSwaraIndex]);
 
   // -------------------------------------------------------------------
   // Exit
@@ -471,7 +497,8 @@ export function useGuidedPractice(
     setPracticeState('idle');
     setStageIndex(0);
     setStagePhase('listen');
-  }, [audio, clearTimer]);
+    setSwaraIndex(0);
+  }, [audio, clearTimer, setSwaraIndex]);
 
   // -------------------------------------------------------------------
   // Cleanup
