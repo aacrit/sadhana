@@ -21,9 +21,11 @@
  */
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { LessonPhase } from '../lib/lesson-loader';
 import type { LessonEngineControls } from '../lib/useLessonEngine';
+import { getSwaraFrequency } from '@/engine/theory/swaras';
+import type { Swara } from '@/engine/theory/types';
 import SwaraIntroduction from './SwaraIntroduction';
 import PhrasePlayback from './PhrasePlayback';
 import LessonPracticeSurface from './LessonPracticeSurface';
@@ -554,11 +556,13 @@ function PhaseDispatcher({
   engine,
   user,
   ragaId,
+  onHighlightString,
 }: {
   phase: LessonPhase;
   engine: LessonEngineControls;
   user?: { streak: number; xp: number };
   ragaId: string;
+  onHighlightString?: (swara: string) => void;
 }) {
   // If mic gate is active and this is a voice phase, show the gate
   if (engine.micGateActive && engine.phaseContext?.isVoicePhase) {
@@ -588,6 +592,7 @@ function PhaseDispatcher({
             audioFirst={phase.audio_first ?? true}
             revealDelayMs={phase.swara_reveal_delay_ms ?? 1200}
             onPlaySwara={(s) => engine.audio.playSwara(s)}
+            onHighlightString={onHighlightString}
           />
         </motion.div>
       );
@@ -597,10 +602,11 @@ function PhaseDispatcher({
         <motion.div key={phase.id} {...phaseTransition}>
           <PhrasePlayback
             phrase={[...(phase.phrase ?? [])]}
-            showLabels={phase.show_labels ?? false}
+            showLabels={phase.show_labels ?? true}
             onComplete={engine.advancePhase}
             repeatCount={phase.repeat ?? 1}
             onPlaySwara={(s) => engine.audio.playSwara(s)}
+            onHighlightString={onHighlightString}
           />
         </motion.div>
       );
@@ -782,6 +788,23 @@ export default function LessonRenderer({
 }: LessonRendererProps) {
   const { state, lesson, phaseContext, pakadTriggered } = engine;
 
+  // ---------------------------------------------------------------------------
+  // Tantri string highlight — driven by SwaraIntroduction and PhrasePlayback.
+  // When a non-voice phase highlights a swara, we compute its Hz and pass it
+  // to Tantri as pitchHz with pitchClarity=1.0 for a perfect-accuracy flash.
+  // Reset on every phase change so a stale highlight doesn't bleed into the
+  // next phase.
+  // ---------------------------------------------------------------------------
+  const [highlightedSwara, setHighlightedSwara] = useState<string | null>(null);
+  const phaseIdForReset = phaseContext?.phase.id;
+  useEffect(() => {
+    setHighlightedSwara(null);
+  }, [phaseIdForReset]);
+
+  const onHighlightString = useCallback((swara: string) => {
+    setHighlightedSwara(swara);
+  }, []);
+
   if (state === 'loading') {
     return (
       <div className={styles.lessonPage}>
@@ -815,6 +838,24 @@ export default function LessonRenderer({
 
   const isVoicePhase = phaseContext?.isVoicePhase ?? false;
 
+  // Compute Hz for the highlighted swara (swara_introduction / phrase_playback)
+  let highlightHz: number | undefined;
+  if (highlightedSwara) {
+    try {
+      highlightHz = getSwaraFrequency(highlightedSwara as Swara, engine.saHz);
+    } catch {
+      highlightHz = undefined;
+    }
+  }
+
+  // Tantri pitch input: voice phases use live voice; playback phases use highlight
+  const tantriPitchHz = isVoicePhase
+    ? (engine.voiceFeedback.hz ?? undefined)
+    : highlightHz;
+  const tantriPitchClarity = isVoicePhase
+    ? engine.voiceFeedback.confidence
+    : (highlightHz ? 1.0 : undefined);
+
   return (
     <div
       className={styles.lessonPage}
@@ -829,8 +870,8 @@ export default function LessonRenderer({
         level="shishya"
         subLevel={phaseContext ? Math.min(Math.floor(phaseContext.phaseIndex / 3) + 1, 3) : 1}
         variant="full"
-        pitchHz={isVoicePhase ? (engine.voiceFeedback.hz ?? undefined) : undefined}
-        pitchClarity={isVoicePhase ? engine.voiceFeedback.confidence : undefined}
+        pitchHz={tantriPitchHz}
+        pitchClarity={tantriPitchClarity}
         analyser={engine.audio.pipelineActive ? engine.audio.getAnalyserNode() : null}
         style={{
           position: 'absolute',
@@ -871,6 +912,7 @@ export default function LessonRenderer({
             engine={engine}
             user={user}
             ragaId={ragaId ?? lesson.raga_id}
+            onHighlightString={onHighlightString}
           />
         </AnimatePresence>
       </div>

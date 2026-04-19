@@ -4,14 +4,15 @@
  * Presents swaras one at a time: plays the tone first, pauses, then reveals
  * the label. Audio before everything — the Presence Rule.
  *
+ * Rendering: thin label overlay above Tantri. No swaraGrid or listeningDot —
+ * Tantri is the primary visual surface. This component drives Tantri via
+ * the onHighlightString callback, which the parent wires to Tantri's pitchHz.
+ *
  * Props:
  *   swaras: string[] — swara symbols to present (e.g. ['Sa', 'Re', 'Ga'])
  *   onComplete: () => void — called when all swaras have been revealed
  *   revealDelayMs: number — pause between audio and label reveal (default 1200)
- *
- * Typography:
- *   Swara name: Cormorant Garamond (--font-serif)
- *   Frequency hint: IBM Plex Mono (--font-mono)
+ *   onHighlightString: (swara: string) => void — drives Tantri string highlight
  *
  * Animation: Framer Motion fade + scale 0.8 -> 1.0 spring on each swara reveal.
  * Reduced-motion: swaras appear instantly, no scale animation.
@@ -21,10 +22,9 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import type { Swara } from '@/engine/theory/types';
-import { getSwaraFrequency } from '@/engine/theory';
-import styles from '../styles/swara-introduction.module.css';
+import { motion } from 'framer-motion';
+// AnimatePresence removed — Tantri is the primary visual surface.
+import styles from '../styles/lesson-renderer.module.css';
 
 // ---------------------------------------------------------------------------
 // Props
@@ -39,28 +39,15 @@ interface SwaraIntroductionProps {
   audioFirst?: boolean;
   /** Delay in ms between audio trigger and label reveal. */
   revealDelayMs?: number;
-  /** Sa frequency in Hz for computing display hints. */
-  saHz?: number;
   /** Optional callback to play a swara tone. Called with the swara name when it becomes active. */
   onPlaySwara?: (swara: string) => void;
+  /**
+   * Drives Tantri string highlight. Called with the swara name whenever a new
+   * swara becomes active. The parent converts swara→Hz and passes to Tantri
+   * as pitchHz with pitchClarity=1.0 for a perfect-accuracy highlight.
+   */
+  onHighlightString?: (swara: string) => void;
 }
-
-// ---------------------------------------------------------------------------
-// Swara spring animation variants
-// ---------------------------------------------------------------------------
-
-const swaraVariants = {
-  hidden: { opacity: 0, scale: 0.8 },
-  visible: {
-    opacity: 1,
-    scale: 1,
-    transition: {
-      type: 'spring' as const,
-      stiffness: 400,
-      damping: 15,
-    },
-  },
-};
 
 // ---------------------------------------------------------------------------
 // Component
@@ -71,8 +58,8 @@ export default function SwaraIntroduction({
   onComplete,
   audioFirst = true,
   revealDelayMs = 1200,
-  saHz = 261.63,
   onPlaySwara,
+  onHighlightString,
 }: SwaraIntroductionProps) {
   /** Index of the next swara to reveal (0-based). -1 = not started. */
   const [currentIndex, setCurrentIndex] = useState(-1);
@@ -90,12 +77,14 @@ export default function SwaraIntroduction({
   const advanceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const completeCalled = useRef(false);
 
-  // Store onPlaySwara in a ref so advanceSwara doesn't depend on it.
-  // Without this, inline arrow function props like onPlaySwara={(s) => audio.playSwara(s)}
-  // create new references every render, causing advanceSwara to recreate and
-  // auto-advance timers to reset before they complete — the "stuck at step 3" bug.
+  // Store callbacks in refs so advanceSwara doesn't depend on them.
+  // Without this, inline arrow function props create new references every render,
+  // causing advanceSwara to recreate and auto-advance timers to reset before
+  // they complete — the "stuck at step 3" bug.
   const onPlaySwaraRef = useRef(onPlaySwara);
   onPlaySwaraRef.current = onPlaySwara;
+  const onHighlightStringRef = useRef(onHighlightString);
+  onHighlightStringRef.current = onHighlightString;
 
   // Clean up both timers on unmount
   useEffect(() => {
@@ -122,9 +111,12 @@ export default function SwaraIntroduction({
 
       setIsPlaying(true);
 
-      // Trigger audio playback for this swara (via ref to avoid dep instability)
+      // Trigger audio playback and Tantri highlight (via refs to avoid dep instability)
       if (onPlaySwaraRef.current) {
         onPlaySwaraRef.current(swaras[next]!);
+      }
+      if (onHighlightStringRef.current) {
+        onHighlightStringRef.current(swaras[next]!);
       }
 
       if (audioFirst) {
@@ -175,19 +167,6 @@ export default function SwaraIntroduction({
     }
   }, [currentIndex, isPlaying, revealedIndices, swaras.length, advanceSwara]);
 
-  // Compute frequency hint for a given swara symbol
-  const getFrequencyHint = useCallback(
-    (swaraSymbol: string): string => {
-      try {
-        const hz = getSwaraFrequency(swaraSymbol as Swara, saHz);
-        return `${Math.round(hz)} Hz`;
-      } catch {
-        return '';
-      }
-    },
-    [saHz],
-  );
-
   // Handle completion
   const handleComplete = useCallback(() => {
     if (!completeCalled.current) {
@@ -196,54 +175,40 @@ export default function SwaraIntroduction({
     }
   }, [onComplete]);
 
+  // The active swara label — shown as thin overlay above Tantri
+  const activeSwara = currentIndex >= 0 ? swaras[currentIndex] : null;
+
   return (
     <div
-      className={styles.container}
+      className={styles.centeredMessage}
       role="region"
       aria-label="Swara introduction"
       aria-live="polite"
     >
-      {/* Listening indicator while audio plays */}
-      {isPlaying && (
-        <div className={styles.listeningDot} aria-label="Playing swara tone" />
+      {/* Current swara label — Tantri is the primary visual surface */}
+      {activeSwara && (
+        <motion.p
+          key={activeSwara}
+          className={styles.practiceTarget}
+          initial={{ opacity: 0, y: 4 }}
+          animate={{ opacity: 1, y: 0, transition: { duration: 0.18 } }}
+          exit={{ opacity: 0 }}
+        >
+          {activeSwara}
+        </motion.p>
       )}
-
-      {/* Swara grid */}
-      <div className={styles.swaraGrid}>
-        <AnimatePresence>
-          {swaras.map((swara, index) => {
-            const isRevealed = revealedIndices.has(index);
-            if (!isRevealed) return null;
-
-            return (
-              <motion.div
-                key={swara + '-' + String(index)}
-                className={styles.swaraItem}
-                variants={swaraVariants}
-                initial="hidden"
-                animate="visible"
-                aria-label={`Swara: ${swara}`}
-              >
-                <span className={styles.swaraName}>{swara}</span>
-                <span className={styles.swaraFrequency}>
-                  {getFrequencyHint(swara)}
-                </span>
-              </motion.div>
-            );
-          })}
-        </AnimatePresence>
-      </div>
 
       {/* Continue button appears when all swaras are revealed */}
       {sequenceComplete && (
         <motion.button
           type="button"
-          className={styles.continueButton}
+          className={styles.actionButton}
           onClick={handleComplete}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.3, duration: 0.4 }}
           aria-label="Continue to next phase"
+          style={{ marginTop: 'var(--space-4)' }}
         >
           Continue
         </motion.button>

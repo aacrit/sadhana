@@ -1,29 +1,27 @@
 /**
- * PhrasePlayback.tsx — Sequential phrase dot visualization
+ * PhrasePlayback.tsx — Sequential phrase presentation layer above Tantri.
  *
- * Displays a sequence of swara dots that light up in order as the phrase plays.
- * Each dot is a 40px circle; the active dot lights up saffron (#E8871E).
- * Labels appear below each dot only when showLabels is true.
+ * Sequences through swaras, calling onPlaySwara for audio and onHighlightString
+ * to drive Tantri string highlighting. Renders only a minimal current-swara
+ * label overlay — Tantri is the primary visual surface.
  *
  * Props:
  *   phrase: string[] — swara symbols in order
- *   showLabels: boolean — whether to display swara names below dots
+ *   showLabels: boolean — kept for API compat; labels shown in phrase row only
  *   onComplete: () => void — called when the full phrase playback finishes
  *   repeatCount: number — how many times to play the phrase (default 1)
  *   noteDurationMs: number — duration of each note in ms (default 800)
+ *   onHighlightString: (swara: string) => void — drives Tantri string highlight
  *
- * Audio: In production, each dot activation triggers Tone.js synthesis.
- * Currently simulated with timers for visual sequencing.
- *
- * Accessibility: Dots are decorative (aria-hidden), phrase content announced
- * via aria-live region. Keyboard: spacebar to replay.
+ * Accessibility: phrase content announced via aria-live region.
+ * Keyboard: spacebar to replay.
  */
 
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion } from 'framer-motion';
-import styles from '../styles/phrase-playback.module.css';
+import styles from '../styles/lesson-renderer.module.css';
 
 // ---------------------------------------------------------------------------
 // Props
@@ -32,7 +30,7 @@ import styles from '../styles/phrase-playback.module.css';
 interface PhrasePlaybackProps {
   /** Swara symbols in the phrase, e.g. ['Sa', 'Re', 'Ga', 'Pa', 'Dha', 'Sa'] */
   phrase: string[];
-  /** Whether to show swara labels below dots. */
+  /** Whether to show swara labels in the phrase row. */
   showLabels: boolean;
   /** Called when all repetitions of the phrase have completed. */
   onComplete: () => void;
@@ -42,6 +40,12 @@ interface PhrasePlaybackProps {
   noteDurationMs?: number;
   /** Optional callback to play an individual swara tone. Called with swara name on each note. */
   onPlaySwara?: (swara: string) => void;
+  /**
+   * Drives Tantri string highlight. Called with the swara name whenever a note
+   * becomes active. The parent converts swara→Hz and passes to Tantri as
+   * pitchHz with pitchClarity=1.0 for a perfect-accuracy highlight.
+   */
+  onHighlightString?: (swara: string) => void;
 }
 
 // ---------------------------------------------------------------------------
@@ -55,6 +59,7 @@ export default function PhrasePlayback({
   repeatCount = 1,
   noteDurationMs = 800,
   onPlaySwara,
+  onHighlightString,
 }: PhrasePlaybackProps) {
   /** Index of the currently active dot (-1 = none active). */
   const [activeIndex, setActiveIndex] = useState(-1);
@@ -68,6 +73,11 @@ export default function PhrasePlayback({
   const currentRepRef = useRef(0);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const completeCalled = useRef(false);
+  // Store callbacks in refs to avoid dep instability in playPhrase
+  const onPlaySwaraRef = useRef(onPlaySwara);
+  onPlaySwaraRef.current = onPlaySwara;
+  const onHighlightStringRef = useRef(onHighlightString);
+  onHighlightStringRef.current = onHighlightString;
 
   // Clean up timers
   useEffect(() => {
@@ -116,9 +126,12 @@ export default function PhrasePlayback({
         return next;
       });
 
-      // Trigger audio playback for this note
-      if (onPlaySwara && phrase[currentNote]) {
-        onPlaySwara(phrase[currentNote]);
+      // Trigger audio playback and Tantri highlight (via refs for dep stability)
+      if (onPlaySwaraRef.current && phrase[currentNote]) {
+        onPlaySwaraRef.current(phrase[currentNote]);
+      }
+      if (onHighlightStringRef.current && phrase[currentNote]) {
+        onHighlightStringRef.current(phrase[currentNote]);
       }
 
       noteIndex += 1;
@@ -129,7 +142,7 @@ export default function PhrasePlayback({
 
     // Start after a brief delay
     timerRef.current = setTimeout(playNext, 300);
-  }, [phrase, phrase.length, repeatCount, noteDurationMs, onPlaySwara]);
+  }, [phrase, phrase.length, repeatCount, noteDurationMs]);
 
   // Auto-start on mount
   useEffect(() => {
@@ -164,9 +177,11 @@ export default function PhrasePlayback({
     }
   }, [onComplete]);
 
+  const activeSwara = activeIndex >= 0 ? phrase[activeIndex] : null;
+
   return (
     <div
-      className={styles.container}
+      className={styles.centeredMessage}
       role="region"
       aria-label={`Phrase: ${phrase.join(' ')}`}
       onKeyDown={handleKeyDown}
@@ -174,34 +189,24 @@ export default function PhrasePlayback({
     >
       {/* Screen reader announcement */}
       <div className="sr-only" aria-live="polite">
-        {activeIndex >= 0 && phrase[activeIndex]
-          ? `Playing: ${phrase[activeIndex]}`
-          : ''}
+        {activeSwara ? `Playing: ${activeSwara}` : ''}
       </div>
 
-      {/* Dot row */}
-      <div className={styles.dotsRow} aria-hidden="true">
-        {phrase.map((swara, index) => {
-          const isActive = index === activeIndex;
-          const isPlayed = playedIndices.has(index) && !isActive;
-
-          const dotClassName = [
-            styles.dot,
-            isActive && styles.dotActive,
-            isPlayed && styles.dotPlayed,
-          ]
-            .filter(Boolean)
-            .join(' ');
-
-          return (
-            <div key={swara + '-' + String(index)} className={styles.dotWrapper}>
-              <div className={dotClassName} />
-              {showLabels && (
-                <span className={styles.dotLabel}>{swara}</span>
-              )}
-            </div>
-          );
-        })}
+      {/* Phrase row — minimal label sequence above Tantri.
+          Tantri string highlighting is the primary visual feedback. */}
+      <div className={styles.phraseRow} aria-hidden="true">
+        {phrase.map((swara, index) => (
+          <span
+            key={swara + '-' + String(index)}
+            className={
+              index === activeIndex
+                ? `${styles.phraseNote} ${styles.phraseNoteActive}`
+                : styles.phraseNote
+            }
+          >
+            {showLabels ? swara : '\u2022'}
+          </span>
+        ))}
       </div>
 
       {/* Continue is always available — skips remaining repeats and advances.
@@ -215,6 +220,7 @@ export default function PhrasePlayback({
         animate={{ opacity: allComplete ? 1 : 0.35 }}
         transition={{ delay: 0.3, duration: 0.4 }}
         aria-label="Continue to next phase"
+        style={{ marginTop: 'var(--space-4)' }}
       >
         Continue
       </motion.button>
