@@ -455,6 +455,43 @@
   text-transform: lowercase;
 }
 
+/* Ornament attempt score display (appears after Done is pressed). */
+.ornamentScore {
+  margin-top: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.ornamentScoreValue {
+  font-family: var(--font-mono);
+  font-size: var(--text-3xl);
+  color: var(--accent);
+  line-height: 1;
+}
+
+.ornamentScoreUnit {
+  font-size: var(--text-sm);
+  color: var(--text-3);
+  letter-spacing: var(--tracking-wider);
+}
+
+.ornamentScoreNotes {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: var(--text-sm);
+  color: var(--text-2);
+  text-align: center;
+}
+
+.ornamentScoreNotes li {
+  margin: 0;
+  padding: 0;
+}
+
 /* Raga identification: hint text */
 .phaseHint {
   font-family: var(--font-serif);
