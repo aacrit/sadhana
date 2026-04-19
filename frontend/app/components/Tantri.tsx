@@ -843,7 +843,19 @@ const Tantri = memo(function Tantri({
     const w = rect.width * dpr;
     const h = rect.height * dpr;
 
-    // Resize canvas if needed
+    // Resize canvas if needed.
+    // No ctx.scale() or ctx.setTransform() is used — all drawing coordinates are
+    // already expressed in CSS pixels and multiplied by `dpr` at each draw call
+    // (e.g. `lineWidth = baseWidth * dpr`, `arc(x, y, 4 * dpr, ...)`). This is
+    // the "manual-scale" DPR strategy, equivalent to the "ctx.scale(dpr,dpr)-once"
+    // strategy but without any risk of transform accumulation.
+    //
+    // DPR changes mid-session (monitor switch, browser zoom): `dpr` is read every
+    // frame from `window.devicePixelRatio`, so `w = rect.width * dpr` and
+    // `h = rect.height * dpr` automatically reflect any change. If DPR changes
+    // without a CSS-pixel dimension change, `w` and `h` will differ from the
+    // stale bitmap dimensions, this branch fires, and the canvas is re-sized with
+    // the correct physical resolution on that same frame.
     if (canvas.width !== w || canvas.height !== h) {
       canvas.width = w;
       canvas.height = h;
