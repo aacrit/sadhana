@@ -141,9 +141,10 @@ Additive synthesis using Web Audio API directly (not Tone.js). Each of 4 strings
 |-----------|-------|
 | Sa frequency | 261.63 Hz (C4) |
 | Master volume | 0.3 |
-| Strings | 4 (always) |
-| Sa detuning | 2 cents between 2nd and 3rd strings |
+| Strings | 2 default (Sa + ground). Level-scaled: shishya=2, sadhaka=3, varistha=4 |
+| Sa detuning | 2 cents between 2nd and 3rd strings (active when stringCount >= 3) |
 | Partials per string | 10 |
+| cycleDuration | 2.0s (at stringCount=2 → 1.0s per pluck) |
 
 ### String Tuning
 
@@ -164,7 +165,7 @@ The jivari bridge excites higher partials far more than a normal plucked string,
 
 ### Pluck Cycle
 
-Strings are plucked sequentially — ground-string → Sa → Sa → low Sa — repeating on a configurable cycle. The ground string is Pa by default; ragas that omit Pa use Ma (Marwa, Malkauns) or Ni (Bageshri) via the `groundString` config field (reads `Raga.tanpuraTuning` automatically). Each pluck applies a jivari amplitude envelope: 35ms exponential ramp attack (previously 15ms linear — more natural string-contact character), then exponential decay with higher partials sustaining longer than lower ones. The `cycleDuration` parameter (default 7s) controls the full 4-string cycle; each string is plucked every `cycleDuration / 4` seconds (1.75s at 7s cycle). String sustain is extended to overlap across the full cycle so successive plucks crossfade rather than gap -- producing a continuous drone rather than discrete clicks. The scheduler uses `AudioContext.currentTime` for sample-accurate timing with 2-beat lookahead.
+Strings are plucked sequentially — ground-string → Sa → [Sa → low Sa when stringCount >= 3/4] — repeating on a configurable cycle. The ground string is Pa by default; ragas that omit Pa use Ma (Marwa, Malkauns) or Ni (Bageshri) via the `groundString` config field (reads `Raga.tanpuraTuning` automatically). Each pluck applies a jivari amplitude envelope: 35ms exponential ramp attack (previously 15ms linear — more natural string-contact character), then exponential decay with higher partials sustaining longer than lower ones. The `cycleDuration` parameter (default 2.0s) controls the full cycle; each string is plucked every `cycleDuration / stringCount` seconds (1.0s at default 2-string, 2.0s cycle). `jivariSustainFactor` is tightened so tails no longer overlap across cycles. String sustain is extended to overlap within the cycle so successive plucks crossfade rather than gap -- producing a continuous drone rather than discrete clicks. The scheduler uses `AudioContext.currentTime` for sample-accurate timing with 2-beat lookahead.
 
 **Per-partial jivari detune:** Each of the 40 oscillators (4 strings × 10 partials) receives a deterministic ±0.4 cent offset. The offset is computed once per construction from a seeded xorshift32 PRNG (seed = string index × 31 + partial index). Deterministic seeding ensures the same shimmer pattern on every play, matching the physical consistency of a real jivari bridge finish.
 
@@ -232,10 +233,12 @@ Two biquad peaking filters in series simulate the wooden harmonium box:
 
 | Phase | Duration | Level |
 |-------|----------|-------|
-| Attack | 0.08s | 0 -> peak (bellows-to-reed delay) |
-| Decay | 0.15s | peak -> 0.85 * peak (initial brightness fade) |
-| Sustain | (note duration - attack - decay - release) | 0.85 * peak |
-| Release | 0.20s | sustain -> 0 (air pressure release) |
+| Attack | 0.04s | 0 -> peak (40ms reed-to-bellows delay — music-director spec) |
+| Decay | — | no decay phase (reed sustains at full amplitude while bellows push) |
+| Sustain | (note duration - attack - release) | 1.0 (full amplitude while held) |
+| Release | 0.30s | sustain -> 0 (300ms air pressure release — music-director spec) |
+
+**Default timbre is harmonium.** Piano timbre exists as `timbre: 'piano'` override but is not used by default. Music-director ruling: equal-tempered percussive piano playback contradicts HCM pedagogy.
 
 ### Bellows LFO (Pitch Instability)
 
@@ -705,12 +708,17 @@ Signature: `useLessonAudio(sa_hz?, ragaId, timbre?): LessonAudioControls`. All j
 
 `LessonAudioControls` includes a `setTanpuraGain(gain, rampMs?)` method (exposed by `useLessonAudio`) that ramps the tanpura drone master gain via `TanpuraDrone.setVolume(v, rampMs)`. `useLessonEngine` calls this on every phase transition using `PHASE_TANPURA_GAIN`:
 
-| Gain | Phase types |
-|------|-------------|
-| Full (1.0×) | `tanpura_drone`, `passive_phrase_recognition`, `session_summary` |
-| Ducked (0.35×) | `sa_detection`, `pitch_exercise`, `phrase_exercise`, `call_response`, `swara_introduction`, `phrase_playback`, `ornament_exercise`, `andolan`, `meend` |
-| Silent (0) | YAML flag `tanpura_presence: off` (optional field on any phase) |
-| Ducked (0.35×) | Unknown phase types (default) |
+| Gain constant | Value | Phase types |
+|---------------|-------|-------------|
+| Full (1.0×) | 1.0 | `tanpura_drone`, `passive_phrase_recognition`, `session_summary` |
+| SA_DETECTION_GAIN | 0.85 | `sa_detection` — tanpura audible, student hasn't started singing |
+| VOICE_EXERCISE_GAIN | 0.22 | `pitch_exercise`, `call_response`, `phrase_exercise`, `ornament_exercise`, `andolan`, `meend` |
+| INSTRUCTION_GAIN | 0.22 | `swara_introduction`, unknown phase types (default) |
+| DEMO_GAIN | 0.18 | `phrase_playback`, `raga_opening`, `sing_along` — harmonium demo must be heard clearly |
+| TANPURA_FLOOR | 0.15 | Absolute minimum — gain never drops below this |
+| Silent (0) | 0 | YAML flag `tanpura_presence: off` (optional field on any phase) |
+
+Gain ramp: 800ms crossfade on phase change (music-director spec — unhurried shift, not a cut).
 
 The tanpura is **never stopped between phases** — only gain changes. Continuous drone is the premise of the lesson experience.
 

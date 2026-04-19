@@ -1,6 +1,6 @@
 # Sādhanā — Complete Curriculum
 
-Last updated: 2026-04-12
+Last updated: 2026-04-19
 
 ---
 
@@ -38,7 +38,7 @@ This is the standard gurukul sequencing: pentatonic pure, sampoorna with one vik
 ## LEVEL 1: SHISHYA (Beginner) -- Levels 1-3
 
 ### Current State
-Five lessons exist: B-01 Bhoopali, B-02 Sa-Pa Drone, B-03 Yaman, B-04 Bhairav, B-05 Bhimpalasi. No Bageshri lesson. No consolidation or review exercises. No explicit level-up challenge.
+Eight lessons exist and are deployed: B-01 through B-08. All beginner YAMLs are in `frontend/public/curriculum/`. Phase counts have been tightened: B-01 through B-04 are 5 phases each, B-05 and B-06 are 6 phases each, B-07 is 3 phases, B-08 is 6 phases. Two new phase types are now live: `raga_opening` (ambient tanpura intro) and `sing_along` (teacher phrase + immediate echo). The `ornament_exercise`, `andolan`, and `meend` phase types from Sadhaka are registered in `VOICE_PHASE_TYPES`.
 
 ### What Is Needed
 

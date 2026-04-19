@@ -1,8 +1,8 @@
 # Lesson Renderer Spec
 
-Last updated: 2026-04-19
+Last updated: 2026-04-19 (rev 2)
 
-The lesson renderer loads a YAML lesson file and its copy overlay, then drives a state machine through phases. Each phase type maps to a React component.
+The lesson renderer loads a YAML lesson file and its copy overlay, then drives a state machine through phases. All singing phases share a single persistent `LessonPracticeSurface` — Tantri is always visible. `SwaraIntroduction` and `PhrasePlayback` are thin label overlays that drive `Tantri.pitchHz` via `onHighlightString`; they do not mount/unmount the surface. Phase transition: enter 0.18s, exit 0.15s. The 500ms inter-phase pause and the Ready/Begin transition page have been removed.
 
 ---
 
@@ -57,6 +57,8 @@ Pitch detection loop to calibrate user's Sa. Skippable via `skip_if`.
 | min_clarity | number | yes (documentation-only — not read by runtime; see AUDIO-ENGINE.md) |
 | fallback_hz | number | yes |
 | skip_if | string | no |
+
+`skip_if: sa_already_set` is evaluated by `useLessonEngine` against `saHz !== 261.6256` (the default fallback). When a new Sa is detected in-lesson, `updateSa(userId, hz)` is called and persists the value to `profiles.sa_hz`. `SaSeedBridge` seeds `VoiceWaveContext` from the profile on mount so subsequent phases use the correct Sa immediately.
 
 Component: `<SaDetectionPhase />`
 
@@ -126,6 +128,24 @@ Engine plays a note, student sings back (same or complement).
 
 Component: `<CallResponsePhase />`
 
+### `raga_opening`
+
+Ambient tanpura listen with raga intro. Minimal UI, same behavior as `tanpura_drone`. No student interaction required. Auto-advances after `duration_s`.
+
+Component: routed through `<TanpuraDronePhase />` in `LessonRenderer`.
+
+### `sing_along`
+
+Teacher phrase plays (via phrase-playback route), student echoes immediately. `guide_tone: true` is standard; explicit teacher-then-student gating is stored in YAML but not yet enforced by the runtime (known gap — see Known Gaps).
+
+| Field | Type | Required |
+|-------|------|----------|
+| phrase | string[] | yes |
+| guide_tone | boolean | yes |
+| feedback_layer | string | yes |
+
+Component: routed through `<PhrasePlaybackPhase />` in `LessonRenderer`.
+
 ### `passive_phrase_recognition`
 
 Free singing with pakad detection running in background.
@@ -170,7 +190,7 @@ Transitions:
     - Summary: user taps "Finish"
     -> PHASE_COMPLETE[n]
   PHASE_COMPLETE[n]:
-    if n < phases.length - 1 -> PHASE_ACTIVE[n+1] (auto-advance, 500ms pause)
+    if n < phases.length - 1 -> PHASE_ACTIVE[n+1] (auto-advance, no inter-phase pause)
     if n == phases.length - 1 -> LESSON_COMPLETE
   LESSON_COMPLETE:
     - Write session to Supabase (accuracy, duration, pakad detected)
@@ -218,3 +238,12 @@ The tanpura starts in the first `tanpura_drone` phase and does NOT stop until th
 3. `screen_title` comes exclusively from copy (no fallback in YAML)
 4. `feedback` object in copy provides all feedback strings for exercise phases
 5. `theory_note`, `western_bridge`, `cultural_note` are accessible via info panel, not shown inline during practice
+
+---
+
+## Known Gaps
+
+| Gap | Detail |
+|-----|--------|
+| `sa_already_set` exact equality | `skip_if: sa_already_set` compares `saHz !== 261.6256` (exact float). If a stored Sa round-trips to the default value, the phase will not be skipped. |
+| `guide_tone` gating in `sing_along` | `guide_tone: true` YAML field is stored but `sing_along` does not yet enforce explicit teacher-then-student sequencing. Both teacher phrase and student echo window are active concurrently. |
