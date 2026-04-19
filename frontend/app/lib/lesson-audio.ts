@@ -55,8 +55,38 @@ const SA_HOLD_FRAMES = 45;
 /** Maximum cents deviation within a hold to remain "stable". */
 const SA_HOLD_STABILITY_CENTS = 120;
 
-/** Minimum clarity for Sa detection readings. */
-const SA_DETECTION_CLARITY = 0.50;
+/**
+ * Initial minimum clarity for Sa detection readings.
+ *
+ * Pitchy's McLeod Pitch Method clarity on real-world sung vowels typically
+ * lands between 0.55 and 0.85 — hardcoded high thresholds (0.80+) would
+ * reject a clean sung tone from a slightly breathy voice. We start at 0.55
+ * (a reasonable per-sample floor for pitched material) and auto-relax it
+ * toward SA_DETECTION_CLARITY_FLOOR when no hold completes in the first
+ * few seconds of active singing.
+ */
+const SA_DETECTION_CLARITY_INITIAL = 0.55;
+
+/**
+ * Hard floor that clarity relaxation will never go below. Anything lower
+ * admits too much non-pitched material (breath noise, consonants).
+ */
+const SA_DETECTION_CLARITY_FLOOR = 0.40;
+
+/**
+ * Cadence for progressive clarity relaxation. Every RELAX_EVERY_MS with
+ * no completed hold, drop the threshold by RELAX_STEP down to the floor.
+ * Total span: 0.55 → 0.40 in (0.55−0.40)/0.05 × 2s = 6s.
+ */
+const SA_DETECTION_RELAX_EVERY_MS = 2000;
+const SA_DETECTION_RELAX_STEP = 0.05;
+
+/**
+ * If the student has been in the Sa-detection phase for this long with no
+ * completed hold, we surface a warning to the console so this regresses
+ * loudly in future, rather than silently stalling. Does NOT affect the UI.
+ */
+const SA_DETECTION_WARN_AFTER_MS = 5000;
 
 // ---------------------------------------------------------------------------
 // Types
@@ -67,6 +97,19 @@ export interface LessonAudioControls {
   startTanpura(): void;
   stopTanpura(): void;
   setTanpuraVolume(volume: number): void;
+  /**
+   * Smoothly ramp the tanpura master gain to a target value.
+   * Used by the lesson engine to duck the drone during focus phases
+   * (sa_detection, pitch_exercise, call_response, etc.) and restore
+   * full presence during listening phases (tanpura_drone, session_summary).
+   *
+   * No-op if the tanpura is not running — safe to call at every phase
+   * transition without knowing whether the drone was started.
+   *
+   * @param gain - Target master volume in [0, 1].
+   * @param rampMs - Ramp duration in milliseconds. Default 400.
+   */
+  setTanpuraGain(gain: number, rampMs?: number): void;
   tanpuraActive: boolean;
 
   // Tabla / Tala
@@ -167,6 +210,7 @@ export function useLessonAudio(
   const talaCtxRef = useRef<AudioContext | null>(null);
   const voicePipelineRef = useRef<VoicePipeline | null>(null);
   const saDetectionPipelineRef = useRef<VoicePipeline | null>(null);
+  const saDetectionTickRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const playbackAbortRef = useRef<AbortController | null>(null);
   const disposedRef = useRef(false);
 
@@ -207,6 +251,14 @@ export function useLessonAudio(
     if (tanpuraRef.current && tanpuraRef.current.isRunning()) {
       tanpuraRef.current.setVolume(volume);
     }
+  }, []);
+
+  const setTanpuraGain = useCallback((gain: number, rampMs: number = 400) => {
+    // Clamp to [0, 1] and no-op if tanpura is not running — calling this
+    // at every phase transition is safe even before the drone has started.
+    if (!tanpuraRef.current || !tanpuraRef.current.isRunning()) return;
+    const clamped = Math.max(0, Math.min(1, gain));
+    tanpuraRef.current.setVolume(clamped, rampMs);
   }, []);
 
   // -----------------------------------------------------------------------
@@ -356,10 +408,61 @@ export function useLessonAudio(
       let holdClaritySum = 0;
       let holdAnchorHz = 0; // first Hz of current hold attempt
 
+      // Auto-calibration: if no hold completes within a few seconds of active
+      // signal, progressively relax the per-sample clarity threshold. A silent
+      // mic still never false-positives because the hold stability gate
+      // (SA_HOLD_FRAMES × SA_HOLD_STABILITY_CENTS) continues to apply.
+      const sessionStart = (typeof performance !== 'undefined'
+        ? performance.now()
+        : Date.now());
+      let lastRelaxAt = sessionStart;
+      let warned = false;
+
+      // Clear any stale auto-relax tick from a previous call
+      if (saDetectionTickRef.current !== null) {
+        clearInterval(saDetectionTickRef.current);
+        saDetectionTickRef.current = null;
+      }
+
+      saDetectionTickRef.current = setInterval(() => {
+        if (disposedRef.current) return;
+        if (completedHolds.length > 0) return; // progress made; don't relax further
+        const now = (typeof performance !== 'undefined'
+          ? performance.now()
+          : Date.now());
+        const elapsed = now - sessionStart;
+
+        if (now - lastRelaxAt >= SA_DETECTION_RELAX_EVERY_MS) {
+          const current = pipeline.getClarityThreshold();
+          const next = Math.max(
+            SA_DETECTION_CLARITY_FLOOR,
+            current - SA_DETECTION_RELAX_STEP,
+          );
+          if (next < current) {
+            pipeline.setClarityThreshold(next);
+          }
+          lastRelaxAt = now;
+        }
+
+        if (!warned && elapsed >= SA_DETECTION_WARN_AFTER_MS) {
+          warned = true;
+          // Surface loudly so this regression is visible in production logs.
+          // eslint-disable-next-line no-console
+          console.warn(
+            '[lesson-audio] Sa detection: no candidate passed the clarity gate ' +
+            `in ${String(Math.round(elapsed))}ms. ` +
+            `Current threshold: ${pipeline.getClarityThreshold().toFixed(2)}. ` +
+            'Auto-relaxing toward ' + SA_DETECTION_CLARITY_FLOOR.toFixed(2) + '. ' +
+            'If this fires often, check mic gain, browser DSP, or whether the ' +
+            'student is singing at all.',
+          );
+        }
+      }, 250);
+
       const pipeline = new VoicePipeline({
         sa_hz: saHzRef.current,
         // No ragaId — raw Hz detection only
-        clarityThreshold: SA_DETECTION_CLARITY,
+        clarityThreshold: SA_DETECTION_CLARITY_INITIAL,
         onPitch: (event: VoiceEvent) => {
           if (
             disposedRef.current ||
@@ -426,6 +529,10 @@ export function useLessonAudio(
               // Stop the detection pipeline
               pipeline.stop();
               saDetectionPipelineRef.current = null;
+              if (saDetectionTickRef.current !== null) {
+                clearInterval(saDetectionTickRef.current);
+                saDetectionTickRef.current = null;
+              }
 
               // Report the candidate
               onCandidate(median.hz, meanClarity);
@@ -451,6 +558,10 @@ export function useLessonAudio(
     if (saDetectionPipelineRef.current) {
       saDetectionPipelineRef.current.stop();
       saDetectionPipelineRef.current = null;
+    }
+    if (saDetectionTickRef.current !== null) {
+      clearInterval(saDetectionTickRef.current);
+      saDetectionTickRef.current = null;
     }
   }, []);
 
@@ -527,6 +638,7 @@ export function useLessonAudio(
     talaCtxRef.current = null;
     voicePipelineRef.current = null;
     saDetectionPipelineRef.current = null;
+    saDetectionTickRef.current = null;
     playbackAbortRef.current = null;
   }, [stopPlayback, stopSaDetection, stopVoicePipeline, stopTanpura, stopTala]);
 
@@ -552,6 +664,7 @@ export function useLessonAudio(
     startTanpura,
     stopTanpura,
     setTanpuraVolume,
+    setTanpuraGain,
     tanpuraActive,
     startTala,
     stopTala,
