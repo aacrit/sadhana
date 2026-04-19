@@ -44,7 +44,15 @@ export interface TanpuraConfig {
   readonly volume: number;
   /** Number of strings. Always 4. */
   readonly strings: 4;
-  /** Use Ma instead of Pa for the first string (for Ma-dominant ragas). */
+  /**
+   * Ground string tuning for the first tanpura string.
+   * - 'Pa': standard (Pa, Sa, Sa, Sa_low) — used for most ragas
+   * - 'Ma': Ma-dominant ragas (Marwa, Malkauns) where Pa is absent
+   * - 'Ni': Ni-emphasised ragas (Bageshri)
+   * Default: 'Pa'. When 'Ma' is set, useMa is also true (legacy compat).
+   */
+  readonly groundString?: 'Pa' | 'Ma' | 'Ni';
+  /** @deprecated Use groundString instead. Kept for backward compatibility. */
   readonly useMa?: boolean;
   /** Slight detuning in cents between the two Sa strings (default: 2). */
   readonly saDetuningCents?: number;
@@ -54,6 +62,13 @@ export interface TanpuraConfig {
    * Default: 4.0 (1.0s per string — medium tempo riyaz pace).
    */
   readonly cycleDuration?: number;
+  /**
+   * Jivari per-partial random detune in cents.
+   * Each partial oscillator receives a random offset in the range [-jivarDetuneCents, +jivarDetuneCents].
+   * Seeded deterministically per partial index for session consistency.
+   * Default: 0.4¢ — just enough shimmer, within musicologically defensible range.
+   */
+  readonly jivariDetuneCents?: number;
 }
 
 /**
@@ -63,9 +78,11 @@ export const DEFAULT_TANPURA_CONFIG: TanpuraConfig = {
   sa_hz: 261.63,
   volume: 0.3,
   strings: 4,
+  groundString: 'Pa',
   useMa: false,
   saDetuningCents: 2,
   cycleDuration: 4.0,
+  jivariDetuneCents: 0.4,
 };
 
 // ---------------------------------------------------------------------------
@@ -120,9 +137,11 @@ export class TanpuraDrone {
 
   constructor(config: Partial<TanpuraConfig> = {}) {
     this.config = { ...DEFAULT_TANPURA_CONFIG, ...config, strings: 4 };
+    // Resolve groundString: new API takes priority, legacy useMa is fallback
+    const groundString = this.config.groundString ?? (this.config.useMa ? 'Ma' : 'Pa');
     this.profiles = tanpuraPartials(
       this.config.sa_hz,
-      this.config.useMa ?? false,
+      groundString,
     );
   }
 
@@ -202,7 +221,8 @@ export class TanpuraDrone {
     if (hz <= 0) throw new RangeError('Sa frequency must be positive');
 
     this.config = { ...this.config, sa_hz: hz };
-    this.profiles = tanpuraPartials(hz, this.config.useMa ?? false);
+    const groundString = this.config.groundString ?? (this.config.useMa ? 'Ma' : 'Pa');
+    this.profiles = tanpuraPartials(hz, groundString);
 
     if (this.running && this.audioContext) {
       this.rebuildOscillators();
@@ -263,6 +283,22 @@ export class TanpuraDrone {
   // -------------------------------------------------------------------------
 
   /**
+   * Deterministic seeded pseudo-random number generator (xorshift32).
+   * Returns a value in [-1, 1] for a given seed.
+   *
+   * Using a seeded PRNG ensures the jivari detune is consistent across
+   * sessions — the same session always has the same shimmer pattern, which
+   * avoids the character of the instrument changing between reloads.
+   */
+  private seededRandom(seed: number): number {
+    let x = seed ^ 0x12345678;
+    x ^= x << 13;
+    x ^= x >> 17;
+    x ^= x << 5;
+    return (x & 0x7fffffff) / 0x7fffffff * 2 - 1;
+  }
+
+  /**
    * Build the oscillator graph. All oscillators start running but at gain 0 —
    * the pluck cycle scheduler shapes the envelopes.
    */
@@ -270,6 +306,7 @@ export class TanpuraDrone {
     if (!this.audioContext || !this.masterGain) return;
 
     const detuningCents = this.config.saDetuningCents ?? 2;
+    const jivariDetuneCents = this.config.jivariDetuneCents ?? 0.4;
 
     for (let stringIdx = 0; stringIdx < this.profiles.length; stringIdx++) {
       const profile = this.profiles[stringIdx]!;
@@ -277,20 +314,29 @@ export class TanpuraDrone {
 
       // String volume balancing
       const stringVolume =
-        stringIdx === 0 ? 0.7 :   // Pa or Ma string — slightly lower
+        stringIdx === 0 ? 0.7 :   // Pa/Ma/Ni string — slightly lower
         stringIdx === 3 ? 0.6 :   // Low Sa — subdued
         1.0;                       // Middle Sa strings — full
 
-      for (const partial of profile.partials) {
+      for (let partialIdx = 0; partialIdx < profile.partials.length; partialIdx++) {
+        const partial = profile.partials[partialIdx]!;
         const osc = this.audioContext.createOscillator();
         osc.type = 'sine';
-        osc.frequency.value = partial.frequency;
 
-        // Apply slight detuning to the third string (second Sa)
+        // Jivari per-partial detune: each partial receives a deterministic
+        // random offset in [-jivariDetuneCents, +jivariDetuneCents].
+        // Seed = stringIdx * 100 + partialIdx for determinism across sessions.
+        const jivariCents = this.seededRandom(stringIdx * 100 + partialIdx) * jivariDetuneCents;
+        const jivariRatio = Math.pow(2, jivariCents / 1200);
+        let freq = partial.frequency * jivariRatio;
+
+        // Apply slight detuning to the third string (second Sa) for chorus effect
         if (stringIdx === 2) {
           const detuneRatio = Math.pow(2, detuningCents / 1200);
-          osc.frequency.value = partial.frequency * detuneRatio;
+          freq = partial.frequency * detuneRatio * jivariRatio;
         }
+
+        osc.frequency.value = freq;
 
         const gain = this.audioContext.createGain();
         // Start silent — pluck cycle will shape the envelope
@@ -363,14 +409,15 @@ export class TanpuraDrone {
       const decayTime = cycleDuration * 0.9 * jivariSustainFactor;
       const timeConstant = decayTime / 2.0;
 
-      // Attack: sharp 15ms rise — jivari bridge contact
-      const attackEnd = now + 0.015;
+      // Attack: 35ms exponential rise — more natural string-contact character
+      // than the previous 15ms linear attack. Exponential ramp models the
+      // progressive engagement of the jivari bridge as the string settles.
+      const attackEnd = now + 0.035;
+      const attackStart = Math.max(gainNode.gain.value, 0.0001); // exponential needs non-zero start
 
-      // Smoothly ramp from current level (residual sustain from
-      // previous pluck) to peak, preserving the continuous feel.
       gainNode.gain.cancelScheduledValues(now);
-      gainNode.gain.setValueAtTime(gainNode.gain.value, now);
-      gainNode.gain.linearRampToValueAtTime(peak, attackEnd);
+      gainNode.gain.setValueAtTime(attackStart, now);
+      gainNode.gain.exponentialRampToValueAtTime(peak, attackEnd);
 
       // Long exponential decay — string rings across 3+ pluck intervals
       gainNode.gain.setTargetAtTime(0, attackEnd, timeConstant);

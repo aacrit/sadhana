@@ -121,4 +121,8 @@ export const marwa: Raga = {
     'extended andolan on Re(k), creating a haunting, almost vocal-cord-trembling effect. ' +
     'Agra gharana explores the lower octave with powerful nom-tom alap. The Gwalior ' +
     'tradition tends to present Marwa with more rhythmic structure in bandish compositions.',
+
+  // Ma tuning: Marwa omits Pa, so the tanpura uses Ma as the ground string
+  // rather than Pa. This is standard practice for Pa-varjit ragas.
+  tanpuraTuning: 'Ma',
 };

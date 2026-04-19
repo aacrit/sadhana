@@ -293,6 +293,17 @@ export interface Raga {
   readonly gharanaVariations?: string;
 
   /**
+   * Tanpura tuning — which string replaces the Pa in the tanpura drone.
+   *
+   * Most ragas use the standard Pa tuning (Pa, Sa, Sa, Sa_low).
+   * Ma-dominant ragas (Marwa, Malkauns) use Ma tuning.
+   * Some ragas (Bageshri) use Ni tuning.
+   *
+   * Default: 'Pa' (omit this field to use Pa tuning).
+   */
+  readonly tanpuraTuning?: 'Pa' | 'Ma' | 'Ni';
+
+  /**
    * Vakra (zigzag) movement sequences — swaras that are approached
    * obliquely rather than in straight aroha/avaroha order.
    *

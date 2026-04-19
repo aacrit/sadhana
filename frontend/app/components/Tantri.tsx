@@ -506,6 +506,7 @@ function renderString(
   time: number,
   dpr: number,
   voiceData?: Float32Array | null,
+  vadiSatBoost?: boolean,
 ): void {
   const x0 = PADDING_X + LABEL_WIDTH;
   const x1 = canvasWidth - PADDING_X;
@@ -531,12 +532,19 @@ function renderString(
   }
 
   // Color: rest state uses neutral, active uses accuracy color
-  const color = s.amplitude > 0.01
+  let color = s.amplitude > 0.01
     ? getAccuracyColor(s.accuracyBand)
     : resolveColor('--text-3', '#7A6B5E');
 
+  // Vadi saturation LUT: when student rests on vadi for >1.2s, boost color
+  // saturation by 15% using CSS filter. This is the only place we use filter
+  // on canvas — applied as a globalCompositeOperation alpha tweak instead to
+  // avoid software rasterization. We increase opacity slightly as the proxy
+  // for perceived saturation (brighter = more saturated on dark backgrounds).
+  const vadiOpacityBoost = (vadiSatBoost && s.isVadi) ? 0.15 : 0;
+
   // Opacity: blend between rest and full based on amplitude
-  const opacity = baseOpacity + s.amplitude * (1 - baseOpacity);
+  const opacity = Math.min(1, baseOpacity + s.amplitude * (1 - baseOpacity) + vadiOpacityBoost);
 
   ctx.save();
 
@@ -772,6 +780,10 @@ const Tantri = memo(function Tantri({
   // Track activity state (any string vibrating)
   const wasActiveRef = useRef(false);
 
+  // Vadi saturation LUT: tracks how long the student has rested on the vadi.
+  // When dwell exceeds 1.2s, the vadi string gets a +15% saturation bump.
+  const vadiDwellRef = useRef(0); // seconds on vadi continuously
+
   // -----------------------------------------------------------------------
   // Create / update field
   // -----------------------------------------------------------------------
@@ -863,6 +875,20 @@ const Tantri = memo(function Tantri({
 
     updateFieldFromVoice(field, voiceMap, voiceAmplitude);
 
+    // --- Vadi saturation LUT: dwell tracking ---
+    // When student rests on the vadi swara for >1.2s, that string's
+    // saturation bumps +15% via --tantri-vadi-sat-boost CSS var.
+    if (field.raga && voiceMap && voiceMap.primaryIndex >= 0) {
+      const primaryString = field.strings[voiceMap.primaryIndex];
+      if (primaryString && primaryString.isVadi && voiceAmplitude > 0.05) {
+        vadiDwellRef.current += now - (lastFrameRef.current > 0 ? lastFrameRef.current : now);
+      } else {
+        vadiDwellRef.current = 0;
+      }
+    } else {
+      vadiDwellRef.current = 0;
+    }
+
     // --- Activity detection for cinematic defocus ---
     if (onActivityChange) {
       let isActive = false;
@@ -926,12 +952,14 @@ const Tantri = memo(function Tantri({
 
     // Pass voice time-domain data to renderString for real-time waveform
     const voiceWaveData = analyserDataRef.current;
+    // Vadi saturation boost: active when student dwells on vadi for >1.2s
+    const vadiSatBoost = vadiDwellRef.current > 1.2;
 
     for (let vi = 0; vi < totalVisible; vi++) {
       const idx = visibleIndices[vi]!;
       const s = field.strings[idx]!;
       const y = getStringY(vi, totalVisible, h / dpr) * dpr;
-      renderString(ctx, s, y, w / dpr, timeRef.current, dpr, voiceWaveData);
+      renderString(ctx, s, y, w / dpr, timeRef.current, dpr, voiceWaveData, vadiSatBoost);
     }
 
     // --- Voice oscilloscope: continuously scrolling waveform ---

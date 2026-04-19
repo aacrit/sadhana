@@ -124,4 +124,9 @@ export const bageshri: Raga = {
     'emphasises the lower octave extensively. Pt. Jasraj\'s recordings of Bageshri are ' +
     'considered landmark interpretations that balance technical precision with ' +
     'extraordinary emotional depth.',
+
+  // Ni tuning: Bageshri is a late-night raga (prahar 7-8) with Ni komal
+  // as a key characteristic swara. Some traditions tune the tanpura to Ni
+  // to emphasise the raga's characteristic night-longing quality.
+  tanpuraTuning: 'Ni',
 };

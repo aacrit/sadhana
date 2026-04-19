@@ -60,7 +60,7 @@ export const SPRING_PRESETS = {
 } as const;
 
 /** Vibration decay rate per frame at 60fps (multiplicative). */
-const VIBRATION_DECAY = 0.92;
+const VIBRATION_DECAY = 0.86;
 
 /** Target frame interval in seconds (60fps). */
 const TARGET_DT = 1 / 60;
@@ -284,7 +284,7 @@ function sympatheticAmplitude(
   if (diff < 5) return 0;
 
   // Perfect fifth (701.96 cents) — strongest sympathetic
-  if (Math.abs(diff - 701.96) < 15) return 0.15;
+  if (Math.abs(diff - 701.96) < 15) return 0.35;
 
   // Perfect fourth (498.04 cents)
   if (Math.abs(diff - 498.04) < 15) return 0.08;
@@ -515,7 +515,7 @@ export function updateFieldFromVoice(
 ): void {
   // Scale factors for frame-rate independence
   const dtScale = dt / TARGET_DT;
-  const lerpPrimary = Math.min(1, 0.3 * dtScale);
+  const lerpPrimary = Math.min(1, 0.12 * dtScale);
   const lerpSympathetic = Math.min(1, 0.15 * dtScale);
   const decay = Math.pow(VIBRATION_DECAY, dtScale);
   for (let i = 0; i < field.strings.length; i++) {
