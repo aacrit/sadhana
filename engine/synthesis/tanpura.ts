@@ -42,8 +42,14 @@ export interface TanpuraConfig {
   readonly sa_hz: number;
   /** Master volume (0 to 1). Default: 0.3. */
   readonly volume: number;
-  /** Number of strings. Always 4. */
-  readonly strings: 4;
+  /**
+   * Number of strings to voice.
+   * - 2: Sa + ground (default — Shishya level, cleaner, less overlap)
+   * - 3: ground + Sa + Sa (Sadhaka level, richer)
+   * - 4: ground + Sa + Sa + Sa_low (Varistha+, full tanpura)
+   * Default: 2. Level-based selection happens in the calling code.
+   */
+  readonly stringCount?: 2 | 3 | 4;
   /**
    * Ground string tuning for the first tanpura string.
    * - 'Pa': standard (Pa, Sa, Sa, Sa_low) — used for most ragas
@@ -57,9 +63,10 @@ export interface TanpuraConfig {
   /** Slight detuning in cents between the two Sa strings (default: 2). */
   readonly saDetuningCents?: number;
   /**
-   * Full cycle duration in seconds for all 4 plucks.
-   * Each string gets cycleDuration/4 seconds between plucks.
-   * Default: 4.0 (1.0s per string — medium tempo riyaz pace).
+   * Full cycle duration in seconds for all plucks across all active strings.
+   * Each string gets cycleDuration/stringCount seconds between plucks.
+   * Default: 2.0 — at stringCount=2 this gives 1.0s/pluck, matching the
+   * original 4-string at 4.0s/cycle feel (same inter-pluck interval).
    */
   readonly cycleDuration?: number;
   /**
@@ -73,15 +80,18 @@ export interface TanpuraConfig {
 
 /**
  * Default tanpura configuration.
+ * stringCount defaults to 2 (Sa + ground): Shishya entry point.
+ * cycleDuration defaults to 2.0 so a 2-string tanpura plucks at 1.0s/string,
+ * matching the feel of the original 4-string at 4.0s/cycle.
  */
 export const DEFAULT_TANPURA_CONFIG: TanpuraConfig = {
   sa_hz: 261.63,
   volume: 0.3,
-  strings: 4,
+  stringCount: 2,
   groundString: 'Pa',
   useMa: false,
   saDetuningCents: 2,
-  cycleDuration: 4.0,
+  cycleDuration: 2.0,
   jivariDetuneCents: 0.4,
 };
 
@@ -138,13 +148,14 @@ export class TanpuraDrone {
   private cycleIndex: number = 0;
 
   constructor(config: Partial<TanpuraConfig> = {}) {
-    this.config = { ...DEFAULT_TANPURA_CONFIG, ...config, strings: 4 };
+    this.config = { ...DEFAULT_TANPURA_CONFIG, ...config };
     // Resolve groundString: new API takes priority, legacy useMa is fallback
     const groundString = this.config.groundString ?? (this.config.useMa ? 'Ma' : 'Pa');
+    const stringCount = this.config.stringCount ?? 2;
     this.profiles = tanpuraPartials(
       this.config.sa_hz,
       groundString,
-    );
+    ).slice(0, stringCount);
   }
 
   /**
@@ -247,7 +258,8 @@ export class TanpuraDrone {
 
     this.config = { ...this.config, sa_hz: hz };
     const groundString = this.config.groundString ?? (this.config.useMa ? 'Ma' : 'Pa');
-    this.profiles = tanpuraPartials(hz, groundString);
+    const stringCount = this.config.stringCount ?? 2;
+    this.profiles = tanpuraPartials(hz, groundString).slice(0, stringCount);
 
     if (this.running && this.audioContext) {
       this.rebuildOscillators();
@@ -311,6 +323,13 @@ export class TanpuraDrone {
     return this.config;
   }
 
+  /**
+   * Returns the active string count (reflects stringCount config).
+   */
+  getStringCount(): number {
+    return this.config.stringCount ?? 2;
+  }
+
   // -------------------------------------------------------------------------
   // Private: oscillator graph construction
   // -------------------------------------------------------------------------
@@ -340,16 +359,20 @@ export class TanpuraDrone {
 
     const detuningCents = this.config.saDetuningCents ?? 2;
     const jivariDetuneCents = this.config.jivariDetuneCents ?? 0.4;
+    const stringCount = this.config.stringCount ?? 2;
 
     for (let stringIdx = 0; stringIdx < this.profiles.length; stringIdx++) {
       const profile = this.profiles[stringIdx]!;
       const voice: StringVoice = { oscillators: [], gains: [], peaks: [] };
 
-      // String volume balancing
+      // String volume balancing — ground string slightly lower,
+      // low Sa (only present in 4-string) subdued.
+      const isGroundString = stringIdx === 0;
+      const isLowSa = stringCount === 4 && stringIdx === 3;
       const stringVolume =
-        stringIdx === 0 ? 0.7 :   // Pa/Ma/Ni string — slightly lower
-        stringIdx === 3 ? 0.6 :   // Low Sa — subdued
-        1.0;                       // Middle Sa strings — full
+        isGroundString ? 0.7 :
+        isLowSa ? 0.6 :
+        1.0;
 
       for (let partialIdx = 0; partialIdx < profile.partials.length; partialIdx++) {
         const partial = profile.partials[partialIdx]!;
@@ -363,8 +386,10 @@ export class TanpuraDrone {
         const jivariRatio = Math.pow(2, jivariCents / 1200);
         let freq = partial.frequency * jivariRatio;
 
-        // Apply slight detuning to the third string (second Sa) for chorus effect
-        if (stringIdx === 2) {
+        // Apply slight detuning to the second Sa string for chorus effect.
+        // In a 2-string config (index 0=ground, 1=Sa) there is no second Sa,
+        // so detuning only fires for stringIdx >= 2 (3-string and 4-string).
+        if (stringIdx >= 2) {
           const detuneRatio = Math.pow(2, detuningCents / 1200);
           freq = partial.frequency * detuneRatio * jivariRatio;
         }
@@ -424,22 +449,23 @@ export class TanpuraDrone {
       const peak = voice.peaks[p]!;
       const partialNum = p + 1; // 1-indexed
 
-      // Jivari model: higher partials (2-5) have slower decay because
-      // the bridge re-excites them. The fundamental decays fastest.
-      // Beyond partial 5, decay speeds up again (string stiffness).
+      // Jivari model: higher partials sustain slightly longer than the
+      // fundamental due to bridge re-excitation. All factors are ≤ 1.0
+      // so the decay tail finishes within one pluck cycle — no audible
+      // overlap on the 2-string default (1.0s/pluck).
       const jivariSustainFactor =
-        partialNum === 1 ? 1.0 :
-        partialNum === 2 ? 1.8 :
-        partialNum <= 4 ? 1.6 :
-        partialNum <= 6 ? 1.3 :
-        0.9;
+        partialNum === 1 ? 0.75 :
+        partialNum === 2 ? 0.95 :
+        partialNum <= 4 ? 0.90 :
+        partialNum <= 6 ? 0.80 :
+        0.65;
 
-      // Each string should sustain across most of the full cycle
-      // (all 4 plucks = cycleDuration). The string is still audible
-      // at ~20-30% when the same string is plucked again, creating
-      // the continuous drone. Time constant chosen so the string
-      // reaches ~15% at one full cycle.
-      const decayTime = cycleDuration * 0.9 * jivariSustainFactor;
+      // Each string decays within 90% of one pluck interval, so the
+      // per-string cycle never overlaps into the next pluck of that string.
+      // cycleDuration / stringCount = per-string interval.
+      const stringCount = this.config.stringCount ?? 2;
+      const perStringInterval = cycleDuration / stringCount;
+      const decayTime = perStringInterval * 0.9 * jivariSustainFactor;
       const timeConstant = decayTime / 2.0;
 
       // Attack: 35ms exponential rise — more natural string-contact character
@@ -459,18 +485,21 @@ export class TanpuraDrone {
 
   /**
    * Schedule the repeating pluck cycle.
-   * Pa → Sa → Sa → Sa(low), then repeat.
+   * Cycles through all active strings: at stringCount=2, ground → Sa → ground → ...
+   * At stringCount=4, ground → Sa → Sa → Sa(low) → ...
    */
   private schedulePluckCycle(): void {
     if (!this.running) return;
 
+    const stringCount = this.config.stringCount ?? 2;
     this.pluckString(this.cycleIndex);
 
-    // Advance to next string
-    this.cycleIndex = (this.cycleIndex + 1) % 4;
+    // Advance to next string, wrapping at the active string count
+    this.cycleIndex = (this.cycleIndex + 1) % stringCount;
 
-    // Schedule next pluck
-    const interval = ((this.config.cycleDuration ?? 4.0) / 4) * 1000; // ms
+    // Per-string interval: total cycle divided by string count.
+    // At 2-string/2.0s → 1.0s/pluck. At 4-string/4.0s → 1.0s/pluck.
+    const interval = ((this.config.cycleDuration ?? 2.0) / stringCount) * 1000; // ms
     this.cycleTimer = setTimeout(() => {
       this.schedulePluckCycle();
     }, interval);

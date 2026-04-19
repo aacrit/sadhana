@@ -21,12 +21,17 @@
  */
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { LessonPhase } from '../lib/lesson-loader';
 import type { LessonEngineControls } from '../lib/useLessonEngine';
+import { getSwaraFrequency } from '@/engine/theory/swaras';
+import type { Swara } from '@/engine/theory/types';
 import SwaraIntroduction from './SwaraIntroduction';
 import PhrasePlayback from './PhrasePlayback';
-import VoiceVisualization from './VoiceVisualization';
+import LessonPracticeSurface from './LessonPracticeSurface';
+// VoiceVisualization removed — Tantri is the primary visualization surface.
+// All phase components that previously mounted VoiceVisualization now rely
+// on the persistent Tantri layer which sits behind the phase content at z-index 0.
 import PakadMoment from './PakadMoment';
 import Tantri from './Tantri';
 import {
@@ -60,13 +65,13 @@ interface LessonRendererProps {
 
 // ---------------------------------------------------------------------------
 // Phase transition animation
+// Fast cross-fade: 180ms enter, 150ms exit (per spec)
 // ---------------------------------------------------------------------------
 
 const phaseTransition = {
-  initial: { opacity: 0, y: 12 },
-  animate: { opacity: 1, y: 0 },
-  exit: { opacity: 0, y: -12 },
-  transition: { duration: 0.35, ease: [0.16, 1, 0.3, 1] as const },
+  initial: { opacity: 0, y: 6 },
+  animate: { opacity: 1, y: 0, transition: { duration: 0.18, ease: [0.16, 1, 0.3, 1] as const } },
+  exit: { opacity: 0, y: -6, transition: { duration: 0.15, ease: [0.16, 1, 0.3, 1] as const } },
 };
 
 // ---------------------------------------------------------------------------
@@ -126,49 +131,19 @@ function SaDetectionPhase({
   );
 }
 
-/** Pitch exercise — single swara hold with voice feedback. */
+/** Pitch exercise — single swara hold. Tantri is the visualization. */
 function PitchExercisePhase({
   phase,
   onAdvance,
-  voiceFeedback,
 }: {
   phase: LessonPhase;
   onAdvance: () => void;
-  voiceFeedback: LessonEngineControls['voiceFeedback'];
 }) {
   // Silent warmup phase — no copy, no button. Tantri shows the swara; engine auto-advances.
   const isWarmup = phase.id.startsWith('__warmup_');
+  if (isWarmup) return null;
   return (
     <motion.div key={phase.id} {...phaseTransition} className={styles.centeredMessage}>
-      <VoiceVisualization feedback={voiceFeedback} className={styles.voiceViz} />
-      {!isWarmup && (
-        <button
-          type="button"
-          className={styles.actionButton}
-          onClick={onAdvance}
-          style={{ marginTop: 'var(--space-4)' }}
-        >
-          Continue
-        </button>
-      )}
-    </motion.div>
-  );
-}
-
-/** Phrase exercise — guided singing with optional guide tone. */
-function PhraseExercisePhase({
-  phase,
-  onAdvance,
-  voiceFeedback,
-}: {
-  phase: LessonPhase;
-  onAdvance: () => void;
-  voiceFeedback: LessonEngineControls['voiceFeedback'];
-}) {
-  return (
-    <motion.div key={phase.id} {...phaseTransition} className={styles.centeredMessage}>
-      <p>Follow the guide tone.</p>
-      <VoiceVisualization feedback={voiceFeedback} className={styles.voiceViz} />
       <button
         type="button"
         className={styles.actionButton}
@@ -181,19 +156,38 @@ function PhraseExercisePhase({
   );
 }
 
-/** Free singing with passive pakad recognition. */
-function FreeSingingPhase({
+/** Phrase exercise — guided singing. Tantri is the visualization. */
+function PhraseExercisePhase({
   phase,
   onAdvance,
-  voiceFeedback,
 }: {
   phase: LessonPhase;
   onAdvance: () => void;
-  voiceFeedback: LessonEngineControls['voiceFeedback'];
 }) {
   return (
     <motion.div key={phase.id} {...phaseTransition} className={styles.centeredMessage}>
-      <VoiceVisualization feedback={voiceFeedback} className={styles.voiceViz} />
+      <button
+        type="button"
+        className={styles.actionButton}
+        onClick={onAdvance}
+        style={{ marginTop: 'var(--space-4)' }}
+      >
+        Continue
+      </button>
+    </motion.div>
+  );
+}
+
+/** Free singing with passive pakad recognition. Tantri is the visualization. */
+function FreeSingingPhase({
+  phase,
+  onAdvance,
+}: {
+  phase: LessonPhase;
+  onAdvance: () => void;
+}) {
+  return (
+    <motion.div key={phase.id} {...phaseTransition} className={styles.centeredMessage}>
       <button
         type="button"
         className={styles.actionButton}
@@ -211,7 +205,7 @@ function FreeSingingPhase({
  *
  * Buffers pitch samples from voiceFeedback for the duration of the attempt,
  * then calls evaluateOrnament() on "Continue" to produce a score. The score
- * is surfaced back through the same feedback text slot (phase body → note).
+ * is surfaced above Tantri (which provides the pitch visualization).
  */
 function OrnamentExercisePhase({
   phase,
@@ -310,7 +304,6 @@ function OrnamentExercisePhase({
         </p>
       )}
       <p className={styles.ornamentLabel}>{ornamentLabel}</p>
-      <VoiceVisualization feedback={voiceFeedback} className={styles.voiceViz} />
       {score && (
         <div className={styles.ornamentScore} role="status" aria-live="polite">
           <p className={styles.ornamentScoreValue}>
@@ -341,22 +334,20 @@ function OrnamentExercisePhase({
 /**
  * Raga identification — engine plays pakad, student sings in response.
  * Full engine integration (pakad playback + response evaluation) is Cluster F.
+ * Tantri provides pitch visualization.
  */
 function RagaIdentificationPhase({
   phase,
   onAdvance,
-  voiceFeedback,
 }: {
   phase: LessonPhase;
   onAdvance: () => void;
-  voiceFeedback: LessonEngineControls['voiceFeedback'];
 }) {
   return (
     <motion.div key={phase.id} {...phaseTransition} className={styles.centeredMessage}>
       <p className={styles.phaseHint}>
         Listen, then sing.
       </p>
-      <VoiceVisualization feedback={voiceFeedback} className={styles.voiceViz} />
       <button
         type="button"
         className={styles.actionButton}
@@ -413,16 +404,14 @@ function RagaComparisonPhase({
 
 /**
  * Mastery challenge — structured assessment phase.
- * Shows targets and accepts voice input. Full auto-scoring is Cluster F.
+ * Shows targets and accepts voice input. Tantri is the pitch visualization.
  */
 function MasteryChallengePhase({
   phase,
   onAdvance,
-  voiceFeedback,
 }: {
   phase: LessonPhase;
   onAdvance: () => void;
-  voiceFeedback: LessonEngineControls['voiceFeedback'];
 }) {
   return (
     <motion.div key={phase.id} {...phaseTransition} className={styles.centeredMessage}>
@@ -435,7 +424,6 @@ function MasteryChallengePhase({
           ))}
         </div>
       )}
-      <VoiceVisualization feedback={voiceFeedback} className={styles.voiceViz} />
       <button
         type="button"
         className={styles.actionButton}
@@ -568,11 +556,13 @@ function PhaseDispatcher({
   engine,
   user,
   ragaId,
+  onHighlightString,
 }: {
   phase: LessonPhase;
   engine: LessonEngineControls;
   user?: { streak: number; xp: number };
   ragaId: string;
+  onHighlightString?: (swara: string) => void;
 }) {
   // If mic gate is active and this is a voice phase, show the gate
   if (engine.micGateActive && engine.phaseContext?.isVoicePhase) {
@@ -602,6 +592,7 @@ function PhaseDispatcher({
             audioFirst={phase.audio_first ?? true}
             revealDelayMs={phase.swara_reveal_delay_ms ?? 1200}
             onPlaySwara={(s) => engine.audio.playSwara(s)}
+            onHighlightString={onHighlightString}
           />
         </motion.div>
       );
@@ -611,49 +602,62 @@ function PhaseDispatcher({
         <motion.div key={phase.id} {...phaseTransition}>
           <PhrasePlayback
             phrase={[...(phase.phrase ?? [])]}
-            showLabels={phase.show_labels ?? false}
+            showLabels={phase.show_labels ?? true}
             onComplete={engine.advancePhase}
             repeatCount={phase.repeat ?? 1}
             onPlaySwara={(s) => engine.audio.playSwara(s)}
+            onHighlightString={onHighlightString}
           />
         </motion.div>
       );
 
     case 'pitch_exercise':
+      // Warmup phase renders nothing (engine auto-advances)
+      if (phase.id.startsWith('__warmup_')) return null;
       return (
-        <PitchExercisePhase
-          phase={phase}
-          onAdvance={engine.advancePhase}
+        <LessonPracticeSurface
+          phaseId={phase.id}
+          targetLabel={phase.target_swara ?? undefined}
           voiceFeedback={engine.voiceFeedback}
+          onAdvance={engine.advancePhase}
+          saHz={engine.saHz}
+          ragaId={ragaId}
         />
       );
 
     case 'phrase_exercise':
       return (
-        <PhraseExercisePhase
-          phase={phase}
-          onAdvance={engine.advancePhase}
+        <LessonPracticeSurface
+          phaseId={phase.id}
+          demoPhrase={phase.phrase ?? []}
           voiceFeedback={engine.voiceFeedback}
+          onAdvance={engine.advancePhase}
+          saHz={engine.saHz}
+          ragaId={ragaId}
         />
       );
 
     case 'call_response':
-      // Placeholder — full call_response is Cluster F
       return (
-        <motion.div key={phase.id} {...phaseTransition} className={styles.centeredMessage}>
-          <p>Call and response coming soon.</p>
-          <button type="button" className={styles.actionButton} onClick={engine.advancePhase}>
-            Continue
-          </button>
-        </motion.div>
+        <LessonPracticeSurface
+          phaseId={phase.id}
+          voiceFeedback={engine.voiceFeedback}
+          onAdvance={engine.advancePhase}
+          advanceLabel="Continue"
+          saHz={engine.saHz}
+          ragaId={ragaId}
+        />
       );
 
     case 'passive_phrase_recognition':
       return (
-        <FreeSingingPhase
-          phase={phase}
-          onAdvance={engine.advancePhase}
+        <LessonPracticeSurface
+          phaseId={phase.id}
           voiceFeedback={engine.voiceFeedback}
+          onAdvance={engine.advancePhase}
+          advanceLabel="Done"
+          saHz={engine.saHz}
+          ragaId={ragaId}
         />
       );
 
@@ -670,26 +674,44 @@ function PhaseDispatcher({
 
     case 'ornament_exercise':
     case 'andolan':
-    case 'meend':
+    case 'meend': {
+      const ornId = isOrnamentId(phase.ornament_type)
+        ? phase.ornament_type
+        : isOrnamentId(phase.type)
+          ? phase.type
+          : undefined;
+      const ornLabel = phase.ornament_type
+        ? phase.ornament_type.charAt(0).toUpperCase() + phase.ornament_type.slice(1)
+        : phase.type.charAt(0).toUpperCase() + phase.type.slice(1);
       return (
-        <OrnamentExercisePhase
-          phase={phase}
-          onAdvance={engine.advancePhase}
+        <LessonPracticeSurface
+          phaseId={phase.id}
+          ornamentName={ornLabel}
+          ornamentFrom={phase.from_swara}
+          ornamentTo={phase.to_swara}
+          ornamentId={ornId}
+          fromSwara={phase.from_swara}
           voiceFeedback={engine.voiceFeedback}
+          onAdvance={engine.advancePhase}
+          advanceLabel="Done"
           saHz={engine.saHz}
           ragaId={phase.raga ?? ragaId}
         />
       );
+    }
 
     // --- Raga recognition / comparison ------------------------------------
 
     case 'raga_identification':
     case 'raga_identification_advanced':
       return (
-        <RagaIdentificationPhase
-          phase={phase}
-          onAdvance={engine.advancePhase}
+        <LessonPracticeSurface
+          phaseId={phase.id}
+          targetLabel="Listen, then sing."
           voiceFeedback={engine.voiceFeedback}
+          onAdvance={engine.advancePhase}
+          saHz={engine.saHz}
+          ragaId={ragaId}
         />
       );
 
@@ -709,10 +731,13 @@ function PhaseDispatcher({
 
     case 'mastery_challenge':
       return (
-        <MasteryChallengePhase
-          phase={phase}
-          onAdvance={engine.advancePhase}
+        <LessonPracticeSurface
+          phaseId={phase.id}
+          challengeTargets={phase.targets}
           voiceFeedback={engine.voiceFeedback}
+          onAdvance={engine.advancePhase}
+          saHz={engine.saHz}
+          ragaId={ragaId}
         />
       );
 
@@ -763,6 +788,23 @@ export default function LessonRenderer({
 }: LessonRendererProps) {
   const { state, lesson, phaseContext, pakadTriggered } = engine;
 
+  // ---------------------------------------------------------------------------
+  // Tantri string highlight — driven by SwaraIntroduction and PhrasePlayback.
+  // When a non-voice phase highlights a swara, we compute its Hz and pass it
+  // to Tantri as pitchHz with pitchClarity=1.0 for a perfect-accuracy flash.
+  // Reset on every phase change so a stale highlight doesn't bleed into the
+  // next phase.
+  // ---------------------------------------------------------------------------
+  const [highlightedSwara, setHighlightedSwara] = useState<string | null>(null);
+  const phaseIdForReset = phaseContext?.phase.id;
+  useEffect(() => {
+    setHighlightedSwara(null);
+  }, [phaseIdForReset]);
+
+  const onHighlightString = useCallback((swara: string) => {
+    setHighlightedSwara(swara);
+  }, []);
+
   if (state === 'loading') {
     return (
       <div className={styles.lessonPage}>
@@ -796,6 +838,24 @@ export default function LessonRenderer({
 
   const isVoicePhase = phaseContext?.isVoicePhase ?? false;
 
+  // Compute Hz for the highlighted swara (swara_introduction / phrase_playback)
+  let highlightHz: number | undefined;
+  if (highlightedSwara) {
+    try {
+      highlightHz = getSwaraFrequency(highlightedSwara as Swara, engine.saHz);
+    } catch {
+      highlightHz = undefined;
+    }
+  }
+
+  // Tantri pitch input: voice phases use live voice; playback phases use highlight
+  const tantriPitchHz = isVoicePhase
+    ? (engine.voiceFeedback.hz ?? undefined)
+    : highlightHz;
+  const tantriPitchClarity = isVoicePhase
+    ? engine.voiceFeedback.confidence
+    : (highlightHz ? 1.0 : undefined);
+
   return (
     <div
       className={styles.lessonPage}
@@ -810,8 +870,8 @@ export default function LessonRenderer({
         level="shishya"
         subLevel={phaseContext ? Math.min(Math.floor(phaseContext.phaseIndex / 3) + 1, 3) : 1}
         variant="full"
-        pitchHz={isVoicePhase ? (engine.voiceFeedback.hz ?? undefined) : undefined}
-        pitchClarity={isVoicePhase ? engine.voiceFeedback.confidence : undefined}
+        pitchHz={tantriPitchHz}
+        pitchClarity={tantriPitchClarity}
         analyser={engine.audio.pipelineActive ? engine.audio.getAnalyserNode() : null}
         style={{
           position: 'absolute',
@@ -834,25 +894,25 @@ export default function LessonRenderer({
         Exit
       </button>
 
-      {/* Phase header — suppressed for silent warmup phase */}
+      {/* Phase label — small top-left label, suppressed for warmup */}
       {!phase.id.startsWith('__warmup_') && (
         <header className={styles.phaseHeader} aria-live="polite">
-          <h1 className={styles.phaseTitle}>
+          <span className={styles.phaseLabel}>
             {phase.screenTitle ?? phase.type.replace(/_/g, ' ')}
-          </h1>
-          {phase.body && <p className={styles.phaseBody}>{phase.body}</p>}
+          </span>
         </header>
       )}
 
       {/* Phase content */}
       <div className={styles.phaseContent}>
-        <AnimatePresence mode="wait">
+        <AnimatePresence mode="sync">
           <PhaseDispatcher
             key={phase.id}
             phase={phase}
             engine={engine}
             user={user}
             ragaId={ragaId ?? lesson.raga_id}
+            onHighlightString={onHighlightString}
           />
         </AnimatePresence>
       </div>
@@ -895,25 +955,21 @@ export default function LessonRenderer({
         </div>
       )}
 
-      {/* Progress dots */}
+      {/* Progress hairline — 1px track at bottom of screen */}
       {state !== 'lesson_complete' && phase.type !== 'session_summary' && (
-        <nav className={styles.progressDots} aria-label="Lesson progress">
-          {lesson.phases.map((p, i) => {
-            let dotClass = styles.progressDot;
-            if (i === phaseIndex) {
-              dotClass += ' ' + styles.progressDotCurrent;
-            } else if (i < phaseIndex) {
-              dotClass += ' ' + styles.progressDotComplete;
-            }
-            return (
-              <div
-                key={p.id}
-                className={dotClass}
-                aria-label={`Phase ${String(i + 1)} of ${String(totalPhases)}${i === phaseIndex ? ' (current)' : ''}`}
-              />
-            );
-          })}
-        </nav>
+        <div
+          className={styles.progressHairline}
+          role="progressbar"
+          aria-label="Lesson progress"
+          aria-valuenow={phaseIndex + 1}
+          aria-valuemin={1}
+          aria-valuemax={totalPhases}
+        >
+          <div
+            className={styles.progressHairlineFill}
+            style={{ width: `${((phaseIndex + 1) / totalPhases) * 100}%` }}
+          />
+        </div>
       )}
     </div>
   );

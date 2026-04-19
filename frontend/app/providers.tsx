@@ -14,7 +14,7 @@
  *   - ReducedMotion   sets data-reduced-motion on <html> for CSS + Framer Motion
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { MotionConfig } from 'framer-motion';
 import { AuthProvider, useAuth } from './lib/auth';
@@ -70,6 +70,31 @@ function LevelBridge() {
   return null;
 }
 
+/**
+ * SaSeedBridge — seeds VoiceWaveContext.saHz from the user's stored profile.
+ *
+ * Runs once when the profile first loads. If the student has previously
+ * calibrated their Sa (profile.saHz !== 261.63 default), the global
+ * VoiceWave rendering uses the correct reference immediately on page load
+ * rather than waiting for the lesson's sa_detection phase to fire.
+ *
+ * Must be mounted inside both AuthProvider and VoiceWaveProvider.
+ */
+function SaSeedBridge() {
+  const { profile } = useAuth();
+  const { setSaHz } = useVoiceWave();
+  const seededRef = useRef(false);
+
+  useEffect(() => {
+    if (seededRef.current) return;
+    if (!profile?.saHz) return;
+    seededRef.current = true;
+    setSaHz(profile.saHz);
+  }, [profile?.saHz, setSaHz]);
+
+  return null;
+}
+
 export default function Providers({ children }: { children: ReactNode }) {
   return (
     <MotionConfig reducedMotion="user">
@@ -77,6 +102,7 @@ export default function Providers({ children }: { children: ReactNode }) {
         <VoiceWaveProvider>
           <ReducedMotionBridge />
           <LevelBridge />
+          <SaSeedBridge />
           {children}
           <FloatingChrome />
         </VoiceWaveProvider>

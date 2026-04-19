@@ -289,3 +289,139 @@ describe('TanpuraDrone.setVolume ramp', () => {
     vi.advanceTimersByTime(600);
   });
 });
+
+// ---------------------------------------------------------------------------
+// stringCount — 2-string Sa+Pa default (Shishya level)
+// ---------------------------------------------------------------------------
+
+describe('TanpuraDrone stringCount', () => {
+  it('defaults to 2 strings — only 2 profiles (ground + Sa) are voiced', async () => {
+    const { TanpuraDrone } = await import('./tanpura');
+    const tanpura = new TanpuraDrone({ sa_hz: 261.63, volume: 0.3 });
+    await tanpura.start();
+
+    expect(tanpura.getStringCount()).toBe(2);
+    // 2 profiles × 10 partials = 20 oscillators
+    const ctx = MockAudioContext.instances[0]!;
+    const oscs = ctx.createdNodes.filter((n) => n.__kind === 'oscillator');
+    expect(oscs).toHaveLength(20);
+
+    tanpura.stop();
+    vi.advanceTimersByTime(600);
+  });
+
+  it('stringCount: 3 voices 30 oscillators', async () => {
+    const { TanpuraDrone } = await import('./tanpura');
+    const tanpura = new TanpuraDrone({ sa_hz: 261.63, volume: 0.3, stringCount: 3 });
+    await tanpura.start();
+
+    expect(tanpura.getStringCount()).toBe(3);
+    const ctx = MockAudioContext.instances[0]!;
+    const oscs = ctx.createdNodes.filter((n) => n.__kind === 'oscillator');
+    expect(oscs).toHaveLength(30);
+
+    tanpura.stop();
+    vi.advanceTimersByTime(600);
+  });
+
+  it('stringCount: 4 voices 40 oscillators (full tanpura)', async () => {
+    const { TanpuraDrone } = await import('./tanpura');
+    const tanpura = new TanpuraDrone({ sa_hz: 261.63, volume: 0.3, stringCount: 4 });
+    await tanpura.start();
+
+    expect(tanpura.getStringCount()).toBe(4);
+    const ctx = MockAudioContext.instances[0]!;
+    const oscs = ctx.createdNodes.filter((n) => n.__kind === 'oscillator');
+    expect(oscs).toHaveLength(40);
+
+    tanpura.stop();
+    vi.advanceTimersByTime(600);
+  });
+
+  it('getProfiles() returns only the sliced profiles — stringCount: 2 → 2 profiles', async () => {
+    const { TanpuraDrone } = await import('./tanpura');
+    const tanpura = new TanpuraDrone({ sa_hz: 261.63, volume: 0.3, stringCount: 2 });
+    await tanpura.start();
+
+    const profiles = tanpura.getProfiles();
+    expect(profiles).toHaveLength(2);
+    // First profile is the ground string (Pa by default)
+    expect(profiles[0]!.name).toBe('Pa');
+    // Second profile is Sa
+    expect(profiles[1]!.name).toBe('Sa');
+
+    tanpura.stop();
+    vi.advanceTimersByTime(600);
+  });
+
+  it('2-string pluck cycle wraps at 2 — cycleIndex never exceeds 1', async () => {
+    const { TanpuraDrone } = await import('./tanpura');
+    const tanpura = new TanpuraDrone({
+      sa_hz: 261.63,
+      volume: 0.3,
+      stringCount: 2,
+      cycleDuration: 2.0, // 1.0s per string
+    });
+    await tanpura.start();
+
+    // After 2 intervals (2.0s), both strings have been plucked once each
+    // and the cycle wraps back to index 0
+    vi.advanceTimersByTime(2100); // slightly past 2 full pluck intervals
+
+    // Still running — pluck cycle has not stalled
+    expect(tanpura.isRunning()).toBe(true);
+
+    tanpura.stop();
+    vi.advanceTimersByTime(600);
+  });
+
+  it('cycleDuration defaults to 2.0 — per-string interval is 1.0s at stringCount: 2', async () => {
+    const { TanpuraDrone } = await import('./tanpura');
+    const tanpura = new TanpuraDrone({ sa_hz: 261.63, volume: 0.3 }); // defaults
+    await tanpura.start();
+
+    expect((tanpura.getConfig() as { cycleDuration?: number }).cycleDuration).toBe(2.0);
+    expect(tanpura.getStringCount()).toBe(2);
+    // per-string interval = 2.0 / 2 = 1.0s
+    // pluck cycle should fire at ~1.0s, ~2.0s, ~3.0s ...
+    vi.advanceTimersByTime(1100); // past first interval
+    expect(tanpura.isRunning()).toBe(true);
+
+    tanpura.stop();
+    vi.advanceTimersByTime(600);
+  });
+
+  it('groundString: Ni for Bageshri uses Ni profile', async () => {
+    const { TanpuraDrone } = await import('./tanpura');
+    const tanpura = new TanpuraDrone({
+      sa_hz: 261.63,
+      volume: 0.3,
+      stringCount: 2,
+      groundString: 'Ni',
+    });
+    await tanpura.start();
+
+    const profiles = tanpura.getProfiles();
+    expect(profiles[0]!.name).toBe('Ni (komal)');
+
+    tanpura.stop();
+    vi.advanceTimersByTime(600);
+  });
+
+  it('groundString: Ma for Marwa/Malkauns uses Ma profile', async () => {
+    const { TanpuraDrone } = await import('./tanpura');
+    const tanpura = new TanpuraDrone({
+      sa_hz: 261.63,
+      volume: 0.3,
+      stringCount: 2,
+      groundString: 'Ma',
+    });
+    await tanpura.start();
+
+    const profiles = tanpura.getProfiles();
+    expect(profiles[0]!.name).toBe('Ma (shuddha)');
+
+    tanpura.stop();
+    vi.advanceTimersByTime(600);
+  });
+});

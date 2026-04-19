@@ -11,11 +11,9 @@
 
 import { Suspense, useState, useEffect, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { motion } from 'framer-motion';
 import { useAuth } from '../../../../lib/auth';
 import { useLessonEngine } from '../../../../lib/useLessonEngine';
 import LessonRenderer from '../../../../components/LessonRenderer';
-import Tantri from '../../../../components/Tantri';
 import styles from '../../../../styles/lesson-renderer.module.css';
 
 // ---------------------------------------------------------------------------
@@ -147,64 +145,46 @@ function LessonPageInner({
   warmupSwara?: string;
   onExit: () => void;
 }) {
-  const engine = useLessonEngine(lessonYaml, copyYaml, saHz, warmupSwara);
-  const { profile } = useAuth();
+  const { profile, user } = useAuth();
+  const engine = useLessonEngine(lessonYaml, copyYaml, saHz, warmupSwara, user?.id);
 
   const handleComplete = useCallback(() => {
     onExit();
   }, [onExit]);
 
-  // Ready state — show lesson info + begin button
-  if (engine.state === 'ready' && engine.lesson) {
+  // Auto-begin: as soon as YAML is loaded and engine is ready, start immediately.
+  // No Begin page — the tanpura starts, the student is in the raga.
+  useEffect(() => {
+    if (engine.state === 'ready' && engine.lesson) {
+      engine.begin();
+    }
+  }, [engine.state, engine.lesson, engine.begin]);
+
+  // Active lesson — LessonRenderer handles all phase rendering.
+  // During 'ready' (pre-begin tick) render null so there is no flash.
+  if (engine.state === 'ready' || engine.state === 'loading') {
     return (
-      <div className={styles.lessonPage} data-raga={engine.lesson.raga_id}>
-        <Tantri
-          saHz={saHz}
-          ragaId={engine.lesson.raga_id}
-          level="shishya"
-          subLevel={1}
-          variant="full"
-          style={{ position: 'absolute', inset: 0, zIndex: 0, pointerEvents: 'none' }}
-        />
-        <motion.div
-          className={styles.centeredMessage}
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-          style={{ zIndex: 2 }}
+      <div className={styles.lessonPage}>
+        <div className={styles.centeredMessage}>
+          <p style={{ color: 'var(--text-4, rgba(255,255,255,0.2))', fontFamily: 'var(--font-sans)' }} />
+        </div>
+        {/* Ghost exit — always available */}
+        <button
+          type="button"
+          className={styles.backLink}
+          onClick={onExit}
+          aria-label="Exit lesson"
+          style={{ opacity: 0.3 }}
         >
-          <h1 style={{
-            fontFamily: 'var(--font-serif)',
-            fontSize: 'var(--text-2xl)',
-            fontWeight: 'var(--weight-light)',
-            color: 'var(--text)',
-            marginBottom: 'var(--space-2)',
-          }}>
-            {engine.lesson.meta.title}
-          </h1>
-          {engine.lesson.meta.subtitle && (
-            <p style={{
-              fontFamily: 'var(--font-sans)',
-              fontSize: 'var(--text-base)',
-              color: 'var(--text-3)',
-              marginBottom: 'var(--space-6)',
-            }}>
-              {engine.lesson.meta.subtitle}
-            </p>
-          )}
-          <button
-            type="button"
-            className={styles.actionButton}
-            onClick={engine.begin}
-          >
-            Begin
-          </button>
-        </motion.div>
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M10 12L6 8L10 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+          Exit
+        </button>
       </div>
     );
   }
 
-  // Active lesson — LessonRenderer handles all phase rendering
   return (
     <LessonRenderer
       engine={engine}
