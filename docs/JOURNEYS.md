@@ -43,6 +43,14 @@ Source: `frontend/app/journeys/beginner/page.tsx`
 
 **Phase-0 re-entry:** `useLessonEngine` resets `prevPhaseIndexRef` to `-1` in both `begin()` and `exitLesson()`. This ensures the phase-audio effect re-fires for phase 0 when the student exits and re-begins a lesson (previously, the guard was never reset, silently skipping tanpura start and the Sa prompt on re-entry).
 
+**Continue escape hatch (`tanpura_drone`):** `TanpuraDronePhase` always renders a Continue button. It appears at 0.45 opacity while `duration_s` is counting down and at full opacity when the timer completes. This prevents students from getting frozen if the timer fails (Strict Mode double-unmount, backgrounded tab, AudioContext user-gesture block).
+
+**Continue escape hatch (`phrase_playback`):** `PhrasePlaybackPhase` Continue button is always visible (0.35 opacity mid-playback, full opacity when `allComplete`). `handleContinue` cancels the internal `timerRef` before advancing to prevent double-fires on mid-playback clicks. Previously, the button was gated behind `allComplete === true`, causing "Continue did nothing" during multi-repeat phrases.
+
+**Tanpura ducking across phase types:** `useLessonEngine` sets tanpura gain on every phase transition via `PHASE_TANPURA_GAIN` (see `docs/AUDIO-ENGINE.md`). Full gain on `tanpura_drone`, `passive_phrase_recognition`, `session_summary`; ducked (0.35×) on all focus phases. Optional YAML field `tanpura_presence: off` silences it entirely for a phase. The tanpura is never stopped between phases.
+
+**Phase consolidation (beginner lessons):** Aroha and avaroha are now paired into a single `phrase_playback` phase rather than presented as two separate sequential phases, matching how Hindustani teachers actually present scale movement. Phase counts after consolidation: beginner-01-bhoopali 7 phases, beginner-03-yaman 9, beginner-04-bhairav 9, beginner-05-bhimpalasi 10, beginner-06-bageshri 9.
+
 **Prahara-aware raga picker (freeform):** In the freeform raga selector, ragas outside the current prahara are rendered at 40% opacity with a tooltip: "Traditional time: [prahara label]". On-prahara ragas render at full opacity. Opacity is visual suggestion only — all ragas remain selectable.
 
 **Dawn gate (beginner-08-challenge):** The `dawn_gate` block in `beginner-08-challenge.yaml` requires the student to complete 3 Bhairav sessions during prahara 1 (04:00–07:00) on 3 different calendar dates. This is the gate for the Shishya → Sadhaka level unlock.

@@ -1,6 +1,6 @@
 # Lesson Renderer Spec
 
-Last updated: 2026-04-11
+Last updated: 2026-04-19
 
 The lesson renderer loads a YAML lesson file and its copy overlay, then drives a state machine through phases. Each phase type maps to a React component.
 
@@ -41,8 +41,11 @@ Starts tanpura, shows instruction, auto-advances after `duration_s`.
 | duration_s | number | yes |
 | tanpura.strings | string[] | yes |
 | tanpura.sa_hz | number or null | yes (null = user Sa) |
+| tanpura_presence | "off" | no |
 
 Component: `<TanpuraDronePhase />`
+
+**Continue button:** Always rendered. Visible at 0.45 opacity while `duration_s` is counting; full opacity on completion. Prevents freeze if timer fails.
 
 ### `sa_detection`
 
@@ -51,7 +54,7 @@ Pitch detection loop to calibrate user's Sa. Skippable via `skip_if`.
 | Field | Type | Required |
 |-------|------|----------|
 | attempts | number | yes |
-| min_clarity | number | yes |
+| min_clarity | number | yes (documentation-only — not read by runtime; see AUDIO-ENGINE.md) |
 | fallback_hz | number | yes |
 | skip_if | string | no |
 
@@ -71,7 +74,7 @@ Component: `<SwaraIntroPhase />`
 
 ### `phrase_playback`
 
-Plays a phrase with optional labels. User listens, does not sing.
+Plays a phrase with optional labels. User listens, does not sing. Aroha and avaroha are paired into a single `phrase_playback` phase (rather than two sequential phases), matching standard Hindustani pedagogy.
 
 | Field | Type | Required |
 |-------|------|----------|
@@ -80,6 +83,8 @@ Plays a phrase with optional labels. User listens, does not sing.
 | show_labels | boolean | yes |
 
 Component: `<PhrasePlaybackPhase />`
+
+**Continue button:** Always visible. Opacity 0.35 mid-playback, full opacity when all repeats complete. `handleContinue` cancels the internal timer before advancing to prevent double-fires.
 
 ### `pitch_exercise`
 
@@ -204,7 +209,7 @@ Transitions:
 
 ## Tanpura Lifecycle
 
-The tanpura starts in the first `tanpura_drone` phase and does NOT stop until the lesson ends. It persists across all subsequent phases. The `session_summary` phase fades it out over 2 seconds.
+The tanpura starts in the first `tanpura_drone` phase and does NOT stop until the lesson ends. It persists across all subsequent phases — only the gain changes per phase type (see `PHASE_TANPURA_GAIN` in `docs/AUDIO-ENGINE.md`). The `session_summary` phase fades it out over 2 seconds. Any phase can carry the optional `tanpura_presence: off` YAML flag to silence the tanpura for that phase only.
 
 ## Copy Overlay Rules
 
