@@ -377,12 +377,11 @@ export function useLessonEngine(
 
     const nextIndex = phaseIndex + 1;
     if (nextIndex < lesson.phases.length) {
-      setState('phase_complete');
-      // Auto-advance after 500ms pause (per spec)
-      timerRef.current = setTimeout(() => {
-        setPhaseIndex(nextIndex);
-        setState('phase_active');
-      }, 500);
+      // Zero-pause transition: set phase index and active state in the same tick.
+      // The 500ms pause has been removed — phase transitions are instant.
+      // AnimatePresence handles the visual cross-fade (≤180ms enter + 150ms exit).
+      setPhaseIndex(nextIndex);
+      setState('phase_active');
     } else {
       setState('lesson_complete');
     }
