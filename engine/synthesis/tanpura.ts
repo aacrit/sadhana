@@ -132,6 +132,8 @@ export class TanpuraDrone {
 
   /** Handle for the pluck cycle scheduler. */
   private cycleTimer: ReturnType<typeof setTimeout> | null = null;
+  /** Handle for the scheduled post-fade cleanup. */
+  private cleanupTimer: ReturnType<typeof setTimeout> | null = null;
   /** Current string index in the pluck cycle (0–3). */
   private cycleIndex: number = 0;
 
@@ -179,7 +181,13 @@ export class TanpuraDrone {
 
   /**
    * Stops the tanpura drone with a smooth fade-out.
-   * Fade duration: 500ms.
+   * Fade duration: 500ms. Graph teardown scheduled at 600ms (post-decay).
+   *
+   * Safe to call multiple times. A second stop() after running has been
+   * cleared is a no-op. The cleanup is scheduled on a captured snapshot
+   * of the current graph, so a start() called within the 600ms fade window
+   * will build a fresh, independent graph that the in-flight teardown
+   * timer cannot touch.
    */
   stop(): void {
     if (!this.running || !this.audioContext || !this.masterGain) return;
@@ -196,12 +204,29 @@ export class TanpuraDrone {
     this.masterGain.gain.setValueAtTime(this.masterGain.gain.value, now);
     this.masterGain.gain.linearRampToValueAtTime(0, now + 0.5);
 
-    // Stop and clean up oscillators after fade
-    setTimeout(() => {
-      this.cleanup();
-    }, 600);
+    // Capture the current graph references so the scheduled cleanup operates
+    // on *this* graph, not on whatever graph happens to be live at the 600ms
+    // mark. Without this capture, a start() called within 600ms would install
+    // a new AudioContext/masterGain/voices and the stale timer would tear
+    // those down.
+    const voicesToClean = this.voices;
+    const masterGainToClean = this.masterGain;
+    const audioContextToClean = this.audioContext;
 
+    // Immediately clear instance fields so start() may rebuild cleanly.
+    this.voices = [];
+    this.masterGain = null;
+    this.audioContext = null;
     this.running = false;
+
+    // Stop and clean up oscillators after fade. Store handle so a subsequent
+    // start() can cancel pending teardown of *its* graph — but since we've
+    // already captured and detached the old graph, start()'s new graph is
+    // independent and the timer below only ever touches the old nodes.
+    this.cleanupTimer = setTimeout(() => {
+      this.cleanupTimer = null;
+      this.cleanupCapturedGraph(voicesToClean, masterGainToClean, audioContextToClean);
+    }, 600);
   }
 
   /**
@@ -475,13 +500,28 @@ export class TanpuraDrone {
     }
   }
 
-  private cleanup(): void {
-    if (this.cycleTimer !== null) {
-      clearTimeout(this.cycleTimer);
-      this.cycleTimer = null;
-    }
-
-    for (const voice of this.voices) {
+  /**
+   * Tear down a captured graph. Used by stop() via a 600ms scheduled timer
+   * so the fade-out can complete before sources are stopped.
+   *
+   * This operates on captured references (passed in as args), never on the
+   * live `this.voices`/`this.masterGain`/`this.audioContext` fields. That
+   * guarantees a start() called during the 600ms fade-out window cannot
+   * have its fresh graph torn down by a stale timer from the prior stop().
+   *
+   * Every OscillatorNode is explicitly .stop()-ed (even though start()
+   * creates them with no end time, they must be stopped to release WebAudio
+   * rendering resources). Every node is .disconnect()-ed. The owning
+   * AudioContext is closed (TanpuraDrone creates its own context per start(),
+   * so this is an owned resource — not a shared context). Any remaining
+   * references become unreachable and are GC'd.
+   */
+  private cleanupCapturedGraph(
+    voices: StringVoice[],
+    masterGain: GainNode,
+    audioContext: AudioContext,
+  ): void {
+    for (const voice of voices) {
       for (const osc of voice.oscillators) {
         try { osc.stop(); } catch { /* already stopped */ }
         osc.disconnect();
@@ -490,15 +530,9 @@ export class TanpuraDrone {
         gain.disconnect();
       }
     }
-    if (this.masterGain) {
-      this.masterGain.disconnect();
+    masterGain.disconnect();
+    if (audioContext.state !== 'closed') {
+      audioContext.close().catch(() => { /* ignore */ });
     }
-    if (this.audioContext) {
-      this.audioContext.close().catch(() => { /* ignore */ });
-    }
-
-    this.voices = [];
-    this.masterGain = null;
-    this.audioContext = null;
   }
 }
