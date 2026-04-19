@@ -49,17 +49,8 @@ phases:
     phrase: [Ni_k_mandra, Sa, Ga_k, Ma, Pa, Ni_k, Sa_upper]
     instruction: |
       Listen to Bhimpalasi climbing. It uses only five notes going up.
-      Two notes are missing from the ascent. Listen for the gaps.
+      Two notes are missing from the ascent — Re and Dha. Listen for the gaps.
     repeat: 2
-    show_labels: false
-
-  - id: aroha_show
-    type: phrase_playback
-    phrase: [Ni_k_mandra, Sa, Ga_k, Ma, Pa, Ni_k, Sa_upper]
-    instruction: |
-      Ni Sa Ga Ma Pa Ni Sa.
-      Five notes up. Re and Dha are absent. That's deliberate.
-    repeat: 1
     show_labels: true
 
   # 4. HEAR THE AVAROHA — Sa' Ni(k) Dha Pa Ma Ga(k) Re Sa
@@ -68,18 +59,8 @@ phases:
     phrase: [Sa_upper, Ni_k, Dha, Pa, Ma, Ga_k, Re, Sa]
     instruction: |
       Now descending. All seven notes appear.
-      The descent is fuller, more detailed. This is where Bhimpalasi
-      opens up and speaks.
-    repeat: 2
-    show_labels: false
-
-  - id: avaroha_show
-    type: phrase_playback
-    phrase: [Sa_upper, Ni_k, Dha, Pa, Ma, Ga_k, Re, Sa]
-    instruction: |
-      Sa Ni Dha Pa Ma Ga Re Sa.
       Seven notes down. Five up, seven down. The asymmetry is the raga.
-    repeat: 1
+    repeat: 2
     show_labels: true
 
   # 5. MEET THE KOMAL SWARAS

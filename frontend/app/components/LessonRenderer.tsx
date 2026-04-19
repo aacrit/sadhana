@@ -84,11 +84,18 @@ function TanpuraDronePhase({
   return (
     <motion.div key={phase.id} {...phaseTransition} className={styles.centeredMessage}>
       <div className={styles.listenPulse} aria-label="Tanpura playing" />
-      {!phase.duration_s && (
-        <button type="button" className={styles.actionButton} onClick={onAdvance}>
-          Continue
-        </button>
-      )}
+      {/* Always show Continue — auto-advance is the happy path but Continue
+          is the escape hatch if the timer fails (Strict Mode, AudioContext
+          suspension, monitor switch, etc.). Styled at low opacity so it
+          doesn't compete with the listening experience. */}
+      <button
+        type="button"
+        className={styles.actionButton}
+        onClick={onAdvance}
+        style={{ opacity: 0.45, marginTop: 'var(--space-8)' }}
+      >
+        Continue
+      </button>
     </motion.div>
   );
 }
