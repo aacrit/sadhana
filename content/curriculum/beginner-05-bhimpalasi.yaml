@@ -169,7 +169,7 @@ phases:
     repeat: 2
     show_labels: false
 
-  # 11. PAKAD WATCH — free singing with recognition
+  # 11. PAKAD WATCH — primed free singing (set-up, not lottery)
   - id: pakad_watch
     type: passive_phrase_recognition
     enabled: true
@@ -178,6 +178,10 @@ phases:
       The tanpura is with you.
     duration_s: 60
     watch_for_pakad: true
+    prime_pakad:
+      raga_id: bhimpalasi
+      phrase: [Ni_k, Sa, Ga_k, Ma]   # Bhimpalasi's defining ascending pakad
+      window_s: 45
     pakad_reward:
       xp_bonus: 15
       ceremony: gsap_pakad_moment

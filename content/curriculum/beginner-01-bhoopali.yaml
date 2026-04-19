@@ -105,7 +105,10 @@ phases:
     guide_tone: true                   # guide tone plays ahead
     feedback_layer: standard
 
-  # 8. PAKAD MOMENT (WOW) — engine watches for Ga-Pa-Dha-Pa-Ga or Sa-Re-Ga-Pa-Dha-Pa-Ga
+  # 8. PAKAD MOMENT — engine silently primes Bhoopali's pakad, watches 45s
+  # Lesson set-up, not lottery: student has just practised these swaras.
+  # primeExpectedPhrase() is called with the Ga-Pa-Dha-Pa-Ga phrase at phase start.
+  # If student naturally returns to it within 45s, Layer 1 fires.
   - id: pakad_watch
     type: passive_phrase_recognition
     enabled: true
@@ -113,6 +116,10 @@ phases:
       Keep singing. Let whatever wants to come, come.
     duration_s: 60
     watch_for_pakad: true
+    prime_pakad:
+      raga_id: bhoopali
+      phrase: [Ga, Pa, Dha, Pa, Ga]   # Bhoopali's characteristic pakad
+      window_s: 45
     pakad_reward:
       xp_bonus: 10
       ceremony: gsap_pakad_moment     # cinematic pause + message
