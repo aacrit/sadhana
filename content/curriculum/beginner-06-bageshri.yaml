@@ -49,18 +49,8 @@ phases:
     phrase: [Sa, Ga_k, Ma, Dha, Ni_k, Sa_upper]
     instruction: |
       Listen to Bageshri climbing. It skips a note on the way up.
-      You know these swaras. You have sung them before.
-      But this raga uses them differently.
+      Sa Ga Ma Dha Ni Sa — five notes up. Re is absent in the ascent.
     repeat: 2
-    show_labels: false
-
-  - id: aroha_show
-    type: phrase_playback
-    phrase: [Sa, Ga_k, Ma, Dha, Ni_k, Sa_upper]
-    instruction: |
-      Sa Ga Ma Dha Ni Sa.
-      Five notes up. Re is absent in the ascent.
-    repeat: 1
     show_labels: true
 
   # 4. HEAR THE AVAROHA — Sa' Ni(k) Dha Pa Ma Ga(k) Re Sa (all seven)
@@ -69,17 +59,8 @@ phases:
     phrase: [Sa_upper, Ni_k, Dha, Pa, Ma, Ga_k, Re, Sa]
     instruction: |
       Now descending. All seven notes appear.
-      Re returns. Pa returns. The descent is the fuller story.
+      Re returns. Pa returns. Like Bhimpalasi — spare ascent, full descent.
     repeat: 2
-    show_labels: false
-
-  - id: avaroha_show
-    type: phrase_playback
-    phrase: [Sa_upper, Ni_k, Dha, Pa, Ma, Ga_k, Re, Sa]
-    instruction: |
-      Sa Ni Dha Pa Ma Ga Re Sa.
-      Seven notes down. Like Bhimpalasi — spare ascent, full descent.
-    repeat: 1
     show_labels: true
 
   # 5. COMPARE WITH BHIMPALASI — same swaras, different world

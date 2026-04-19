@@ -151,10 +151,15 @@ export default function PhrasePlayback({
     [isPlaying, playPhrase],
   );
 
-  // Handle continue
+  // Handle continue — fires immediately whether playback is done or still running.
+  // Clears any pending timer so mid-playback clicks don't double-fire.
   const handleContinue = useCallback(() => {
     if (!completeCalled.current) {
       completeCalled.current = true;
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+        timerRef.current = null;
+      }
       onComplete();
     }
   }, [onComplete]);
@@ -199,20 +204,20 @@ export default function PhrasePlayback({
         })}
       </div>
 
-      {/* Continue button after playback completes */}
-      {allComplete && (
-        <motion.button
-          type="button"
-          className={styles.actionButton}
-          onClick={handleContinue}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.3, duration: 0.4 }}
-          aria-label="Continue to next phase"
-        >
-          Continue
-        </motion.button>
-      )}
+      {/* Continue is always available — skips remaining repeats and advances.
+          Visible immediately at low opacity; becomes full opacity once all
+          repetitions finish, so the natural flow still rewards listening. */}
+      <motion.button
+        type="button"
+        className={styles.actionButton}
+        onClick={handleContinue}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: allComplete ? 1 : 0.35 }}
+        transition={{ delay: 0.3, duration: 0.4 }}
+        aria-label="Continue to next phase"
+      >
+        Continue
+      </motion.button>
     </div>
   );
 }

@@ -50,16 +50,8 @@ phases:
     instruction: |
       Listen to Bhairav climbing. Pay attention to the second and sixth notes.
       They sit lower than you might expect. They pull downward.
+      Sa Re Ga Ma Pa Dha Ni Sa — two of them are komal.
     repeat: 2
-    show_labels: false
-
-  - id: aroha_show
-    type: phrase_playback
-    phrase: [Sa, Re_k, Ga, Ma, Pa, Dha_k, Ni, Sa_upper]
-    instruction: |
-      Sa Re Ga Ma Pa Dha Ni Sa.
-      Seven notes. Two of them are komal — lowered.
-    repeat: 1
     show_labels: true
 
   # 4. HEAR THE AVAROHA — Sa' Ni Dha(k) Pa Ma Ga Re(k) Sa
@@ -70,12 +62,6 @@ phases:
       And descending. The two komal notes become even more powerful
       on the way down.
     repeat: 2
-    show_labels: false
-
-  - id: avaroha_show
-    type: phrase_playback
-    phrase: [Sa_upper, Ni, Dha_k, Pa, Ma, Ga, Re_k, Sa]
-    repeat: 1
     show_labels: true
 
   # 5. MEET THE KOMAL SWARAS — the defining character

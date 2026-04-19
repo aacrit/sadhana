@@ -51,15 +51,6 @@ phases:
       Listen to Yaman climbing. It begins below Sa, from Ni.
       That's unusual. It tells you something about this raga.
     repeat: 2
-    show_labels: false
-
-  - id: aroha_show
-    type: phrase_playback
-    phrase: [Ni_mandra, Re, Ga, Ma_t, Pa, Dha, Ni, Sa_upper]
-    instruction: |
-      Ni Re Ga Ma Pa Dha Ni Sa.
-      Seven notes. All shuddha except one.
-    repeat: 1
     show_labels: true
 
   # 4. HEAR THE AVAROHA — Sa' Ni Dha Pa Ma(t) Ga Re Sa
@@ -68,14 +59,8 @@ phases:
     phrase: [Sa_upper, Ni, Dha, Pa, Ma_t, Ga, Re, Sa]
     instruction: |
       And descending. Listen to the fourth note from the top.
-      It has a different quality.
+      It has a different quality — that is tivra Ma.
     repeat: 2
-    show_labels: false
-
-  - id: avaroha_show
-    type: phrase_playback
-    phrase: [Sa_upper, Ni, Dha, Pa, Ma_t, Ga, Re, Sa]
-    repeat: 1
     show_labels: true
 
   # 5. MEET THE TIVRA MA — the defining swara

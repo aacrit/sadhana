@@ -52,7 +52,7 @@ phases:
     presentation: sequential         # one at a time with audio
     audio_first: true                # hear before see label
 
-  # 4. ASCENT — aroha
+  # 4. ASCENT + DESCENT — aroha-avaroha as one paired unit
   - id: aroha_listen
     type: phrase_playback
     phrase: [Sa, Re, Ga, Pa, Dha, Sa_upper]
@@ -60,15 +60,8 @@ phases:
       Listen to Bhoopali climbing up.
       Sa — Re — Ga — Pa — Dha — Sa
     repeat: 2
-    show_labels: false               # hear first
+    show_labels: true                # labels visible from first play
 
-  - id: aroha_show
-    type: phrase_playback
-    phrase: [Sa, Re, Ga, Pa, Dha, Sa_upper]
-    repeat: 1
-    show_labels: true
-
-  # 5. DESCENT — avaroha
   - id: avaroha_listen
     type: phrase_playback
     phrase: [Sa_upper, Dha, Pa, Ga, Re, Sa]
@@ -76,12 +69,6 @@ phases:
       And coming back down.
       Sa — Dha — Pa — Ga — Re — Sa
     repeat: 2
-    show_labels: false
-
-  - id: avaroha_show
-    type: phrase_playback
-    phrase: [Sa_upper, Dha, Pa, Ga, Re, Sa]
-    repeat: 1
     show_labels: true
 
   # 6. FIRST SINGING — Sa only
