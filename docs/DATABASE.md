@@ -1,10 +1,12 @@
 # Database Schema Reference
 
-Last updated: 2026-04-14
+Last updated: 2026-04-19
 
 Supabase (free tier). All tables have Row Level Security (RLS) enabled. Every table is scoped to the authenticated user via `auth.uid()`.
 
-Migration: `supabase/migrations/001_initial_schema.sql`
+Migrations:
+- `supabase/migrations/001_initial_schema.sql` — base schema
+- `supabase/migrations/002_worst_swara.sql` — adds `worst_swara` column to `sessions` table
 
 ---
 
@@ -42,11 +44,12 @@ One row per practice session.
 | `xp_earned` | integer | 0 | CHECK >= 0 |
 | `avg_accuracy` | numeric(5,4) | null | CHECK 0-1 |
 | `pakad_found` | boolean | false | -- |
+| `worst_swara` | text | null | Swara symbol with highest avg abs(cents_dev) for the session. Written by the app on session end. Used by `getYesterdayWorstSwara()` to surface the Return Note warmup. |
 | `journey` | text | `'beginner'` | -- |
 | `started_at` | timestamptz | now() | -- |
 | `ended_at` | timestamptz | null | -- |
 
-Index: `(user_id, started_at DESC)`
+Indexes: `(user_id, started_at DESC)`, `(user_id, started_at DESC) WHERE worst_swara IS NOT NULL` (covering index for `getYesterdayWorstSwara`)
 
 RLS: select own, insert own, update own.
 
@@ -141,6 +144,7 @@ Source: `frontend/app/lib/supabase.ts`
 |--------|-----------|-------------|
 | `getRecentRagas` | `(userId, limit)` | Fetch last N raga_encounters ordered by `last_practiced DESC` |
 | `getPracticeHistory` | `(userId, days)` | Aggregate sessions by day for the last N days. Returns `{ date: string, minutes: number, sessions: number }[]`. Used by the profile heatmap. |
+| `getYesterdayWorstSwara` | `(userId)` | Returns the `worst_swara` value from the most recent session whose `started_at` falls on the calendar day before today. Returns `null` if no yesterday session exists or `worst_swara` is unset. Used by `useLessonEngine` to inject the Return Note warmup phase via `?warmup=` URL param. |
 
 ---
 

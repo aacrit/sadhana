@@ -1,6 +1,6 @@
 # Engine Reference
 
-Last updated: 2026-04-14
+Last updated: 2026-04-19
 
 The engine lives at `/engine/`. Pure TypeScript. Zero UI. Zero dependencies except Tone.js (synthesis only). Single barrel export from `engine/index.ts`.
 
@@ -101,7 +101,7 @@ All core type definitions.
 | `RagaJati` | `'audava' \| 'shadava' \| 'sampoorna'` (5/6/7 notes) |
 | `Rasa` | 9 rasas: shant, karuna, shringar, veer, adbhut, bhayanak, raudra, bibhatsa, hasya |
 | `Prahara` | `1-8` (3-hour divisions of the day) |
-| `Raga` | Complete raga: id, aroha, avaroha, vadi, samvadi, pakad, prahara, rasa, ornaments, ornamentMap, vakra, description |
+| `Raga` | Complete raga: id, aroha, avaroha, vadi, samvadi, pakad, prahara, rasa, ornaments, ornamentMap, vakra, tanpuraTuning?, description |
 | `Thaat` | Bhatkhande thaat: id, name, 7 swaras, description |
 | `Tala` | Rhythmic cycle: beats, vibhag, sam, khali, theka |
 | `n(swara, octave?)` | Helper to create SwaraNote |
@@ -236,9 +236,14 @@ Pakad detection -- the "wow" feature.
 | Export | Kind | Description |
 |--------|------|-------------|
 | `PakadMatch` | interface | `{ matched, ragaId, ragaName, pakadPhrase, confidence, sargamNotation }` |
+| `PrimedPhrase` | interface | `{ phrase, ragaId, primedAt, windowMs }` — active prime state |
 | `recognizePakad(recentSwaras, ragas?, minConfidence?)` | fn | Search all ragas, default threshold 0.7 |
 | `recognizePakadInRaga(recentSwaras, ragaId, minConfidence?)` | fn | Single-raga search, threshold 0.6 |
 | `pakadToSargam(phrase)` | fn | SwaraNote[] to sargam string with octave marks |
+| `primeExpectedPhrase(phrase, ragaId, windowMs?)` | fn | Prime a specific phrase for detection; if sung within `windowMs` (default 45 000ms), fires immediately at lower threshold. Used by YAML `prime_pakad` blocks in beginner-01 through beginner-06. |
+| `clearPrimedPhrase()` | fn | Cancel an active prime |
+| `getPrimedPhrase()` | fn | Read active prime state (null if none) |
+| `checkPrimedPhrase(recentSwaras)` | fn | Called by VoicePipeline each frame; returns PakadMatch or null |
 
 Algorithm: collapse consecutive repeats, sliding window subsequence match. Confidence based on extra-swara penalty. Minimum 3 swaras required.
 
@@ -270,13 +275,17 @@ Additive synthesis drone from first principles.
 
 | Export | Kind | Description |
 |--------|------|-------------|
-| `TanpuraConfig` | interface | `{ sa_hz, volume, strings: 4, useMa?, saDetuningCents?, cycleDuration? }` |
-| `DEFAULT_TANPURA_CONFIG` | const | 261.63 Hz, volume 0.3, 2 cents detuning, 7s pluck cycle |
+| `TanpuraConfig` | interface | `{ sa_hz, volume, strings: 4, groundString?: 'Pa'\|'Ma'\|'Ni', useMa?, saDetuningCents?, cycleDuration? }` |
+| `DEFAULT_TANPURA_CONFIG` | const | 261.63 Hz, volume 0.3, 2 cents detuning, 7s pluck cycle, groundString 'Pa' |
 | `TanpuraDrone` | class | `start()`, `stop()`, `setSa(hz)`, `setVolume(v)`, `getPartialFrequencies()`, `getProfiles()` |
 
-Architecture: 4 strings x 10 partials = 40 sine oscillators. Third string detuned 2 cents for shimmer. String volume balance: Pa/Ma 0.7, low Sa 0.6, middle Sa 1.0. 500ms fade-out on stop. Web Audio API directly (no Tone.js).
+Architecture: 4 strings x 10 partials = 40 sine oscillators. Third string detuned 2 cents for shimmer. String volume balance: Pa/Ma/Ni 0.7, low Sa 0.6, middle Sa 1.0. 500ms fade-out on stop. Web Audio API directly (no Tone.js).
 
-Pluck cycle model: strings are plucked sequentially (Pa → Sa → Sa → low Sa → repeat) with a jivari amplitude envelope per pluck. The `cycleDuration` parameter controls the full 4-string pluck cycle in seconds (default 7s, yielding one pluck every 1.75s). String sustain overlaps the full cycle duration so successive plucks crossfade rather than gap, producing a continuous drone. Higher partials sustain longer than lower partials, matching the physical behaviour of the jivari bridge.
+Per-partial jivari detune: each partial receives a deterministic ±0.4 cent offset computed from a seeded xorshift32 PRNG (seed derived from string index + partial index). The same detuning pattern plays back every pluck cycle, matching the physical consistency of a real jivari bridge.
+
+Pluck cycle model: strings are plucked sequentially (ground-string → Sa → Sa → low Sa → repeat) with a jivari amplitude envelope per pluck. Attack: 35ms exponential ramp (was 15ms linear) for more natural string-contact character. The `cycleDuration` parameter controls the full 4-string pluck cycle in seconds (default 7s, yielding one pluck every 1.75s). String sustain overlaps the full cycle duration so successive plucks crossfade rather than gap, producing a continuous drone. Higher partials sustain longer than lower partials, matching the physical behaviour of the jivari bridge.
+
+`groundString` parameter: ragas that omit Pa traditionally use an alternate ground string. `tanpuraTuning` on the `Raga` interface drives this automatically: Marwa → 'Ma', Malkauns → 'Ma', Bageshri → 'Ni', all others default to 'Pa'. The legacy `useMa` boolean is still accepted for backward compatibility but deprecated in favour of `groundString`.
 
 ### swara-voice.ts
 
@@ -330,3 +339,23 @@ Chain: `getUserMedia -> AnalyserNode -> Pitchy (McLeod) -> mapPitchToSwara -> pa
 | `generateSilenceFeedback()` | fn | "Listening..." message |
 
 Feedback is terse and specific. Hints appear after 2+ consecutive errors. Color maps to RAG: correct / in-progress / needs-work. Raga-aware: knows when Re_k needs andolan in Bhairav.
+
+### ornament-evaluator.ts
+
+Scores a sung ornament attempt against the expected ornament shape for meend, andolan, gamak, kan, murki, khatka, and zamzama.
+
+| Export | Kind | Description |
+|--------|------|-------------|
+| `OrnamentId` | type | `'meend' \| 'andolan' \| 'gamak' \| 'kan' \| 'murki' \| 'khatka' \| 'zamzama'` |
+| `OrnamentPitchSample` | interface | `{ timeMs, hz, clarity }` — single voice frame |
+| `OrnamentAttempt` | interface | `{ ornamentId, samples[], toSwara, fromSwara?, ragaId? }` |
+| `OrnamentScore` | interface | `{ overall, shapeFit, timing, arrivalAccuracyCents }` |
+| `evaluateOrnament(attempt)` | fn | Returns fully populated OrnamentScore. Never throws. |
+
+Scoring weights: `overall = 0.5 * shapeFit + 0.2 * timing + 0.3 * arrivalScore`.
+
+- **shapeFit**: DTW-free approach — resamples both student and expected curves to a fixed grid, computes RMS of the cents difference weighted by an exponential decay envelope (σ = 40 cents). Shape-specific expected curves: logarithmic glide for meend, sinusoidal for andolan/gamak, impulse for kan/sparsh.
+- **timing**: ±30% of the ornament's nominal duration range scores 1.0; decays linearly beyond that.
+- **arrival**: Gaussian (σ = 25 cents) scoring of the average cents deviation across the final 120ms window. Used to check the student lands on the target swara.
+
+Wired into `OrnamentExercisePhase` in `LessonRenderer.tsx`. `ornament_exercise`, `andolan`, and `meend` added to `VOICE_PHASE_TYPES` (fixes a latent mic-closed bug where those phase types were silently skipped).

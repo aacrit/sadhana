@@ -1,6 +1,6 @@
 # Journey UX Specs
 
-Last updated: 2026-04-14
+Last updated: 2026-04-19
 
 Four entry points to the same engine. Different interfaces, different depth, same musical truth.
 
@@ -34,6 +34,16 @@ An SVG ring displayed on the home page shows today's riyaz completion status. Th
 ## Beginner Journey
 
 Source: `frontend/app/journeys/beginner/page.tsx`
+
+### Daily Loop Rituals
+
+**Arriving moment:** On the first open of any daily riyaz lesson, a 6s cinematic overlay fires (localStorage-gated per calendar day — will not repeat). The overlay shows a sun or moon SVG glyph appropriate to the current prahara (sun for prahars 1–4, moon for 5–8), plus the prahar name in Devanagari (e.g., प्रथम प्रहर). Pure CSS animation, no audio. Fades out and gives way to the lesson. Implemented in `LessonClient.tsx`.
+
+**Return Note warmup:** When `?warmup=[swara]` is present in the URL (set by `getYesterdayWorstSwara()` Supabase query), `useLessonEngine` injects a silent warmup phase at index 0 before the lesson's normal first phase. The warmup reuses the `pitch_exercise` phase type with the specified swara as target. Mastery condition: ±25 cents for 8 continuous seconds → auto-advances. 60s fallback auto-advance. `LessonClient.tsx` wraps the engine in `<Suspense>` for static export compatibility.
+
+**Prahara-aware raga picker (freeform):** In the freeform raga selector, ragas outside the current prahara are rendered at 40% opacity with a tooltip: "Traditional time: [prahara label]". On-prahara ragas render at full opacity. Opacity is visual suggestion only — all ragas remain selectable.
+
+**Dawn gate (beginner-08-challenge):** The `dawn_gate` block in `beginner-08-challenge.yaml` requires the student to complete 3 Bhairav sessions during prahara 1 (04:00–07:00) on 3 different calendar dates. This is the gate for the Shishya → Sadhaka level unlock.
 
 ### Home View (~230 lines)
 
@@ -70,7 +80,7 @@ preparing -> listening -> active <-> pakad-moment -> completing -> complete
 | `preparing` | 2s auto | "Preparing tanpura..." message. Tanpura not yet active. |
 | `listening` | manual | Tanpura active. Waiting for student to start singing. |
 | `active` | manual | Student singing. Voice feedback live. Timer running. |
-| `pakad-moment` | 4s auto | Cinematic pakad overlay. Tanpura continues. Returns to active. |
+| `pakad-moment` | 5.2s auto | Cinematic pakad overlay. Tanpura continues. Returns to active. |
 | `completing` | 1s auto | "Completing session..." message. |
 | `complete` | terminal | Stats display: duration, XP earned, pakad found. |
 
@@ -93,11 +103,12 @@ preparing -> listening -> active <-> pakad-moment -> completing -> complete
 
 Triggered once per session when pakad is detected. 2-layer reveal:
 
-**Layer 1 -- Cinematic pause (4s):**
-- Framer Motion overlay fades in (0.8s ease-out)
-- Raga name appears with `motion.h2` (1s delay 0.3s, fadeUp)
-- Sargam notation below (0.8s delay 0.8s, fade)
-- Tanpura continues uninterrupted
+**Layer 1 -- Cinematic pause (5.2s):**
+- Framer Motion overlay fades in using `ENTRY_EASE [0.22, 0.61, 0.36, 1]` (slower ceremonial curve)
+- Tanpura gain ducks to 0 on entry, restores over 400ms starting at 3800ms
+- Raga name appears with `motion.h2` (Devanagari or romanized per script toggle)
+- Sargam notation below
+- `PakadMoment.tsx` receives `primeExpectedPhrase` calls from YAML `prime_pakad` blocks in beginner-01 through beginner-06, ensuring pakad fires on the lesson's intended phrase rather than any matching phrase
 
 **Layer 2 -- Settles:**
 - After 4s, overlay fades out
