@@ -53,17 +53,7 @@ phases:
     presentation: sequential
     audio_first: true
 
-  # 4. HEAR THE AROHA — see it move
-  - id: aroha_playback
-    type: phrase_playback
-    phrase: [Ni_mandra, Re, Ga, Ma_t, Pa, Dha, Ni, Sa_upper]
-    instruction: |
-      Listen to Yaman climbing. It begins below Sa, from Ni.
-      The tivra Ma pulls every phrase upward.
-    repeat: 2
-    show_labels: true
-
-  # 5. SING ALONG — follow the aroha
+  # 4. SING ALONG — follow the aroha
   - id: sing_aroha
     type: sing_along
     phrase: [Sa, Re, Ga, Ma_t, Pa, Dha]
@@ -73,7 +63,7 @@ phases:
     guide_tone: true
     feedback_layer: minimal
 
-  # 6. COMPLETION (Note: lesson counts as 5 because sa_calibration skips after first run)
+  # 5. COMPLETION
   - id: complete
     type: session_summary
     show_accuracy: true

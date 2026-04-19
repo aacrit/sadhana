@@ -54,28 +54,18 @@ phases:
     presentation: sequential
     audio_first: true
 
-  # 4. HEAR THE OPENING PHRASE — Bhairav's pakad
-  - id: pakad_listen
-    type: phrase_playback
-    phrase: [Sa, Re_k, Ga, Re_k, Sa]
-    instruction: |
-      This is how Bhairav begins. Sa, up to komal Re, up to Ga,
-      back through komal Re, and home to Sa.
-      The way it dwells on komal Re — that is Bhairav.
-    repeat: 3
-    show_labels: true
-
-  # 5. SING ALONG — the opening phrase
+  # 4. SING ALONG — Bhairav's opening phrase (pakad)
   - id: sing_opening
     type: sing_along
     phrase: [Sa, Re_k, Ga, Re_k, Sa]
     instruction: |
-      Follow the guide. Sa, komal Re, Ga, komal Re, Sa.
-      Let komal Re pull you back toward home.
+      This is how Bhairav begins. Sa, komal Re, Ga, komal Re, Sa.
+      Follow the guide. Let komal Re pull you back toward home.
+      The way it dwells on komal Re — that is Bhairav.
     guide_tone: true
     feedback_layer: minimal
 
-  # 6. COMPLETION
+  # 5. COMPLETION
   - id: complete
     type: session_summary
     show_accuracy: true
