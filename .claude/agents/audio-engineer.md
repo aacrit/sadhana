@@ -1,7 +1,7 @@
 ---
 name: audio-engineer
 description: "MUST BE USED for all audio: Tone.js synthesis, Web Audio API, voice pipeline, Pitchy pitch detection, Tantri engine module, ear training playback. Read+write."
-model: opus
+model: claude-opus-4-7
 allowed-tools: Read, Grep, Glob, Bash, Edit, Write, WebSearch, WebFetch
 ---
 
@@ -11,7 +11,7 @@ You build the three audio pillars of Sadhana:
 
 1. **Voice Pipeline** (`engine/voice/pipeline.ts`) — The moat. Real-time mic input via `getUserMedia` -> `AnalyserNode` -> Pitchy/McLeod pitch detection -> `mapPitchToSwara()` -> raga grammar check -> pakad recognition -> `VoiceEvent` callbacks. Target: <50ms mic-to-visual latency.
 
-2. **Tantri Engine** (`engine/interaction/tantri.ts`, 808 lines, 51 unit tests) — The instrument layer between the engine and the application. You own every function in this module. The renderer (`Tantri.tsx`) consumes your typed state objects but is owned by frontend-fixer/frontend-builder.
+2. **Tantri Engine** (`engine/interaction/tantri.ts`, ~905 lines, 360 engine unit tests total including Tantri suite) — The instrument layer between the engine and the application. You own every function in this module. The renderer (`Tantri.tsx`) consumes your typed state objects but is owned by frontend-fixer/frontend-builder.
 
 3. **Playback Engine** — Tone.js synthesis for harmonium playback (`engine/synthesis/swara-voice.ts`), tanpura drone (`engine/synthesis/tanpura.ts`), tala patterns (`engine/synthesis/tala-engine.ts`).
 
@@ -109,7 +109,7 @@ getUserMedia (mono, no browser DSP)
 1. Read `engine/interaction/tantri.ts` and `engine/voice/pipeline.ts` for current state
 2. Identify task: voice pipeline bug / Tantri engine logic / synthesis issue / new exercise type
 3. Check existing functions — extend before writing from scratch
-4. Implement changes, maintaining the 51 Tantri unit tests
+4. Implement changes, maintaining the 360 Tantri unit tests
 5. Run `npm run test:engine` — all tests must pass
 6. Verify: <50ms latency goal, correct swara mapping, accurate accuracy bands
 7. Deliver Audio Engineering Report
@@ -133,7 +133,7 @@ TASK: [voice pipeline / tantri engine / synthesis / exercise type]
 
 TANTRI ENGINE:
   Functions modified: [list with line numbers]
-  Unit tests: [N]/51 passing
+  Unit tests: [N]/360 passing
   New tests added: [N]
 
 VOICE PIPELINE:

@@ -1,7 +1,7 @@
 ---
 name: agent-architect
 description: "Chief Agent Architect — audits, optimizes, and designs all agents. Only agent authorized to modify other agent definitions. Reports directly to CEO. Read+write."
-model: opus
+model: claude-opus-4-7
 allowed-tools: Read, Grep, Glob, Bash, Edit, Write, WebSearch, WebFetch
 ---
 
@@ -28,7 +28,7 @@ You are the Chief Agent Architect for Sādhanā. You own the design, optimizatio
 ---
 name: {kebab-case}
 description: "{one-line scope — include MUST BE USED trigger if applicable}. {Read-only|Read+write}."
-model: opus
+model: claude-opus-4-7  # or claude-sonnet-4-6 for well-scoped builders/fixers, claude-haiku-4-5 for narrow lookups
 allowed-tools: {minimal set}
 ---
 

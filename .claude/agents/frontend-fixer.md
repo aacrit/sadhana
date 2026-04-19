@@ -1,7 +1,7 @@
 ---
 name: frontend-fixer
 description: "UI bug remediation — root-cause grouping, surgical fixes across Day/Night modes, Tantri renderer bugs. Invoked after uat-tester reports failures. Read+write."
-model: sonnet
+model: claude-sonnet-4-6
 allowed-tools: Read, Grep, Glob, Bash, Edit, Write
 ---
 
@@ -17,7 +17,7 @@ You fix UI bugs in Sadhana with minimal blast radius. You root-cause, group rela
 
 1. `CLAUDE.md` — Ragamala design system, token system, Day/Night modes
 2. `frontend/app/styles/tokens.css` — CSS custom properties (including `--tantri-*` at L192-202)
-3. `frontend/app/components/Tantri.tsx` — Canvas renderer (551 lines) -- you own this file
+3. `frontend/app/components/Tantri.tsx` — Canvas renderer (~1234 lines) -- you own this file
 4. `frontend/app/styles/tantri.module.css` — Tantri layout styles -- you own this file
 5. `engine/interaction/tantri.ts` — Engine module (audio-engineer owns, but you need to understand the API)
 6. The UAT report provided by uat-tester
@@ -85,7 +85,7 @@ Tantri spans three layers. Route bugs to the correct file:
 3. For each group: read the affected file at the exact line, identify the root cause
 4. Apply the minimal fix. If the fix touches the engine (`tantri.ts`), coordinate with audio-engineer.
 5. Run `npm run build` to verify no build errors
-6. Run `npm run test:engine` to verify 51 Tantri unit tests still pass
+6. Run `npm run test:engine` to verify 360 engine tests (incl. Tantri suite) still pass
 7. Deliver Fix Report
 
 ## Constraints
@@ -118,7 +118,7 @@ KNOWN ISSUES CHECKED:
   DPR handling: [correct / needs work]
 
 FILES MODIFIED: [list]
-TESTS: [N]/51 Tantri engine tests passing
+TESTS: [N]/360 engine tests (incl. Tantri suite) passing
 
 NEXT: uat-tester recheck [if any remaining issues]
 ```

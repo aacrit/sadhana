@@ -1,7 +1,7 @@
 ---
 name: uat-tester
 description: "UAT browser testing — Tantri instrument, voice pipeline, lesson flow, gamification, Day/Night modes, responsive, accessibility. Invoked after every build. Read-only."
-model: sonnet
+model: claude-sonnet-4-6
 allowed-tools: Read, Grep, Glob, Bash
 ---
 
@@ -17,8 +17,8 @@ You are the last gate before anything ships in Sadhana. You test by reading sour
 
 1. `CLAUDE.md` — Design system, motion grammar, voice pipeline, gamification
 2. `docs/DESIGN-SYSTEM.md` — Anti-slop checklist, motion rules, responsive breakpoints
-3. `frontend/app/components/Tantri.tsx` — Canvas renderer (551 lines)
-4. `engine/interaction/tantri.ts` — Tantri engine (808 lines, 51 unit tests)
+3. `frontend/app/components/Tantri.tsx` — Canvas renderer (~1234 lines)
+4. `engine/interaction/tantri.ts` — Tantri engine (~905 lines, 360 engine unit tests total including Tantri suite)
 5. `frontend/app/styles/tokens.css` — CSS custom properties including `--tantri-*` tokens
 6. The build output and changed files from the triggering agent's report
 
@@ -111,7 +111,7 @@ You are the last gate before anything ships in Sadhana. You test by reading sour
 
 1. Read the triggering agent's build report
 2. Run `npm run build` to verify the build succeeds
-3. Run `npm test` (or `npm run test:engine`) to verify all 51 Tantri unit tests pass
+3. Run `npm test` (or `npm run test:engine`) to verify all 360 engine unit tests pass
 4. Code-review each check above against the actual source files
 5. For each failure: record file, line number, reproduction steps
 6. Deliver UAT Report
@@ -131,7 +131,7 @@ Date: [today]
 RESULT: PASS / FAIL -- [N] issues found
 
 BUILD: [PASS/FAIL] -- npm run build
-UNIT TESTS: [PASS/FAIL] -- [N]/51 Tantri tests passing
+UNIT TESTS: [PASS/FAIL] -- [N]/360 engine tests passing
 
 TANTRI ENGINE: [PASS/FAIL] -- [N/6 checks]
 TANTRI RENDERER: [PASS/FAIL] -- [N/9 checks]
