@@ -1,6 +1,6 @@
 # Design System -- Ragamala
 
-Last updated: 2026-04-14
+Last updated: 2026-04-19
 
 ---
 
@@ -521,13 +521,13 @@ Three.js scene. The tanpura drone visualized as a standing wave that responds to
 
 When the engine detects the student has sung the pakad (characteristic phrase) of the active raga, a 2-layer cinematic sequence fires:
 
-**Layer 1 -- Cinematic pause (~4s):**
-- Tanpura continues uninterrupted.
+**Layer 1 -- Cinematic pause (~5.2s):**
+- Tanpura continues uninterrupted; tanpura gain ducks to 0 at entry then restores to 1 over 400ms starting at 3800ms.
 - Background deepens to full `--raga-bg`.
 - Jali pattern scales to full reveal (100% opacity), then settles.
 - Raga name appears large (--text-4xl) in Cormorant Garamond (or Noto Serif Devanagari if script toggle is active), center screen.
 - Below it: the phrase in sargam notation (e.g., Ni Re Ga Ma Ga Re Sa).
-- GSAP timeline, ~4000ms total.
+- GSAP timeline, 5200ms total (`OVERLAY_DURATION_MS`). Entry uses `ENTRY_EASE [0.22, 0.61, 0.36, 1]` (slower, more ceremonial than before).
 
 **Layer 2 -- Settles:**
 - "You just sang the pakad of [raga]" appears at the bottom as quiet text.
@@ -751,6 +751,8 @@ When a not-in-raga swara is activated by voice: ghost string flickers `--needs-w
 
 When perfect pitch is sustained >2 seconds: `--jali-opacity` rises to `--jali-opacity-pitch` (0.12) behind the string field. The architecture of the music becomes faintly visible.
 
+**Vadi dwell saturation boost:** When the student dwells on the vadi string continuously for >1.2s (tracked per-frame in `Tantri.tsx` via `vadiDwellRef`), the string receives a +0.15 opacity bonus (`vadiOpacityBoost`). This makes the most important swara of the raga bloom visibly under sustained focus without any announcement.
+
 ### Touch/Click Interaction
 
 | Phase | Spring preset | Duration | Character |
@@ -785,7 +787,7 @@ When raga deactivates: all 12 strings return to chromatic layout over 600ms.
 --tantri-string-sa-width: 2px;
 --tantri-string-pa-width: 2px;
 --tantri-string-default-width: 1px;
---tantri-string-rest-opacity: 0.35;
+--tantri-string-rest-opacity: 0.22;
 --tantri-string-ghost-opacity: 0.08;
 --tantri-string-achala-opacity: 0.15;
 --tantri-ripple-duration: 400ms;

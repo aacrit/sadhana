@@ -1,6 +1,6 @@
 # Audio Engine
 
-Last updated: 2026-04-14
+Last updated: 2026-04-19
 
 Voice capture, pitch detection, tanpura synthesis, and swara playback. Everything runs in the browser. $0 operational cost.
 
@@ -10,16 +10,24 @@ Voice capture, pitch detection, tanpura synthesis, and swara playback. Everythin
 
 Source: `engine/voice/pipeline.ts`
 
+**CURRENT pipeline** (shipping):
 ```
-Mic (getUserMedia) -> AnalyserNode (FFT 2048) -> Pitchy McLeod -> mapPitchToSwara
+Mic (getUserMedia) -> AnalyserNode (FFT 2048) -> Pitchy McLeod (main thread) -> mapPitchToSwara
   -> raga grammar check -> pakad recognition -> VoiceEvent callbacks
+```
+
+**TARGET pipeline** (future — owned by `acoustics-engineer`):
+```
+Mic -> AudioWorklet (off-thread) -> RNNoise WASM (denoise) -> Pitchy McLeod -> mapPitchToSwara -> ...
 ```
 
 ### Architecture Decisions
 
-1. **AnalyserNode + main-thread Pitchy** (not AudioWorklet). Pitchy runs in <5ms per frame -- fast enough without Worker overhead. AudioWorklet adds SharedArrayBuffer requirements and message passing latency with no measurable benefit at this scale.
+1. **CURRENT: AnalyserNode + main-thread Pitchy** (not AudioWorklet). Pitchy runs in <5ms per frame -- fast enough without Worker overhead. AudioWorklet adds SharedArrayBuffer requirements and message passing latency with no measurable benefit at this scale. `audio-engineer` owns this layer.
 
-2. **RNNoise WASM: future enhancement.** Current pipeline works without denoising. All browser-level audio processing (`echoCancellation`, `noiseSuppression`, `autoGainControl`) is **disabled** in getUserMedia constraints because they corrupt pitch detection. Echo cancellation modifies frequency content; noise suppression cuts soft vowel onset; AGC distorts amplitude which corrupts clarity scores. When RNNoise is integrated, it inserts between mic source and AnalyserNode with no changes to the rest of the chain.
+2. **TARGET: AudioWorklet + RNNoise WASM.** `acoustics-engineer` owns the upgrade path. When RNNoise is integrated, it inserts between mic source and AnalyserNode with no changes to the rest of the chain. Trigger: profiling shows main-thread pressure on low-end devices, or user reports confirm noisy-environment demand.
+
+3. **RNNoise WASM absent from CURRENT pipeline.** All browser-level audio processing (`echoCancellation`, `noiseSuppression`, `autoGainControl`) is **disabled** in getUserMedia constraints because they corrupt pitch detection. Echo cancellation modifies frequency content; noise suppression cuts soft vowel onset; AGC distorts amplitude which corrupts clarity scores.
 
 3. **Callback-based events** (not buffered). Only the latest pitch matters for real-time feedback. VoicePipeline emits `VoiceEvent` objects via `onPitch`, `onSilence`, and `onPakadDetected` callbacks.
 
@@ -154,7 +162,9 @@ The jivari bridge excites higher partials far more than a normal plucked string,
 
 ### Pluck Cycle
 
-Strings are plucked sequentially — Pa → Sa → Sa → low Sa — repeating on a configurable cycle. Each pluck applies a jivari amplitude envelope: sharp attack, then exponential decay with higher partials sustaining longer than lower ones. The `cycleDuration` parameter (default 7s) controls the full 4-string cycle; each string is plucked every `cycleDuration / 4` seconds (1.75s at 7s cycle). String sustain is extended to overlap across the full cycle so successive plucks crossfade rather than gap -- producing a continuous drone rather than discrete clicks. The scheduler uses `AudioContext.currentTime` for sample-accurate timing with 2-beat lookahead.
+Strings are plucked sequentially — ground-string → Sa → Sa → low Sa — repeating on a configurable cycle. The ground string is Pa by default; ragas that omit Pa use Ma (Marwa, Malkauns) or Ni (Bageshri) via the `groundString` config field (reads `Raga.tanpuraTuning` automatically). Each pluck applies a jivari amplitude envelope: 35ms exponential ramp attack (previously 15ms linear — more natural string-contact character), then exponential decay with higher partials sustaining longer than lower ones. The `cycleDuration` parameter (default 7s) controls the full 4-string cycle; each string is plucked every `cycleDuration / 4` seconds (1.75s at 7s cycle). String sustain is extended to overlap across the full cycle so successive plucks crossfade rather than gap -- producing a continuous drone rather than discrete clicks. The scheduler uses `AudioContext.currentTime` for sample-accurate timing with 2-beat lookahead.
+
+**Per-partial jivari detune:** Each of the 40 oscillators (4 strings × 10 partials) receives a deterministic ±0.4 cent offset. The offset is computed once per construction from a seeded xorshift32 PRNG (seed = string index × 31 + partial index). Deterministic seeding ensures the same shimmer pattern on every play, matching the physical consistency of a real jivari bridge finish.
 
 ### Lifecycle
 

@@ -1,6 +1,6 @@
 # Music Team Standards
 
-Last updated: 2026-04-14
+Last updated: 2026-04-19
 
 Raga database standards, shruti science, and cultural guidelines for all musicological content in the engine.
 
@@ -34,6 +34,7 @@ Every raga file (`engine/theory/ragas/*.ts`) exports a single `Raga` object. All
 | `description` | string | Evocative, precise, written for first encounter |
 | `westernBridge` | string | "Western listeners may notice..." -- never "This is like..." |
 | `relatedRagas` | string[] | IDs of similar/easily-confused ragas |
+| `tanpuraTuning?` | `'Pa' \| 'Ma' \| 'Ni'` | Optional: alternate tanpura ground string. Omit for Pa (the default). Set to 'Ma' for ragas that omit Pa (Marwa, Malkauns). Set to 'Ni' for Bageshri. The 27 other engine ragas have not yet been audited — leave unset until confirmed. |
 | `gharanaVariations?` | string | Optional: treatment differences across schools |
 
 ### Naming Conventions
@@ -65,7 +66,7 @@ Five ragas wired to journeys, in pedagogical order:
 4. **Bhairav** (Bhairav thaat) -- andolan on Re_k and Dha_k. Dawn gravity.
 5. **Bageshri** (Kafi thaat) -- midnight depth, emotional complexity.
 
-The engine defines 25 additional ragas not yet wired to journeys: Asavari, Bhairavi, Bilawal, Darbari Kanada, Desh, Durga, Hameer, Hamsadhwani, Jaunpuri, Jog, Kafi, Kedar, Khamaj, Lalit, Madhuvanti, Malkauns, Marwa, Multani, Pahadi, Puriya, Puriya Dhanashri, Shree, Sohini, Tilak Kamod, Todi. All 30 ragas pass `npm run test:engine` (318 tests).
+The engine defines 25 additional ragas not yet wired to journeys: Asavari, Bhairavi, Bilawal, Darbari Kanada, Desh, Durga, Hameer, Hamsadhwani, Jaunpuri, Jog, Kafi, Kedar, Khamaj, Lalit, Madhuvanti, Malkauns, Marwa, Multani, Pahadi, Puriya, Puriya Dhanashri, Shree, Sohini, Tilak Kamod, Todi. All 30 ragas pass `npm run test:engine` (386 tests).
 
 ### Adding a New Raga
 
