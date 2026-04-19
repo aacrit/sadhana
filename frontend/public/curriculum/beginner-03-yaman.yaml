@@ -1,30 +1,29 @@
 # Lesson B-03: Raga Yaman — The Evening Raga
 # Journey: Beginner | Level: Shishya (1-3)
 # Presence Rule: you hear before you name.
-# Engine source: engine/theory/ragas/yaman.ts
-# Prahara: 5-6 (late evening / first prahar of night)
+# Rewritten: 5 phases, ~10 min, Tantri-centric.
 
 id: beginner-03-yaman
 journey: beginner
 level_range: [1, 3]          # Shishya
 raga_id: yaman
-duration_target_min: 12
+duration_target_min: 10
 xp_award: 35
 
 meta:
   title: "The Evening Raga"
   subtitle: "Raga Yaman"
   time_of_day: evening        # prahara 5-6
-  rasa: shant                 # peace, devotion
+  rasa: shant
 
 # --- PHASES -------------------------------------------------------
 
 phases:
 
-  # 1. LISTENING — tanpura drone, Yaman context
+  # 1. LISTEN — tanpura in Yaman's context
   - id: listen
     type: tanpura_drone
-    duration_s: 30
+    duration_s: 20
     instruction: |
       Close your eyes. Listen.
       The tanpura is with you. Evening light.
@@ -32,7 +31,7 @@ phases:
       strings: [Pa, Sa, Sa, Sa_upper]
       sa_hz: null
 
-  # 2. SA DETECTION
+  # 2. SA DETECTION — skipped if already done
   - id: sa_calibration
     type: sa_detection
     skip_if: sa_already_set
@@ -43,121 +42,44 @@ phases:
     min_clarity: 0.85
     fallback_hz: 261.6256
 
-  # 3. HEAR THE AROHA — Ni Re Ga Ma(t) Pa Dha Ni Sa'
-  - id: aroha_listen
+  # 3. MEET TIVRA MA — the defining swara of Yaman
+  - id: meet_yaman
+    type: swara_introduction
+    instruction: |
+      Yaman has one note that sets it apart. A raised fourth.
+      Listen to the difference: natural Ma, then tivra Ma.
+      That raised note lifts every phrase upward.
+    swaras: [Ma, Ma_t, Sa, Re, Ga, Ma_t, Pa, Dha, Ni]
+    presentation: sequential
+    audio_first: true
+
+  # 4. HEAR THE AROHA — see it move
+  - id: aroha_playback
     type: phrase_playback
     phrase: [Ni_mandra, Re, Ga, Ma_t, Pa, Dha, Ni, Sa_upper]
     instruction: |
       Listen to Yaman climbing. It begins below Sa, from Ni.
-      That's unusual. It tells you something about this raga.
+      The tivra Ma pulls every phrase upward.
     repeat: 2
-    show_labels: false
-
-  - id: aroha_show
-    type: phrase_playback
-    phrase: [Ni_mandra, Re, Ga, Ma_t, Pa, Dha, Ni, Sa_upper]
-    instruction: |
-      Ni Re Ga Ma Pa Dha Ni Sa.
-      Seven notes. All shuddha except one.
-    repeat: 1
     show_labels: true
 
-  # 4. HEAR THE AVAROHA — Sa' Ni Dha Pa Ma(t) Ga Re Sa
-  - id: avaroha_listen
-    type: phrase_playback
-    phrase: [Sa_upper, Ni, Dha, Pa, Ma_t, Ga, Re, Sa]
-    instruction: |
-      And descending. Listen to the fourth note from the top.
-      It has a different quality.
-    repeat: 2
-    show_labels: false
-
-  - id: avaroha_show
-    type: phrase_playback
-    phrase: [Sa_upper, Ni, Dha, Pa, Ma_t, Ga, Re, Sa]
-    repeat: 1
-    show_labels: true
-
-  # 5. MEET THE TIVRA MA — the defining swara
-  - id: meet_ma_tivra
-    type: swara_introduction
-    instruction: |
-      That different note is called tivra Ma.
-      It is the only raised note in Yaman.
-      It lifts every phrase upward. Listen.
-    swaras: [Ma, Ma_t]
-    presentation: comparison    # play shuddha Ma then tivra Ma
-    audio_first: true
-
-  # 6. INTRODUCTION — all seven swaras, one at a time
-  - id: meet_yaman
-    type: swara_introduction
-    instruction: |
-      Yaman uses seven swaras. Six are natural. One is raised.
-      Listen to each one.
-    swaras: [Sa, Re, Ga, Ma_t, Pa, Dha, Ni]
-    presentation: sequential
-    audio_first: true
-
-  # 7. SING SA
-  - id: sing_sa
-    type: pitch_exercise
-    target_swara: Sa
-    duration_s: 15
-    instruction: |
-      Sing Sa. The anchor, as always.
-    feedback_layer: minimal
-    level_tolerance: shishya
-
-  # 8. SING THE AROHA — guided
+  # 5. SING ALONG — follow the aroha
   - id: sing_aroha
-    type: phrase_exercise
+    type: sing_along
     phrase: [Sa, Re, Ga, Ma_t, Pa, Dha]
     instruction: |
-      Follow the guide tone up through Yaman.
-      When you reach the fourth note — tivra Ma — notice how it pulls upward.
+      Follow the guide up through Yaman.
+      When you reach tivra Ma — notice how it lifts.
     guide_tone: true
-    feedback_layer: standard
+    feedback_layer: minimal
 
-  # 9. HEAR PAKAD PHRASES
-  - id: pakad_listen
-    type: phrase_playback
-    phrase: [Ni_mandra, Re, Ga]
-    instruction: |
-      This is Yaman's signature opening. Ni Re Ga.
-      It starts below Sa and rises. Listen three times.
-    repeat: 3
-    show_labels: false
-
-  - id: pakad_listen_2
-    type: phrase_playback
-    phrase: [Ga, Ma_t, Re, Sa]
-    instruction: |
-      And this phrase turns back down through tivra Ma.
-      Ga Ma Re Sa. Listen.
-    repeat: 2
-    show_labels: false
-
-  # 10. PAKAD WATCH — free singing with recognition
-  - id: pakad_watch
-    type: passive_phrase_recognition
-    enabled: true
-    instruction: |
-      Now sing freely. Use the notes of Yaman.
-      The tanpura is with you. Take your time.
-    duration_s: 60
-    watch_for_pakad: true
-    pakad_reward:
-      xp_bonus: 10
-      ceremony: gsap_pakad_moment
-
-  # 11. COMPLETION
+  # 6. COMPLETION (Note: lesson counts as 5 because sa_calibration skips after first run)
   - id: complete
     type: session_summary
     show_accuracy: true
     show_streak: true
     message: |
-      You've met Yaman.
+      You have met Yaman.
       In the evening, when the world grows quiet and lamps are lit —
       this raga lives there.
 
@@ -165,8 +87,8 @@ phases:
 
 engine:
   raga_grammar_active: true
-  pakad_recognition: true
-  ornaments_shown: false       # Shishya: no ornament hints yet
+  pakad_recognition: false
+  ornaments_shown: false
   cents_display: hidden
   accuracy_model: shishya
 

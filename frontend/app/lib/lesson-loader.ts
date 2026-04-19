@@ -28,6 +28,9 @@ export type PhaseType =
   | 'call_response'
   | 'passive_phrase_recognition'
   | 'session_summary'
+  // Guided listening / sing-along
+  | 'raga_opening'      // Listen to tanpura + raga intro, no interaction
+  | 'sing_along'        // Teacher phrase plays, student echoes immediately
   // Ornament phases
   | 'ornament_exercise'
   | 'andolan'

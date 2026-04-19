@@ -1,6 +1,7 @@
 # Lesson B-01: Your First Raga — Bhoopali
 # Journey: Beginner | Level: Shishya (1-3)
 # Presence Rule: you hear before you name.
+# Rewritten: 5 phases, ~10 min, Tantri-centric.
 
 id: beginner-01-bhoopali
 journey: beginner
@@ -12,128 +13,72 @@ xp_award: 30
 meta:
   title: "Your First Raga"
   subtitle: "Raga Bhoopali"
-  time_of_day: evening        # prahara 4-5, dusk (per engine)
+  time_of_day: evening        # prahara 4-5, dusk
   rasa: shant                 # peaceful, serene
 
 # ─── PHASES ──────────────────────────────────────────────────
 
 phases:
 
-  # 1. LISTENING — hear before naming (Presence Rule)
+  # 1. LISTEN — tanpura arrives, student settles
   - id: listen
     type: tanpura_drone
-    duration_s: 30
+    duration_s: 20
     instruction: |
       Close your eyes. Listen.
       This is the tanpura. It will always be here with you.
-      You don't need to do anything yet.
     tanpura:
-      strings: [Pa, Sa, Sa, Sa_upper]  # standard 4-string: Pa + 3×Sa (low to high)
-      sa_hz: null                    # use user's detected Sa
+      strings: [Pa, Sa, Sa, Sa_upper]
+      sa_hz: null
 
-  # 2. SA DETECTION — calibrate
+  # 2. SA DETECTION — calibrate (skipped after first session)
   - id: sa_calibration
     type: sa_detection
-    skip_if: sa_already_set          # skips after first session
+    skip_if: sa_already_set
     instruction: |
       We'll find your Sa — the home note, the anchor.
       Hum or sing a comfortable note. Hold it steady.
     attempts: 5
     min_clarity: 0.85
-    fallback_hz: 261.6256            # C4
+    fallback_hz: 261.6256
 
-  # 3. INTRODUCTION — five notes, one at a time
+  # 3. MEET THE RAGA — five swaras of Bhoopali, one at a time
   - id: meet_bhoopali
     type: swara_introduction
     instruction: |
       Bhoopali uses only five notes.
-      That's why it feels so open, so complete.
+      That is why it feels so open, so complete.
     swaras: [Sa, Re, Ga, Pa, Dha]
-    presentation: sequential         # one at a time with audio
-    audio_first: true                # hear before see label
+    presentation: sequential
+    audio_first: true
 
-  # 4. ASCENT — aroha
-  - id: aroha_listen
-    type: phrase_playback
-    phrase: [Sa, Re, Ga, Pa, Dha, Sa_upper]
-    instruction: |
-      Listen to Bhoopali climbing up.
-      Sa — Re — Ga — Pa — Dha — Sa
-    repeat: 2
-    show_labels: false               # hear first
-
-  - id: aroha_show
-    type: phrase_playback
-    phrase: [Sa, Re, Ga, Pa, Dha, Sa_upper]
-    repeat: 1
-    show_labels: true
-
-  # 5. DESCENT — avaroha
-  - id: avaroha_listen
-    type: phrase_playback
-    phrase: [Sa_upper, Dha, Pa, Ga, Re, Sa]
-    instruction: |
-      And coming back down.
-      Sa — Dha — Pa — Ga — Re — Sa
-    repeat: 2
-    show_labels: false
-
-  - id: avaroha_show
-    type: phrase_playback
-    phrase: [Sa_upper, Dha, Pa, Ga, Re, Sa]
-    repeat: 1
-    show_labels: true
-
-  # 6. FIRST SINGING — Sa only
-  - id: sing_sa
-    type: pitch_exercise
-    target_swara: Sa
-    duration_s: 20
-    instruction: |
-      Now you. Just sing Sa. Hold it as long as you like.
-      The tanpura is with you.
-    feedback_layer: minimal           # colour + gentle message only
-    level_tolerance: shishya          # ±50 cents
-
-  # 7. AROHA PRACTICE
+  # 4. SING ALONG — aroha, guided by teacher phrase
   - id: sing_aroha
-    type: phrase_exercise
+    type: sing_along
     phrase: [Sa, Re, Ga, Pa, Dha]
     instruction: |
-      Follow the guide up: Sa Re Ga Pa Dha
-      Don't rush. Let each note land.
-    guide_tone: true                   # guide tone plays ahead
-    feedback_layer: standard
+      Follow the guide up: Sa Re Ga Pa Dha.
+      Let each note land before the next one arrives.
+    guide_tone: true
+    feedback_layer: minimal
 
-  # 8. PAKAD MOMENT (WOW) — engine watches for Ga-Pa-Dha-Pa-Ga or Sa-Re-Ga-Pa-Dha-Pa-Ga
-  - id: pakad_watch
-    type: passive_phrase_recognition
-    enabled: true
-    instruction: |
-      Keep singing. Let whatever wants to come, come.
-    duration_s: 60
-    watch_for_pakad: true
-    pakad_reward:
-      xp_bonus: 10
-      ceremony: gsap_pakad_moment     # cinematic pause + message
-
-  # 9. COMPLETION
+  # 5. COMPLETION
   - id: complete
     type: session_summary
     show_accuracy: true
     show_streak: true
     message: |
-      You've met Bhoopali.
+      You have met Bhoopali.
       At dusk, when the last light turns gold — this raga is yours.
 
 # ─── ENGINE PARAMETERS ───────────────────────────────────────
 
 engine:
   raga_grammar_active: true
-  pakad_recognition: true
-  ornaments_shown: false             # Shishya: no ornament hints yet
-  cents_display: hidden              # revealed at tap on Beginner
-  accuracy_model: shishya            # ±50 cents tolerance
+  pakad_recognition: false
+  ornaments_shown: false
+  cents_display: hidden
+  accuracy_model: shishya
 
 # ─── UNLOCK CONDITION ────────────────────────────────────────
 

@@ -611,6 +611,25 @@ function PhaseDispatcher({
         </motion.div>
       );
 
+    // raga_opening: ambient tanpura listen — same minimal UI as tanpura_drone
+    case 'raga_opening':
+      return <TanpuraDronePhase phase={phase} onAdvance={engine.advancePhase} />;
+
+    // sing_along: teacher phrase plays (via phrase_playback route), student echoes
+    // Renders as a guided phrase exercise — phrase displayed, voice practice surface
+    case 'sing_along':
+      return (
+        <LessonPracticeSurface
+          phaseId={phase.id}
+          demoPhrase={phase.phrase ?? []}
+          voiceFeedback={engine.voiceFeedback}
+          onAdvance={engine.advancePhase}
+          advanceLabel="Done"
+          saHz={engine.saHz}
+          ragaId={ragaId}
+        />
+      );
+
     case 'pitch_exercise':
       // Warmup phase renders nothing (engine auto-advances)
       if (phase.id.startsWith('__warmup_')) return null;

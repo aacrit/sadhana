@@ -1,14 +1,13 @@
 # Lesson B-04: Raga Bhairav — The Dawn Raga
 # Journey: Beginner | Level: Shishya (1-3)
 # Presence Rule: you hear before you name.
-# Engine source: engine/theory/ragas/bhairav.ts
-# Prahara: 1 (dawn, first prahar)
+# Rewritten: 5 phases, ~10 min, Tantri-centric.
 
 id: beginner-04-bhairav
 journey: beginner
 level_range: [1, 3]          # Shishya
 raga_id: bhairav
-duration_target_min: 12
+duration_target_min: 10
 xp_award: 35
 
 meta:
@@ -21,10 +20,10 @@ meta:
 
 phases:
 
-  # 1. LISTENING — tanpura drone, Bhairav context
+  # 1. LISTEN — tanpura, first light
   - id: listen
     type: tanpura_drone
-    duration_s: 30
+    duration_s: 20
     instruction: |
       Close your eyes. Listen.
       The tanpura is with you. First light.
@@ -32,7 +31,7 @@ phases:
       strings: [Pa, Sa, Sa, Sa_upper]
       sa_hz: null
 
-  # 2. SA DETECTION
+  # 2. SA DETECTION — skipped if already done
   - id: sa_calibration
     type: sa_detection
     skip_if: sa_already_set
@@ -43,134 +42,46 @@ phases:
     min_clarity: 0.85
     fallback_hz: 261.6256
 
-  # 3. HEAR THE AROHA — Sa Re(k) Ga Ma Pa Dha(k) Ni Sa'
-  - id: aroha_listen
-    type: phrase_playback
-    phrase: [Sa, Re_k, Ga, Ma, Pa, Dha_k, Ni, Sa_upper]
-    instruction: |
-      Listen to Bhairav climbing. Pay attention to the second and sixth notes.
-      They sit lower than you might expect. They pull downward.
-    repeat: 2
-    show_labels: false
-
-  - id: aroha_show
-    type: phrase_playback
-    phrase: [Sa, Re_k, Ga, Ma, Pa, Dha_k, Ni, Sa_upper]
-    instruction: |
-      Sa Re Ga Ma Pa Dha Ni Sa.
-      Seven notes. Two of them are komal — lowered.
-    repeat: 1
-    show_labels: true
-
-  # 4. HEAR THE AVAROHA — Sa' Ni Dha(k) Pa Ma Ga Re(k) Sa
-  - id: avaroha_listen
-    type: phrase_playback
-    phrase: [Sa_upper, Ni, Dha_k, Pa, Ma, Ga, Re_k, Sa]
-    instruction: |
-      And descending. The two komal notes become even more powerful
-      on the way down.
-    repeat: 2
-    show_labels: false
-
-  - id: avaroha_show
-    type: phrase_playback
-    phrase: [Sa_upper, Ni, Dha_k, Pa, Ma, Ga, Re_k, Sa]
-    repeat: 1
-    show_labels: true
-
-  # 5. MEET THE KOMAL SWARAS — the defining character
-  - id: meet_komal_re
-    type: swara_introduction
-    instruction: |
-      This is komal Re — the lowered second note.
-      In Bhairav, komal Re has a powerful gravitational pull toward Sa.
-      It sits just above Sa, almost touching it.
-    swaras: [Re, Re_k]
-    presentation: comparison    # play shuddha Re then komal Re
-    audio_first: true
-
-  - id: meet_komal_dha
-    type: swara_introduction
-    instruction: |
-      And this is komal Dha — the lowered sixth.
-      It mirrors komal Re in the upper half of the scale.
-      Together they give Bhairav its gravity.
-      At higher levels, you will learn to sing komal Dha with
-      andolan — a gentle oscillation. For now, just hear it.
-    swaras: [Dha, Dha_k]
-    presentation: comparison
-    audio_first: true
-
-  # 6. INTRODUCTION — all seven swaras
+  # 3. MEET KOMAL RE AND KOMAL DHA — the defining swaras
   - id: meet_bhairav
     type: swara_introduction
     instruction: |
-      Bhairav uses seven swaras. Five natural, two lowered.
-      Listen to each one.
-    swaras: [Sa, Re_k, Ga, Ma, Pa, Dha_k, Ni]
+      Bhairav has two lowered notes. Komal Re and komal Dha.
+      They sit just below their natural positions.
+      Together they give this raga its gravity.
+      Listen to each note — natural first, then lowered.
+    swaras: [Re, Re_k, Dha, Dha_k, Sa, Re_k, Ga, Ma, Pa, Dha_k, Ni]
     presentation: sequential
     audio_first: true
 
-  # 7. SING SA
-  - id: sing_sa
-    type: pitch_exercise
-    target_swara: Sa
-    duration_s: 15
-    instruction: |
-      Sing Sa. Ground yourself.
-    feedback_layer: minimal
-    level_tolerance: shishya
-
-  # 8. SING THE OPENING PHRASE — Sa Re(k) Ga Re(k) Sa
-  - id: sing_opening
-    type: phrase_exercise
-    phrase: [Sa, Re_k, Ga, Re_k, Sa]
-    instruction: |
-      Follow the guide tone. Sa, up to komal Re, up to Ga, back
-      through komal Re, and home to Sa.
-      This is how Bhairav begins.
-    guide_tone: true
-    feedback_layer: standard
-
-  # 9. HEAR PAKAD PHRASES
+  # 4. HEAR THE OPENING PHRASE — Bhairav's pakad
   - id: pakad_listen
     type: phrase_playback
     phrase: [Sa, Re_k, Ga, Re_k, Sa]
     instruction: |
-      Listen to this phrase again. Sa Re Ga Re Sa.
+      This is how Bhairav begins. Sa, up to komal Re, up to Ga,
+      back through komal Re, and home to Sa.
       The way it dwells on komal Re — that is Bhairav.
     repeat: 3
-    show_labels: false
+    show_labels: true
 
-  - id: pakad_listen_2
-    type: phrase_playback
-    phrase: [Ma, Ga, Re_k, Sa]
+  # 5. SING ALONG — the opening phrase
+  - id: sing_opening
+    type: sing_along
+    phrase: [Sa, Re_k, Ga, Re_k, Sa]
     instruction: |
-      And this descent. Ma Ga Re Sa.
-      Feel how the komal Re creates a pull toward Sa.
-    repeat: 2
-    show_labels: false
+      Follow the guide. Sa, komal Re, Ga, komal Re, Sa.
+      Let komal Re pull you back toward home.
+    guide_tone: true
+    feedback_layer: minimal
 
-  # 10. PAKAD WATCH — free singing with recognition
-  - id: pakad_watch
-    type: passive_phrase_recognition
-    enabled: true
-    instruction: |
-      Now sing freely in Bhairav. Use the notes you've heard.
-      The tanpura is with you.
-    duration_s: 60
-    watch_for_pakad: true
-    pakad_reward:
-      xp_bonus: 10
-      ceremony: gsap_pakad_moment
-
-  # 11. COMPLETION
+  # 6. COMPLETION
   - id: complete
     type: session_summary
     show_accuracy: true
     show_streak: true
     message: |
-      You've met Bhairav.
+      You have met Bhairav.
       Before sunrise, when the world is still and the air is heavy —
       this raga belongs to that silence.
 
@@ -178,8 +89,8 @@ phases:
 
 engine:
   raga_grammar_active: true
-  pakad_recognition: true
-  ornaments_shown: false       # Shishya: andolan mentioned but not shown
+  pakad_recognition: false
+  ornaments_shown: false
   cents_display: hidden
   accuracy_model: shishya
 
