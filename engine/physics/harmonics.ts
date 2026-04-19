@@ -318,12 +318,35 @@ function buildTanpuraString(
  */
 export function tanpuraPartials(
   saHz: number = 261.63,
-  useMa: boolean = false,
+  useMaOrGroundString: boolean | 'Pa' | 'Ma' | 'Ni' = false,
 ): ReadonlyArray<TanpuraStringProfile> {
   const PARTIAL_COUNT = 10;
 
-  const firstStringRatio = useMa ? 4 / 3 : 3 / 2;
-  const firstStringName = useMa ? 'Ma (shuddha)' : 'Pa';
+  // Resolve groundString from either legacy boolean or new string literal
+  let groundString: 'Pa' | 'Ma' | 'Ni';
+  if (typeof useMaOrGroundString === 'boolean') {
+    groundString = useMaOrGroundString ? 'Ma' : 'Pa';
+  } else {
+    groundString = useMaOrGroundString;
+  }
+
+  // Frequency ratios relative to Sa (just intonation):
+  //   Pa  = 3/2  (perfect fifth)
+  //   Ma  = 4/3  (perfect fourth — shuddha Ma)
+  //   Ni  = 16/9 (komal Ni — minor seventh, the Bageshri tuning)
+  const ratioMap: Record<'Pa' | 'Ma' | 'Ni', number> = {
+    Pa: 3 / 2,
+    Ma: 4 / 3,
+    Ni: 16 / 9,
+  };
+  const nameMap: Record<'Pa' | 'Ma' | 'Ni', string> = {
+    Pa: 'Pa',
+    Ma: 'Ma (shuddha)',
+    Ni: 'Ni (komal)',
+  };
+
+  const firstStringRatio = ratioMap[groundString];
+  const firstStringName = nameMap[groundString];
 
   // The first string is in the lower octave: ratio / 2
   const firstString = buildTanpuraString(

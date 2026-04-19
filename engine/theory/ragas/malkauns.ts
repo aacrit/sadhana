@@ -119,4 +119,8 @@ export const malkauns: Raga = {
     'meend between Ga(k) and Ma with profound emotional depth. Gwalior tradition favours ' +
     'structured bandish presentations with rhythmic clarity. Pt. Nikhil Banerjee\'s sitar ' +
     'renditions of Malkauns are considered among the finest instrumental interpretations.',
+
+  // Ma tuning: Malkauns omits Pa entirely. The tanpura uses Ma as the ground
+  // string — the vadi of the raga and the dominant harmonic reference point.
+  tanpuraTuning: 'Ma',
 };
