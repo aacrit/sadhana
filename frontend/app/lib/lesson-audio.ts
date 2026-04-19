@@ -164,6 +164,7 @@ export function useLessonAudio(
   // -----------------------------------------------------------------------
   const tanpuraRef = useRef<TanpuraDrone | null>(null);
   const talaPlayerRef = useRef<TalaPlayer | null>(null);
+  const talaCtxRef = useRef<AudioContext | null>(null);
   const voicePipelineRef = useRef<VoicePipeline | null>(null);
   const saDetectionPipelineRef = useRef<VoicePipeline | null>(null);
   const playbackAbortRef = useRef<AbortController | null>(null);
@@ -215,11 +216,16 @@ export function useLessonAudio(
   const startTala = useCallback((talaId: TalaId = 'teentaal', tempo: number = 80) => {
     if (disposedRef.current) return;
 
-    // Need an AudioContext — create via ensureAudioReady pattern
     const startAsync = async () => {
       await ensureAudioReady();
-      // Get the shared AudioContext from swara-voice
-      const ctx = new AudioContext();
+
+      // Reuse the existing tala AudioContext if it is still open.
+      // Creating a new AudioContext on every call leaks OS audio resources
+      // because the browser caps the number of simultaneous contexts.
+      if (!talaCtxRef.current || talaCtxRef.current.state === 'closed') {
+        talaCtxRef.current = new AudioContext();
+      }
+      const ctx = talaCtxRef.current;
       if (ctx.state === 'suspended') await ctx.resume();
 
       if (talaPlayerRef.current) {
@@ -239,6 +245,12 @@ export function useLessonAudio(
       talaPlayerRef.current.stopTheka();
       talaPlayerRef.current.dispose();
       talaPlayerRef.current = null;
+    }
+    // Close the AudioContext so the OS audio resource is released.
+    // A new one will be created on the next startTala call.
+    if (talaCtxRef.current && talaCtxRef.current.state !== 'closed') {
+      talaCtxRef.current.close().catch(() => { /* ignore close errors */ });
+      talaCtxRef.current = null;
     }
     setTalaActive(false);
   }, []);
@@ -497,6 +509,7 @@ export function useLessonAudio(
     // Null out refs
     tanpuraRef.current = null;
     talaPlayerRef.current = null;
+    talaCtxRef.current = null;
     voicePipelineRef.current = null;
     saDetectionPipelineRef.current = null;
     playbackAbortRef.current = null;

@@ -225,6 +225,10 @@ export function useLessonEngine(
   // Warmup mastery tracking — consecutive milliseconds within ±25 cents
   const warmupMasteryMsRef = useRef(0);
   const warmupLastTickRef = useRef<number | null>(null);
+  // Stable ref to advancePhase so the phase-audio effect always sees the
+  // latest callback without needing it in the effect's dependency array
+  // (adding it would cause the effect to re-fire on every phaseIndex change).
+  const advancePhaseRef = useRef<() => void>(() => {});
 
   // -----------------------------------------------------------------------
   // Parse YAML (+ optional warmup injection)
@@ -276,6 +280,9 @@ export function useLessonEngine(
   const begin = useCallback(() => {
     if (!lesson) return;
     setPhaseIndex(0);
+    // Reset the phase-dedup guard so the phase-audio effect re-fires for
+    // phase 0 even if the student previously completed phase 0 and re-begins.
+    prevPhaseIndexRef.current = -1;
     setPakadTriggered(false);
     setVoiceFeedback(IDLE_VOICE_FEEDBACK);
     startTimeRef.current = new Date();
@@ -304,6 +311,11 @@ export function useLessonEngine(
     }
   }, [lesson, phaseIndex]);
 
+  // Keep the ref in sync with the latest advancePhase closure so the
+  // phase-audio effect can call advancePhaseRef.current() and always
+  // invoke the up-to-date version without a stale closure.
+  advancePhaseRef.current = advancePhase;
+
   const goBackPhase = useCallback(() => {
     if (!lesson || phaseIndex <= 0) return;
 
@@ -328,6 +340,9 @@ export function useLessonEngine(
     setVoiceFeedback(IDLE_VOICE_FEEDBACK);
     setState('ready');
     setPhaseIndex(0);
+    // Reset the phase-dedup guard so the phase-audio effect re-fires for
+    // phase 0 when the student begins again after exiting.
+    prevPhaseIndexRef.current = -1;
   }, [audio]);
 
   // -----------------------------------------------------------------------
@@ -379,7 +394,7 @@ export function useLessonEngine(
         audio.startTanpura();
         if (currentPhase.duration_s) {
           timerRef.current = setTimeout(() => {
-            advancePhase();
+            advancePhaseRef.current();
           }, currentPhase.duration_s * 1000);
         }
         break;
@@ -387,12 +402,12 @@ export function useLessonEngine(
 
       case 'sa_detection': {
         if (skipMicFlag) {
-          advancePhase();
+          advancePhaseRef.current();
           break;
         }
         audio.startSaDetection((hz: number) => {
           setSaHz(hz);
-          advancePhase();
+          advancePhaseRef.current();
         }).catch(() => {
           setMicPermission('denied');
           setMicGateActive(true);
@@ -445,7 +460,8 @@ export function useLessonEngine(
                       }
                       warmupMasteryMsRef.current = 0;
                       warmupLastTickRef.current = null;
-                      advancePhase();
+                      // Use ref to avoid capturing a stale advancePhase closure
+                      advancePhaseRef.current();
                     }
                   } else {
                     // Reset streak — must be consecutive
@@ -468,7 +484,7 @@ export function useLessonEngine(
         // Auto-advance for timed phases (warmup: 60s fallback if no mastery)
         if (currentPhase.duration_s) {
           timerRef.current = setTimeout(() => {
-            advancePhase();
+            advancePhaseRef.current();
           }, currentPhase.duration_s * 1000);
         }
         break;
