@@ -41,6 +41,8 @@ Source: `frontend/app/journeys/beginner/page.tsx`
 
 **Return Note warmup:** When `?warmup=[swara]` is present in the URL (set by `getYesterdayWorstSwara()` Supabase query), `useLessonEngine` injects a silent warmup phase at index 0 before the lesson's normal first phase. The warmup reuses the `pitch_exercise` phase type with the specified swara as target. Mastery condition: ±25 cents for 8 continuous seconds → auto-advances. 60s fallback auto-advance. `LessonClient.tsx` wraps the engine in `<Suspense>` for static export compatibility.
 
+**Phase-0 re-entry:** `useLessonEngine` resets `prevPhaseIndexRef` to `-1` in both `begin()` and `exitLesson()`. This ensures the phase-audio effect re-fires for phase 0 when the student exits and re-begins a lesson (previously, the guard was never reset, silently skipping tanpura start and the Sa prompt on re-entry).
+
 **Prahara-aware raga picker (freeform):** In the freeform raga selector, ragas outside the current prahara are rendered at 40% opacity with a tooltip: "Traditional time: [prahara label]". On-prahara ragas render at full opacity. Opacity is visual suggestion only — all ragas remain selectable.
 
 **Dawn gate (beginner-08-challenge):** The `dawn_gate` block in `beginner-08-challenge.yaml` requires the student to complete 3 Bhairav sessions during prahara 1 (04:00–07:00) on 3 different calendar dates. This is the gate for the Shishya → Sadhaka level unlock.
@@ -196,7 +198,7 @@ Props: `partialFrequencies?`, `voiceAmplitude?`, `active?`, `className?`, `style
 | `ScriptToggle` | components/ScriptToggle.tsx | Global Devanagari/romanized toggle (fixed bottom-right) |
 | `Tantri` | components/Tantri.tsx | 12-string swara field renderer. Canvas-based. Reads CSS tokens via `resolveNum()`. Wired to voice pipeline (pitchHz/pitchClarity) and synthesis via `onPlayString` / `timbre`. Three display variants: `full` (default, all 12 strings), `portal` (centered ~40vh band, guitar-like, with integrated pitch trail), `compact`. Performance: pre-allocated `Float32Array` pool for oscilloscope (zero-alloc hot path); animation loop pauses when `document.hidden` (tab visibility guard). Pointer events disabled in beginner lesson context (visual-only). |
 | `VoiceTimbreSelector` | components/VoiceTimbreSelector.tsx | Harmonium / voice-male / voice-female selector. Drives `timbre` prop on `useLessonAudio`. |
-| `VoiceWave` | components/VoiceWave.tsx | Ambient voice waveform visualization. Uses VoiceWaveContext for cross-component pitch data. Fixed canvas, `position: fixed`. Animation loop pauses when `document.hidden` (tab visibility guard). |
+| `VoiceWave` | components/VoiceWave.tsx | Ambient voice waveform visualization. Uses VoiceWaveContext for cross-component pitch data. Fixed canvas, `position: fixed`. Animation loop pauses when `document.hidden` (tab visibility guard). Animation timestep uses actual RAF delta (`timestamp - prevTimestamp`) so speed is frame-rate independent (correct at 60Hz, 120Hz, 144Hz, and slow devices). |
 | `GuidedPractice` | components/GuidedPractice.tsx | 4-stage guided raga practice with 0-3 star scoring per stage. Used in Explorer raga detail practice route. Driven by `useGuidedPractice` hook. |
 
 ---
