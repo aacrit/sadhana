@@ -22,6 +22,7 @@ import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import type { LessonDef, LessonPhase, PhaseType } from './lesson-loader';
 import { loadLesson } from './lesson-loader';
 import { useLessonAudio } from './lesson-audio';
+import { updateSa } from './supabase';
 import type { PitchResult } from '@/engine/analysis/pitch-mapping';
 import type { PakadMatch } from '@/engine/analysis/phrase-recognition';
 import type { VoiceFeedback } from './types';
@@ -270,12 +271,16 @@ function buildWarmupPhase(swara: string): LessonPhase {
  * @param initialSaHz - Student's Sa frequency (default C4)
  * @param warmupSwara - Optional swara from ?warmup= URL param — injects a
  *   silent 60-second pitch_exercise at phase index 0 (Return Note feature).
+ * @param userId - Optional Supabase user ID for persisting Sa detection results.
+ *   When provided, any in-lesson Sa detection result is written to Supabase
+ *   immediately so future lessons don't re-prompt.
  */
 export function useLessonEngine(
   lessonYaml: string,
   copyYaml?: string,
   initialSaHz: number = 261.63,
   warmupSwara?: string,
+  userId?: string,
 ): LessonEngineControls {
   // -----------------------------------------------------------------------
   // Core state
@@ -488,8 +493,22 @@ export function useLessonEngine(
           advancePhaseRef.current();
           break;
         }
+        // skip_if: 'sa_already_set' — advance immediately when the student
+        // already has a calibrated Sa (any value other than the C4 default).
+        // This prevents re-prompting returning students on every lesson open.
+        if (currentPhase.skip_if === 'sa_already_set' && saHz !== 261.6256) {
+          advancePhaseRef.current();
+          break;
+        }
         audio.startSaDetection((hz: number) => {
           setSaHz(hz);
+          // Persist to Supabase so future lessons skip re-calibration.
+          // Fire-and-forget — do not block phase advance on network.
+          if (userId) {
+            updateSa(userId, hz).catch(() => {
+              // Silently ignore network errors — local state is already updated.
+            });
+          }
           advancePhaseRef.current();
         }).catch(() => {
           setMicPermission('denied');

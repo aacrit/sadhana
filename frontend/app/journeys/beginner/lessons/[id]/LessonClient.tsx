@@ -147,8 +147,8 @@ function LessonPageInner({
   warmupSwara?: string;
   onExit: () => void;
 }) {
-  const engine = useLessonEngine(lessonYaml, copyYaml, saHz, warmupSwara);
-  const { profile } = useAuth();
+  const { profile, user } = useAuth();
+  const engine = useLessonEngine(lessonYaml, copyYaml, saHz, warmupSwara, user?.id);
 
   const handleComplete = useCallback(() => {
     onExit();
