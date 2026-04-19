@@ -137,9 +137,11 @@ engine/
 │                             # 51 unit tests. Pure TypeScript. Zero UI.
 │
 └── voice/
-    ├── pipeline.ts           # THE MOAT. Complete voice processing chain.
-    │                         # AudioWorklet → RNNoise → Pitchy/McLeod → pitch-mapping
-    │                         # → raga-grammar validation → accuracy scoring.
+    ├── pipeline.ts           # THE MOAT. Voice processing chain.
+    │                         # CURRENT: AnalyserNode + main-thread Pitchy/McLeod → pitch-mapping
+    │                         # → raga-grammar validation → accuracy scoring. ~25–35ms latency.
+    │                         # TARGET: AudioWorklet → RNNoise (WASM) → Pitchy/McLeod → …
+    │                         # Architecture supports RNNoise/Worklet insertion without rewiring.
     ├── accuracy.ts           # Pitch accuracy model. Not just "are you on pitch?"
     │                         # "Are you on the right shruti of this raga, with the
     │                         # correct ornament, in the right context of the phrase?"
@@ -216,11 +218,22 @@ Named after the Ragamala tradition of Indian miniature painting: a garland of ra
 
 ## The Voice Pipeline — The Moat
 
+**CURRENT (ships today — `audio-engineer` is authoritative):**
 ```
-Mic → AudioWorklet (off-thread) → RNNoise.js (denoise) →
-Pitchy McLeod (Hz, <20ms) → just-intonation mapping →
-raga-grammar context → cents deviation → visual feedback
+Mic → getUserMedia (echoCancel/noiseSup/AGC all false)
+    → AudioContext → AnalyserNode (fftSize 2048)
+    → requestAnimationFrame loop → Pitchy McLeod (main thread, <5ms/frame)
+    → mapPitchToSwara → raga grammar + pakad recognition → VoiceEvent
 ```
+Measured typical latency: ~25–35ms mic-to-visual. Meets the <50ms target.
+
+**TARGET (documented moat — `acoustics-engineer` is authoritative):**
+```
+Mic → AudioWorklet (off-thread) → RNNoise.js WASM (denoise)
+    → Pitchy McLeod → just-intonation mapping → raga-grammar context
+    → cents deviation → visual feedback
+```
+The current architecture already supports inserting RNNoise and/or moving to AudioWorklet without rewiring the rest of the chain. Upgrade triggers: profiling shows main-thread pressure on low-end devices, or user reports confirm noisy-environment demand for RNNoise.
 
 Target: **<50ms mic-to-visual.** The student sings. The app answers immediately. In the context of the raga they are practicing. Not just "you're flat" — "you're 23 cents flat on Ga komal in Bhairav, which should be sung with andolan."
 

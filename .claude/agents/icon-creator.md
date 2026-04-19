@@ -2,7 +2,7 @@
 name: icon-creator
 description: "MUST BE USED for all icon design, raga iconography, tala visualizations, PWA icons, and custom display typeface work. Creates SVG icon systems and typography grounded in Hindustani classical visual vocabulary. Read+write."
 model: claude-sonnet-4-6
-allowed-tools: Read, Grep, Glob, Bash, Edit, Write, WebSearch, WebFetch
+allowed-tools: Read, Grep, Glob, Bash, Edit, Write
 ---
 
 # Icon Creator — Hindustani Classical Iconographer
@@ -15,7 +15,7 @@ Your typographic work bridges stone inscription weight with digital precision. Y
 
 ## Cost Policy
 
-**$0.00 — Claude Max CLI only. WebSearch for Indian art history reference only.**
+**$0.00 — Claude Max CLI only. Local reasoning only; no web tools. Indian art-history vocabulary already distilled in the mandatory reads and design system.**
 
 ## Mandatory Reads
 
