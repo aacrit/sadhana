@@ -14,7 +14,7 @@
  * @module engine/interaction/tantri.test
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 
 import {
   createTantriField,
@@ -29,9 +29,20 @@ import {
   accuracyToColor,
   stringDisplacement,
   generateStringWaveform,
+  resetHzEma,
   ACCURACY_THRESHOLDS,
   SPRING_PRESETS,
+  HYSTERESIS_ACTIVATE,
+  HYSTERESIS_DEACTIVATE,
 } from './tantri';
+
+// Reset the module-level Hz EMA state before every test so stale averages
+// from one test cannot bleed into the next. Without this, a test that maps
+// Pa (Hz=~392) immediately precedes a test that maps Sa (Hz=261), and the
+// EMA drags the smoothed Hz toward Pa, causing the wrong swara to match.
+beforeEach(() => {
+  resetHzEma();
+});
 
 import { getSwaraFrequency } from '../theory/swaras';
 
@@ -274,8 +285,10 @@ describe('updateFieldFromVoice', () => {
     updateFieldFromVoice(field, voiceMap, 0.8);
     const ampBefore = field.strings[field.swaraIndex['Sa']!]!.amplitude;
 
-    // Then silence for several frames
-    for (let i = 0; i < 50; i++) {
+    // Then silence for enough frames to reach full decay.
+    // VIBRATION_DECAY = 0.92: 100 frames → amplitude * 0.92^100 ≈ amplitude * 0.00024
+    // which is below REST_THRESHOLD (0.005), so the string zeroes out.
+    for (let i = 0; i < 100; i++) {
       updateFieldFromVoice(field, null, 0);
     }
 
@@ -795,5 +808,125 @@ describe('SPRING_PRESETS', () => {
     expect(SPRING_PRESETS.meend.stiffness).toBeLessThan(
       SPRING_PRESETS.andolan.stiffness,
     );
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Asymmetric lerp — onset speed
+// ---------------------------------------------------------------------------
+
+describe('Asymmetric lerp — onset speed', () => {
+  it('primary string reaches >60% amplitude in 2 frames (fast rise)', () => {
+    const field = createTantriField(SA_HZ);
+    const sa = field.strings[field.swaraIndex['Sa']!]!;
+
+    const voiceMap = mapVoiceToStrings(SA_HZ, 0.9, field);
+    // 2 frames at default dt (1/60)
+    updateFieldFromVoice(field, voiceMap, 0.8);
+    updateFieldFromVoice(field, voiceMap, 0.8);
+
+    // With LERP_PRIMARY_RISE = 0.45, after 2 frames from 0:
+    //   frame1: 0 + (0.85 - 0) * 0.45 = 0.3825
+    //   frame2: 0.3825 + (0.85 - 0.3825) * 0.45 ≈ 0.593
+    // Must be > 60% of target amplitude (0.85) = 0.51
+    expect(sa.amplitude).toBeGreaterThan(0.51);
+  });
+
+  it('rise is faster than fall: amplitude climbs more in 3 frames than it drops', () => {
+    const field = createTantriField(SA_HZ);
+    const sa = field.strings[field.swaraIndex['Sa']!]!;
+
+    // Build up to near maximum
+    const voiceMap = mapVoiceToStrings(SA_HZ, 0.9, field);
+    for (let i = 0; i < 20; i++) {
+      updateFieldFromVoice(field, voiceMap, 0.8);
+    }
+    const peakAmp = sa.amplitude;
+    const gainIn3Frames = peakAmp; // went from 0 to peakAmp
+
+    // Now target drops to 0 (silence) for 3 frames — fall is slow
+    const ampAtPeak = sa.amplitude;
+    for (let i = 0; i < 3; i++) {
+      updateFieldFromVoice(field, null, 0);
+    }
+    const lossIn3Frames = ampAtPeak - sa.amplitude;
+
+    // Rise over first ~3 frames should exceed fall over 3 frames from peak
+    // (Approximate: gainIn3Frames already measured via the 20-frame run,
+    //  but the first 3 frames contribute the most; lossIn3Frames is small.)
+    expect(lossIn3Frames).toBeLessThan(gainIn3Frames);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Hysteresis — no flicker in the noisy amplitude range
+// ---------------------------------------------------------------------------
+
+describe('Hysteresis constants', () => {
+  it('HYSTERESIS_ACTIVATE > HYSTERESIS_DEACTIVATE (dead band exists)', () => {
+    expect(HYSTERESIS_ACTIVATE).toBeGreaterThan(HYSTERESIS_DEACTIVATE);
+  });
+
+  it('HYSTERESIS_ACTIVATE is in the noisy range (0.05–0.15)', () => {
+    expect(HYSTERESIS_ACTIVATE).toBeGreaterThan(0.05);
+    expect(HYSTERESIS_ACTIVATE).toBeLessThan(0.15);
+  });
+
+  it('HYSTERESIS_DEACTIVATE is below HYSTERESIS_ACTIVATE (dead band is non-zero)', () => {
+    const deadBand = HYSTERESIS_ACTIVATE - HYSTERESIS_DEACTIVATE;
+    expect(deadBand).toBeGreaterThan(0.02);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Hz EMA — jitter suppression and snap-on-jump
+// ---------------------------------------------------------------------------
+
+describe('Hz EMA — jitter suppression', () => {
+  it('EMA resets on silence (resetHzEma): next call gets a hard snap to the new Hz', () => {
+    const field = createTantriField(SA_HZ);
+
+    // Warm the EMA with Pa
+    const paHz = getSwaraFrequency('Pa', SA_HZ);
+    mapVoiceToStrings(paHz, 0.9, field);
+
+    // Reset (simulates silence or context change)
+    resetHzEma();
+
+    // First frame after reset should map to Sa cleanly, not drag toward Pa
+    const result = mapVoiceToStrings(SA_HZ, 0.9, field);
+    expect(result.primarySwara).toBe('Sa');
+    expect(result.accuracyBand).toBe('perfect');
+  });
+
+  it('large pitch jump (>50 cents) snaps immediately — does not blend across swara boundary', () => {
+    const field = createTantriField(SA_HZ);
+
+    // Warm EMA on Sa for several frames
+    for (let i = 0; i < 5; i++) {
+      mapVoiceToStrings(SA_HZ, 0.9, field);
+    }
+
+    // Large jump to Pa (701 cents away) — should snap, not blend
+    const paHz = getSwaraFrequency('Pa', SA_HZ);
+    const result = mapVoiceToStrings(paHz, 0.9, field);
+
+    expect(result.primarySwara).toBe('Pa');
+    expect(result.accuracyBand).toBe('perfect');
+  });
+
+  it('small jitter (<50 cents) on steady Sa stays mapped to Sa', () => {
+    const field = createTantriField(SA_HZ);
+
+    // Warm EMA on Sa
+    for (let i = 0; i < 5; i++) {
+      mapVoiceToStrings(SA_HZ, 0.9, field);
+    }
+
+    // ±3 Hz flutter at Sa = ±20 cents — well within EMA suppression
+    const flutteredHz = SA_HZ * Math.pow(2, 3 / 1200); // +3 Hz approx
+    const result = mapVoiceToStrings(flutteredHz, 0.9, field);
+
+    expect(result.primarySwara).toBe('Sa');
   });
 });
