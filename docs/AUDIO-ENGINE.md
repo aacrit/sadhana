@@ -697,6 +697,8 @@ The `useLessonAudio` hook accepts a `timbre: TantriTimbre` parameter (`'harmoniu
 
 Signature: `useLessonAudio(sa_hz?, ragaId, timbre?): LessonAudioControls`. All journey pages pass `timbre` from `useTimbreSelection()`.
 
+**AudioContext lifecycle for tabla (canonical pattern):** `useLessonAudio` holds a `talaCtxRef` alongside `talaPlayerRef`. `startTala()` reuses the existing `AudioContext` if it is still open (`state !== 'closed'`), creating a new one only when none exists. `stopTala()` closes `talaCtxRef` after disposing the player, releasing the OS audio resource. `dispose()` nulls the ref. This prevents hitting the browser's simultaneous-AudioContext cap after ~6 toggle cycles. The same pattern is applied in the freeform page (`talaCtxRef` co-managed with `talaPlayerRef`). Any new code that creates a `TalaPlayer` must follow this ref-reuse/close-on-teardown pattern.
+
 `LessonAudioControls` includes a `setTanpuraVolume(volume: number)` method that ramps the tanpura drone master gain. `useLessonEngine` calls this on every phase transition: full volume (0.3) during singing phases (`tanpura_drone`, `pitch_exercise`, `phrase_exercise`, `passive_phrase_recognition`), reduced to 30% of normal (0.09) during all other phase types (listen, read, speak). The tanpura never stops between phases — it persists as an ambient presence throughout the lesson.
 
 ### PWA Offline Caching
