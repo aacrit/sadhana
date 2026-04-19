@@ -206,3 +206,86 @@ describe('TanpuraDrone stop/start lifecycle', () => {
     expect(tanpura.isRunning()).toBe(true);
   });
 });
+
+// ---------------------------------------------------------------------------
+// setVolume ramp — drives the phase-aware ducking in useLessonEngine
+// ---------------------------------------------------------------------------
+
+describe('TanpuraDrone.setVolume ramp', () => {
+  it('default ramp is ~50ms (no click) — backwards compatible', async () => {
+    const { TanpuraDrone } = await import('./tanpura');
+    const tanpura = new TanpuraDrone({ sa_hz: 220, volume: 0.3 });
+    await tanpura.start();
+
+    const ctx = MockAudioContext.instances[0]!;
+    const masterGain = ctx.createdNodes.find((n) => n.__kind === 'gain')!;
+    masterGain.gain!.linearRampToValueAtTime.mockClear();
+    masterGain.gain!.setValueAtTime.mockClear();
+    masterGain.gain!.cancelScheduledValues.mockClear();
+
+    tanpura.setVolume(0.1); // no rampMs arg
+
+    // Must cancel any pending schedule, seed current value, and ramp to 0.1
+    expect(masterGain.gain!.cancelScheduledValues).toHaveBeenCalledTimes(1);
+    expect(masterGain.gain!.setValueAtTime).toHaveBeenCalledTimes(1);
+    expect(masterGain.gain!.linearRampToValueAtTime).toHaveBeenCalledTimes(1);
+
+    const [target, when] = masterGain.gain!.linearRampToValueAtTime.mock.calls[0] as [number, number];
+    expect(target).toBe(0.1);
+    // now=0, 50ms ramp → when ≈ 0.05 seconds
+    expect(when).toBeCloseTo(0.05, 3);
+
+    tanpura.stop();
+    vi.advanceTimersByTime(600);
+  });
+
+  it('accepts a rampMs argument for phase-aware ducking (400ms)', async () => {
+    const { TanpuraDrone } = await import('./tanpura');
+    const tanpura = new TanpuraDrone({ sa_hz: 220, volume: 0.3 });
+    await tanpura.start();
+
+    const ctx = MockAudioContext.instances[0]!;
+    const masterGain = ctx.createdNodes.find((n) => n.__kind === 'gain')!;
+    masterGain.gain!.linearRampToValueAtTime.mockClear();
+
+    tanpura.setVolume(0.1, 400); // ducking ramp
+
+    const [target, when] = masterGain.gain!.linearRampToValueAtTime.mock.calls[0] as [number, number];
+    expect(target).toBe(0.1);
+    expect(when).toBeCloseTo(0.4, 3);
+
+    tanpura.stop();
+    vi.advanceTimersByTime(600);
+  });
+
+  it('rejects out-of-range volume', async () => {
+    const { TanpuraDrone } = await import('./tanpura');
+    const tanpura = new TanpuraDrone({ sa_hz: 220, volume: 0.3 });
+    await tanpura.start();
+
+    expect(() => tanpura.setVolume(-0.1)).toThrow(RangeError);
+    expect(() => tanpura.setVolume(1.5)).toThrow(RangeError);
+
+    tanpura.stop();
+    vi.advanceTimersByTime(600);
+  });
+
+  it('clamps rampMs to a minimum of 1ms so setValueAtTime + linearRamp never collide', async () => {
+    const { TanpuraDrone } = await import('./tanpura');
+    const tanpura = new TanpuraDrone({ sa_hz: 220, volume: 0.3 });
+    await tanpura.start();
+
+    const ctx = MockAudioContext.instances[0]!;
+    const masterGain = ctx.createdNodes.find((n) => n.__kind === 'gain')!;
+    masterGain.gain!.linearRampToValueAtTime.mockClear();
+
+    tanpura.setVolume(0.1, 0); // degenerate case
+
+    const [, when] = masterGain.gain!.linearRampToValueAtTime.mock.calls[0] as [number, number];
+    // With rampMs=0, the impl clamps to ~1ms → 0.001s
+    expect(when).toBeGreaterThan(0);
+
+    tanpura.stop();
+    vi.advanceTimersByTime(600);
+  });
+});

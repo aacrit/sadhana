@@ -74,6 +74,17 @@ export interface LessonPhase {
     readonly strings: readonly string[];
     readonly sa_hz: number | null;
   };
+  /**
+   * Per-phase tanpura presence override.
+   * - 'full'  — play at normal volume (0.3)
+   * - 'duck'  — play at ducked volume (0.35 × base = ~0.1), for focus phases
+   * - 'off'   — silence the drone entirely during this phase (ramp to 0)
+   *
+   * Overrides the default PHASE_TANPURA_GAIN map in useLessonEngine. Use
+   * sparingly — the default map already picks sensible presence per phase
+   * type (ducked during singing/focus, full during listening).
+   */
+  readonly tanpura_presence?: 'full' | 'duck' | 'off';
 
   // sa_detection
   readonly attempts?: number;

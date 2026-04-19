@@ -328,6 +328,31 @@ export class VoicePipeline {
   }
 
   /**
+   * Updates the per-sample clarity threshold at runtime.
+   *
+   * Pitchy clarity (McLeod Pitch Method periodicity score) for real-world
+   * sung vowels typically lands in 0.55–0.85. A brief `setClarityThreshold`
+   * relax lets callers (e.g. Sa-detection auto-calibration) lower the gate
+   * progressively when no candidate passes within a timeout, rather than
+   * re-creating the pipeline.
+   *
+   * @param threshold - Clarity value in [0, 1]. Values outside the range are clamped.
+   */
+  setClarityThreshold(threshold: number): void {
+    const clamped = Math.max(0, Math.min(1, threshold));
+    this.config = { ...this.config, clarityThreshold: clamped };
+  }
+
+  /**
+   * Returns the current clarity threshold — useful for tests and for
+   * callers that implement progressive relaxation and want to inspect
+   * the live value.
+   */
+  getClarityThreshold(): number {
+    return this.config.clarityThreshold ?? 0.80;
+  }
+
+  /**
    * Returns the current rolling buffer of detected swaras.
    * Useful for UI display of recent pitch history.
    */

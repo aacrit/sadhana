@@ -257,9 +257,15 @@ export class TanpuraDrone {
   /**
    * Sets the master volume.
    *
+   * A short ramp (default 50ms) is applied so gain changes are perceptually
+   * smooth — no clicks. Use a longer ramp (e.g. 400ms) when ducking the
+   * drone between lesson phases so the transition feels like a natural
+   * shift in presence rather than a hard cut.
+   *
    * @param volume - Volume level (0 to 1)
+   * @param rampMs - Duration of the ramp in milliseconds (default 50, clamped to >= 1).
    */
-  setVolume(volume: number): void {
+  setVolume(volume: number, rampMs: number = 50): void {
     if (volume < 0 || volume > 1) {
       throw new RangeError('Volume must be between 0 and 1');
     }
@@ -268,8 +274,10 @@ export class TanpuraDrone {
 
     if (this.masterGain && this.audioContext) {
       const now = this.audioContext.currentTime;
+      const rampSec = Math.max(0.001, rampMs / 1000);
+      this.masterGain.gain.cancelScheduledValues(now);
       this.masterGain.gain.setValueAtTime(this.masterGain.gain.value, now);
-      this.masterGain.gain.linearRampToValueAtTime(volume, now + 0.05);
+      this.masterGain.gain.linearRampToValueAtTime(volume, now + rampSec);
     }
   }
 
