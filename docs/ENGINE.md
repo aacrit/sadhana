@@ -275,15 +275,17 @@ Additive synthesis drone from first principles.
 
 | Export | Kind | Description |
 |--------|------|-------------|
-| `TanpuraConfig` | interface | `{ sa_hz, volume, strings: 4, groundString?: 'Pa'\|'Ma'\|'Ni', useMa?, saDetuningCents?, cycleDuration? }` |
-| `DEFAULT_TANPURA_CONFIG` | const | 261.63 Hz, volume 0.3, 2 cents detuning, 7s pluck cycle, groundString 'Pa' |
+| `TanpuraConfig` | interface | `{ sa_hz, volume, stringCount?: 2\|3\|4, groundString?: 'Pa'\|'Ma'\|'Ni', useMa?, saDetuningCents?, cycleDuration?, jivariDetuneCents? }` |
+| `DEFAULT_TANPURA_CONFIG` | const | 261.63 Hz, volume 0.3, stringCount 2, cycleDuration 2.0s, groundString 'Pa', 0.4 cents jivari detune |
 | `TanpuraDrone` | class | `start()`, `stop()`, `setSa(hz)`, `setVolume(v, rampMs?)`, `getPartialFrequencies()`, `getProfiles()` |
 
-Architecture: 4 strings x 10 partials = 40 sine oscillators. Third string detuned 2 cents for shimmer. String volume balance: Pa/Ma/Ni 0.7, low Sa 0.6, middle Sa 1.0. 500ms fade-out on stop. Web Audio API directly (no Tone.js).
+Architecture: up to 4 strings x 10 partials (default 2 strings = 20 oscillators). Third string detuned 2 cents for shimmer when stringCount >= 3. String volume balance: Pa/Ma/Ni 0.7, low Sa 0.6, middle Sa 1.0. 500ms fade-out on stop. Web Audio API directly (no Tone.js).
+
+Level-scaled stringCount: shishya=2 (Sa + ground), sadhaka=3, varistha=4. Progressive disclosure matches Tantri string visibility.
 
 Per-partial jivari detune: each partial receives a deterministic ±0.4 cent offset computed from a seeded xorshift32 PRNG (seed derived from string index + partial index). The same detuning pattern plays back every pluck cycle, matching the physical consistency of a real jivari bridge.
 
-Pluck cycle model: strings are plucked sequentially (ground-string → Sa → Sa → low Sa → repeat) with a jivari amplitude envelope per pluck. Attack: 35ms exponential ramp (was 15ms linear) for more natural string-contact character. The `cycleDuration` parameter controls the full 4-string pluck cycle in seconds (default 7s, yielding one pluck every 1.75s). String sustain overlaps the full cycle duration so successive plucks crossfade rather than gap, producing a continuous drone. Higher partials sustain longer than lower partials, matching the physical behaviour of the jivari bridge.
+Pluck cycle model: strings are plucked sequentially (ground-string → Sa → [Sa → low Sa] for stringCount >= 3/4 → repeat) with a jivari amplitude envelope per pluck. Attack: 35ms exponential ramp (was 15ms linear) for more natural string-contact character. The `cycleDuration` parameter controls the full cycle in seconds (default 2.0s; at stringCount=2 this gives 1.0s/pluck). String sustain overlaps the full cycle duration so successive plucks crossfade rather than gap, producing a continuous drone. Higher partials sustain longer than lower partials, matching the physical behaviour of the jivari bridge. `jivariSustainFactor` is tightened so tails no longer overlap across cycles.
 
 `groundString` parameter: ragas that omit Pa traditionally use an alternate ground string. `tanpuraTuning` on the `Raga` interface drives this automatically: Marwa → 'Ma', Malkauns → 'Ma', Bageshri → 'Ni', all others default to 'Pa'. The legacy `useMa` boolean is still accepted for backward compatibility but deprecated in favour of `groundString`.
 

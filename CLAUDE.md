@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 # Sādhanā
 
-Last updated: 2026-04-19 (rev 8)
+Last updated: 2026-04-19 (rev 9)
 
 > Sanskrit: sādhanā (साधना) — disciplined practice toward mastery. Not learning about music. Becoming it.
 
@@ -119,10 +119,15 @@ engine/
 ├── synthesis/
 │   ├── tanpura.ts            # Tanpura drone synthesis from first principles.
 │   │                         # Not a sample. Mathematical overtone series.
-│   │                         # Sa string: fundamental + 9 partials with natural decay.
-│   │                         # Pa string: 3:2 ratio. Upper Sa string: 2:1 ratio.
+│   │                         # Default: 2 strings (Sa + ground). Level-scaled:
+│   │                         # shishya=2, sadhaka=3, varistha=4.
+│   │                         # cycleDuration default 2.0s. groundString 'Pa'|'Ma'|'Ni'
+│   │                         # (raga-aware: Bageshri→'Ni', Marwa/Malkauns→'Ma').
 │   ├── swara-voice.ts        # Individual swara synthesis with correct shruti frequency.
-│   │                         # Tone.js PolySynth configured to just intonation.
+│   │                         # Default timbre: harmonium (attack 40ms, sustain 1.0,
+│   │                         # release 300ms, fundamental + 3 partials + bellows LFO).
+│   │                         # Piano timbre available as override only — music-director
+│   │                         # ruling: equal-tempered percussive playback contradicts HCM.
 │   └── tala-engine.ts        # Rhythmic pulse generator. Teentaal, Ektaal, etc.
 │                             # Tabla sound events at correct beat positions.
 │
