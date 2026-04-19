@@ -347,12 +347,13 @@ export function useLessonAudio(
         saDetectionPipelineRef.current = null;
       }
 
-      // Completed holds — each is the average Hz of a sustained tone
-      const completedHolds: number[] = [];
+      // Completed holds — each is the average Hz + average clarity of a sustained tone
+      const completedHolds: Array<{ hz: number; clarity: number }> = [];
 
       // Current hold tracking
       let holdFrames = 0;
       let holdSum = 0;
+      let holdClaritySum = 0;
       let holdAnchorHz = 0; // first Hz of current hold attempt
 
       const pipeline = new VoicePipeline({
@@ -377,6 +378,7 @@ export function useLessonAudio(
             // Start a new hold attempt
             holdAnchorHz = event.hz;
             holdSum = event.hz;
+            holdClaritySum = event.clarity;
             holdFrames = 1;
           } else {
             // Check stability: is this pitch within tolerance of the anchor?
@@ -384,11 +386,13 @@ export function useLessonAudio(
             if (Math.abs(cents) <= SA_HOLD_STABILITY_CENTS) {
               // Still stable — accumulate
               holdSum += event.hz;
+              holdClaritySum += event.clarity;
               holdFrames++;
             } else {
               // Pitch drifted too far — restart hold
               holdAnchorHz = event.hz;
               holdSum = event.hz;
+              holdClaritySum = event.clarity;
               holdFrames = 1;
             }
           }
@@ -396,25 +400,35 @@ export function useLessonAudio(
           // Check if we have enough frames for a complete hold
           if (holdFrames >= SA_HOLD_FRAMES) {
             const avgHz = holdSum / holdFrames;
-            completedHolds.push(avgHz);
+            const avgClarity = holdClaritySum / holdFrames;
+            completedHolds.push({ hz: avgHz, clarity: avgClarity });
             onProgress?.(completedHolds.length, SA_DETECTION_HOLDS, avgHz);
 
             // Reset for next hold
             holdFrames = 0;
             holdSum = 0;
+            holdClaritySum = 0;
             holdAnchorHz = 0;
 
             if (completedHolds.length >= SA_DETECTION_HOLDS) {
-              // All holds complete — compute final Sa as median of holds
-              const sorted = [...completedHolds].sort((a, b) => a - b);
-              const median = sorted[Math.floor(sorted.length / 2)]!;
+              // All holds complete — compute final Sa as median by Hz.
+              // Clarity reported as the mean of the accepted holds: reflects
+              // the true confidence of the detection. A bright sung tone gives
+              // ~0.95+; a breathy or uncertain tone lands ~0.60–0.75. The
+              // caller can threshold on this (>= 0.7 typical) rather than
+              // trusting a hardcoded 1.0.
+              const sortedByHz = [...completedHolds].sort((a, b) => a.hz - b.hz);
+              const median = sortedByHz[Math.floor(sortedByHz.length / 2)]!;
+              const meanClarity =
+                completedHolds.reduce((s, h) => s + h.clarity, 0) /
+                completedHolds.length;
 
               // Stop the detection pipeline
               pipeline.stop();
               saDetectionPipelineRef.current = null;
 
               // Report the candidate
-              onCandidate(median, 1.0);
+              onCandidate(median.hz, meanClarity);
             }
           }
         },
@@ -422,6 +436,7 @@ export function useLessonAudio(
           // Silence resets the current hold — student paused between attempts
           holdFrames = 0;
           holdSum = 0;
+          holdClaritySum = 0;
           holdAnchorHz = 0;
         },
       });
