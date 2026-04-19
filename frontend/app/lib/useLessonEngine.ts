@@ -87,54 +87,73 @@ const VOICE_PHASE_TYPES: readonly PhaseType[] = [
 /**
  * Per-phase tanpura presence map.
  *
- * The tanpura is the harmonic reference field of every session — it must
- * never stop, only change presence. During listening phases (tanpura_drone,
- * passive_phrase_recognition, session_summary) it sits at full volume as
- * the primary sound. During focus phases (sa_detection, pitch_exercise,
- * phrase_exercise, ornament_exercise, call_response, ...) it ducks to
- * 0.35× so the student can attend to instruction, playback, or their own
- * voice without the drone competing.
+ * The tanpura NEVER stops — silence breaks the ritual (music-director ruling).
+ * It only changes presence. Floor is 0.15 (never below).
  *
- * Gain values are relative multipliers applied to the tanpura's base
- * volume (0.3). A gain of 1.0 = normal (0.3 absolute). A gain of 0.35 =
- * ducked (~0.105 absolute). A gain of 0 = silent (ramp to 0).
+ * Gain values are multipliers on the tanpura base volume (0.3):
+ *   1.0 × 0.3 = 0.30 absolute (full presence)
+ *   0.75 × 0.3 = 0.225 (sa_detection — audible reference, student not yet singing)
+ *   0.55 × 0.3 = 0.165 (free singing — student's voice must be audible over drone)
+ *   0.22 × 0.3 = 0.066 (instruction / pitch_exercise — student focused, not singing)
+ *   0.18 × 0.3 = 0.054 (phrase playback — harmonium demo must be heard clearly)
+ *   0.15 = absolute floor (never below this)
  *
- * Any phase type not in the map defaults to DUCK_GAIN — i.e. assume the
- * student is focused unless explicitly a listening phase.
+ * Any phase type not in the map defaults to INSTRUCTION_GAIN (0.22).
  */
-const FULL_GAIN = 1.0;
-const DUCK_GAIN = 0.35;
-const OFF_GAIN = 0.0;
+const FULL_GAIN = 1.0;         // tanpura_drone — student is actively listening to drone
+const SA_DETECTION_GAIN = 0.85;    // tanpura audible; student hasn't started singing yet
+const FREE_SING_GAIN = 0.55;       // passive_phrase_recognition — student singing freely
+const PAKAD_SWELL_GAIN = 0.65;     // pakad_recognition_moment — swell on recognition
+const INSTRUCTION_GAIN = 0.22;     // chrome / instructions / exercise setup
+const DEMO_GAIN = 0.18;            // phrase playback / harmonium demo playing
+const VOICE_EXERCISE_GAIN = 0.22;  // pitch_exercise, call_response — student singing
+const TANPURA_FLOOR = 0.15;        // absolute minimum — never below this
 
 const PHASE_TANPURA_GAIN: Readonly<Partial<Record<PhaseType, number>>> = {
-  // Full presence — student is listening to the drone as the primary sound.
+  // Full presence — student is listening to the drone as the primary sound
   tanpura_drone: FULL_GAIN,
-  passive_phrase_recognition: FULL_GAIN,
   session_summary: FULL_GAIN,
 
-  // Ducked — student is focusing on instruction, sample audio, or their voice.
-  sa_detection: DUCK_GAIN,
-  pitch_exercise: DUCK_GAIN,
-  phrase_exercise: DUCK_GAIN,
-  call_response: DUCK_GAIN,
-  swara_introduction: DUCK_GAIN,
-  phrase_playback: DUCK_GAIN,
-  ornament_exercise: DUCK_GAIN,
-  andolan: DUCK_GAIN,
-  meend: DUCK_GAIN,
+  // Sa detection — drone is the reference; student hasn't yet started singing
+  sa_detection: SA_DETECTION_GAIN,
+
+  // Free singing — student's voice carries, drone supports but doesn't compete
+  passive_phrase_recognition: FREE_SING_GAIN,
+
+  // Demo / instruction phases — harmonium or explanation must be heard clearly
+  phrase_playback: DEMO_GAIN,
+  swara_introduction: DEMO_GAIN,
+  ornament_exercise: DEMO_GAIN,
+  andolan: DEMO_GAIN,
+  meend: DEMO_GAIN,
+
+  // Voice exercise — student singing, needs to hear themselves
+  pitch_exercise: VOICE_EXERCISE_GAIN,
+  phrase_exercise: VOICE_EXERCISE_GAIN,
+  call_response: VOICE_EXERCISE_GAIN,
 };
+
+/**
+ * Crossfade duration for tanpura gain changes.
+ * 800ms (per music-director spec — unhurried shift in presence, not a cut).
+ */
+const TANPURA_GAIN_RAMP_MS = 800;
 
 /**
  * Resolve the tanpura target gain for a phase. Honors the per-phase
  * `tanpura_presence` YAML override, then falls back to the default map,
- * then to DUCK_GAIN for unknown phase types.
+ * then to INSTRUCTION_GAIN for unknown phase types.
+ * Always clamps to ≥ TANPURA_FLOOR — the drone never stops.
+ * The `tanpura_presence: 'off'` override is ignored (deprecated — silence
+ * breaks the ritual).
  */
 function resolveTanpuraGain(phase: LessonPhase): number {
   if (phase.tanpura_presence === 'full') return FULL_GAIN;
-  if (phase.tanpura_presence === 'duck') return DUCK_GAIN;
-  if (phase.tanpura_presence === 'off') return OFF_GAIN;
+  if (phase.tanpura_presence === 'duck') return VOICE_EXERCISE_GAIN;
+  // 'off' is deprecated — map to floor rather than 0
+  if (phase.tanpura_presence === 'off') return TANPURA_FLOOR;
   const mapped = PHASE_TANPURA_GAIN[phase.type];
-  return mapped ?? DUCK_GAIN;
+  return Math.max(TANPURA_FLOOR, mapped ?? INSTRUCTION_GAIN);
 }
 
 export interface LessonEngineControls {
@@ -442,15 +461,15 @@ export function useLessonEngine(
     setVoiceFeedback(IDLE_VOICE_FEEDBACK);
 
     // Duck or restore the tanpura for this phase. No-op if the drone is not
-    // running — calling on every phase transition is safe. 400ms ramp so the
-    // shift in presence feels like a natural change in focus, not a cut.
+    // running — calling on every phase transition is safe. 800ms ramp so the
+    // shift in presence feels like a natural change in focus (music-director spec).
     //
     // Note: the tanpura itself is started by the first `tanpura_drone` phase
     // (typically phase 0) and plays continuously for the rest of the lesson.
     // Only the gain changes as the student moves between listening and
-    // focus phases.
+    // focus phases. Gain never drops below TANPURA_FLOOR (0.15).
     const targetGain = resolveTanpuraGain(currentPhase);
-    audio.setTanpuraGain(targetGain, 400);
+    audio.setTanpuraGain(targetGain, TANPURA_GAIN_RAMP_MS);
 
     switch (currentPhase.type) {
       case 'tanpura_drone': {
