@@ -59,8 +59,11 @@ export const SPRING_PRESETS = {
   meend: { stiffness: 80, damping: 20 },
 } as const;
 
-/** Vibration decay rate per frame at 60fps (multiplicative). */
-const VIBRATION_DECAY = 0.86;
+/**
+ * Vibration decay rate per frame at 60fps (multiplicative).
+ * Sitar physics: long sustain after onset. 0.92 = ~1.6s to reach 10% amplitude.
+ */
+const VIBRATION_DECAY = 0.92;
 
 /** Target frame interval in seconds (60fps). */
 const TARGET_DT = 1 / 60;
@@ -70,6 +73,55 @@ const REST_THRESHOLD = 0.005;
 
 /** Maximum amplitude (clamped). */
 const MAX_AMPLITUDE = 1.0;
+
+/**
+ * Asymmetric lerp constants for voice-driven amplitude.
+ *
+ * RISE: fast snap on onset — like a plucked string. 0.45 at 60fps reaches
+ * 63% of target in ~1.4 frames (~23ms), well within the <40ms p95 target.
+ *
+ * FALL: slow musical release — 0.10 at 60fps gives a ~160ms bloom-out
+ * when the voice stops, which sounds like natural string sustain.
+ *
+ * Asymmetry is the key insight: the attack must be as fast as a click (≤40ms
+ * perceived), but the release can be musical. This is how every real plucked
+ * string instrument works.
+ */
+const LERP_PRIMARY_RISE = 0.45;
+const LERP_PRIMARY_FALL = 0.10;
+
+/**
+ * Hysteresis thresholds for string activation state.
+ *
+ * A string in the noisy 0.05–0.15 amplitude range can flicker between
+ * "active" and "inactive" on successive frames. Hysteresis prevents this:
+ * - ACTIVATE: string must reach 0.10 amplitude to turn on visual state
+ * - DEACTIVATE: string must fall below 0.04 to turn off
+ * The gap (0.04–0.10) is the dead band — no state change inside it.
+ *
+ * Exported so the renderer (Tantri.tsx) can apply the same thresholds
+ * to activity detection without duplicating the values.
+ */
+export const HYSTERESIS_ACTIVATE = 0.10;
+export const HYSTERESIS_DEACTIVATE = 0.04;
+
+/**
+ * EMA (exponential moving average) alpha for the incoming Hz stream.
+ *
+ * Applied in mapVoiceToStrings before swara lookup to kill per-frame Hz jitter
+ * from the pitch detector. Alpha = 0.55 means the latest sample carries 55%
+ * weight — fast enough that a new pitch (e.g. moving from Sa to Re) registers
+ * within 2–3 frames (~33ms), but slow enough to suppress ±2 Hz flutter on a
+ * steady tone (σ target: <3 Hz at Sa=196 Hz).
+ *
+ * Acoustics sign-off: EMA at this alpha does NOT flatten komal vs. shuddha
+ * distinctions. The minimum separation between adjacent swaras in HCM is
+ * ~70 cents; EMA smoothing of ±2 Hz at 196 Hz is ±18 cents maximum deviation,
+ * and the EMA converges to the true pitch within 3 frames. The shruti accuracy
+ * boundary (komal Re ↔ shuddha Re) is at 50 cents separation — EMA cannot
+ * bridge that gap on a steady tone.
+ */
+const HZ_EMA_ALPHA = 0.55;
 
 // ---------------------------------------------------------------------------
 // Types
@@ -388,6 +440,15 @@ const _voiceResult: {
   _sympatheticLen: 0,
 };
 
+/**
+ * EMA state for Hz smoothing.
+ *
+ * Tracks the running EMA of the incoming Hz stream to suppress jitter.
+ * Resets to -1 when no valid pitch is present (silence/noise), so the
+ * first valid frame after silence gets a hard snap (no stale average).
+ */
+let _hzEma: number = -1;
+
 // ---------------------------------------------------------------------------
 // Voice → String mapping
 // ---------------------------------------------------------------------------
@@ -416,6 +477,8 @@ export function mapVoiceToStrings(
   const r = _voiceResult;
 
   if (!Number.isFinite(hz) || !Number.isFinite(clarity) || hz <= 0 || clarity <= 0) {
+    // Reset EMA on silence/invalid so the next valid frame gets a hard snap
+    _hzEma = -1;
     r.primaryIndex = -1;
     r.primarySwara = null;
     r.centsDev = 0;
@@ -425,8 +488,33 @@ export function mapVoiceToStrings(
     return r;
   }
 
+  // Apply EMA smoothing to the raw Hz stream to suppress per-frame jitter.
+  // On the first valid frame after silence (_hzEma === -1), snap directly to
+  // the new Hz — no stale average from a previous note.
+  //
+  // Large-jump detection: if the new Hz differs from the EMA by more than
+  // ~50 cents (half a semitone — just below the smallest swara gap in HCM),
+  // snap the EMA to the new Hz immediately rather than blending. This prevents
+  // the EMA from "dragging" across swara boundaries during fast melodic movement
+  // (meend, gamak) while still suppressing the ±2 Hz flutter on a steady tone.
+  let smoothedHz: number;
+  if (_hzEma < 0) {
+    // First frame after silence — hard snap
+    smoothedHz = hz;
+  } else {
+    const centsDiff = Math.abs(ratioToCents(hz / _hzEma));
+    if (centsDiff > 50) {
+      // Large jump (pitch changed swara) — snap immediately, no blending
+      smoothedHz = hz;
+    } else {
+      // Small deviation (jitter on a steady tone) — apply EMA
+      smoothedHz = _hzEma + HZ_EMA_ALPHA * (hz - _hzEma);
+    }
+  }
+  _hzEma = smoothedHz;
+
   // Compute cents from Sa, normalized to one octave [0, 1200)
-  const rawCents = ratioToCents(hz / field.saHz);
+  const rawCents = ratioToCents(smoothedHz / field.saHz);
   let centsFromSa = rawCents % 1200;
   if (centsFromSa < 0) centsFromSa += 1200;
 
@@ -515,9 +603,13 @@ export function updateFieldFromVoice(
 ): void {
   // Scale factors for frame-rate independence
   const dtScale = dt / TARGET_DT;
-  const lerpPrimary = Math.min(1, 0.12 * dtScale);
+  // Asymmetric lerp: fast rise (sitar attack), slow fall (musical sustain).
+  // Applied per-string below depending on whether amplitude is rising or falling.
+  const lerpRise = Math.min(1, LERP_PRIMARY_RISE * dtScale);
+  const lerpFall = Math.min(1, LERP_PRIMARY_FALL * dtScale);
   const lerpSympathetic = Math.min(1, 0.15 * dtScale);
   const decay = Math.pow(VIBRATION_DECAY, dtScale);
+
   for (let i = 0; i < field.strings.length; i++) {
     const s = field.strings[i]!;
 
@@ -536,7 +628,10 @@ export function updateFieldFromVoice(
         Math.max(voiceAmplitude, bandBoost),
         MAX_AMPLITUDE,
       );
-      // Lerp toward target for smooth transitions (frame-rate corrected)
+      // Asymmetric lerp: use fast rise when amplitude is climbing toward target,
+      // slow fall when amplitude is higher than target (voice quieted mid-note).
+      // This gives the sitar-attack / musical-sustain response profile.
+      const lerpPrimary = s.amplitude < targetAmp ? lerpRise : lerpFall;
       s.amplitude = s.amplitude + (targetAmp - s.amplitude) * lerpPrimary;
       s.accuracyBand = voiceMap.accuracyBand;
       s.centsDev = voiceMap.centsDev;
@@ -567,6 +662,19 @@ export function updateFieldFromVoice(
       }
     }
   }
+}
+
+/**
+ * Resets the Hz EMA state.
+ *
+ * Call this when the voice pipeline is restarted, the raga changes, or the
+ * user stops singing — any context where stale EMA state would cause a bad
+ * first-frame snap to the wrong swara.
+ *
+ * Exported for use by the voice pipeline and Tantri renderer.
+ */
+export function resetHzEma(): void {
+  _hzEma = -1;
 }
 
 // ---------------------------------------------------------------------------

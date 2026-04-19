@@ -41,7 +41,10 @@ import {
   applyLevelVisibility,
   accuracyToColor,
   generateStringWaveform,
+  resetHzEma,
   SPRING_PRESETS,
+  HYSTERESIS_ACTIVATE,
+  HYSTERESIS_DEACTIVATE,
 } from '@/engine/interaction/tantri';
 import type {
   TantriField,
@@ -788,6 +791,11 @@ const Tantri = memo(function Tantri({
   // Create / update field
   // -----------------------------------------------------------------------
   useEffect(() => {
+    // Reset Hz EMA whenever the musical context changes (new raga, new Sa, new level).
+    // Stale EMA from a previous context would cause the first vocal frame in the
+    // new context to snap to the wrong swara.
+    resetHzEma();
+
     const field = createTantriField(saHz, ragaId, level);
     applyLevelVisibility(field, subLevel);
     fieldRef.current = field;
@@ -889,11 +897,14 @@ const Tantri = memo(function Tantri({
       vadiDwellRef.current = 0;
     }
 
-    // --- Activity detection for cinematic defocus ---
+    // --- Activity detection for cinematic defocus (with hysteresis) ---
+    // Use HYSTERESIS_ACTIVATE / HYSTERESIS_DEACTIVATE to prevent rapid
+    // on/off toggling in the noisy 0.05–0.15 amplitude range.
     if (onActivityChange) {
       let isActive = false;
+      const threshold = wasActiveRef.current ? HYSTERESIS_DEACTIVATE : HYSTERESIS_ACTIVATE;
       for (let i = 0; i < field.strings.length; i++) {
-        if (field.strings[i]!.amplitude > 0.05) {
+        if (field.strings[i]!.amplitude > threshold) {
           isActive = true;
           break;
         }
