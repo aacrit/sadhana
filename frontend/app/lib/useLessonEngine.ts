@@ -26,6 +26,7 @@ import { updateSa } from './supabase';
 import type { PitchResult } from '@/engine/analysis/pitch-mapping';
 import type { PakadMatch } from '@/engine/analysis/phrase-recognition';
 import type { VoiceFeedback } from './types';
+import { emit } from './telemetry';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -439,14 +440,17 @@ export function useLessonEngine(
     if (granted) {
       setMicPermission('granted');
       setMicGateActive(false);
+      void emit('mic-granted');
     } else {
       setMicPermission('denied');
+      void emit('mic-denied');
     }
   }, []);
 
   const skipMic = useCallback(() => {
     setSkipMicFlag(true);
     setMicGateActive(false);
+    void emit('phase-skipped', { reason: 'mic-denied-skip' });
   }, []);
 
   const retryMic = useCallback(async () => {

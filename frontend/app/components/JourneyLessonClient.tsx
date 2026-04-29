@@ -21,6 +21,7 @@ import { useAuth } from '../lib/auth';
 import { useLessonEngine } from '../lib/useLessonEngine';
 import LessonRenderer from './LessonRenderer';
 import { saveSession, addXp, completeRiyaz } from '../lib/supabase';
+import { emit, emitError } from '../lib/telemetry';
 import styles from '../styles/lesson-renderer.module.css';
 
 // ---------------------------------------------------------------------------
@@ -162,20 +163,44 @@ function Runtime({
   warmupSwara?: string;
   onExit: () => void;
 }) {
+  const router = useRouter();
   const { profile, user } = useAuth();
   const engine = useLessonEngine(lessonYaml, copyYaml, saHz, warmupSwara, user?.id);
 
   const startTimeRef = useRef<Date | null>(null);
   const persistedRef = useRef(false);
 
+  // Audit #11 — first-launch Sa calibration guard. If the student arrives
+  // with the C4 default, bounce to /onboarding/sa before audio starts.
+  // We tolerate guests (no profile yet) — their lesson default is fine.
+  useEffect(() => {
+    if (!user?.id) return;
+    if (!profile) return;
+    if (Math.abs(profile.saHz - 261.6256) > 0.5) return;
+    // Default Sa AND signed in — onboard.
+    const next = encodeURIComponent(window.location.pathname + window.location.search);
+    router.replace(`/onboarding/sa?next=${next}`);
+  }, [profile, user?.id, router]);
+
   const handleComplete = useCallback(() => {
+    void emit('lesson-exited', {
+      lessonId: engine.lesson?.id,
+      state: engine.state,
+      phase: engine.phaseContext?.phase.id,
+      phaseIndex: engine.phaseContext?.phaseIndex,
+    });
     onExit();
-  }, [onExit]);
+  }, [onExit, engine.lesson?.id, engine.state, engine.phaseContext]);
 
   useEffect(() => {
     if (engine.state === 'ready' && engine.lesson) {
       startTimeRef.current = new Date();
       persistedRef.current = false;
+      void emit('lesson-started', {
+        lessonId: engine.lesson.id,
+        journey: engine.lesson.journey,
+        ragaId: engine.lesson.raga_id,
+      });
       engine.begin();
     }
   }, [engine.state, engine.lesson, engine.begin]);
@@ -218,21 +243,38 @@ function Runtime({
       journey,
     };
 
+    // Telemetry: emit completion event before persistence so we capture
+    // the intent even if the writes fail.
+    void emit('lesson-completed', {
+      lessonId: engine.lesson.id,
+      journey,
+      ragaId: engine.lesson.raga_id,
+      durationS,
+      xpEarned,
+      pakadsFound,
+    });
+    if (engine.pakadTriggered) {
+      void emit('pakad-recognised', {
+        lessonId: engine.lesson.id,
+        ragaId: engine.lesson.raga_id,
+      });
+    }
+
     void (async () => {
       try {
         await saveSession(user.id, sessionData);
       } catch (err) {
-        if (typeof console !== 'undefined') console.warn('saveSession failed:', err);
+        emitError('saveSession', err, { lessonId: engine.lesson?.id });
       }
       try {
         await addXp(user.id, xpEarned);
       } catch (err) {
-        if (typeof console !== 'undefined') console.warn('addXp failed:', err);
+        emitError('addXp', err, { lessonId: engine.lesson?.id });
       }
       try {
         await completeRiyaz(user.id);
       } catch (err) {
-        if (typeof console !== 'undefined') console.warn('completeRiyaz failed:', err);
+        emitError('completeRiyaz', err, { lessonId: engine.lesson?.id });
       }
     })();
   }, [engine.state, engine.lesson, engine.pakadTriggered, user?.id]);

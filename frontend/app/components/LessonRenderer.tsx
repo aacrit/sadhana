@@ -226,6 +226,16 @@ function SessionSummaryPhase({
 }
 
 /** Mic permission gate overlay. */
+/** Detect platform for tailored permission-recovery instructions. */
+function detectPlatform(): 'ios' | 'android' | 'desktop' | 'unknown' {
+  if (typeof navigator === 'undefined') return 'unknown';
+  const ua = navigator.userAgent;
+  if (/iPhone|iPad|iPod/.test(ua)) return 'ios';
+  if (/Android/.test(ua)) return 'android';
+  if (/Macintosh|Windows|Linux/.test(ua)) return 'desktop';
+  return 'unknown';
+}
+
 function MicGate({
   permission,
   onGrant,
@@ -237,14 +247,48 @@ function MicGate({
   onSkip: () => void;
   onRetry: () => void;
 }) {
+  const platform = detectPlatform();
+
+  // Audit #7 — platform-specific recovery instructions for sticky-deny.
+  // Once the user has denied permission once, getUserMedia retries are
+  // silently rejected without re-prompting; only a settings round-trip
+  // (or full re-grant) recovers. Tell them exactly what to do.
+  let recoveryHint: string | null = null;
+  if (permission === 'denied') {
+    if (platform === 'ios') {
+      recoveryHint =
+        'On iPhone: open Settings → Safari → Microphone → set to Allow. ' +
+        'Then return here and tap Try again.';
+    } else if (platform === 'android') {
+      recoveryHint =
+        'On Android: tap the lock icon in the address bar → Site settings → ' +
+        'Microphone → Allow. Then tap Try again.';
+    } else {
+      recoveryHint =
+        'On desktop: click the lock icon next to the URL → Site settings → ' +
+        'Microphone → Allow. Refresh the page and tap Try again.';
+    }
+  }
+
+  // Auto-retry permission state when the tab regains focus — the user
+  // may have toggled the setting in another tab/app.
+  useEffect(() => {
+    if (permission !== 'denied') return;
+    const onFocus = () => onRetry();
+    window.addEventListener('focus', onFocus);
+    return () => window.removeEventListener('focus', onFocus);
+  }, [permission, onRetry]);
+
   return (
     <div className={styles.micGate} role="alert">
       {permission === 'denied' ? (
         <>
           <p className={styles.micGateText}>
-            Microphone access is needed to hear your singing.
-            Please allow microphone access in your browser settings.
+            Microphone access is blocked. Sādhanā cannot hear you sing.
           </p>
+          {recoveryHint && (
+            <p className={styles.micGateHint}>{recoveryHint}</p>
+          )}
           <div className={styles.micGateActions}>
             <button type="button" className={styles.actionButton} onClick={onRetry}>
               Try again
@@ -256,7 +300,10 @@ function MicGate({
         </>
       ) : (
         <>
-          <p className={styles.micGateText}>Sadhana needs to hear you sing.</p>
+          <p className={styles.micGateText}>Sādhanā needs to hear you sing.</p>
+          <p className={styles.micGateHint}>
+            We never record audio — only the pitch is read, in real time, in your browser.
+          </p>
           <div className={styles.micGateActions}>
             <button type="button" className={styles.actionButton} onClick={onGrant}>
               Grant access

@@ -19,6 +19,7 @@ import Link from 'next/link';
 import { useAuth } from '../lib/auth';
 import { getRecentRagas, getPracticeHistory, updateSa } from '../lib/supabase';
 import { useVoiceWave } from '../lib/VoiceWaveContext';
+import { emit } from '../lib/telemetry';
 import { getLevelTitle } from '../lib/types';
 import type { LevelTitle, RecentRaga } from '../lib/types';
 import { getLevelIcon } from '../components/icons';
@@ -231,6 +232,7 @@ export default function ProfilePage() {
     try {
       await updateSa(authUser.id, parsed);
       setVoiceSaHz(parsed);
+      void emit('sa-manual-override', { hz: parsed });
       await refreshProfile();
       setSaEditOpen(false);
     } catch (err) {

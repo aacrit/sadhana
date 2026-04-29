@@ -24,6 +24,7 @@ import { getLevelTitle } from './lib/types';
 import ScriptToggle from './components/ScriptToggle';
 import ThemeToggle from './components/ThemeToggle';
 import SaCalibrator from './components/SaCalibrator';
+import AudioContextResumer from './components/AudioContextResumer';
 
 /**
  * ReducedMotionBridge — sets data-reduced-motion="true"|"false" on <html>.
@@ -103,6 +104,9 @@ export default function Providers({ children }: { children: ReactNode }) {
           <ReducedMotionBridge />
           <LevelBridge />
           <SaSeedBridge />
+          {/* Audit #1 — global AudioContext resume on visibilitychange.
+              Critical for mobile where backgrounding suspends contexts. */}
+          <AudioContextResumer />
           {children}
           <FloatingChrome />
         </VoiceWaveProvider>
