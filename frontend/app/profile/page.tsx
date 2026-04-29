@@ -578,7 +578,14 @@ export default function ProfilePage() {
           </div>
         </section>
 
-        {/* Section 7: Sign out */}
+        {/* Section 7: Privacy + sign out */}
+        <Link
+          href="/profile/privacy"
+          className={styles.privacyLink}
+        >
+          Your data and privacy
+        </Link>
+
         <button
           type="button"
           className={styles.signOutButton}

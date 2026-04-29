@@ -659,3 +659,20 @@
     transition: none;
   }
 }
+
+.privacyLink {
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  color: var(--text-3);
+  text-decoration: none;
+  margin-top: var(--space-8);
+  margin-bottom: var(--space-3);
+  letter-spacing: var(--tracking-wide);
+  text-align: center;
+  display: block;
+  transition: color var(--dur-fast);
+}
+
+.privacyLink:hover {
+  color: var(--text-2);
+}
