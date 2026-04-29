@@ -18,6 +18,7 @@ import { useAuth } from '../../lib/auth';
 import { getRecentRagas, getYesterdayWorstSwara, getNextLessonId } from '../../lib/supabase';
 import PracticeReminder, { requestNotificationPermission } from '../../components/PracticeReminder';
 import InstallPrompt from '../../components/InstallPrompt';
+import KeyboardModeHint from '../../components/KeyboardModeHint';
 import homeStyles from '../../styles/beginner.module.css';
 
 // ---------------------------------------------------------------------------
@@ -547,6 +548,13 @@ export default function BeginnerPage() {
           ))}
         </div>
       </motion.section>
+
+      {/* Audit #15 — Keyboard mode discoverability. Tantri's keyboard
+          navigation already works (handleKeyDown in Tantri.tsx); this
+          surfaces the keymap so sighted-keyboard and SR users find it. */}
+      <div style={{ alignSelf: 'center', marginTop: 'var(--space-3)' }}>
+        <KeyboardModeHint />
+      </div>
 
       {/* First-time user callout */}
       {isFirstTime && (

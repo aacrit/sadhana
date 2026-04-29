@@ -418,6 +418,64 @@ export async function completeRiyaz(userId: string): Promise<void> {
 }
 
 // ---------------------------------------------------------------------------
+// Progression — derive level from event log (audit #3, T1.3 follow-through)
+// ---------------------------------------------------------------------------
+
+/**
+ * Fetch the user's progression events — a flattening of the events table
+ * into the ProgressionEvent shape the engine's level-gates module expects.
+ *
+ * Reads the most recent 500 events. Events older than that are unlikely
+ * to gate a level the student has not already achieved.
+ */
+export async function getProgressionEvents(
+  userId: string,
+): Promise<Array<{
+  id: string;
+  userId: string;
+  sessionId?: string;
+  ragaId?: string;
+  t: number;
+  value?: number;
+  metadata?: Readonly<Record<string, unknown>>;
+}>> {
+  const { data, error } = await supabase
+    .from('events')
+    .select('name, payload, created_at')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false })
+    .limit(500);
+
+  if (error || !data) return [];
+
+  return data.map((row) => {
+    const name = row.name as string;
+    const payload = (row.payload as Record<string, unknown> | null) ?? {};
+    return {
+      id: name,
+      userId,
+      sessionId: payload.sessionId as string | undefined,
+      ragaId: payload.ragaId as string | undefined,
+      t: new Date(row.created_at as string).getTime(),
+      value: payload.value as number | undefined,
+      metadata: payload,
+    };
+  });
+}
+
+/** Persist a derived level back to the profile. */
+export async function setProfileLevel(
+  userId: string,
+  levelTitle: 'Shishya' | 'Sadhaka' | 'Varistha' | 'Guru',
+): Promise<void> {
+  const { error } = await supabase
+    .from('profiles')
+    .update({ level: levelTitle.toLowerCase() })
+    .eq('id', userId);
+  if (error) throw new Error(error.message);
+}
+
+// ---------------------------------------------------------------------------
 // GDPR / DPDP / LGPD — account deletion + data export (migration 005)
 // ---------------------------------------------------------------------------
 

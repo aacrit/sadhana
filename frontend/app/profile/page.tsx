@@ -17,7 +17,9 @@ import { useEffect, useState, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '../lib/auth';
-import { getRecentRagas, getPracticeHistory, updateSa } from '../lib/supabase';
+import { getRecentRagas, getPracticeHistory, updateSa, getProgressionEvents } from '../lib/supabase';
+import { earnedGates, pendingGates, LEVEL_GATES } from '@/engine/progression/level-gates';
+import type { GateId } from '@/engine/progression/level-gates';
 import { useVoiceWave } from '../lib/VoiceWaveContext';
 import { emit } from '../lib/telemetry';
 import { getLevelTitle } from '../lib/types';
@@ -111,12 +113,17 @@ export default function ProfilePage() {
   const [practiceHistory, setPracticeHistory] = useState<
     { date: string; minutes: number; sessions: number }[]
   >([]);
+  // Audit #3 — earned/pending level-gate ids derived from event log
+  const [earnedGateIds, setEarnedGateIds] = useState<Set<GateId>>(new Set());
 
-  // Fetch recent ragas and practice history for signed-in users
+  // Fetch recent ragas, practice history, and progression events
   useEffect(() => {
     if (user) {
       getRecentRagas(user.id, 3).then(setRecentRagas);
       getPracticeHistory(user.id, 90).then(setPracticeHistory);
+      getProgressionEvents(user.id).then((events) => {
+        setEarnedGateIds(earnedGates(events));
+      });
     }
   }, [user]);
 
@@ -576,6 +583,37 @@ export default function ProfilePage() {
               );
             })}
           </div>
+        </section>
+
+        {/* Section 6.5: Mastery acts (audit #3 — level gates UI).
+            Surfaces the musical-act gates that govern level transitions —
+            the locked D+B design says "interface deepens through musical
+            acts, not XP". Without this surface the gate predicates have
+            no UI affordance and the student cannot see what's next. */}
+        <section
+          className={styles.gatesSection}
+          aria-label="Mastery acts"
+        >
+          <span className={styles.sectionLabel}>Mastery acts</span>
+          <ul className={styles.gatesList}>
+            {LEVEL_GATES.map((gate) => {
+              const earned = earnedGateIds.has(gate.id);
+              return (
+                <li
+                  key={gate.id}
+                  className={`${styles.gateItem} ${earned ? styles.gateEarned : styles.gatePending}`}
+                >
+                  <span className={styles.gateMark} aria-hidden="true">
+                    {earned ? '✓' : '○'}
+                  </span>
+                  <span className={styles.gateText}>
+                    <span className={styles.gateLevel}>→ {gate.unlocks}</span>{' '}
+                    {gate.description}
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
         </section>
 
         {/* Section 7: Privacy + sign out */}

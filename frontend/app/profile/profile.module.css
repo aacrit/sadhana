@@ -676,3 +676,78 @@
 .privacyLink:hover {
   color: var(--text-2);
 }
+
+/* Audit #3 — Mastery acts (level-gate UI) */
+
+.gatesSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-top: var(--space-12);
+  margin-bottom: var(--space-8);
+}
+
+.gatesList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.gateItem {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  font-family: var(--font-serif);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-light);
+  line-height: var(--leading-relaxed);
+  transition: border-color 200ms, background 200ms;
+}
+
+.gateEarned {
+  border-color: color-mix(in srgb, var(--correct) 35%, var(--border));
+  background: color-mix(in srgb, var(--correct) 4%, transparent);
+}
+
+.gatePending {
+  color: var(--text-2);
+}
+
+.gateMark {
+  font-family: var(--font-mono);
+  font-size: var(--text-md);
+  flex-shrink: 0;
+  width: 1.4em;
+  text-align: center;
+}
+
+.gateEarned .gateMark {
+  color: var(--correct);
+}
+
+.gatePending .gateMark {
+  color: var(--text-3);
+}
+
+.gateText {
+  flex: 1;
+}
+
+.gateLevel {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wider);
+  margin-right: var(--space-2);
+}
+
+.gateEarned .gateLevel {
+  color: var(--correct);
+}
