@@ -18,7 +18,25 @@
 :root {
   /* -- Typography ------------------------------------------------------ */
   --font-serif: 'Cormorant Garamond', Georgia, serif;
-  --font-devanagari: 'Noto Serif Devanagari', serif;
+  /*
+   * Devanagari font stack — primary face self-hosted via next/font/google;
+   * the layout's --font-devanagari class variable cascades through this
+   * declaration (next/font defines the variable on <html>; this :root
+   * declaration is the fallback chain when the self-hosted face fails to
+   * render a glyph).
+   *
+   * Fallback order is deliberate:
+   *   1. 'Noto Serif Devanagari' — exact match for next/font's resolved family.
+   *   2. 'Noto Sans Devanagari' — universal Android default; same shaping rules.
+   *   3. 'Mangal' — Windows default Devanagari face.
+   *   4. 'Devanagari MT' — Apple iOS / macOS default.
+   *   5. system-ui — last resort; the OS picks its preferred Devanagari face.
+   * This explicit chain stops the browser falling through to generic 'serif',
+   * which has no Devanagari coverage and silently substitutes whatever the OS
+   * defaults to — the original cross-browser glyph drift.
+   */
+  --font-devanagari: 'Noto Serif Devanagari', 'Noto Sans Devanagari',
+    'Mangal', 'Devanagari MT', system-ui, sans-serif;
   --font-sans: 'Inter', system-ui, sans-serif;
   --font-mono: 'IBM Plex Mono', monospace;
 
@@ -469,6 +487,13 @@
 [data-script="devanagari"] .raga-name,
 [data-script="devanagari"] .tala-name {
   font-family: var(--font-devanagari);
+  /* Enforce contextual alternates and ligatures so क्ष, ज्ञ, श्र, त्र render
+     as proper conjuncts across iOS/Android/Windows. Without these, Safari
+     and some Chromium builds disable conjunct shaping for non-system faces. */
+  font-feature-settings: "calt" 1, "liga" 1, "dlig" 1;
+  /* Force the engine to actually shape Devanagari instead of mapping
+     codepoint-by-codepoint, which is what produces the cross-browser drift. */
+  font-variant-ligatures: contextual common-ligatures;
 }
 
 [data-script="devanagari"] .romanized-only {

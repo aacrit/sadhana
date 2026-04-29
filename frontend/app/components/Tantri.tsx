@@ -1248,6 +1248,35 @@ const Tantri = memo(function Tantri({
     ? `${visibleIndicesRef.current.length} swara strings. Use arrow keys to navigate, Enter to pluck.`
     : 'Tantri instrument loading';
 
+  // T4.2 — accessible status announcer. Polls the live pitch ref at 1Hz and
+  // emits the detected swara label so screen-reader users hear what sighted
+  // users see. Throttled to once per second to avoid swamping the AT queue.
+  const [announcedSwara, setAnnouncedSwara] = useState<string | null>(null);
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const tick = () => {
+      const hz = pitchHzRef.current;
+      const cl = pitchClarityRef.current;
+      if (!hz || cl < 0.6 || !fieldRef.current) {
+        setAnnouncedSwara((prev) => (prev === null ? prev : null));
+        return;
+      }
+      // Find the closest visible string by frequency. fieldRef.strings
+      // already carries `swara` and `frequency`, populated by createTantriField.
+      let best: { swara: string; cents: number } | null = null;
+      for (const idx of visibleIndicesRef.current) {
+        const s = fieldRef.current.strings[idx];
+        if (!s || !s.hz) continue;
+        const cents = Math.abs(1200 * Math.log2(hz / s.hz));
+        if (!best || cents < best.cents) best = { swara: String(s.swara), cents };
+      }
+      const next = best && best.cents <= 80 ? best.swara : null;
+      setAnnouncedSwara((prev) => (prev === next ? prev : next));
+    };
+    const id = window.setInterval(tick, 1000);
+    return () => window.clearInterval(id);
+  }, []);
+
   return (
     <div
       className={containerClass}
@@ -1267,6 +1296,21 @@ const Tantri = memo(function Tantri({
         onKeyDown={handleKeyDown}
         style={{ touchAction: 'none' }}
       />
+      {/*
+       * T4.2 — accessible status surface. The canvas is opaque to screen
+       * readers; this aria-live region announces which swara is being
+       * detected so SR users get parity with sighted users. Throttled at
+       * the parent level (announcedSwara state changes at most once per
+       * second to avoid swamping the AT speech queue).
+       */}
+      <span
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+        className={styles.srOnly}
+      >
+        {announcedSwara ? `Singing ${announcedSwara}` : ''}
+      </span>
     </div>
   );
 });

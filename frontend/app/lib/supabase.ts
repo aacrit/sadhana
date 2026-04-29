@@ -387,6 +387,63 @@ export async function completeRiyaz(userId: string): Promise<void> {
 }
 
 /**
+ * Resolve the next lesson the student should resume.
+ *
+ * Reads `sessions` for the journey, finds the most recently *completed*
+ * lesson by inspecting `raga_id` against the lesson catalog, and returns
+ * the next lesson ID in sequence. If the student has never completed any
+ * lesson in this journey, returns the first ID. If the student has
+ * completed every lesson, returns the last ID (replay-the-final-test).
+ *
+ * The catalog is passed in by the caller so this stays journey-agnostic
+ * — the same function backs Beginner, Sadhaka, Varistha, and Guru CTAs.
+ *
+ * Uses lesson IDs (not raga IDs) where possible. Sessions store raga_id
+ * not lesson_id, so we match by walking the catalog. If multiple lessons
+ * share a raga (none today, but planned), the catalog order disambiguates.
+ *
+ * @param userId — Supabase auth user ID. Pass null for guest mode.
+ * @param catalog — Ordered array of `{ id, ragaId }` for the journey.
+ * @returns The next lesson ID. Always returns a value (never undefined).
+ */
+export async function getNextLessonId(
+  userId: string | null,
+  catalog: ReadonlyArray<{ readonly id: string; readonly ragaId: string }>,
+): Promise<string> {
+  if (catalog.length === 0) {
+    throw new Error('getNextLessonId: empty catalog');
+  }
+  if (!userId) return catalog[0]!.id;
+
+  // Pull the last 200 sessions for this user — enough to cover any reasonable
+  // beginner→sadhaka transition without overshooting the free-tier read budget.
+  const { data, error } = await supabase
+    .from('sessions')
+    .select('raga_id, ended_at')
+    .eq('user_id', userId)
+    .order('ended_at', { ascending: false })
+    .limit(200);
+
+  if (error || !data || data.length === 0) return catalog[0]!.id;
+
+  // Find the highest catalog index whose ragaId appears in the session list.
+  // Walk catalog ascending so the result is the *furthest* lesson reached.
+  const completedRagas = new Set<string>(
+    data.map((row) => (row.raga_id as string | null) ?? '').filter(Boolean),
+  );
+  let furthestIdx = -1;
+  for (let i = 0; i < catalog.length; i++) {
+    if (completedRagas.has(catalog[i]!.ragaId)) {
+      furthestIdx = i;
+    }
+  }
+
+  if (furthestIdx < 0) return catalog[0]!.id;
+  if (furthestIdx >= catalog.length - 1) return catalog[catalog.length - 1]!.id;
+  return catalog[furthestIdx + 1]!.id;
+}
+
+/**
  * Fetch recently practiced ragas for a user from raga_encounters.
  *
  * @param userId - The Supabase auth user ID.

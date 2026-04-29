@@ -15,7 +15,7 @@ import { getRagaForTimeOfDay } from '@/engine/theory';
 import { DEFAULT_USER, getLevelTitle, getLevelColor } from '../../lib/types';
 import type { RecentRaga } from '../../lib/types';
 import { useAuth } from '../../lib/auth';
-import { getRecentRagas, getYesterdayWorstSwara } from '../../lib/supabase';
+import { getRecentRagas, getYesterdayWorstSwara, getNextLessonId } from '../../lib/supabase';
 import homeStyles from '../../styles/beginner.module.css';
 
 // ---------------------------------------------------------------------------
@@ -222,6 +222,27 @@ export default function BeginnerPage() {
     }
   }, [authUser, riyazDone]);
 
+  // Resume CTA — the next-lesson hint above the catalog. Defaults to lesson
+  // 1 for guests / first-time users, or whichever lesson follows the
+  // student's furthest completed raga.
+  const [resumeLessonId, setResumeLessonId] = useState<string>('beginner-01-bhoopali');
+  useEffect(() => {
+    const catalog = BEGINNER_LESSONS.map((l) => ({
+      id: l.id,
+      ragaId: l.raga.toLowerCase(),
+    }));
+    if (authUser) {
+      getNextLessonId(authUser.id, catalog).then(setResumeLessonId).catch(() => {
+        // Fallback already covered by initial state
+      });
+    }
+  }, [authUser]);
+
+  const resumeLesson = useMemo(
+    () => BEGINNER_LESSONS.find((l) => l.id === resumeLessonId) ?? BEGINNER_LESSONS[0],
+    [resumeLessonId],
+  );
+
   // ---------------------------------------------------------------------------
   // Render
   // ---------------------------------------------------------------------------
@@ -425,6 +446,25 @@ export default function BeginnerPage() {
         aria-label="Beginner lessons"
       >
         <h3 className={homeStyles.sectionTitle}>Lessons</h3>
+
+        {/* Resume CTA — the single primary path back into practice. Surfaces
+            the next un-completed lesson (or the first one for new students)
+            as a prominent banner above the full grid. */}
+        {resumeLesson && (
+          <Link
+            href={`/journeys/beginner/lessons/${resumeLesson.id}`}
+            className={homeStyles.resumeCta}
+            aria-label={`Continue: ${resumeLesson.title}`}
+          >
+            <span className={homeStyles.resumeLabel}>Continue</span>
+            <span className={homeStyles.resumeTitle}>{resumeLesson.title}</span>
+            <span className={homeStyles.resumeRaga}>{resumeLesson.raga}</span>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <path d="M6 3L11 8L6 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </Link>
+        )}
+
         <div className={homeStyles.lessonGrid}>
           {BEGINNER_LESSONS.map((lesson) => (
             <Link

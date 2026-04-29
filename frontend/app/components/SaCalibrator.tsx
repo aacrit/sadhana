@@ -25,8 +25,19 @@ import { updateSa } from '../lib/supabase';
 const HOLDS_REQUIRED = 5;
 const HOLD_FRAMES = 45; // ~0.75s at 60fps — responsive detection
 const HOLD_STABILITY_CENTS = 120; // allow natural pitch wobble
-const CLARITY_THRESHOLD = 0.50; // lower threshold for wider mic support
+// T4.4: clarity floor lowered from 0.50 → 0.35. Breathy voices, child voices,
+// and lower-quality microphones routinely produce pitch with clarity 0.35-0.50
+// even when the pitch itself is correct. Pitchy's McLeod method only emits
+// clarity > 0.5 for textbook-clean tones; anything more nuanced (vibrato,
+// breath onset, hoarse timbre) sits in the 0.35-0.50 band. Tightening here
+// was preventing legitimate calibration in real-world conditions.
+const CLARITY_THRESHOLD = 0.35;
 const TIMEOUT_MS = 120_000; // 2 minutes
+// T4.4: human Sa range bounds for sanity checking. Adult bass voices reach
+// ~73 Hz (D2); child sopranos sing comfortably up to ~525 Hz (C5). Outside
+// this range a detected pitch is almost certainly an octave error or noise.
+const SA_HZ_MIN = 70;
+const SA_HZ_MAX = 530;
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -86,7 +97,8 @@ export default function SaCalibrator({ open, onClose }: SaCalibratorProps) {
       clarityThreshold: CLARITY_THRESHOLD,
       onPitch: (event) => {
         if (event.type !== 'pitch' || !event.hz || !event.clarity) return;
-        if (event.hz < 80 || event.hz > 1000) return;
+        // Use SA_HZ_MIN/MAX (T4.4) so bass voices (~73 Hz) are accepted.
+        if (event.hz < SA_HZ_MIN || event.hz > SA_HZ_MAX) return;
 
         if (holdFrames === 0) {
           holdAnchorHz = event.hz;
