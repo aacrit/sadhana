@@ -30,6 +30,19 @@ const notoSerifDevanagari = Noto_Serif_Devanagari({
   weight: ['400', '600'],
   display: 'swap',
   variable: '--font-devanagari',
+  // Explicit fallback array so next/font's resolved CSS includes Devanagari-
+  // capable system faces (not just generic serif). Without this, browsers
+  // that fail to load the self-hosted .woff2 substitute the OS's default
+  // serif (Times New Roman / Georgia) which has zero Devanagari coverage,
+  // forcing a second silent fallback to whatever Devanagari face the OS
+  // picks. Listing the system Devanagari faces explicitly stops the drift.
+  fallback: ['Noto Sans Devanagari', 'Mangal', 'Devanagari MT', 'system-ui'],
+  // Disable preload of the (large) Devanagari face from every page; preload
+  // only on routes where Devanagari is rendered above the fold. (Setting
+  // preload:false here means we control preload via <link> in pages that
+  // need it; for now, swap-on-paint is acceptable since the romanized
+  // labels render synchronously while Devanagari swaps in.)
+  preload: false,
 });
 
 const inter = Inter({

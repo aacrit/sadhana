@@ -13,11 +13,12 @@
  *   - Loading: saffron pulse dot
  */
 
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '../lib/auth';
-import { getRecentRagas, getPracticeHistory } from '../lib/supabase';
+import { getRecentRagas, getPracticeHistory, updateSa } from '../lib/supabase';
+import { useVoiceWave } from '../lib/VoiceWaveContext';
 import { getLevelTitle } from '../lib/types';
 import type { LevelTitle, RecentRaga } from '../lib/types';
 import { getLevelIcon } from '../components/icons';
@@ -100,7 +101,10 @@ function capitalize(s: string): string {
 
 export default function ProfilePage() {
   const router = useRouter();
-  const { user, profile, loading, isGuest, signOut } = useAuth();
+  const { user: authUser, profile, loading, isGuest, signOut, refreshProfile } = useAuth();
+  // Preserve the legacy `user` reference for downstream code that still
+  // reads it (the rename above keeps the rest of the file unchanged).
+  const user = authUser;
 
   const [recentRagas, setRecentRagas] = useState<RecentRaga[]>([]);
   const [practiceHistory, setPracticeHistory] = useState<
@@ -201,6 +205,40 @@ export default function ProfilePage() {
   const longestStreak = profile?.longestStreak ?? 0;
   const saHz = profile?.saHz ?? 261.63;
   const journey = profile?.journey;
+
+  // T4.4: Sa manual override. The auto-detector misreads bass/child voices,
+  // breathy timbres, and noisy mic input. Once a wrong Sa is stored, every
+  // future lesson is wrong. Surface a manual entry so the student can fix
+  // it from the profile without re-running the calibrator.
+  const { setSaHz: setVoiceSaHz } = useVoiceWave();
+  const [saEditOpen, setSaEditOpen] = useState(false);
+  const [saInput, setSaInput] = useState<string>(saHz.toFixed(2));
+  const [saError, setSaError] = useState<string | null>(null);
+  const [saSaving, setSaSaving] = useState(false);
+
+  const handleSaCommit = useCallback(async () => {
+    setSaError(null);
+    const parsed = Number(saInput);
+    if (!Number.isFinite(parsed) || parsed < 70 || parsed > 530) {
+      setSaError('Enter a frequency between 70 Hz and 530 Hz.');
+      return;
+    }
+    if (!authUser?.id) {
+      setSaError('Sign in to save Sa.');
+      return;
+    }
+    setSaSaving(true);
+    try {
+      await updateSa(authUser.id, parsed);
+      setVoiceSaHz(parsed);
+      await refreshProfile();
+      setSaEditOpen(false);
+    } catch (err) {
+      setSaError(err instanceof Error ? err.message : 'Failed to save Sa.');
+    } finally {
+      setSaSaving(false);
+    }
+  }, [saInput, authUser?.id, setVoiceSaHz, refreshProfile]);
 
   const handleSignOut = async () => {
     await signOut();
@@ -303,9 +341,74 @@ export default function ProfilePage() {
           </span>
         )}
 
-        <span className={styles.saHz}>
-          Sa = {saHz.toFixed(1)} Hz
-        </span>
+        <div className={styles.saRow}>
+          <span className={styles.saHz}>
+            Sa = {saHz.toFixed(1)} Hz
+          </span>
+          {!saEditOpen && (
+            <button
+              type="button"
+              className={styles.saEditButton}
+              onClick={() => {
+                setSaInput(saHz.toFixed(2));
+                setSaError(null);
+                setSaEditOpen(true);
+              }}
+              aria-label="Set Sa frequency manually"
+            >
+              Set manually
+            </button>
+          )}
+          {saEditOpen && (
+            <div className={styles.saEditPanel} role="group" aria-label="Manual Sa frequency entry">
+              <label className={styles.saEditLabel} htmlFor="sa-input">
+                Sa frequency (Hz)
+              </label>
+              <input
+                id="sa-input"
+                type="number"
+                inputMode="decimal"
+                step="0.01"
+                min="70"
+                max="530"
+                value={saInput}
+                onChange={(e) => setSaInput(e.target.value)}
+                className={styles.saEditInput}
+                disabled={saSaving}
+              />
+              <div className={styles.saEditActions}>
+                <button
+                  type="button"
+                  className={styles.saEditPrimary}
+                  onClick={handleSaCommit}
+                  disabled={saSaving}
+                >
+                  {saSaving ? 'Saving...' : 'Save'}
+                </button>
+                <button
+                  type="button"
+                  className={styles.saEditSecondary}
+                  onClick={() => {
+                    setSaEditOpen(false);
+                    setSaError(null);
+                  }}
+                  disabled={saSaving}
+                >
+                  Cancel
+                </button>
+              </div>
+              {saError && (
+                <p className={styles.saEditError} role="alert">
+                  {saError}
+                </p>
+              )}
+              <p className={styles.saEditHint}>
+                Range: 70 Hz (low bass) – 530 Hz (high soprano).
+                Common values: C4 = 261.63, G3 = 196, D4 = 293.66.
+              </p>
+            </div>
+          )}
+        </div>
 
         {/* Section 3: Encouragement */}
         <p className={styles.encouragement}>{encouragement}</p>
