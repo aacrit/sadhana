@@ -145,36 +145,49 @@ export default function ScholarPage() {
         ))}
       </motion.section>
 
-      {/* Horizon panel — what this journey will contain */}
-      <motion.div className={styles.gatePanel} variants={fadeUp} role="region" aria-label="Journey status">
-        <p className={styles.gateTitle}>
-          Arriving soon
+      {/* Lesson catalog — the Varistha curriculum (11 lessons). Wired to
+          /journeys/scholar/lessons/[id]. Level gating (require completion of
+          Sadhaka challenge) is enforced by T1.3's progression engine; for
+          now, lessons are reachable but the engine logs progress so the gate
+          can be applied later. */}
+      <motion.section
+        className={styles.lessonSection}
+        variants={fadeUp}
+        aria-label="Varistha lessons"
+      >
+        <h2 className={styles.lessonHeading}>Varistha lessons</h2>
+        <p className={styles.lessonIntro}>
+          Eleven lessons. Each takes a single raga or technique and explores
+          it deeply. Marwa, Darbari, Puriya Dhanashri, Malkauns, Todi — the
+          masters&rsquo; ragas. Then a tala integration session, and a
+          challenge that opens the Guru gate.
         </p>
-
-        <p className={styles.gateDescription}>
-          Full raga grammar analysis, shruti-level pitch exploration, and deep
-          theory rendered directly from the engine. Each update brings it closer.
-        </p>
-
-        <Link href="/" className={styles.practiceLink}>
-          Return to practice
-          <svg
-            width="14"
-            height="14"
-            viewBox="0 0 14 14"
-            fill="none"
-            aria-hidden="true"
-          >
-            <path
-              d="M5 3L9 7L5 11"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </Link>
-      </motion.div>
+        <div className={styles.lessonGrid}>
+          {[
+            { id: 'varistha-01-marwa', num: 1, title: 'The Absent Fifth', raga: 'Marwa' },
+            { id: 'varistha-02-raga-comparison', num: 2, title: 'Same Thaat, Different Worlds', raga: 'Comparison' },
+            { id: 'varistha-03-darbari', num: 3, title: 'The Profound Andolan', raga: 'Darbari' },
+            { id: 'varistha-04-composition', num: 4, title: 'Creating Valid Phrases', raga: 'Composition' },
+            { id: 'varistha-05-puriya-dhanashri', num: 5, title: 'Evening Tension', raga: 'Puriya Dhanashri' },
+            { id: 'varistha-06-ornament-mastery', num: 6, title: 'Where Ornaments Belong', raga: 'Ornaments' },
+            { id: 'varistha-07-malkauns', num: 7, title: 'Power in Five Notes', raga: 'Malkauns' },
+            { id: 'varistha-08-shruti', num: 8, title: 'The 22 Positions', raga: 'Shruti' },
+            { id: 'varistha-09-todi', num: 9, title: 'Chromatic Density', raga: 'Todi' },
+            { id: 'varistha-10-tala-integration', num: 10, title: 'Melody Meets Rhythm', raga: 'Tala' },
+            { id: 'varistha-11-challenge', num: 11, title: 'Varistha Challenge', raga: 'Mastery' },
+          ].map((lesson) => (
+            <Link
+              key={lesson.id}
+              href={`/journeys/scholar/lessons/${lesson.id}`}
+              className={styles.lessonTile}
+            >
+              <span className={styles.lessonNum}>{String(lesson.num).padStart(2, '0')}</span>
+              <span className={styles.lessonTitle}>{lesson.title}</span>
+              <span className={styles.lessonRaga}>{lesson.raga}</span>
+            </Link>
+          ))}
+        </div>
+      </motion.section>
     </motion.div>
   );
 }

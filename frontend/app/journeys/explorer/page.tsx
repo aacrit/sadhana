@@ -514,6 +514,46 @@ export default function ExplorerPage() {
         )}
       </motion.div>
 
+      {/* Sadhaka lessons (the Explorer journey's structured curriculum).
+          Wired to /journeys/explorer/lessons/[id] which loads the YAML and
+          runs it through the same engine used by Beginner. */}
+      <motion.section
+        className={styles.lessonSection}
+        variants={fadeUp}
+        aria-label="Sadhaka lessons"
+      >
+        <h2 className={`${styles.earTrainingTitle} raga-name`}>Sadhaka Lessons</h2>
+        <p className={styles.earTrainingDescription}>
+          Ten lessons that take you from Shishya to Sadhaka — meend, andolan,
+          gamak, the parent ragas, and the rules that govern raga grammar.
+          Each lesson is 10–15 minutes.
+        </p>
+        <div className={styles.lessonGrid}>
+          {[
+            { id: 'sadhaka-01-desh', num: 1, title: 'The Monsoon Raga', raga: 'Desh' },
+            { id: 'sadhaka-02-meend', num: 2, title: 'The Glide', raga: 'Meend' },
+            { id: 'sadhaka-03-andolan', num: 3, title: 'The Gentle Wave', raga: 'Andolan' },
+            { id: 'sadhaka-04-kafi', num: 4, title: 'The Parent Raga', raga: 'Kafi' },
+            { id: 'sadhaka-05-teentaal', num: 5, title: 'The First Rhythm', raga: 'Teentaal' },
+            { id: 'sadhaka-06-grammar', num: 6, title: 'Rules of Movement', raga: 'Grammar' },
+            { id: 'sadhaka-07-gamak', num: 7, title: 'The Shake', raga: 'Gamak' },
+            { id: 'sadhaka-08-call-response', num: 8, title: 'Call and Response', raga: 'Phrases' },
+            { id: 'sadhaka-09-intervals', num: 9, title: 'Hearing Distance', raga: 'Intervals' },
+            { id: 'sadhaka-10-challenge', num: 10, title: 'Sadhaka Challenge', raga: 'Mastery' },
+          ].map((lesson) => (
+            <Link
+              key={lesson.id}
+              href={`/journeys/explorer/lessons/${lesson.id}`}
+              className={styles.lessonTile}
+            >
+              <span className={styles.lessonNum}>{String(lesson.num).padStart(2, '0')}</span>
+              <span className={styles.lessonTitle}>{lesson.title}</span>
+              <span className={styles.lessonRaga}>{lesson.raga}</span>
+            </Link>
+          ))}
+        </div>
+      </motion.section>
+
       {/* Ear training CTA */}
       <motion.section
         className={styles.earTrainingSection}
