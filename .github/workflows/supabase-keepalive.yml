@@ -1,0 +1,50 @@
+# Supabase free-tier keep-alive (audit #14)
+#
+# Free-tier Supabase projects pause after 7 days of admin inactivity.
+# A paused project = a dead app for users until manually unpaused.
+# This workflow hits a no-op endpoint twice a week so the project
+# never crosses the inactivity threshold.
+#
+# We use the public REST endpoint via the anon key — counts as an
+# admin-side read for inactivity purposes. No data is fetched (the
+# query selects a single non-existent row); only the request itself
+# matters.
+
+name: Supabase keep-alive
+
+on:
+  schedule:
+    # Twice a week (Monday + Thursday) at 06:00 UTC
+    - cron: '0 6 * * 1,4'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase REST endpoint
+        env:
+          SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+        run: |
+          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_ANON_KEY" ]; then
+            echo "::warning::Supabase secrets not set. Skipping keep-alive."
+            exit 0
+          fi
+          # Hit the profiles head endpoint — counts as activity, returns
+          # only headers (no row data, no egress charge).
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            -X HEAD \
+            -H "apikey: $SUPABASE_ANON_KEY" \
+            -H "Authorization: Bearer $SUPABASE_ANON_KEY" \
+            "$SUPABASE_URL/rest/v1/profiles?limit=1")
+          echo "Supabase responded with $STATUS"
+          # 200 / 206 / 401 / 403 all count as "project is awake".
+          # 5xx or timeout = problem.
+          if [ "$STATUS" -ge 500 ] || [ "$STATUS" = "000" ]; then
+            echo "::error::Supabase ping failed with status $STATUS"
+            exit 1
+          fi

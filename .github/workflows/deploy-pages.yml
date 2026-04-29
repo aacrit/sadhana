@@ -40,6 +40,15 @@ jobs:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
 
+      # Audit #13 — Lighthouse CI gate. Fails the deploy if PWA score
+      # drops below 90, mobile perf below 70, or a11y below 90. Catches
+      # regressions before they hit users.
+      - name: Lighthouse CI
+        run: npx --yes @lhci/cli@0.13.x autorun
+        continue-on-error: true   # advisory until we baseline the scores
+        env:
+          LHCI_BUILD_CONTEXT__CURRENT_BRANCH: ${{ github.ref_name }}
+
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
