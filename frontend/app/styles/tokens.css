@@ -23,6 +23,7 @@
   --font-mono: 'IBM Plex Mono', monospace;
 
   /* Type scale -- modular, base 16px, ratio ~1.25 (major third) */
+  --text-2xs: 0.625rem;   /* 10px -- minimum legible size, status labels */
   --text-xs: 0.75rem;     /* 12px -- fine print, cents values */
   --text-sm: 0.875rem;    /* 14px -- labels, captions */
   --text-base: 1rem;      /* 16px -- body */

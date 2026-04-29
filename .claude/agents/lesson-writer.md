@@ -1,7 +1,7 @@
 ---
 name: lesson-writer
 description: "MUST BE USED for authoring lesson content, exercise copy, theory explanations, and feedback messages. Follows the Presence Rule (hear before label). Read+write."
-model: claude-sonnet-4-6
+model: claude-opus-4-7
 allowed-tools: Read, Grep, Glob, Bash, Edit, Write
 ---
 

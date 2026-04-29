@@ -115,6 +115,19 @@ export const yaman: Raga = {
     'Ma_t': ['kan'],             // Ma tivra gets kan — brief touch, never heavy
   },
 
+  // Vakra (oblique) movement patterns — phrases approached non-linearly.
+  // These are characteristic Yaman moves where the contour zigzags across
+  // strict aroha/avaroha order. The grammar checker will exempt them when
+  // they appear as contiguous subsequences in a sung phrase.
+  vakra: [
+    // Ga Ma(t) Re Sa — the descending turn through tivra Ma to Sa
+    [n('Ga', 'madhya'), n('Ma_t', 'madhya'), n('Re', 'madhya'), n('Sa', 'madhya')],
+    // 'Ni Re Ga Re Sa — the characteristic opening with vakra return
+    [n('Ni', 'mandra'), n('Re', 'madhya'), n('Ga', 'madhya'), n('Re', 'madhya'), n('Sa', 'madhya')],
+    // Pa Ma(t) Ga Re Sa — the descending home phrase
+    [n('Pa', 'madhya'), n('Ma_t', 'madhya'), n('Ga', 'madhya'), n('Re', 'madhya'), n('Sa', 'madhya')],
+  ],
+
   relatedRagas: ['bhoopali', 'shuddha_kalyan', 'hameer', 'kedar', 'yaman_kalyan'],
 
   gharanaVariations:

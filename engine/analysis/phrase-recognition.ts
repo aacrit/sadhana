@@ -230,14 +230,18 @@ export function recognizePakad(
  *
  * @param recentSwaras - Recent swara sequence
  * @param ragaId - The raga to search within
- * @param minConfidence - Minimum confidence (default: 0.6, more lenient for
- *                        single-raga search since context is known)
+ * @param minConfidence - Minimum confidence (default: 0.7). Tightened from
+ *                        the previous 0.6 in the rev-9 audit: single-raga
+ *                        recognition is the moment the student earns the
+ *                        "you sang the pakad of X" cinematic, and the bar
+ *                        for that moment must be high enough that a casual
+ *                        scale traversal does not trigger it.
  * @returns PakadMatch or null
  */
 export function recognizePakadInRaga(
   recentSwaras: readonly Swara[],
   ragaId: string,
-  minConfidence: number = 0.6,
+  minConfidence: number = 0.7,
 ): PakadMatch | null {
   const raga = RAGAS[ragaId];
   if (!raga) return null;

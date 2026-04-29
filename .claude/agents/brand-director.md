@@ -1,7 +1,7 @@
 ---
 name: brand-director
 description: "MUST BE USED for all brand identity, logo design, visual language, Ragamala design system tokens, Tantri visual language, and aesthetic principles. Read+write."
-model: claude-sonnet-4-6
+model: claude-opus-4-7
 allowed-tools: Read, Grep, Glob, Bash, Edit, Write
 ---
 

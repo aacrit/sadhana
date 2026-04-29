@@ -41,6 +41,15 @@ phases:
     fallback_hz: 261.6256
 
   # HEAR THE INTERVALS — most consonant to most tense
+  - id: hear_sa_sa_upper
+    type: phrase_playback
+    phrase: [Sa, Sa_upper]
+    instruction: |
+      Sa to Sa. The octave. 2:1 — the same swara, doubled.
+      Your tanpura plays this with every cycle.
+    repeat: 3
+    show_labels: true
+
   - id: hear_sa_pa
     type: phrase_playback
     phrase: [Sa, Pa]
@@ -64,7 +73,7 @@ phases:
     type: phrase_playback
     phrase: [Sa, Ga]
     instruction: |
-      Sa — Ga. The major third. Bright, open.
+      Sa — Ga. The major third. The 5/4 ratio. Bright, open.
       You hear this in Bhoopali and Yaman.
     repeat: 3
     show_labels: true
@@ -73,8 +82,9 @@ phases:
     type: phrase_playback
     phrase: [Sa, Re]
     instruction: |
-      Sa — Re. A whole step. The smallest interval
-      you have sung with shuddha swaras.
+      Sa — Re shuddha. A whole step. The 9/8 ratio.
+      Wider than the half-step Ni→Sa or Ga→Ma you already know —
+      those felt close; this feels open.
     repeat: 3
     show_labels: true
 
@@ -82,8 +92,8 @@ phases:
     type: phrase_playback
     phrase: [Sa, Re_k]
     instruction: |
-      Sa — Re komal. A half step. The smallest interval
-      in the system. Tense. Close. Bhairav's signature.
+      Sa — Re komal. A half step. The smallest distance
+      between two named swaras. Tense. Close. Bhairav's signature.
     repeat: 3
     show_labels: true
 
@@ -91,8 +101,8 @@ phases:
     type: phrase_playback
     phrase: [Sa, Ga_k]
     instruction: |
-      Sa — Ga komal. The minor third. Tender, dark.
-      You hear this in Bhimpalasi, Bageshri, and Kafi.
+      Sa — Ga komal. The minor third. The 6/5 ratio. Tender, contemplative.
+      Bhimpalasi turns on this swara.
     repeat: 3
     show_labels: true
 

@@ -83,9 +83,9 @@ phases:
   - id: compare_bhoopali
     type: raga_comparison_advanced
     instruction: |
-      Bhoopali and Malkauns. Both pentatonic. Both omit Re and Pa... no.
+      Both pentatonic — but they omit different swaras.
       Bhoopali omits Ma and Ni. Malkauns omits Re and Pa.
-      Five notes each. Structural twins. Opposite universes.
+      Different absences. Different worlds.
     comparison_set:
       - raga_id: bhoopali
         pakad: [Sa, Re, Ga, Pa, Dha, Sa_upper]

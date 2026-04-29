@@ -216,7 +216,8 @@ export default function VoiceWave({
       const phaseOffset = lineIdx * 1.2;
       const time = timeRef.current;
 
-      for (let x = 0; x < w; x++) {
+      // P2 fix: step by 3 pixels instead of 1 (~67% fewer sin calls)
+      for (let x = 0; x < w; x += 3) {
         const progress = x / w;
         // Envelope: fade at edges (sinusoidal window)
         const envelope = Math.sin(progress * Math.PI);

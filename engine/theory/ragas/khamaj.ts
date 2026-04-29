@@ -32,7 +32,9 @@ import { n } from '../types';
  *   (All seven swaras — sampoorna. Komal Ni used.)
  *
  * Vadi: Ga (the sweet third — the raga's emotional centre)
- * Samvadi: Ni_k (komal Ni — the descending anchor)
+ * Samvadi: Ni (shuddha Ni — at a perfect fifth from Ga, samvadi consonance
+ *          requires the shuddha form. Komal Ni is a featured colour-tone
+ *          in avaroha, not the consonant counterweight to the vadi.)
  *
  * The dual Ni treatment defines both Khamaj the raga and Khamaj the thaat.
  */
@@ -69,8 +71,8 @@ export const khamaj: Raga = {
   },
 
   vadi: 'Ga',
-  samvadi: 'Ni_k',
-  anuvadi: ['Re', 'Ma', 'Pa', 'Dha', 'Ni'],
+  samvadi: 'Ni',
+  anuvadi: ['Re', 'Ma', 'Pa', 'Dha', 'Ni_k'],
   varjit: ['Re_k', 'Ga_k', 'Ma_t', 'Dha_k'],
 
   pakad: [

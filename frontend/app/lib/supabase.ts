@@ -23,12 +23,47 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? '';
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '';
 
 /**
- * Singleton Supabase client.
- * In production, reads from env vars. In development without Supabase,
- * the client is still created but queries will fail gracefully.
+ * Production hard-error: a misconfigured deploy must never silently
+ * fall back to placeholder credentials. The placeholder fallback is
+ * kept ONLY for local development so `npm run dev` works without env.
  *
- * When no Supabase URL is configured (local dev / static build),
- * a placeholder URL is used. The client is inert — queries fail safely.
+ * The check is gated on `typeof window !== 'undefined'` so the
+ * static-export prerender (which runs in Node, with no browser) does
+ * not crash when env vars are unset at build time. CI/CD builds run
+ * the prerender first, then ship the bundle; the bundle then throws
+ * loudly if the user's browser loads it without env vars baked in.
+ *
+ * In other words: the error fires when a real user opens a misconfigured
+ * production site, not when CI runs `next build` to generate the static
+ * pages. For static export, env vars must be inlined at build time via
+ * NEXT_PUBLIC_SUPABASE_URL — if absent, every browser load will throw.
+ */
+if (
+  typeof window !== 'undefined' &&
+  process.env.NODE_ENV === 'production' &&
+  !supabaseUrl
+) {
+  throw new Error(
+    'NEXT_PUBLIC_SUPABASE_URL is required in production. ' +
+      'Set it in your build environment (GitHub Actions secret, Vercel env, etc).',
+  );
+}
+if (
+  typeof window !== 'undefined' &&
+  process.env.NODE_ENV === 'production' &&
+  !supabaseAnonKey
+) {
+  throw new Error(
+    'NEXT_PUBLIC_SUPABASE_ANON_KEY is required in production. ' +
+      'Set it in your build environment.',
+  );
+}
+
+/**
+ * Singleton Supabase client.
+ * In production, reads from env vars (hard-required above).
+ * In development without Supabase, a placeholder URL is used —
+ * the client is inert and queries fail safely.
  */
 export const supabase: SupabaseClient = createClient(
   supabaseUrl || 'https://placeholder.supabase.co',
@@ -142,40 +177,64 @@ export async function saveSession(
     ended_at: session.endedAt.toISOString(),
   });
 
-  // Upsert raga_encounters: increment session_count, update last_practiced
-  const { data: existingEncounter } = await supabase
-    .from('raga_encounters')
-    .select('id, session_count, total_minutes, best_accuracy, pakad_found')
-    .eq('user_id', userId)
-    .eq('raga_id', session.ragaId)
-    .single();
-
+  // Race-free upsert of raga_encounters.
+  // The SELECT-then-INSERT-or-UPDATE pattern was vulnerable to a
+  // TOCTOU race when two sessions for the same raga completed in
+  // parallel — both could observe "no row" and both INSERT, or both
+  // could read session_count=N and overwrite to N+1. The RPC does the
+  // upsert atomically and returns the new session_count.
   const durationMinutes = Math.round(session.duration / 60);
+  const { error: rpcError } = await supabase.rpc('increment_raga_session', {
+    p_user_id: userId,
+    p_raga_id: session.ragaId,
+    p_minutes: durationMinutes,
+    p_accuracy: session.accuracy,
+    p_pakad_found: session.pakadsFound > 0,
+  });
 
-  if (existingEncounter) {
-    const currentBest = Number(existingEncounter.best_accuracy) || 0;
-    const currentPakad = existingEncounter.pakad_found as boolean;
-    await supabase
+  if (rpcError) {
+    // Fallback for environments where migration 003 has not yet been
+    // applied. The fallback retains the original race window — log
+    // loudly so deployment misalignment is obvious.
+    if (typeof console !== 'undefined') {
+      console.warn(
+        'increment_raga_session RPC failed — falling back to client upsert. ' +
+          'Apply migration 003 to remove this race window. Error:',
+        rpcError.message,
+      );
+    }
+    const { data: existingEncounter } = await supabase
       .from('raga_encounters')
-      .update({
-        session_count: (existingEncounter.session_count as number) + 1,
-        total_minutes: (existingEncounter.total_minutes as number) + durationMinutes,
-        best_accuracy: Math.max(currentBest, session.accuracy),
-        pakad_found: currentPakad || session.pakadsFound > 0,
+      .select('id, session_count, total_minutes, best_accuracy, pakad_found')
+      .eq('user_id', userId)
+      .eq('raga_id', session.ragaId)
+      .maybeSingle();
+
+    if (existingEncounter) {
+      const currentBest = Number(existingEncounter.best_accuracy) || 0;
+      const currentPakad = existingEncounter.pakad_found as boolean;
+      await supabase
+        .from('raga_encounters')
+        .update({
+          session_count: (existingEncounter.session_count as number) + 1,
+          total_minutes: (existingEncounter.total_minutes as number) + durationMinutes,
+          best_accuracy: Math.max(currentBest, session.accuracy),
+          pakad_found: currentPakad || session.pakadsFound > 0,
+          last_practiced: new Date().toISOString(),
+        })
+        .eq('id', existingEncounter.id);
+    } else {
+      await supabase.from('raga_encounters').insert({
+        user_id: userId,
+        raga_id: session.ragaId,
+        session_count: 1,
+        total_minutes: durationMinutes,
+        best_accuracy: session.accuracy,
+        pakad_found: session.pakadsFound > 0,
+        first_practiced: new Date().toISOString(),
         last_practiced: new Date().toISOString(),
-      })
-      .eq('id', existingEncounter.id);
-  } else {
-    await supabase.from('raga_encounters').insert({
-      user_id: userId,
-      raga_id: session.ragaId,
-      session_count: 1,
-      total_minutes: durationMinutes,
-      best_accuracy: session.accuracy,
-      pakad_found: session.pakadsFound > 0,
-      first_practiced: new Date().toISOString(),
-      last_practiced: new Date().toISOString(),
-    });
+      });
+    }
   }
 }
 
@@ -210,8 +269,8 @@ export async function addXp(
 ): Promise<void> {
   // Try RPC first (atomic increment)
   const { error } = await supabase.rpc('increment_xp', {
-    user_id: userId,
-    xp_amount: xpDelta,
+    p_user_id: userId,
+    p_xp_delta: xpDelta,
   });
 
   // Fall back to read-then-write if RPC doesn't exist
@@ -232,6 +291,30 @@ export async function addXp(
 }
 
 /**
+ * Number of milliseconds in one UTC day. Used for day-index math.
+ * Using a fixed constant (rather than local-time setHours/getDate) makes
+ * streak arithmetic timezone-independent — a student in IST and a student
+ * in PST both get the same answer for "is this date one day after that one?"
+ */
+const MS_PER_DAY = 86_400_000;
+
+/** YYYY-MM-DD in UTC for a given Date (or now()). */
+function utcDayString(d: Date = new Date()): string {
+  return d.toISOString().slice(0, 10);
+}
+
+/** Integer UTC day index (days since 1970-01-01 UTC). */
+function utcDayIndex(d: Date = new Date()): number {
+  return Math.floor(d.getTime() / MS_PER_DAY);
+}
+
+/** Day index for a YYYY-MM-DD string (interpreted as UTC midnight). */
+function utcDayIndexFromString(yyyyMmDd: string): number {
+  // Construct as UTC midnight to avoid local-tz offsets shifting the day.
+  return Math.floor(Date.parse(`${yyyyMmDd}T00:00:00Z`) / MS_PER_DAY);
+}
+
+/**
  * Mark today's riyaz as complete and update streak.
  *
  * Logic:
@@ -241,17 +324,22 @@ export async function addXp(
  *   - Update longest_streak if current exceeds it
  *   - Set last_riyaz_date = today
  *
+ * All date math uses UTC day indices so the streak is consistent across
+ * timezones (a student travelling will never lose or gain a streak day
+ * because of local clock differences).
+ *
  * @param userId - The Supabase auth user ID.
  */
 export async function completeRiyaz(userId: string): Promise<void> {
-  const today = new Date().toISOString().slice(0, 10);
+  const today = utcDayString();
+  const todayIdx = utcDayIndex();
 
   // Fetch existing streak row
   const { data: streakData } = await supabase
     .from('streaks')
     .select('current_streak, longest_streak, last_riyaz_date')
     .eq('user_id', userId)
-    .single();
+    .maybeSingle();
 
   if (!streakData) {
     // No streak row — create one (first riyaz ever)
@@ -269,18 +357,18 @@ export async function completeRiyaz(userId: string): Promise<void> {
   // Already done today — no-op
   if (lastDate === today) return;
 
-  // Calculate if yesterday
+  // Calculate gap in UTC days (timezone-independent)
   let newStreak = 1;
   if (lastDate) {
-    const lastMs = new Date(lastDate).getTime();
-    const todayMs = new Date(today).getTime();
-    const dayDiff = Math.round((todayMs - lastMs) / (1000 * 60 * 60 * 24));
+    const lastIdx = utcDayIndexFromString(lastDate);
+    const dayDiff = todayIdx - lastIdx;
 
     if (dayDiff === 1) {
       // Consecutive day — increment
       newStreak = (streakData.current_streak as number) + 1;
     }
     // dayDiff > 1: gap, reset to 1 (already set above)
+    // dayDiff <= 0: clock skew or stale row — treat as fresh day
   }
 
   const longestStreak = Math.max(
@@ -385,21 +473,23 @@ export async function getPracticeHistory(
 export async function getYesterdayWorstSwara(
   userId: string,
 ): Promise<string | null> {
-  const now = new Date();
-  // Yesterday's start and end in ISO
-  const yesterdayStart = new Date(now);
-  yesterdayStart.setDate(now.getDate() - 1);
-  yesterdayStart.setHours(0, 0, 0, 0);
-  const yesterdayEnd = new Date(now);
-  yesterdayEnd.setHours(0, 0, 0, 0);
+  // Compute yesterday's window in UTC so the lookup is consistent for
+  // travelling users. Local-tz setHours math previously shifted the
+  // window by up to ±14 hours, which silently dropped or duplicated
+  // sessions at day boundaries.
+  const todayIdx = utcDayIndex();
+  const yesterdayStartMs = (todayIdx - 1) * MS_PER_DAY;
+  const yesterdayEndMs = todayIdx * MS_PER_DAY;
+  const yesterdayStart = new Date(yesterdayStartMs).toISOString();
+  const yesterdayEnd = new Date(yesterdayEndMs).toISOString();
 
   const { data, error } = await supabase
     .from('sessions')
     .select('worst_swara')
     .eq('user_id', userId)
     .not('worst_swara', 'is', null)
-    .gte('started_at', yesterdayStart.toISOString())
-    .lt('started_at', yesterdayEnd.toISOString())
+    .gte('started_at', yesterdayStart)
+    .lt('started_at', yesterdayEnd)
     .order('started_at', { ascending: false })
     .limit(1);
 

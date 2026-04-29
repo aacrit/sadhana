@@ -470,10 +470,10 @@ function VoicePipeline() {
       <table className={styles.table}>
         <thead><tr><th>Level</th><th>Tolerance</th><th>Description</th></tr></thead>
         <tbody>
-          <tr><td>Shishya (Beginner)</td><td>&plusmn;50 cents</td><td>Generous &mdash; encourages exploration</td></tr>
-          <tr><td>Sadhaka (Explorer)</td><td>&plusmn;25 cents</td><td>Tightening &mdash; precision matters</td></tr>
-          <tr><td>Varistha (Scholar)</td><td>&plusmn;15 cents</td><td>Demanding &mdash; approaching shruti precision</td></tr>
-          <tr><td>Guru (Master)</td><td>&plusmn;10 cents</td><td>Near-perfect intonation required</td></tr>
+          <tr><td>Shishya (Beginner)</td><td>&plusmn;35 cents</td><td>Generous &mdash; encourages exploration</td></tr>
+          <tr><td>Sadhaka (Explorer)</td><td>&plusmn;20 cents</td><td>Tightening &mdash; precision matters</td></tr>
+          <tr><td>Varistha (Scholar)</td><td>&plusmn;12 cents</td><td>Demanding &mdash; approaching shruti precision</td></tr>
+          <tr><td>Guru (Master)</td><td>&plusmn;8 cents</td><td>Near-perfect intonation required</td></tr>
         </tbody>
       </table>
     </section>
@@ -544,22 +544,22 @@ function UserLifecycle() {
       <div className={styles.levelGrid}>
         <div className={`${styles.levelCard} ${styles.levelShishya}`}>
           <h4>Shishya <span className={styles.devanagari}>{'\u0936\u093F\u0937\u094D\u092F'}</span></h4>
-          <p>Levels 1&ndash;3 &bull; 8 lessons &bull; 355 XP &bull; 5 ragas &bull; &plusmn;50 cents<br/>
+          <p>Levels 1&ndash;3 &bull; 8 lessons &bull; 355 XP &bull; 5 ragas &bull; &plusmn;35 cents<br/>
           <strong>Gate</strong>: 3-session challenge with 4-hour cooldown</p>
         </div>
         <div className={`${styles.levelCard} ${styles.levelSadhaka}`}>
           <h4>Sadhaka <span className={styles.devanagari}>{'\u0938\u093E\u0927\u0915'}</span></h4>
-          <p>Levels 4&ndash;6 &bull; 10 lessons &bull; 420 XP &bull; 7 ragas &bull; &plusmn;25 cents<br/>
+          <p>Levels 4&ndash;6 &bull; 10 lessons &bull; 420 XP &bull; 7 ragas &bull; &plusmn;20 cents<br/>
           <strong>Gate</strong>: 5 challenges including ornament execution</p>
         </div>
         <div className={`${styles.levelCard} ${styles.levelVaristha}`}>
           <h4>Varistha <span className={styles.devanagari}>{'\u0935\u0930\u093F\u0937\u094D\u0920'}</span></h4>
-          <p>Levels 7&ndash;9 &bull; 11 lessons &bull; 645 XP &bull; 12+ ragas &bull; &plusmn;15 cents<br/>
+          <p>Levels 7&ndash;9 &bull; 11 lessons &bull; 645 XP &bull; 12+ ragas &bull; &plusmn;12 cents<br/>
           <strong>Gate</strong>: 5-session gate with 6-hour cooldown</p>
         </div>
         <div className={`${styles.levelCard} ${styles.levelGuru}`}>
           <h4>Guru <span className={styles.devanagari}>{'\u0917\u0941\u0930\u0941'}</span></h4>
-          <p>Levels 10+ &bull; 10 exercises &bull; 510+ XP &bull; All 30 ragas &bull; &plusmn;10 cents<br/>
+          <p>Levels 10+ &bull; 10 exercises &bull; 510+ XP &bull; All 30 ragas &bull; &plusmn;8 cents<br/>
           <strong>Capstone</strong>: Open mastery, no upper bound</p>
         </div>
       </div>
@@ -654,10 +654,10 @@ function CurriculumArchitecture() {
       <table className={styles.table}>
         <thead><tr><th>Level</th><th>Lessons</th><th>XP</th><th>Ragas</th><th>Tolerance</th><th>Gate</th></tr></thead>
         <tbody>
-          <tr><td>Shishya</td><td>8</td><td>355</td><td>5</td><td>&plusmn;50c</td><td>3-session, 4hr cooldown</td></tr>
-          <tr><td>Sadhaka</td><td>10</td><td>420</td><td>7</td><td>&plusmn;25c</td><td>3-session, multi-challenge</td></tr>
-          <tr><td>Varistha</td><td>11</td><td>645</td><td>12+</td><td>&plusmn;15c</td><td>5-session, 6hr cooldown</td></tr>
-          <tr><td>Guru</td><td>10</td><td>510+</td><td>30</td><td>&plusmn;10c</td><td>Open mastery</td></tr>
+          <tr><td>Shishya</td><td>8</td><td>355</td><td>5</td><td>&plusmn;35c</td><td>3-session, 4hr cooldown</td></tr>
+          <tr><td>Sadhaka</td><td>10</td><td>420</td><td>7</td><td>&plusmn;20c</td><td>3-session, multi-challenge</td></tr>
+          <tr><td>Varistha</td><td>11</td><td>645</td><td>12+</td><td>&plusmn;12c</td><td>5-session, 6hr cooldown</td></tr>
+          <tr><td>Guru</td><td>10</td><td>510+</td><td>30</td><td>&plusmn;8c</td><td>Open mastery</td></tr>
           <tr><td><strong>Total</strong></td><td><strong>39</strong></td><td><strong>~1,930</strong></td><td><strong>30</strong></td><td>&mdash;</td><td>&mdash;</td></tr>
         </tbody>
       </table>

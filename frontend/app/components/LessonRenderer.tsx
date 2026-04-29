@@ -35,11 +35,7 @@ import LessonPracticeSurface from './LessonPracticeSurface';
 import PakadMoment from './PakadMoment';
 import Tantri from './Tantri';
 import {
-  evaluateOrnament,
-  type OrnamentAttempt,
   type OrnamentId,
-  type OrnamentPitchSample,
-  type OrnamentScore,
 } from '@/engine/voice/ornament-evaluator';
 import styles from '../styles/lesson-renderer.module.css';
 
@@ -195,137 +191,6 @@ function FreeSingingPhase({
         style={{ marginTop: 'var(--space-4)' }}
       >
         Done
-      </button>
-    </motion.div>
-  );
-}
-
-/**
- * Ornament exercise — meend, andolan, gamak, kan, murki, khatka, zamzama.
- *
- * Buffers pitch samples from voiceFeedback for the duration of the attempt,
- * then calls evaluateOrnament() on "Continue" to produce a score. The score
- * is surfaced above Tantri (which provides the pitch visualization).
- */
-function OrnamentExercisePhase({
-  phase,
-  onAdvance,
-  voiceFeedback,
-  saHz,
-  ragaId,
-}: {
-  phase: LessonPhase;
-  onAdvance: () => void;
-  voiceFeedback: LessonEngineControls['voiceFeedback'];
-  saHz: number;
-  ragaId: string;
-}) {
-  const ornamentLabel = phase.ornament_type
-    ? phase.ornament_type.charAt(0).toUpperCase() + phase.ornament_type.slice(1)
-    : 'Ornament';
-  const hasRoute = phase.from_swara && phase.to_swara;
-
-  // Resolve ornament id: phase.ornament_type, else phase.type if it is itself
-  // an ornament id (e.g. 'andolan' or 'meend' dispatched as their own types).
-  const resolvedOrnamentId: OrnamentId | undefined = isOrnamentId(phase.ornament_type)
-    ? (phase.ornament_type as OrnamentId)
-    : isOrnamentId(phase.type)
-      ? (phase.type as OrnamentId)
-      : undefined;
-
-  // Buffer pitch samples as voiceFeedback updates. We dedupe by timestamp so
-  // that the rolling pitchHistory (which redelivers the same samples many
-  // times) contributes each sample only once.
-  const samplesRef = useRef<OrnamentPitchSample[]>([]);
-  const seenTsRef = useRef<Set<number>>(new Set());
-  const [score, setScore] = useState<OrnamentScore | null>(null);
-
-  // Reset per-phase: any change in phase id clears the sample buffer.
-  useEffect(() => {
-    samplesRef.current = [];
-    seenTsRef.current = new Set();
-    setScore(null);
-  }, [phase.id]);
-
-  // Ingest new samples from the pitchHistory on each voiceFeedback update.
-  useEffect(() => {
-    const history = voiceFeedback.pitchHistory;
-    if (!history || history.length === 0) return;
-    const confidence = voiceFeedback.confidence ?? 0;
-    for (const [ts, hz] of history) {
-      if (!Number.isFinite(ts) || !Number.isFinite(hz) || hz <= 0) continue;
-      if (seenTsRef.current.has(ts)) continue;
-      seenTsRef.current.add(ts);
-      samplesRef.current.push({ t: ts, hz, confidence });
-    }
-  }, [voiceFeedback]);
-
-  const handleContinue = () => {
-    if (score) {
-      onAdvance();
-      return;
-    }
-    const targetSwara =
-      phase.to_swara ??
-      phase.target_swara ??
-      phase.from_swara ??
-      'Sa';
-
-    if (!resolvedOrnamentId || samplesRef.current.length < 2) {
-      // No ornament id or no voice — just advance without evaluation.
-      onAdvance();
-      return;
-    }
-
-    const attempt: OrnamentAttempt = {
-      ornamentId: resolvedOrnamentId,
-      targetSwara,
-      fromSwara: phase.from_swara,
-      pitchSamples: samplesRef.current,
-      ragaContext: ragaId,
-      saHz,
-    };
-    try {
-      const result = evaluateOrnament(attempt);
-      setScore(result);
-    } catch {
-      // Invalid swara symbol or other unexpected input — fall back to advance.
-      onAdvance();
-    }
-  };
-
-  const buttonLabel = score ? 'Continue' : 'Done';
-
-  return (
-    <motion.div key={phase.id} {...phaseTransition} className={styles.centeredMessage}>
-      {hasRoute && (
-        <p className={styles.ornamentRoute}>
-          {phase.from_swara} <span className={styles.ornamentArrow}>&rarr;</span> {phase.to_swara}
-        </p>
-      )}
-      <p className={styles.ornamentLabel}>{ornamentLabel}</p>
-      {score && (
-        <div className={styles.ornamentScore} role="status" aria-live="polite">
-          <p className={styles.ornamentScoreValue}>
-            {Math.round(score.overall * 100)}
-            <span className={styles.ornamentScoreUnit}> / 100</span>
-          </p>
-          {score.notes.length > 0 && (
-            <ul className={styles.ornamentScoreNotes}>
-              {score.notes.map((n) => (
-                <li key={n}>{n}</li>
-              ))}
-            </ul>
-          )}
-        </div>
-      )}
-      <button
-        type="button"
-        className={styles.actionButton}
-        onClick={handleContinue}
-        style={{ marginTop: 'var(--space-4)' }}
-      >
-        {buttonLabel}
       </button>
     </motion.div>
   );
@@ -823,6 +688,17 @@ export default function LessonRenderer({
   const onHighlightString = useCallback((swara: string) => {
     setHighlightedSwara(swara);
   }, []);
+
+  // B7 fix: mirror data-raga onto document.body to unlock body::before/::after
+  // raga-aware background rules in globals.css / tokens.css.
+  const effectiveRagaId = ragaId ?? lesson?.raga_id;
+  useEffect(() => {
+    if (typeof document === 'undefined' || !effectiveRagaId) return;
+    document.body.dataset.raga = effectiveRagaId;
+    return () => {
+      delete document.body.dataset.raga;
+    };
+  }, [effectiveRagaId]);
 
   if (state === 'loading') {
     return (

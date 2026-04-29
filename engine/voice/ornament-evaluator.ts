@@ -31,7 +31,7 @@
  * evaluation is well under 1ms in practice.
  */
 
-import type { Swara } from '../theory/types';
+import type { Swara, Octave } from '../theory/types';
 import {
   ORNAMENTS,
   generateMeendTrajectory,
@@ -79,6 +79,11 @@ export interface OrnamentPitchSample {
  * @property fromSwara    Optional — for meend, the origin swara. If omitted,
  *                        the evaluator infers it from the first confident
  *                        pitch sample.
+ * @property targetOctave Optional octave register for the target swara
+ *                        ('mandra' | 'madhya' | 'taar'). Defaults to
+ *                        'madhya'. Used to compute the target Hz so a
+ *                        student practising a kan in taar Sa is scored
+ *                        against taar Sa, not madhya Sa.
  * @property pitchSamples Chronologically ordered samples from the voice
  *                        pipeline for the duration of the attempt.
  * @property ragaContext  Raga ID — reserved for future context-aware scoring
@@ -92,6 +97,7 @@ export interface OrnamentAttempt {
   readonly ornamentId: OrnamentId;
   readonly targetSwara: string;
   readonly fromSwara?: string;
+  readonly targetOctave?: Octave;
   readonly pitchSamples: readonly OrnamentPitchSample[];
   readonly ragaContext: string;
   readonly saHz: number;
@@ -207,15 +213,19 @@ export function evaluateOrnament(attempt: OrnamentAttempt): OrnamentScore {
   }
 
   // ---------------- target / origin frequencies --------------------------
+  const targetOctave: Octave = attempt.targetOctave ?? 'madhya';
   const targetHz = getSwaraFrequency(
     attempt.targetSwara as Swara,
     attempt.saHz,
-    'madhya',
+    targetOctave,
   );
 
+  // The 'from' for a meend is interpreted in the same octave as the target
+  // unless the caller specifies otherwise. (Cross-octave meend is rare;
+  // when present, callers can pass an explicit fromHz via a future API.)
   const fromHz =
     attempt.fromSwara
-      ? getSwaraFrequency(attempt.fromSwara as Swara, attempt.saHz, 'madhya')
+      ? getSwaraFrequency(attempt.fromSwara as Swara, attempt.saHz, targetOctave)
       : confident[0]!.hz;
 
   // ---------------- duration / timing ------------------------------------

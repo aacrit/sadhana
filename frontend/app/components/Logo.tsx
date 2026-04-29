@@ -77,11 +77,12 @@ const SIZE_PRESETS: Record<LogoSizePreset, number> = {
 };
 
 // Legacy preset mapping for backward compatibility
+// B8 fix: 'hero' renamed to 'heroLegacy' — SIZE_PRESETS.hero (400px) takes precedence.
 const LEGACY_PRESETS: Record<string, number> = {
   favicon: 16,
   nav: 32,
   header: 48,
-  hero: 96,
+  heroLegacy: 96,
   splash: 200,
 };
 
@@ -207,10 +208,19 @@ function StringAccent({
 }: StringAccentProps) {
   const stringOpacityMultiplier = useTransform(hoverValue, [0, 1], [1, 1.4]);
 
-  const opacityByIndex = BASE_OPACITIES.map((base, _i) =>
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    useTransform(stringOpacityMultiplier, (v: number) => Math.min(1, base * v)),
+  // P5 fix: single useTransform returning number[] avoids hooks-in-map violation.
+  const opacitiesMotion = useTransform(
+    stringOpacityMultiplier,
+    (v: number) => BASE_OPACITIES.map((base) => Math.min(1, base * v)),
   );
+
+  // Derive per-string MotionValues by transforming the array output.
+  const opacity0 = useTransform(opacitiesMotion, (arr: number[]) => arr[0] ?? BASE_OPACITIES[0]!);
+  const opacity1 = useTransform(opacitiesMotion, (arr: number[]) => arr[1] ?? BASE_OPACITIES[1]!);
+  const opacity2 = useTransform(opacitiesMotion, (arr: number[]) => arr[2] ?? BASE_OPACITIES[2]!);
+  const opacity3 = useTransform(opacitiesMotion, (arr: number[]) => arr[3] ?? BASE_OPACITIES[3]!);
+  const opacity4 = useTransform(opacitiesMotion, (arr: number[]) => arr[4] ?? BASE_OPACITIES[4]!);
+  const opacityByIndex = [opacity0, opacity1, opacity2, opacity3, opacity4];
 
   const waveGlowOpacity = useTransform(hoverValue, [0, 1], [0.12, 0.3]);
 
@@ -638,12 +648,9 @@ function FullLogo({
 
   const content = (
     <>
-      {showStrings && (
-        <style dangerouslySetInnerHTML={{ __html: keyframesCSS }} />
-      )}
-      {!showStrings && (
-        <style dangerouslySetInnerHTML={{ __html: getKeyframes(uid, 0) }} />
-      )}
+      {/* P5 fix: keyframesCSS is already memoized on [uid, waveAmplitude].
+           When !showStrings, waveAmplitude is 0, so keyframesCSS == getKeyframes(uid, 0). */}
+      <style dangerouslySetInnerHTML={{ __html: keyframesCSS }} />
       <defs>
         <radialGradient id={ids.saGlow} cx="50%" cy="50%" r="50%">
           <stop offset="0%" stopColor="#E8871E" stopOpacity="0.5" />

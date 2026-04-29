@@ -58,7 +58,7 @@ phases:
     type: phrase_playback
     phrase: [Sa_upper, Ni, Dha, Pa, Ma_t, Ga, Re, Sa]
     instruction: |
-      And descending. Listen to the fourth note from the top.
+      And descending. Listen to the note between Pa and Ga.
       It has a different quality — that is tivra Ma.
     repeat: 2
     show_labels: true

@@ -32,10 +32,16 @@ import { getRagaById, getRagaSwaras } from '../theory/ragas';
 /**
  * Student level, determining pitch accuracy tolerance.
  *
- * Shishya (beginner): +/-50 cents — very forgiving
- * Sadhaka (practitioner): +/-25 cents — moderate
- * Varistha (advanced): +/-15 cents — tight
- * Guru (master): +/-10 cents — near-perfect intonation required
+ * Shishya (beginner): +/-35 cents — forgiving but still musical
+ * Sadhaka (practitioner): +/-20 cents — moderate
+ * Varistha (advanced): +/-12 cents — tight
+ * Guru (master): +/-8 cents — near-perfect intonation required
+ *
+ * Acoustics-engineer audit: the legacy tolerance of 50 cents at shishya was
+ * a quarter-tone — admitting non-musical pitch as "correct." The tightened
+ * thresholds keep the beginner experience kind (35c is still ~1/3 of a
+ * semitone) while requiring the student's pitch to actually live near the
+ * target swara.
  */
 export type Level = 'shishya' | 'sadhaka' | 'varistha' | 'guru';
 
@@ -43,10 +49,10 @@ export type Level = 'shishya' | 'sadhaka' | 'varistha' | 'guru';
  * Tolerance in cents for each level.
  */
 export const LEVEL_TOLERANCE: Readonly<Record<Level, number>> = {
-  shishya: 50,
-  sadhaka: 25,
-  varistha: 15,
-  guru: 10,
+  shishya: 35,
+  sadhaka: 20,
+  varistha: 12,
+  guru: 8,
 };
 
 /**

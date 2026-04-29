@@ -101,7 +101,7 @@ beforeEach(() => {
 
 afterEach(() => {
   vi.useRealTimers();
-  delete (globalThis as { AudioContext?: typeof MockAudioContext }).AudioContext;
+  delete (globalThis as unknown as { AudioContext?: typeof MockAudioContext }).AudioContext;
 });
 
 // ---------------------------------------------------------------------------

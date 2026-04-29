@@ -60,6 +60,17 @@ export default function TanpuraViz({
   const timeRef = useRef(0);
   const reducedMotionRef = useRef(false);
 
+  // Props as refs so the RAF loop always reads current values without
+  // causing the animation effect to tear down and restart each frame.
+  const voiceAmplitudeRef = useRef(voiceAmplitude);
+  const partialFrequenciesRef = useRef(partialFrequencies);
+  const activeRef = useRef(active);
+
+  // Keep refs in sync with latest props — no effect restart needed.
+  useEffect(() => { voiceAmplitudeRef.current = voiceAmplitude; }, [voiceAmplitude]);
+  useEffect(() => { partialFrequenciesRef.current = partialFrequencies; }, [partialFrequencies]);
+  useEffect(() => { activeRef.current = active; }, [active]);
+
   // Check theme from DOM — re-reads on data-theme attribute change
   const colorsRef = useRef(STRING_COLORS_NIGHT);
 
@@ -71,15 +82,13 @@ export default function TanpuraViz({
 
   const getColors = useCallback(() => colorsRef.current, []);
 
-  // Compute how "in tune" the voice is (0 = silent/off, 1 = perfectly aligned)
+  // Compute how "in tune" the voice is — reads from refs (no closure capture)
   const getAlignment = useCallback(() => {
-    if (!active || voiceAmplitude < 0.01 || partialFrequencies.length === 0) {
+    if (!activeRef.current || voiceAmplitudeRef.current < 0.01 || partialFrequenciesRef.current.length === 0) {
       return 0;
     }
-    // Simple alignment: if any partial is close to a string ratio, boost alignment
-    // This is a visualization heuristic, not the actual pitch detection
-    return Math.min(voiceAmplitude * 1.5, 1);
-  }, [active, voiceAmplitude, partialFrequencies]);
+    return Math.min(voiceAmplitudeRef.current * 1.5, 1);
+  }, []);
 
   useEffect(() => {
     // SSR guard
@@ -108,12 +117,14 @@ export default function TanpuraViz({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Handle resize
+    // Handle resize — reset transform first to prevent scale-matrix accumulation
+    // on browser zoom / DPR changes.
     const resize = () => {
       const dpr = window.devicePixelRatio || 1;
       const rect = canvas.getBoundingClientRect();
       canvas.width = rect.width * dpr;
       canvas.height = rect.height * dpr;
+      ctx.setTransform(1, 0, 0, 1, 0, 0); // reset before scaling (P1 fix)
       ctx.scale(dpr, dpr);
     };
     resize();
@@ -132,8 +143,9 @@ export default function TanpuraViz({
     ) => {
       const ratio = STRING_RATIOS[stringIndex] ?? 1;
       const yCenter = height * (0.3 + stringIndex * 0.15);
-      const amplitude = active
-        ? 8 + voiceAmplitude * 12 - alignment * stringIndex * 2
+      const currentVoiceAmp = voiceAmplitudeRef.current;
+      const amplitude = activeRef.current
+        ? 8 + currentVoiceAmp * 12 - alignment * stringIndex * 2
         : 4;
       const frequency = 0.008 * ratio;
       // Phase offset per string — creates the "converging" effect when aligned
@@ -146,7 +158,8 @@ export default function TanpuraViz({
       ctx.lineWidth = stringIndex === 0 ? 2 : 1.2;
       ctx.globalAlpha = 1;
 
-      for (let x = 0; x < width; x++) {
+      // P2 fix: step by 3 pixels instead of 1 (~67% fewer sin calls)
+      for (let x = 0; x < width; x += 3) {
         const progress = x / width;
         // Envelope: fade at edges
         const envelope = Math.sin(progress * Math.PI);
@@ -165,7 +178,7 @@ export default function TanpuraViz({
       ctx.stroke();
     };
 
-    // Animation loop
+    // Animation loop — reads all prop-derived state from refs
     const animate = () => {
       if (!canvas || !ctx) return;
 
@@ -204,7 +217,9 @@ export default function TanpuraViz({
       motionQuery.removeEventListener('change', handleMotionChange);
       themeObserver.disconnect();
     };
-  }, [active, voiceAmplitude, partialFrequencies, getColors, getAlignment, refreshColors]);
+    // Effect depends only on setup-time stable refs — no prop-derived values.
+    // Props are kept current via the tiny sync effects above.
+  }, [getColors, getAlignment, refreshColors]);
 
   return (
     <canvas

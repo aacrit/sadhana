@@ -1,7 +1,7 @@
 ---
 name: uat-tester
 description: "UAT browser testing — Tantri instrument, voice pipeline, lesson flow, gamification, Day/Night modes, responsive, accessibility. Invoked after every build. Read-only."
-model: claude-sonnet-4-6
+model: claude-opus-4-7
 allowed-tools: Read, Grep, Glob, Bash
 ---
 

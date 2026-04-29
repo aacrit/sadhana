@@ -179,9 +179,18 @@ function checkMovement(
 
     const ascending = currCents > prevCents;
 
+    // The Sa-position context — Sa as the start of a phrase is always
+    // allowed (every phrase can begin on Sa). Sa landing as a final
+    // resolution is also allowed (every phrase resolves to Sa). But Sa
+    // appearing in the middle of a phrase still has to obey aroha/avaroha
+    // (e.g., Re_k → Sa ascending in a raga whose aroha goes Re_k → Ga is
+    // a real violation, not an exemption).
+    const prevIsSaAtBoundary = prev === 'Sa' && i === 1;
+    const currIsSaAtEnd = curr === 'Sa' && i === swaras.length - 1;
+
     if (ascending) {
       // Check if this ascending transition exists in the aroha
-      if (!isTransitionAllowed(prev, curr, arohaSwaras)) {
+      if (!isTransitionAllowed(prev, curr, arohaSwaras, prevIsSaAtBoundary, currIsSaAtEnd)) {
         if (!arohaSwaras.includes(curr) && !raga.varjit.includes(curr)) {
           const def = SWARA_MAP[curr];
           violations.push({
@@ -194,7 +203,7 @@ function checkMovement(
       }
     } else {
       // Check if this descending transition exists in the avaroha
-      if (!isTransitionAllowed(prev, curr, avarohaSwaras)) {
+      if (!isTransitionAllowed(prev, curr, avarohaSwaras, prevIsSaAtBoundary, currIsSaAtEnd)) {
         if (!avarohaSwaras.includes(curr) && !raga.varjit.includes(curr)) {
           const def = SWARA_MAP[curr];
           violations.push({
@@ -291,16 +300,36 @@ function getCentsForSwara(swara: Swara): number | undefined {
  *
  * The transition is "allowed" if both swaras appear in the sequence
  * and swaraA comes before swaraB (for aroha) or after (for avaroha).
- * We also allow transitions where one swara is Sa (the tonic is always
- * a valid starting/ending point).
+ *
+ * Sa exemptions are restricted to phrase boundaries (acoustics-engineer
+ * audit, rev 9): Sa is exempt only when it appears as the first swara of
+ * the phrase OR as the last swara (a resolving cadence). A Sa in the
+ * middle of a phrase obeys aroha/avaroha like any other swara — e.g.,
+ * a raga whose aroha begins Sa → Re_k → Ga rejects Re_k → Sa as
+ * an ascending move mid-phrase.
+ *
+ * @param from              The departing swara
+ * @param to                The arriving swara
+ * @param scaleSequence     aroha or avaroha for the current direction
+ * @param fromIsSaBoundary  true when `from` is Sa AND this is the first
+ *                          transition in the phrase (i === 1)
+ * @param toIsSaEnd         true when `to` is Sa AND this is the last
+ *                          transition (i === swaras.length - 1)
  */
 function isTransitionAllowed(
   from: Swara,
   to: Swara,
   scaleSequence: readonly Swara[],
+  fromIsSaBoundary: boolean = false,
+  toIsSaEnd: boolean = false,
 ): boolean {
-  // Sa transitions are always allowed
-  if (from === 'Sa' || to === 'Sa') return true;
+  // Sa exemption — boundary only.
+  // - 'from' is Sa AND this is the phrase opening (always allowed: every phrase
+  //   can begin on Sa).
+  // - 'to' is Sa AND this is the final resolution (always allowed: any
+  //   phrase can resolve to Sa).
+  if (from === 'Sa' && fromIsSaBoundary) return true;
+  if (to === 'Sa' && toIsSaEnd) return true;
 
   const fromIndex = scaleSequence.indexOf(from);
   const toIndex = scaleSequence.indexOf(to);

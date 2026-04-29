@@ -96,6 +96,41 @@ export default function RootLayout({
       data-script="devanagari"
     >
       <head>
+        {/*
+          Content Security Policy — best-effort via <meta http-equiv>.
+          GitHub Pages does not support custom response headers, so this
+          is the only CSP-enforcement path available on the current host.
+          Tuned for our stack:
+            - 'unsafe-inline' on style: required by Framer Motion inline styles
+            - 'wasm-unsafe-eval' on script: required by Tone.js / Pitchy WASM
+            - https://*.supabase.co: data API + realtime
+            - https://accounts.google.com: OAuth redirect
+            - https://lh3.googleusercontent.com: Google profile avatars
+            - data:/blob: media: required for Three.js textures + voice
+              waveform analyser source nodes
+          Notes:
+            - Strict-Transport-Security, Permissions-Policy and Referrer-Policy
+              CANNOT be set via <meta>. They live in /public/_headers below
+              for hosts that read it (Cloudflare Pages, Netlify, Vercel).
+              On GitHub Pages they are unenforced; HSTS comes from the
+              github.io parent domain in practice.
+        */}
+        <meta
+          httpEquiv="Content-Security-Policy"
+          content={[
+            "default-src 'self'",
+            "script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'",
+            "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://accounts.google.com",
+            "img-src 'self' data: https://lh3.googleusercontent.com",
+            "media-src 'self' blob:",
+            "style-src 'self' 'unsafe-inline'",
+            "font-src 'self' data: https://fonts.gstatic.com",
+            "frame-ancestors 'none'",
+            "base-uri 'self'",
+            "form-action 'self' https://accounts.google.com",
+          ].join('; ')}
+        />
+        <meta httpEquiv="X-Content-Type-Options" content="nosniff" />
         <link rel="manifest" href="/sadhana/manifest.json" />
         <link rel="icon" href="/sadhana/icons/favicon.svg" type="image/svg+xml" />
         <link rel="apple-touch-icon" href="/sadhana/icons/icon-192.svg" />

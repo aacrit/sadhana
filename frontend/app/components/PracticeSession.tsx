@@ -199,7 +199,7 @@ export default function PracticeSession({
           centsDeviation: event.deviationCents ?? 0,
           detectedSwara: event.swara ?? null,
           confidence: event.clarity ?? 0,
-          pitchHistory: event.pitchHistory ?? prev.pitchHistory,
+          pitchHistory: event.pitchHistory ? event.pitchHistory.slice() : prev.pitchHistory,
         }));
       },
       onSilence: () => {

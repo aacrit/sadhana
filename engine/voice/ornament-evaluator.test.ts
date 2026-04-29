@@ -330,3 +330,57 @@ describe('evaluateOrnament — weight sum invariant', () => {
     expect(score.overall).toBeLessThanOrEqual(1);
   });
 });
+
+describe('evaluateOrnament — targetOctave parameter (F1.8)', () => {
+  it('defaults to madhya when targetOctave is omitted (backward compat)', () => {
+    // A meend Sa->Re sung in madhya scores well when no octave is given.
+    const saHz = SA_HZ;
+    const reHz = getSwaraFrequency('Re', saHz, 'madhya');
+    const traj = generateMeendTrajectory(saHz, reHz, 1200, 60);
+    const attempt: OrnamentAttempt = {
+      ornamentId: 'meend',
+      targetSwara: 'Re',
+      fromSwara: 'Sa',
+      pitchSamples: samplesFromTrajectory(traj),
+      ragaContext: 'yaman',
+      saHz,
+    };
+    const score = evaluateOrnament(attempt);
+    expect(score.overall).toBeGreaterThan(0.9);
+  });
+
+  it('scores a taar-octave kan against taar-octave Sa, not madhya Sa', () => {
+    // Sung samples are in taar octave (Sa one octave above madhya Sa).
+    const saHz = SA_HZ;
+    const taarSaHz = getSwaraFrequency('Sa', saHz, 'taar');
+
+    // Build a kan-ish trajectory hovering at taar Sa
+    const samples: OrnamentPitchSample[] = [
+      { t: 0,    hz: taarSaHz * Math.pow(2, 200 / 1200), confidence: 0.9 },
+      { t: 0.01, hz: taarSaHz * Math.pow(2,  50 / 1200), confidence: 0.9 },
+      { t: 0.02, hz: taarSaHz, confidence: 0.95 },
+      { t: 0.03, hz: taarSaHz, confidence: 0.95 },
+      { t: 0.04, hz: taarSaHz, confidence: 0.95 },
+    ];
+
+    const withOctave: OrnamentAttempt = {
+      ornamentId: 'kan',
+      targetSwara: 'Sa',
+      targetOctave: 'taar',
+      pitchSamples: samples,
+      ragaContext: 'yaman',
+      saHz,
+    };
+    const withoutOctave: OrnamentAttempt = {
+      ...withOctave,
+      targetOctave: undefined,
+    };
+    const scoreCorrect = evaluateOrnament(withOctave);
+    const scoreWrong = evaluateOrnament(withoutOctave);
+
+    // With targetOctave=taar, arrivalAccuracyCents lands near 0 (within 50c).
+    expect(Math.abs(scoreCorrect.arrivalAccuracyCents)).toBeLessThan(50);
+    // Without it, the evaluator scores against madhya Sa — arrival is ~1200c off.
+    expect(Math.abs(scoreWrong.arrivalAccuracyCents)).toBeGreaterThan(1000);
+  });
+});
