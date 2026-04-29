@@ -145,6 +145,30 @@ export default function ScholarPage() {
         ))}
       </motion.section>
 
+      {/* Engine reference — surfaces the engine's swara/shruti definitions
+          as readable scholarship. T2.4 of the enhancement plan. */}
+      <motion.section
+        className={styles.lessonSection}
+        variants={fadeUp}
+        aria-label="Engine reference"
+      >
+        <h2 className={styles.lessonHeading}>Engine reference</h2>
+        <p className={styles.lessonIntro}>
+          The engine&rsquo;s twelve swaras as they exist in code — exact
+          ratios, cents from Sa, deviation from equal temperament, every one
+          playable. Read music theory the way a musicologist would.
+        </p>
+        <Link
+          href="/journeys/scholar/reference"
+          className={styles.lessonTile}
+          style={{ maxWidth: 320, margin: '0 auto' }}
+        >
+          <span className={styles.lessonNum}>00</span>
+          <span className={styles.lessonTitle}>The 12 swaras</span>
+          <span className={styles.lessonRaga}>Reference</span>
+        </Link>
+      </motion.section>
+
       {/* Lesson catalog — the Varistha curriculum (11 lessons). Wired to
           /journeys/scholar/lessons/[id]. Level gating (require completion of
           Sadhaka challenge) is enforced by T1.3's progression engine; for
