@@ -393,8 +393,38 @@ The v1 audit surfaced four classes of silent-drop YAML fields. All four are now 
 
 `call_response` and `mastery_challenge` are now in `VOICE_PHASE_TYPES` so the voice pipeline starts and Tantri shows live pitch during sing windows.
 
-### Outstanding deeper work
+### rev 12 — Enhancement plan execution
 
-- **Sadhaka journey activation** (CEO advisor #1) — UI route + lesson list still gated; lessons themselves now render correctly when reached.
-- **Ornament evaluation in mastery_challenge** — currently only the per-target hold gate runs; ornament-specific evaluation (`evaluation.oscillation_rate_hz`, `evaluation.trajectory_smoothness`, etc.) still passthrough.
-- **Modulation / controlled deviation** — phases render instruction + Listen but do not yet evaluate the transition swara or fleeting-tone duration; these need engine-side analyzers.
+Subsequent work tackled the items deferred at rev 11. Status as of this rev:
+
+| Tier | Item | Status | Notes |
+|------|------|--------|-------|
+| Tier 0 | T0.1 XP awarded on completion | Shipped | `LessonClient.handleComplete` wires `addXp`. |
+| Tier 0 | T0.2 Beginner riyaz increments streak | Shipped | `completeRiyaz` called from beginner + explorer flows. |
+| Tier 0 | T0.3 Sessions persisted | Shipped | `saveSession` called from beginner + explorer. |
+| Tier 1 | T1.1+T5.2 Sadhaka/Varistha/Guru activation | Shipped | 31 orphaned YAMLs reachable via 3 new dynamic routes. 114 → 115 prerendered. |
+| Tier 1 | T1.2 Resume CTA | Shipped | `getNextLessonId(userId, catalog)` + Beginner home banner. |
+| Tier 1 | T1.3 Level-up engine (gates) | Foundation shipped | `engine/progression/level-gates.ts` — predicates + `deriveLevel`. UI integration deferred (still needs profile-page wire-up + event-emit calls in lesson flow). |
+| Tier 1 | T1.4 Streak freeze + Notifications | Shipped | Migration 004; freezes consumed on 1-day gap; PracticeReminder local Notifications. |
+| Tier 2 | T2.1 Ornament evaluator wired into MasteryChallenge | Shipped | `phase.exercise === 'ornament_challenge'` branches to OrnamentChallenge subcomponent. |
+| Tier 2 | T2.2 Modulation + deviation analyzers | Shipped | `engine/analysis/modulation.ts` + `deviation.ts` with 10 unit tests. Frontend integration into Guru-03/04 still pending. |
+| Tier 2 | T2.3 Tala onset detection | Shipped | `engine/voice/onset-detection.ts` + 11 unit tests. TalaPhase consumes it for clap_sam scoring. |
+| Tier 2 | T2.4 Scholar engine surface | Initial shipped | `/journeys/scholar/reference` shrutis table. Per-raga reference views (`ragas/[id]`, `thaats`, `talas`) remain to author. |
+| Tier 3 | T3.1 Frontend test harness | Shipped | Vitest config extended; lesson-loader has 9 unit tests. RTL component tests + Playwright UAT still to add. |
+| Tier 3 | T3.2 PWA pre-cache | Shipped | sw.js v3 caches all 39 lesson YAMLs + shell + manifest at install. |
+| Tier 3 | T3.3 Voice corpus | **Deferred** | Requires recording 30–60 voice samples — not codifiable here. Plan documents the corpus structure (`engine/voice/__fixtures__/`) and `pipeline.regression.test.ts` skeleton. |
+| Tier 3 | T3.4 Telemetry events | Shipped | Migration 004 events table + `lib/telemetry.ts` `emit()` / `emitError()`. Insights view still to build. |
+| Tier 4 | T4.1 i18n Hindi | **Deferred** | Requires `next-intl` install + extracting ~200 UI strings. Plan saved as `project_sadhana_i18n_fonts.md`. Hindi-only at v1 (no Marathi). |
+| Tier 4 | T4.2 Accessibility audit | Shipped | Tantri canvas aria-live status announcer; remaining work (RAG dual-encoding, motion gating in cinematic overlays) ongoing. |
+| Tier 4 | T4.3 Devanagari font consistency | Shipped | Explicit fallback chain (Noto Sans Devanagari → Mangal → Devanagari MT → system-ui) replaces generic serif fallback. font-feature-settings calt+liga+dlig enforced. |
+| Tier 4 | T4.4 Sa robustness | Shipped | Clarity floor 0.50 → 0.35; range 70–530 Hz; `/profile` manual override. |
+| Tier 5 | T5.1 Raga-aware Tantri tuning | **Deferred** | Requires per-swara ornament metadata on each Raga object (currently only raga-level ornament list). Engine refactor required first. |
+
+### Test counts
+
+- Engine: 446 → 476 (added onset-detection 11, modulation 5, deviation 5, level-gates 9).
+- Frontend: 0 → 9 (lesson-loader pure-logic tests).
+
+### Routes
+
+- 83 (rev 10) → 114 (rev 11) → 115 (rev 12, +Scholar reference page).
