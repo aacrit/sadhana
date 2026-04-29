@@ -85,6 +85,11 @@ const VOICE_PHASE_TYPES: readonly PhaseType[] = [
   'ornament_exercise',
   'andolan',
   'meend',
+  // T2.3 — tala exercises need raw mic input for onset detection. The voice
+  // pipeline's analyser is the audio source TalaPhase pulls time-domain
+  // samples from to score student claps against beat times.
+  'tala_exercise',
+  'tala_melody_exercise',
 ];
 
 /**
@@ -525,6 +530,8 @@ export function useLessonEngine(
       case 'sing_along':
       case 'call_response':
       case 'mastery_challenge':
+      case 'tala_exercise':
+      case 'tala_melody_exercise':
       case 'passive_phrase_recognition': {
         if (skipMicFlag) break;
 

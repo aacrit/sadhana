@@ -17,6 +17,12 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import type { LessonPhase } from '../lib/lesson-loader';
 import type { LessonEngineControls } from '../lib/useLessonEngine';
+import {
+  detectOnsets,
+  scoreTalaOnsets,
+  buildBeatTimes,
+  type TalaScoreResult,
+} from '@/engine/voice/onset-detection';
 import styles from '../styles/lesson-renderer.module.css';
 
 const phaseTransition = {
@@ -52,8 +58,27 @@ export default function TalaPhase({
 
   const [activeBeat, setActiveBeat] = useState(0);
   const [cycleNum, setCycleNum] = useState(1);
+  const [score, setScore] = useState<TalaScoreResult | null>(null);
   const advanceRef = useRef(onAdvance);
   advanceRef.current = onAdvance;
+
+  // T2.3 — capture mic input via the existing analyser node so we can run
+  // onset detection at the end of the cycle. Time-domain samples are pulled
+  // every animation frame and concatenated. The buffer is bounded by total
+  // cycle duration so memory usage stays predictable.
+  const recordingRef = useRef<{
+    buffer: Float32Array;
+    sampleRate: number;
+    writeIdx: number;
+    startEpoch: number;
+  } | null>(null);
+  const rafRef = useRef<number | null>(null);
+
+  // Whether to score against student onsets (clap_sam, clap_sam_khali, etc.)
+  const shouldScore = (phase.exercise === 'clap_sam'
+    || phase.exercise === 'clap_sam_khali'
+    || phase.exercise === 'sing_on_sam'
+    || phase.exercise === 'free_clap');
 
   // Start the tabla on mount; stop on unmount.
   useEffect(() => {
@@ -66,6 +91,39 @@ export default function TalaPhase({
     }
 
     const beatMs = 60_000 / tempo;
+    const totalDurationS = (cycles * meta.beats * beatMs) / 1000 + 0.5;
+
+    // Set up recording if scoring is requested. We pre-allocate a
+    // fixed-size buffer at 44.1kHz; this is conservative — the actual
+    // analyser sample rate is fetched per pull.
+    if (shouldScore) {
+      const sampleRate = 44100;
+      recordingRef.current = {
+        buffer: new Float32Array(Math.ceil(totalDurationS * sampleRate)),
+        sampleRate,
+        writeIdx: 0,
+        startEpoch: performance.now(),
+      };
+
+      const analyser = engine.audio.getAnalyserNode();
+      if (analyser) {
+        const fftSize = analyser.fftSize;
+        const tdBuf = new Float32Array(fftSize);
+        const pull = () => {
+          analyser.getFloatTimeDomainData(tdBuf);
+          const rec = recordingRef.current;
+          if (rec) {
+            const remaining = rec.buffer.length - rec.writeIdx;
+            const n = Math.min(remaining, fftSize);
+            for (let i = 0; i < n; i++) rec.buffer[rec.writeIdx + i] = tdBuf[i] ?? 0;
+            rec.writeIdx += n;
+          }
+          rafRef.current = requestAnimationFrame(pull);
+        };
+        rafRef.current = requestAnimationFrame(pull);
+      }
+    }
+
     let beat = 0;
     let cycle = 1;
     const id = window.setInterval(() => {
@@ -74,6 +132,37 @@ export default function TalaPhase({
         cycle += 1;
         if (cycle > cycles) {
           window.clearInterval(id);
+          // Score the recording if we captured one
+          if (shouldScore && recordingRef.current) {
+            const rec = recordingRef.current;
+            const audio = rec.buffer.slice(0, rec.writeIdx);
+            // Use a real sample rate — Float32Array doesn't carry it.
+            const ctxRate = engine.audio.getAnalyserNode()?.context?.sampleRate ?? 44100;
+            const result = detectOnsets(audio, { sampleRate: ctxRate });
+
+            // Build expected beat times. Beat 1 of cycle 1 fires at the
+            // first interval tick (beatMs after mount). startEpoch was
+            // recorded at the same moment, so beat times are relative.
+            const expected = buildBeatTimes(meta.beats, tempo, cycles, beatMs / 1000);
+            // For clap_sam, only score sam beats. For sam+khali, both.
+            const sam = meta.sam - 1;
+            const khali = meta.khali - 1;
+            let filtered: number[];
+            if (phase.exercise === 'clap_sam') {
+              filtered = expected.filter((_, i) => i % meta.beats === sam);
+            } else if (phase.exercise === 'clap_sam_khali') {
+              filtered = expected.filter((_, i) => {
+                const b = i % meta.beats;
+                return b === sam || b === khali;
+              });
+            } else {
+              filtered = expected;
+            }
+
+            const tolMs = phase.timing_tolerance_ms ?? 200;
+            const scored = scoreTalaOnsets(result.onsets, filtered, tolMs);
+            setScore(scored);
+          }
           // small breath, then auto-advance unless student already pressed Continue
           window.setTimeout(() => advanceRef.current(), 600);
           return;
@@ -85,6 +174,7 @@ export default function TalaPhase({
 
     return () => {
       window.clearInterval(id);
+      if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
       try {
         engine.audio.stopTala();
       } catch {
@@ -124,6 +214,21 @@ export default function TalaPhase({
           return <span key={i} className={cls} />;
         })}
       </div>
+
+      {score && (
+        <div className={styles.ornamentScore} role="status" aria-live="polite">
+          <p className={styles.ornamentScoreValue}>
+            {Math.round(score.accuracy * 100)}
+            <span className={styles.ornamentScoreUnit}> / 100</span>
+          </p>
+          <ul className={styles.ornamentScoreNotes}>
+            <li>{score.hits.filter((h) => h.hit).length} of {score.hits.length} beats hit</li>
+            {score.meanAbsErrorMs > 0 && (
+              <li>Mean timing error: {Math.round(score.meanAbsErrorMs)}ms</li>
+            )}
+          </ul>
+        </div>
+      )}
 
       {phase.phrase && phase.phrase.length > 0 && (
         <div className={styles.phraseRow} aria-hidden="true">

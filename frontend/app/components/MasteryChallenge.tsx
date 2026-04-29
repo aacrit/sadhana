@@ -3,24 +3,33 @@
 /**
  * MasteryChallenge — pass/fail gated singing challenge.
  *
- * Iterates `targets[]`. For each target:
- *   - student must hold their voice within ±`tolerance_cents` of the target
- *     swara for `hold_duration_s` consecutive seconds.
- *   - confidence ≥ 0.4 required (suppresses noise floor false-positives).
- * Targets are evaluated in order. Once all targets are held, the verdict
- * banner shows and Continue advances.
+ * Two modes:
  *
- * If `targets[]` is absent (e.g. legacy `tolerance_cents` global), the phase
- * still renders the instruction but uses a single open-ended hold timer.
+ *   Hold mode (default) — iterates `targets[]`. For each target the student
+ *   must hold their voice within ±tolerance_cents of the swara for
+ *   hold_duration_s consecutive seconds (confidence ≥ 0.4 required).
  *
- * The voice pipeline is started by useLessonEngine. We only consume
- * `voiceFeedback.detectedSwara`, `centsDeviation` and `confidence`.
+ *   Ornament mode (T2.1) — when `phase.exercise === 'ornament_challenge'`,
+ *   the student records a single pitch trajectory which is then scored by
+ *   the existing engine evaluator (engine/voice/ornament-evaluator.ts).
+ *   Pass = overall score ≥ 0.6 (or `min_overall` from YAML). Up to
+ *   `attempts_allowed` retries; verdict reflects the best attempt.
+ *
+ * The voice pipeline is started by useLessonEngine. The ornament branch
+ * additionally consumes voiceFeedback.pitchHistory and voiceFeedback.hz.
  */
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import type { LessonPhase } from '../lib/lesson-loader';
 import type { LessonEngineControls } from '../lib/useLessonEngine';
+import {
+  evaluateOrnament,
+  type OrnamentAttempt,
+  type OrnamentId,
+  type OrnamentPitchSample,
+  type OrnamentScore,
+} from '@/engine/voice/ornament-evaluator';
 import styles from '../styles/lesson-renderer.module.css';
 
 const phaseTransition = {
@@ -33,6 +42,14 @@ const MIN_CLARITY = 0.4;
 const DEFAULT_TOLERANCE_CENTS = 30;
 const DEFAULT_HOLD_S = 4;
 const MAX_TIME_PER_TARGET_S = 30;
+
+const ORNAMENT_IDS: readonly OrnamentId[] = [
+  'meend', 'andolan', 'gamak', 'kan', 'murki', 'khatka', 'zamzama',
+];
+
+function isOrnamentId(s: string | undefined): s is OrnamentId {
+  return !!s && (ORNAMENT_IDS as readonly string[]).includes(s);
+}
 
 type TargetState = 'pending' | 'active' | 'passed' | 'failed';
 
@@ -47,6 +64,15 @@ export default function MasteryChallenge({
   engine,
   onAdvance,
 }: MasteryChallengeProps) {
+  // T2.1 — ornament challenge branch. When the YAML declares
+  // `exercise: ornament_challenge`, route to a dedicated scorer that uses
+  // the engine's evaluateOrnament rather than the per-target hold gate.
+  if (phase.exercise === 'ornament_challenge') {
+    return (
+      <OrnamentChallenge phase={phase} engine={engine} onAdvance={onAdvance} />
+    );
+  }
+
   // Build target list. If absent, synthesise one open-ended target.
   const targets = (() => {
     if (phase.targets && phase.targets.length > 0) {
@@ -228,4 +254,235 @@ function computeVerdict(
   const passed = countPassed(resolved);
   const total = resolved.length || 1;
   return passed / total >= minAccuracy ? 'pass' : 'fail';
+}
+
+// =============================================================================
+// OrnamentChallenge — T2.1
+//
+// Records the student's pitch trajectory during a single attempt window,
+// then scores it via evaluateOrnament. Up to `attempts_allowed` retries; the
+// verdict reflects the best attempt. Pass threshold defaults to overall ≥ 0.6.
+// =============================================================================
+
+const ORNAMENT_PASS_THRESHOLD = 0.6;
+const DEFAULT_ORNAMENT_DURATION_S = 6;
+
+function OrnamentChallenge({
+  phase,
+  engine,
+  onAdvance,
+}: MasteryChallengeProps) {
+  const ornamentId: OrnamentId | null = (() => {
+    if (isOrnamentId(phase.ornament_type)) return phase.ornament_type;
+    return null;
+  })();
+
+  const targetSwara = phase.target_swara ?? phase.to_swara ?? 'Sa';
+  const fromSwara = phase.from_swara;
+  const ragaContext = phase.raga ?? phase.raga_id ?? 'bhoopali';
+  const attemptsAllowed = phase.attempts_allowed ?? 3;
+  const recordingDurationS = phase.hold_duration_s ?? DEFAULT_ORNAMENT_DURATION_S;
+
+  const [recording, setRecording] = useState(false);
+  const [bestScore, setBestScore] = useState<OrnamentScore | null>(null);
+  const [lastScore, setLastScore] = useState<OrnamentScore | null>(null);
+  const [attemptsUsed, setAttemptsUsed] = useState(0);
+  const [verdict, setVerdict] = useState<'pass' | 'fail' | null>(null);
+
+  const samplesRef = useRef<OrnamentPitchSample[]>([]);
+  const seenTsRef = useRef<Set<number>>(new Set());
+  const recordingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const advanceRef = useRef(onAdvance);
+  advanceRef.current = onAdvance;
+
+  // Buffer pitch samples while recording is active. The voice pipeline
+  // populates voiceFeedback.pitchHistory; we de-dupe by timestamp so each
+  // physical sample is recorded once.
+  const fb = engine.voiceFeedback;
+  useEffect(() => {
+    if (!recording) return;
+    const history = fb.pitchHistory;
+    if (!history || history.length === 0) return;
+    const confidence = fb.confidence ?? 0;
+    for (const [ts, hz] of history) {
+      if (!Number.isFinite(ts) || !Number.isFinite(hz) || hz <= 0) continue;
+      if (seenTsRef.current.has(ts)) continue;
+      seenTsRef.current.add(ts);
+      samplesRef.current.push({ t: ts, hz, confidence });
+    }
+  }, [fb, recording]);
+
+  const stopRecording = useCallback(() => {
+    if (recordingTimerRef.current) {
+      clearTimeout(recordingTimerRef.current);
+      recordingTimerRef.current = null;
+    }
+    setRecording(false);
+
+    if (!ornamentId || samplesRef.current.length < 2) {
+      // Not enough samples — count as a failed attempt with zero score
+      const zero: OrnamentScore = {
+        overall: 0,
+        shapeFit: 0,
+        timing: 0,
+        arrivalAccuracyCents: 0,
+        notes: ['Not enough audio recorded — try again'],
+      };
+      setLastScore(zero);
+      setAttemptsUsed((n) => n + 1);
+      return;
+    }
+
+    const attempt: OrnamentAttempt = {
+      ornamentId,
+      targetSwara,
+      fromSwara,
+      pitchSamples: samplesRef.current,
+      ragaContext,
+      saHz: engine.saHz,
+    };
+
+    try {
+      const score = evaluateOrnament(attempt);
+      setLastScore(score);
+      setBestScore((prev) => (prev === null || score.overall > prev.overall ? score : prev));
+      const newAttempts = attemptsUsed + 1;
+      setAttemptsUsed(newAttempts);
+
+      const passed = score.overall >= ORNAMENT_PASS_THRESHOLD;
+      // If passed, lock the verdict immediately. Otherwise allow retries
+      // until attempts_allowed is exhausted, then verdict = best so far.
+      if (passed) {
+        setVerdict('pass');
+      } else if (newAttempts >= attemptsAllowed) {
+        setVerdict(
+          (bestScore && bestScore.overall >= ORNAMENT_PASS_THRESHOLD) ||
+            score.overall >= ORNAMENT_PASS_THRESHOLD
+            ? 'pass'
+            : 'fail',
+        );
+      }
+    } catch {
+      // Defensive — keep the lesson advanceable even if scoring throws
+      setLastScore({
+        overall: 0,
+        shapeFit: 0,
+        timing: 0,
+        arrivalAccuracyCents: 0,
+        notes: ['Scoring failed — try again'],
+      });
+      setAttemptsUsed((n) => n + 1);
+    }
+  }, [ornamentId, targetSwara, fromSwara, ragaContext, engine.saHz, attemptsUsed, attemptsAllowed, bestScore]);
+
+  const startRecording = useCallback(() => {
+    samplesRef.current = [];
+    seenTsRef.current = new Set();
+    setLastScore(null);
+    setRecording(true);
+
+    recordingTimerRef.current = setTimeout(() => {
+      stopRecording();
+    }, recordingDurationS * 1000);
+  }, [recordingDurationS, stopRecording]);
+
+  // Cleanup
+  useEffect(() => {
+    return () => {
+      if (recordingTimerRef.current) clearTimeout(recordingTimerRef.current);
+    };
+  }, []);
+
+  const canRetry = !recording && verdict === null && attemptsUsed > 0 && attemptsUsed < attemptsAllowed;
+  const canStart = !recording && lastScore === null && attemptsUsed === 0;
+  const ornamentLabel = ornamentId
+    ? ornamentId.charAt(0).toUpperCase() + ornamentId.slice(1)
+    : 'Ornament';
+
+  return (
+    <motion.div key={phase.id} {...phaseTransition} className={styles.centeredMessage}>
+      {phase.instruction && (
+        <p className={styles.phaseInstruction}>{phase.instruction.trim()}</p>
+      )}
+
+      <p className={styles.phaseMeta}>
+        {ornamentLabel} · {ragaContext} · attempt {Math.min(attemptsUsed + (recording ? 1 : 0), attemptsAllowed)} / {attemptsAllowed}
+      </p>
+
+      {fromSwara ? (
+        <p className={styles.ornamentRoute}>
+          {fromSwara} <span className={styles.ornamentArrow}>&rarr;</span> {targetSwara}
+        </p>
+      ) : (
+        <p className={styles.practiceTarget}>{targetSwara}</p>
+      )}
+
+      {recording && (
+        <div className={styles.holdMeter} aria-live="polite">
+          <span className={styles.holdMeterLabel}>Recording — sing the ornament</span>
+        </div>
+      )}
+
+      {lastScore && !recording && (
+        <div className={styles.ornamentScore} role="status" aria-live="polite">
+          <p className={styles.ornamentScoreValue}>
+            {Math.round(lastScore.overall * 100)}
+            <span className={styles.ornamentScoreUnit}> / 100</span>
+          </p>
+          {lastScore.notes.length > 0 && (
+            <ul className={styles.ornamentScoreNotes}>
+              {lastScore.notes.map((n) => (
+                <li key={n}>{n}</li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+
+      {verdict !== null && (
+        <p className={`${styles.verdictBanner} ${verdict === 'pass' ? styles.verdictPass : styles.verdictFail}`}>
+          {verdict === 'pass' ? 'Passed' : 'Not yet'}
+        </p>
+      )}
+
+      <div style={{ display: 'flex', gap: 'var(--space-3)', marginTop: 'var(--space-4)' }}>
+        {canStart && (
+          <button
+            type="button"
+            className={styles.actionButton}
+            onClick={startRecording}
+          >
+            Begin
+          </button>
+        )}
+        {canRetry && (
+          <button
+            type="button"
+            className={styles.actionButtonSecondary}
+            onClick={startRecording}
+          >
+            Try again
+          </button>
+        )}
+        {recording && (
+          <button
+            type="button"
+            className={styles.actionButtonSecondary}
+            onClick={stopRecording}
+          >
+            Done
+          </button>
+        )}
+        {(verdict !== null || (lastScore && !canRetry)) && (
+          <button
+            type="button"
+            className={styles.actionButton}
+            onClick={() => advanceRef.current()}
+          >
+            Continue
+          </button>
+        )}
+      </div>
+    </motion.div>
+  );
 }

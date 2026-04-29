@@ -188,6 +188,8 @@ export interface LessonPhase {
 
   // mastery_challenge / passive_phrase_recognition
   readonly min_match_confidence?: number;
+  /** Top-level hold duration for ornament_challenge phases (seconds). */
+  readonly hold_duration_s?: number;
 
   // grammar_exercise
   readonly grammar_rule?: string;
