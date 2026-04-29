@@ -21,6 +21,7 @@
  */
 
 import { useEffect, useRef } from 'react';
+import { emit } from '../lib/telemetry';
 
 const STORAGE_KEY = 'sadhana_last_reminder_date';
 
@@ -131,7 +132,13 @@ export async function requestNotificationPermission(): Promise<NotificationPermi
     return Notification.permission;
   }
   try {
-    return await Notification.requestPermission();
+    const result = await Notification.requestPermission();
+    if (result === 'granted') {
+      void emit('notification-permission-granted');
+    } else if (result === 'denied') {
+      void emit('notification-permission-denied');
+    }
+    return result;
   } catch {
     return 'denied';
   }

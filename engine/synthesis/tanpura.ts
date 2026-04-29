@@ -140,6 +140,14 @@ export class TanpuraDrone {
   private masterGain: GainNode | null = null;
   private audioContext: AudioContext | null = null;
 
+  /**
+   * Expose the underlying AudioContext so the frontend can register it
+   * with the global resumer (audit #1 — mobile context suspension).
+   */
+  getAudioContext(): AudioContext | null {
+    return this.audioContext;
+  }
+
   /** Handle for the pluck cycle scheduler. */
   private cycleTimer: ReturnType<typeof setTimeout> | null = null;
   /** Handle for the scheduled post-fade cleanup. */

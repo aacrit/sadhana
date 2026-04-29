@@ -17,6 +17,7 @@ import { VoicePipeline } from '@/engine/voice/pipeline';
 import { useVoiceWave } from '../lib/VoiceWaveContext';
 import { useAuth } from '../lib/auth';
 import { updateSa } from '../lib/supabase';
+import { emit } from '../lib/telemetry';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -169,6 +170,7 @@ export default function SaCalibrator({ open, onClose }: SaCalibratorProps) {
   const confirmSa = useCallback(async () => {
     if (!detectedHz) return;
     setSaHz(detectedHz);
+    void emit('sa-calibrated', { hz: detectedHz, source: 'auto' });
     if (authUser) {
       await updateSa(authUser.id, detectedHz);
       refreshProfile?.();

@@ -335,6 +335,15 @@ export class VoicePipeline {
    * Returns the AnalyserNode for external visualization (VoiceWave).
    * Returns null if the pipeline is not running.
    */
+  /**
+   * Expose the underlying AudioContext so the frontend can register it
+   * with the global resumer (audit #1 — backgrounded mobile context
+   * suspension). Returns null when the pipeline has not started.
+   */
+  getAudioContext(): AudioContext | null {
+    return this.audioContext;
+  }
+
   getAnalyserNode(): AnalyserNode | null {
     return this.analyserNode;
   }

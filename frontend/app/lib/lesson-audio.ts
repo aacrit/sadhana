@@ -22,6 +22,7 @@
 import { useRef, useState, useCallback, useEffect } from 'react';
 
 import { TanpuraDrone } from '@/engine/synthesis/tanpura';
+import { registerAudioContext } from './audio-context-registry';
 import {
   playSwaraNote as enginePlaySwaraNote,
   ensureAudioReady,
@@ -267,6 +268,9 @@ export function useLessonAudio(
     }
 
     tanpuraRef.current.start().then(() => {
+      // Register with the global AudioContext resumer (audit #1)
+      const ctx = tanpuraRef.current?.getAudioContext();
+      if (ctx) registerAudioContext(ctx);
       if (!disposedRef.current) {
         setTanpuraActive(true);
       }
@@ -309,6 +313,7 @@ export function useLessonAudio(
       // because the browser caps the number of simultaneous contexts.
       if (!talaCtxRef.current || talaCtxRef.current.state === 'closed') {
         talaCtxRef.current = new AudioContext();
+        registerAudioContext(talaCtxRef.current);
       }
       const ctx = talaCtxRef.current;
       if (ctx.state === 'suspended') await ctx.resume();
@@ -583,6 +588,10 @@ export function useLessonAudio(
 
       saDetectionPipelineRef.current = pipeline;
       await pipeline.start();
+      // Register the context with the global resumer so a backgrounded
+      // mobile tab gets resume() on visibilitychange (audit #1).
+      const ctx = pipeline.getAudioContext();
+      if (ctx) registerAudioContext(ctx);
     },
     [],
   );
@@ -635,6 +644,8 @@ export function useLessonAudio(
 
       voicePipelineRef.current = pipeline;
       await pipeline.start();
+      const ctx = pipeline.getAudioContext();
+      if (ctx) registerAudioContext(ctx);
 
       if (!disposedRef.current) {
         setPipelineActive(true);
