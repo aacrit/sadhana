@@ -78,6 +78,7 @@ const VOICE_PHASE_TYPES: readonly PhaseType[] = [
   'sa_detection',
   'pitch_exercise',
   'phrase_exercise',
+  'sing_along',
   'call_response',
   'passive_phrase_recognition',
   'ornament_exercise',
@@ -131,6 +132,7 @@ const PHASE_TANPURA_GAIN: Readonly<Partial<Record<PhaseType, number>>> = {
   // Voice exercise — student singing, needs to hear themselves
   pitch_exercise: VOICE_EXERCISE_GAIN,
   phrase_exercise: VOICE_EXERCISE_GAIN,
+  sing_along: VOICE_EXERCISE_GAIN,
   call_response: VOICE_EXERCISE_GAIN,
 };
 
@@ -518,6 +520,7 @@ export function useLessonEngine(
 
       case 'pitch_exercise':
       case 'phrase_exercise':
+      case 'sing_along':
       case 'passive_phrase_recognition': {
         if (skipMicFlag) break;
 

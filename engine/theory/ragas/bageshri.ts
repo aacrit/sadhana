@@ -125,8 +125,10 @@ export const bageshri: Raga = {
     'considered landmark interpretations that balance technical precision with ' +
     'extraordinary emotional depth.',
 
-  // Ni tuning: Bageshri is a late-night raga (prahar 7-8) with Ni komal
-  // as a key characteristic swara. Some traditions tune the tanpura to Ni
-  // to emphasise the raga's characteristic night-longing quality.
-  tanpuraTuning: 'Ni',
+  // Ma tuning: standard practice for Bageshri (raga-scholar audit, rev 9).
+  // Ma is the vadi — the emotional epicentre that every phrase orbits — so
+  // the tanpura's Pa-string is replaced by Ma to put the raga's centre of
+  // gravity in the drone. Confirmed against Kirana / Jaipur-Atrauli /
+  // Agra performance practice.
+  tanpuraTuning: 'Ma',
 };

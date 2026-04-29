@@ -1,4 +1,4 @@
-const CACHE = 'sadhana-v1'
+const CACHE = 'sadhana-v2'
 const SHELL = ['/sadhana/', '/sadhana/journeys/beginner/']
 
 self.addEventListener('install', e => {

@@ -49,10 +49,17 @@ const ENCLOSURE_LOW_GAIN = 4;
 const ENCLOSURE_HIGH_FREQ = 1500;
 const ENCLOSURE_HIGH_Q = 2.0;
 const ENCLOSURE_HIGH_GAIN = 3;
-const HARMONIUM_ATTACK = 0.08;
+// Music-director-locked spec (rev 9 audit):
+//   Attack 40ms (reed-to-bellows delay)
+//   Decay 0.15s (initial brightness fade as reed settles)
+//   Sustain 1.0 (sustained reed — full amplitude while held)
+//   Release 300ms (air pressure release through reed chamber)
+// These match swara-voice.ts:74-77 so the Tier 1 fallback in this sampler
+// produces an identical envelope to the dedicated swara synth — DRY.
+const HARMONIUM_ATTACK = 0.04;
 const HARMONIUM_DECAY = 0.15;
-const HARMONIUM_SUSTAIN = 0.85;
-const HARMONIUM_RELEASE = 0.20;
+const HARMONIUM_SUSTAIN = 1.0;
+const HARMONIUM_RELEASE = 0.30;
 const BELLOWS_LFO_RATE = 4.5;
 const BELLOWS_LFO_DEPTH = 1.5;
 

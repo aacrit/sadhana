@@ -1,7 +1,7 @@
 ---
 name: frontend-builder
 description: "MUST BE USED for building UI components and practice session views. Follows Ragamala design system, Next.js 15/React 19/TypeScript. Tantri integration for all swara/pitch views. Read+write."
-model: claude-sonnet-4-6
+model: claude-opus-4-7
 allowed-tools: Read, Grep, Glob, Bash, Edit, Write
 ---
 

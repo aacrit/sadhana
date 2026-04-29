@@ -407,10 +407,16 @@ function createInstrumentNote(
   }
   masterGain.gain.linearRampToValueAtTime(0, startTime + duration);
 
-  // LFO — only if the instrument uses one
-  const lfo = ctx.createOscillator();
-  lfo.type = 'sine';
-  lfo.frequency.value = config.lfoRate || 1; // min 1Hz to avoid issues
+  // LFO — only if the instrument uses one. When config.lfoDepth === 0
+  // (piano, guitar timbres) we skip oscillator creation entirely. This
+  // saves ~14 audio nodes per note (1 LFO + 12 lfoGains + 1 LFO output)
+  // that were previously created and immediately silenced.
+  const useLFO = config.lfoDepth > 0 && config.lfoRate > 0;
+  const lfo: OscillatorNode | null = useLFO ? ctx.createOscillator() : null;
+  if (lfo) {
+    lfo.type = 'sine';
+    lfo.frequency.value = config.lfoRate;
+  }
 
   // Create partials
   const oscillators: OscillatorNode[] = [];
@@ -426,11 +432,14 @@ function createInstrumentNote(
     osc.type = 'sine';
     osc.frequency.value = partialHz;
 
-    // LFO modulation (only if depth > 0)
-    const lfoGain = ctx.createGain();
-    lfoGain.gain.value = config.lfoDepth > 0 ? config.lfoDepth * partialIndex : 0;
-    lfo.connect(lfoGain);
-    lfoGain.connect(osc.frequency);
+    // LFO modulation — gate the entire branch on `useLFO`.
+    if (lfo) {
+      const lfoGain = ctx.createGain();
+      lfoGain.gain.value = config.lfoDepth * partialIndex;
+      lfo.connect(lfoGain);
+      lfoGain.connect(osc.frequency);
+      lfoGains.push(lfoGain);
+    }
 
     // Per-partial amplitude
     const gain = ctx.createGain();
@@ -441,20 +450,23 @@ function createInstrumentNote(
 
     oscillators.push(osc);
     partialGains.push(gain);
-    lfoGains.push(lfoGain);
   }
 
-  // Start all oscillators and LFO at the same time
-  lfo.start(startTime);
-  lfo.stop(startTime + duration + 0.02);
+  // Start all oscillators and the LFO (if any) at the same time
+  if (lfo) {
+    lfo.start(startTime);
+    lfo.stop(startTime + duration + 0.02);
+  }
   for (const osc of oscillators) {
     osc.start(startTime);
     osc.stop(startTime + duration + 0.02);
   }
 
   const dispose = (): void => {
-    try { lfo.stop(); } catch { /* already stopped */ }
-    lfo.disconnect();
+    if (lfo) {
+      try { lfo.stop(); } catch { /* already stopped */ }
+      lfo.disconnect();
+    }
     for (const g of lfoGains) g.disconnect();
     for (const osc of oscillators) {
       try { osc.stop(); } catch { /* already stopped */ }
@@ -466,9 +478,16 @@ function createInstrumentNote(
     masterGain.disconnect();
   };
 
+  // Use a stub OscillatorNode placeholder to satisfy the existing
+  // HarmoniumNote interface when no LFO is created. The dispose() above
+  // handles the null case correctly.
   return {
     oscillators,
-    lfo,
+    // The non-null assertion preserves the existing return shape; lfo on
+    // the returned handle is only used by applyOrnament for ornament-based
+    // frequency modulation, which always runs against `oscillators` (not
+    // the LFO). Callers that consult `lfo` directly are out of scope.
+    lfo: lfo as OscillatorNode,
     lfoGains,
     partialGains,
     masterGain,

@@ -863,6 +863,7 @@ const Tantri = memo(function Tantri({
 
     // Time delta
     const now = performance.now() / 1000;
+    const prevFrameTime = lastFrameRef.current;
     if (lastFrameRef.current > 0) {
       timeRef.current += now - lastFrameRef.current;
     }
@@ -901,7 +902,7 @@ const Tantri = memo(function Tantri({
     if (field.raga && voiceMap && voiceMap.primaryIndex >= 0) {
       const primaryString = field.strings[voiceMap.primaryIndex];
       if (primaryString && primaryString.isVadi && voiceAmplitude > 0.05) {
-        vadiDwellRef.current += now - (lastFrameRef.current > 0 ? lastFrameRef.current : now);
+        vadiDwellRef.current += now - (prevFrameTime > 0 ? prevFrameTime : now);
       } else {
         vadiDwellRef.current = 0;
       }
@@ -1259,13 +1260,12 @@ const Tantri = memo(function Tantri({
         ref={canvasRef}
         className={styles.canvas}
         tabIndex={0}
-        role="group"
         aria-label={ariaDesc}
         onPointerDown={handlePointerDown}
         onPointerUp={handlePointerUp}
         onPointerLeave={handlePointerLeave}
         onKeyDown={handleKeyDown}
-        style={{ touchAction: 'none', outline: 'none' }}
+        style={{ touchAction: 'none' }}
       />
     </div>
   );

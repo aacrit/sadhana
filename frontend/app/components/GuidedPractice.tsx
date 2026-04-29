@@ -13,11 +13,11 @@
  */
 
 import { motion, AnimatePresence } from 'framer-motion';
+import { useEffect } from 'react';
 import type { Raga } from '@/engine/theory/types';
 import { PRACTICE_STAGES, STAGE_LABELS } from '@/engine/analysis/practice-scoring';
 import type { StarRating, StageResult } from '@/engine/analysis/practice-scoring';
 import type { GuidedPracticeControls } from '../lib/useGuidedPractice';
-import VoiceVisualization from './VoiceVisualization';
 import Tantri from './Tantri';
 import type { TantriPlayEvent } from '@/engine/interaction/tantri';
 import { playSwaraNote, ensureAudioReady } from '@/engine/synthesis/swara-voice';
@@ -275,13 +275,8 @@ function ActiveScreen({
           </div>
         )}
 
-        {/* Voice visualization during singing */}
-        {isVoiceActive && (
-          <VoiceVisualization
-            feedback={voiceFeedback}
-            className={styles.voiceViz}
-          />
-        )}
+        {/* P6 fix: VoiceVisualization removed — Tantri is the persistent voice
+             surface for guided practice. Consistent with LessonRenderer. */}
 
         {/* Listen indicator */}
         {stagePhase === 'listen' && (
@@ -455,6 +450,17 @@ export default function GuidedPractice({
   onExit,
 }: GuidedPracticeProps) {
   const { practiceState, exit } = controls;
+
+  // B7 fix: mirror data-raga onto document.body so body::before/::after
+  // raga-aware backgrounds activate. Guard with cleanup so two surfaces
+  // don't conflict; clear on unmount.
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    document.body.dataset.raga = raga.id;
+    return () => {
+      delete document.body.dataset.raga;
+    };
+  }, [raga.id]);
 
   const handleExit = () => {
     exit();

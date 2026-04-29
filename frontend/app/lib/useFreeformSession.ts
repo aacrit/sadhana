@@ -171,7 +171,8 @@ export interface FreeformState {
 
   // Session history
   swaraHistory: SwaraEvent[];
-  sessionDurationS: number;
+  /** P4 fix: use getDurationS() for live HUD display; avoids 1Hz full re-renders. */
+  getDurationS(): number;
   totalSwaraCount: number;
 
   // Status
@@ -235,7 +236,9 @@ export function useFreeformSession(
   const [harmonyStrength, setHarmonyStrength] = useState(0);
 
   const [swaraHistory, setSwaraHistory] = useState<SwaraEvent[]>([]);
-  const [sessionDurationS, setSessionDurationS] = useState(0);
+  // P4 fix: session duration moved to a ref to stop 1Hz re-renders.
+  // Callers that need a live tick should use getDurationS() with their own timer.
+  const sessionDurationSRef = useRef(0);
   const [totalSwaraCount, setTotalSwaraCount] = useState(0);
 
   const [isListening, setIsListening] = useState(false);
@@ -474,12 +477,12 @@ export function useFreeformSession(
       totalSwaraCountRef.current = 0;
       setTotalSwaraCount(0);
       setSwaraHistory([]);
-      setSessionDurationS(0);
+      sessionDurationSRef.current = 0;
 
       timerRef.current = setInterval(() => {
         if (disposedRef.current) return;
         const elapsed = (performance.now() - sessionStartRef.current) / 1000;
-        setSessionDurationS(Math.floor(elapsed));
+        sessionDurationSRef.current = Math.floor(elapsed);
       }, 1000);
 
       // Also start tanpura if not already running
@@ -520,7 +523,7 @@ export function useFreeformSession(
           currentSwaraSymbolRef.current,
           swaraStartHzRef.current,
           elapsed,
-          centsDev ?? 0,
+          lastCentsDevRef.current ?? 0,
         );
       }
       currentSwaraSymbolRef.current = null;
@@ -540,7 +543,7 @@ export function useFreeformSession(
     const finalDurationS = sessionStartRef.current
       ? Math.floor((performance.now() - sessionStartRef.current) / 1000)
       : 0;
-    setSessionDurationS(finalDurationS);
+    sessionDurationSRef.current = finalDurationS;
 
     // Save to Supabase if session was long enough (fire-and-forget)
     if (finalDurationS >= MIN_SESSION_DURATION_S) {
@@ -601,7 +604,7 @@ export function useFreeformSession(
 
     // Session history
     swaraHistory,
-    sessionDurationS,
+    getDurationS: () => sessionDurationSRef.current,
     totalSwaraCount,
 
     // Status
@@ -636,13 +639,10 @@ async function saveFreeformSession(
   durationS: number,
 ): Promise<void> {
   try {
-    const { saveSession } = await import('./supabase');
-    const { useAuth } = await import('./auth');
-
     // We cannot call hooks here (outside React), so we access Supabase
     // directly for the session insert. The supabase module exports the
     // client; we use it with a simplified insert.
-    const { supabase } = await import('./supabase');
+    const { supabase, completeRiyaz } = await import('./supabase');
 
     // Get current user from Supabase auth
     const { data: { user } } = await supabase.auth.getUser();
@@ -660,6 +660,12 @@ async function saveFreeformSession(
       started_at: new Date(Date.now() - durationS * 1000).toISOString(),
       ended_at: new Date().toISOString(),
     });
+
+    // Update the daily streak — freeform riyaz counts toward the streak
+    // just like a structured lesson. Previously only useLessonEngine paths
+    // called completeRiyaz; freeform sessions silently skipped, which was
+    // a regression for students who practice freeform-only.
+    await completeRiyaz(user.id);
   } catch {
     // Fire-and-forget: log but never crash
     if (typeof console !== 'undefined') {

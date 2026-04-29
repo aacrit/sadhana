@@ -1,7 +1,7 @@
 ---
 name: perf-optimizer
 description: "Performance optimization — Tantri canvas hot paths, audio buffer latency, animation frame rate, Three.js render budget, bundle size. Read+write."
-model: claude-sonnet-4-6
+model: claude-opus-4-7
 allowed-tools: Read, Grep, Glob, Bash, Edit, Write
 ---
 

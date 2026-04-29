@@ -90,6 +90,9 @@ export default function VoiceVisualization({
   const containerRef = useRef<HTMLDivElement>(null);
   const [centsOpen, setCentsOpen] = useState(defaultExpanded);
 
+  // P3 fix: cache --text-3 instead of calling getComputedStyle per frame.
+  const text3ColorRef = useRef<string>('#7A6B5E');
+
   // EMA-smoothed cents deviation (mutable ref for performance)
   const smoothedCentsRef = useRef<number>(0);
   const hasVoiceRef = useRef<boolean>(false);
@@ -173,6 +176,25 @@ export default function VoiceVisualization({
   // The spring physics (stiffness 300, damping 12) naturally produce a
   // settling motion that feels like a physical needle returning to rest.
 
+  // P3 fix: resolve --text-3 at mount and on data-theme change,
+  // so getComputedStyle is never called inside the per-frame draw path.
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    const readColor = () => {
+      const val = getComputedStyle(document.documentElement)
+        .getPropertyValue('--text-3')
+        .trim();
+      if (val) text3ColorRef.current = val;
+    };
+    readColor();
+    const observer = new MutationObserver(readColor);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['data-theme'],
+    });
+    return () => observer.disconnect();
+  }, []);
+
   // -------------------------------------------------------------------------
   // Layer 1: Waveform canvas
   // -------------------------------------------------------------------------
@@ -200,7 +222,7 @@ export default function VoiceVisualization({
     // Voice waveform — render from pitch history
     if (feedback.pitchHistory.length > 1) {
       ctx.beginPath();
-      ctx.strokeStyle = getComputedStyle(canvas).getPropertyValue('--text-3').trim() || '#7A6B5E';
+      ctx.strokeStyle = text3ColorRef.current;
       ctx.lineWidth = 1.5;
       ctx.globalAlpha = Math.min(feedback.amplitude * 1.2, 0.9);
 

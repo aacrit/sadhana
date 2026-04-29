@@ -1,7 +1,7 @@
 ---
 name: frontend-fixer
 description: "UI bug remediation — root-cause grouping, surgical fixes across Day/Night modes, Tantri renderer bugs. Invoked after uat-tester reports failures. Read+write."
-model: claude-sonnet-4-6
+model: claude-opus-4-7
 allowed-tools: Read, Grep, Glob, Bash, Edit, Write
 ---
 

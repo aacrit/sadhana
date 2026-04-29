@@ -196,11 +196,11 @@ export default function AuthPage() {
               className={styles.input}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="At least 6 characters"
+              placeholder="At least 10 characters"
               autoComplete={
                 mode === 'signup' ? 'new-password' : 'current-password'
               }
-              minLength={6}
+              minLength={10}
               required
               tabIndex={isEmailOpen ? 0 : -1}
             />
@@ -214,7 +214,7 @@ export default function AuthPage() {
             <button
               type="submit"
               className={styles.submitButton}
-              disabled={submitting || !email || !password}
+              disabled={submitting || !email || (mode === 'signup' ? password.length < 10 : !password)}
               tabIndex={isEmailOpen ? 0 : -1}
             >
               {submitting

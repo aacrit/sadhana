@@ -147,6 +147,8 @@
   text-transform: uppercase;
 }
 
+/* B3 fix: saffron is earned-only — never a decorative fill.
+   Use transparent background + saffron border + saffron text. */
 .beginButton {
   display: inline-flex;
   align-items: center;
@@ -154,24 +156,23 @@
   padding: var(--space-4) var(--space-12, 4rem);
   min-height: var(--touch-min);
   min-width: 180px;
-  border: none;
+  border: 1px solid var(--accent);
   border-radius: var(--radius-full);
-  background: linear-gradient(135deg, #E8871E 0%, #D07518 100%);
-  color: #fff;
+  background: transparent;
+  color: var(--accent);
   font-family: var(--font-serif);
   font-size: var(--text-lg);
   font-weight: var(--weight-medium);
   letter-spacing: var(--tracking-wider);
   cursor: pointer;
   text-decoration: none;
-  box-shadow: 0 2px 12px rgba(232, 135, 30, 0.25);
   transition: transform var(--dur-fast) var(--ease-out),
-              box-shadow var(--dur-fast) var(--ease-out);
+              background-color var(--dur-fast) var(--ease-out);
 }
 
 .beginButton:hover {
+  background: var(--accent-dim);
   transform: translateY(-1px);
-  box-shadow: 0 4px 20px rgba(232, 135, 30, 0.35);
 }
 
 .beginButton:focus-visible {
@@ -441,9 +442,9 @@
 
 .lessonRaga {
   font-family: var(--font-sans);
-  font-size: 10px;
+  font-size: var(--text-2xs);
   font-weight: var(--weight-medium);
-  color: var(--text-3);
+  color: var(--text-2);
   text-transform: uppercase;
   letter-spacing: var(--tracking-widest);
   flex-shrink: 0;

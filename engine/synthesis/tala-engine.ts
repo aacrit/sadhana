@@ -178,10 +178,14 @@ export function synthBayan(
     osc.type = 'sine';
     osc.frequency.setValueAtTime(fundamental * ratio, t);
 
-    // Pitch slide for open (undamped) strokes — "Ge" character
+    // Pitch slide for open (undamped) strokes — "Ge" character.
+    // Matches a real bayan's ~25% pitch dive on 'Ge' (membrane heel-pressure
+    // release lets the fundamental fall by a perfect fourth, not by a full
+    // octave). Previous 50% multiplier produced an exaggerated bend that
+    // sounded like a synth pitch-down rather than a tabla.
     if (!damped) {
       osc.frequency.exponentialRampToValueAtTime(
-        fundamental * ratio * 0.5, // slide down 50%
+        fundamental * ratio * 0.75, // slide down 25%
         t + 0.2, // over 200ms
       );
     }
@@ -395,6 +399,20 @@ export class TalaPlayer {
   private nextBeatIndex = 0;        // Next beat to schedule (0-indexed within cycle)
   private rafId: number | null = null;
 
+  // Pending visual-beat callbacks queued by scheduleAhead() and dispatched
+  // by the rAF loop when AudioContext.currentTime crosses each beatTime.
+  // setTimeout was previously used here, but it gets throttled to ~1Hz when
+  // the tab is backgrounded — the audio kept perfect time but the visual
+  // counter froze. rAF stops when the tab is hidden too, but it resumes
+  // immediately on focus and we re-sync against ctx.currentTime, so the
+  // visual catches up to whichever beat is currently sounding.
+  private pendingBeatCallbacks: Array<{
+    time: number;
+    beat: number;
+    isSam: boolean;
+    isKhali: boolean;
+  }> = [];
+
   // How far ahead (in beats) to schedule
   private static readonly LOOKAHEAD_BEATS = 4;
   // Re-schedule when this many beats remain in the buffer
@@ -498,6 +516,7 @@ export class TalaPlayer {
     this.thekaRunning = false;
     this.currentTala = null;
     this.onBeatCallback = null;
+    this.pendingBeatCallbacks.length = 0;
 
     if (this.rafId !== null) {
       cancelAnimationFrame(this.rafId);
@@ -534,6 +553,11 @@ export class TalaPlayer {
   /**
    * Schedule beats ahead into the Web Audio timeline.
    * Fills the lookahead buffer from the current position.
+   *
+   * Audio is scheduled directly via Web Audio's sample-accurate clock.
+   * Visual callbacks are queued into `pendingBeatCallbacks` and dispatched
+   * by the rAF loop when ctx.currentTime crosses each beatTime — see
+   * dispatchPendingCallbacks().
    */
   private scheduleAhead(): void {
     if (!this.thekaRunning || !this.currentTala) return;
@@ -552,20 +576,21 @@ export class TalaPlayer {
         this.playBol(bol, beatTime);
       }
 
-      // Fire the onBeat callback (asynchronously, since we're scheduling ahead)
       const beatNumber = beatIndexInCycle + 1; // 1-indexed
       const isSam = beatNumber === tala.sam;
       const isKhali = tala.khali.includes(beatNumber);
 
+      // Queue the visual callback for rAF dispatch — no setTimeout.
+      // The rAF loop will fire this when the AudioContext clock crosses
+      // beatTime. If the tab was backgrounded, dispatch happens on focus
+      // and the visual catches up to the audio.
       if (this.onBeatCallback) {
-        // Schedule the callback to fire at the right time
-        const delay = (beatTime - this.ctx.currentTime) * 1000;
-        if (delay > 0) {
-          const cb = this.onBeatCallback;
-          setTimeout(() => cb(beatNumber, isSam, isKhali), delay);
-        } else {
-          this.onBeatCallback(beatNumber, isSam, isKhali);
-        }
+        this.pendingBeatCallbacks.push({
+          time: beatTime,
+          beat: beatNumber,
+          isSam,
+          isKhali,
+        });
       }
 
       this.scheduledUpTo += secondsPerBeat;
@@ -574,11 +599,45 @@ export class TalaPlayer {
   }
 
   /**
+   * Drain any queued visual beat callbacks whose audio time has now passed.
+   * Called from the rAF loop. We compare against ctx.currentTime (the same
+   * clock the audio scheduling uses) so the visual is always coherent with
+   * the sound, regardless of what setTimeout would have fired.
+   */
+  private dispatchPendingCallbacks(): void {
+    const cb = this.onBeatCallback;
+    if (!cb) {
+      this.pendingBeatCallbacks.length = 0;
+      return;
+    }
+    const now = this.ctx.currentTime;
+    const queue = this.pendingBeatCallbacks;
+    let writeIdx = 0;
+    for (let i = 0; i < queue.length; i++) {
+      const entry = queue[i]!;
+      if (entry.time <= now) {
+        try {
+          cb(entry.beat, entry.isSam, entry.isKhali);
+        } catch { /* user callback errors must not stall the loop */ }
+      } else {
+        // Compact retained entries to the front of the queue
+        if (writeIdx !== i) queue[writeIdx] = entry;
+        writeIdx++;
+      }
+    }
+    queue.length = writeIdx;
+  }
+
+  /**
    * The scheduling loop — runs on requestAnimationFrame.
-   * Checks if we need to schedule more beats and does so.
+   * Each tick: dispatch any beat callbacks that have come due, and check
+   * if we need to schedule more audio beats.
    */
   private schedulingLoop(): void {
     if (!this.thekaRunning) return;
+
+    // Fire visual callbacks for any beat whose audio time has passed.
+    this.dispatchPendingCallbacks();
 
     const secondsPerBeat = 60 / this.currentTempo;
     const thresholdTime = this.ctx.currentTime + TalaPlayer.RESCHEDULE_THRESHOLD_BEATS * secondsPerBeat;

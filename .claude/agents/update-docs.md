@@ -1,7 +1,7 @@
 ---
 name: update-docs
 description: "Scans codebase changes and updates all docs/*.md files to reflect current state. Run after significant changes. Read+write."
-model: claude-haiku-4-5
+model: claude-opus-4-7
 allowed-tools: Read, Grep, Glob, Bash, Edit, Write
 ---
 

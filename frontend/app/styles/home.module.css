@@ -94,9 +94,9 @@
 
 .statusLabel {
   font-family: var(--font-sans);
-  font-size: 10px;
+  font-size: var(--text-2xs);
   font-weight: var(--weight-medium);
-  color: var(--text-3);
+  color: var(--text-2);
   text-transform: uppercase;
   letter-spacing: var(--tracking-widest);
   line-height: 1.2;
@@ -226,9 +226,9 @@
 
 .cardEnglish {
   font-family: var(--font-sans);
-  font-size: 10px;
+  font-size: var(--text-2xs);
   font-weight: var(--weight-medium);
-  color: var(--text-3);
+  color: var(--text-2);
   text-transform: uppercase;
   letter-spacing: var(--tracking-widest);
 }
@@ -285,9 +285,9 @@
 
 .cardLockLabel {
   font-family: var(--font-sans);
-  font-size: 10px;
+  font-size: var(--text-2xs);
   font-weight: var(--weight-medium);
-  color: var(--text-3);
+  color: var(--text-2);
   text-transform: uppercase;
   letter-spacing: var(--tracking-widest);
   white-space: nowrap;

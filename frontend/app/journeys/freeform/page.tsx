@@ -245,6 +245,8 @@ export default function FreeformPage() {
   const { setAnalyser, setSaHz } = useVoiceWave();
   const [hasStarted, setHasStarted] = useState(false);
   const [startError, setStartError] = useState<string | null>(null);
+  // P4 fix: local tick for HUD timer — keeps re-renders local to this counter.
+  const [hudDurationS, setHudDurationS] = useState(0);
   const [timbre, setTimbre] = useTimbreSelection();
   // Cinematic defocus: true when Tantri strings are vibrating
   const [tantriActive, setTantriActive] = useState(false);
@@ -260,6 +262,17 @@ export default function FreeformPage() {
     () => (selectedRagaId ? getRagaById(selectedRagaId) ?? null : null),
     [selectedRagaId],
   );
+
+  // Mirror data-raga onto document.body to unlock body::before/::after
+  // raga-aware background rules in globals.css / tokens.css.
+  const effectiveRagaId = selectedRagaId ?? todayRaga.id;
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    document.body.dataset.raga = effectiveRagaId;
+    return () => {
+      delete document.body.dataset.raga;
+    };
+  }, [effectiveRagaId]);
 
   // Guided mode: show aroha suggestion
   const [showGuide, setShowGuide] = useState(false);
@@ -280,6 +293,20 @@ export default function FreeformPage() {
     }
     return () => setAnalyser(null);
   }, [session.isListening, setAnalyser, setSaHz, userSaHz, session]);
+
+  // P4 fix: HUD timer tick — local to this component, not in the session hook.
+  // Isolates the 1Hz re-render so it never forces the full session state update.
+  useEffect(() => {
+    if (!session.isListening) {
+      setHudDurationS(0);
+      return;
+    }
+    setHudDurationS(session.getDurationS());
+    const id = setInterval(() => {
+      setHudDurationS(session.getDurationS());
+    }, 1000);
+    return () => clearInterval(id);
+  }, [session.isListening, session]);
 
   // Detect new swara events and add to ghost list
   useEffect(() => {
@@ -666,7 +693,7 @@ export default function FreeformPage() {
       >
         <div className={styles.hudLeft}>
           <span className={styles.hudMono}>
-            {formatDuration(session.sessionDurationS)}
+            {formatDuration(hudDurationS)}
           </span>
         </div>
         <div className={styles.hudRight}>

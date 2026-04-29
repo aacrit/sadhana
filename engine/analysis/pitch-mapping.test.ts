@@ -279,10 +279,12 @@ describe('getAccuracyScore', () => {
 
   it('should return ~0.5 at the tolerance boundary', () => {
     // At exactly the tolerance, score should be ~0.5
-    expect(getAccuracyScore(50, 'shishya')).toBeCloseTo(0.5, 1);
-    expect(getAccuracyScore(25, 'sadhaka')).toBeCloseTo(0.5, 1);
-    expect(getAccuracyScore(15, 'varistha')).toBeCloseTo(0.5, 1);
-    expect(getAccuracyScore(10, 'guru')).toBeCloseTo(0.5, 1);
+    // Tolerances tightened in acoustics-engineer audit (rev 9): shishya 35,
+    // sadhaka 20, varistha 12, guru 8.
+    expect(getAccuracyScore(35, 'shishya')).toBeCloseTo(0.5, 1);
+    expect(getAccuracyScore(20, 'sadhaka')).toBeCloseTo(0.5, 1);
+    expect(getAccuracyScore(12, 'varistha')).toBeCloseTo(0.5, 1);
+    expect(getAccuracyScore(8, 'guru')).toBeCloseTo(0.5, 1);
   });
 
   it('should be symmetric for positive and negative deviation', () => {
@@ -323,22 +325,25 @@ describe('getAccuracyScore', () => {
 
 describe('isPitchCorrect', () => {
   it('should be correct within tolerance', () => {
-    expect(isPitchCorrect(49, 'shishya')).toBe(true);
-    expect(isPitchCorrect(-49, 'shishya')).toBe(true);
-    expect(isPitchCorrect(50, 'shishya')).toBe(true);
+    // Shishya tolerance is 35 cents (rev 9 tightening).
+    expect(isPitchCorrect(34, 'shishya')).toBe(true);
+    expect(isPitchCorrect(-34, 'shishya')).toBe(true);
+    expect(isPitchCorrect(35, 'shishya')).toBe(true);
   });
 
   it('should be incorrect outside tolerance', () => {
-    expect(isPitchCorrect(51, 'shishya')).toBe(false);
-    expect(isPitchCorrect(-51, 'shishya')).toBe(false);
+    expect(isPitchCorrect(36, 'shishya')).toBe(false);
+    expect(isPitchCorrect(-36, 'shishya')).toBe(false);
   });
 
   it('should use different tolerances per level', () => {
-    expect(isPitchCorrect(30, 'shishya')).toBe(true);
-    expect(isPitchCorrect(30, 'sadhaka')).toBe(false);
+    // Shishya 35, Sadhaka 20: 25 cents passes shishya, fails sadhaka.
+    expect(isPitchCorrect(25, 'shishya')).toBe(true);
+    expect(isPitchCorrect(25, 'sadhaka')).toBe(false);
 
-    expect(isPitchCorrect(12, 'varistha')).toBe(true);
-    expect(isPitchCorrect(12, 'guru')).toBe(false);
+    // Varistha 12, Guru 8: 10 cents passes varistha, fails guru.
+    expect(isPitchCorrect(10, 'varistha')).toBe(true);
+    expect(isPitchCorrect(10, 'guru')).toBe(false);
   });
 });
 
@@ -443,10 +448,14 @@ describe('mapPitchToSwara — NaN/Infinity guards', () => {
 
 describe('LEVEL_TOLERANCE', () => {
   it('should have correct tolerance values', () => {
-    expect(LEVEL_TOLERANCE.shishya).toBe(50);
-    expect(LEVEL_TOLERANCE.sadhaka).toBe(25);
-    expect(LEVEL_TOLERANCE.varistha).toBe(15);
-    expect(LEVEL_TOLERANCE.guru).toBe(10);
+    // Tightened in acoustics-engineer audit (rev 9): the legacy 50/25/15/10
+    // shishya tolerance was a quarter-tone — admitting non-musical pitch as
+    // "correct." New values keep beginners forgiven (35c is still ~1/3
+    // semitone) while requiring real proximity to the target swara.
+    expect(LEVEL_TOLERANCE.shishya).toBe(35);
+    expect(LEVEL_TOLERANCE.sadhaka).toBe(20);
+    expect(LEVEL_TOLERANCE.varistha).toBe(12);
+    expect(LEVEL_TOLERANCE.guru).toBe(8);
   });
 
   it('should decrease with increasing level', () => {

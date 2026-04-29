@@ -72,8 +72,8 @@ phases:
     type: phrase_playback
     phrase: [Sa, Pa]
     instruction: |
-      The widest glide. Sa to Pa. The entire distance between
-      the tonic and its fifth, traversed as one continuous sound.
+      The widest glide. Sa to Pa.
+      Sa and Pa, traversed as one continuous sound.
     repeat: 2
     show_labels: true
     ornament: meend
