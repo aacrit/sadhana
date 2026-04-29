@@ -107,3 +107,16 @@
   border: 0;
 }
 
+
+/* Audit #10 — Low-tier perf path. Disables expensive ambient animations
+   on weak Android devices. The canvas itself still renders strings —
+   only auxiliary motion is suppressed. */
+
+[data-perf-tier="low"] .canvas {
+  will-change: auto;
+}
+
+[data-perf-tier="low"] .tantri::before,
+[data-perf-tier="low"] .tantri::after {
+  animation: none !important;
+}

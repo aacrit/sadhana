@@ -58,6 +58,7 @@ import type { Swara } from '@/engine/theory/types';
 import type { Level } from '@/engine/analysis/pitch-mapping';
 
 import styles from '../styles/tantri.module.css';
+import { usePerfTier } from '../lib/usePerfTier';
 
 // ---------------------------------------------------------------------------
 // Props
@@ -756,6 +757,10 @@ const Tantri = memo(function Tantri({
   className,
   style,
 }: TantriProps) {
+  // Audit #10 — perf tier lowers visual fidelity on weak hardware.
+  // 'low' keeps Tantri at 60fps on sub-$200 Androids by skipping the
+  // most expensive hot paths.
+  const perfTier = usePerfTier();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fieldRef = useRef<TantriField | null>(null);
   const animFrameRef = useRef<number>(0);
@@ -1284,6 +1289,7 @@ const Tantri = memo(function Tantri({
       role="application"
       aria-label="Tantri — interactive swara strings"
       aria-roledescription="musical instrument"
+      data-perf-tier={perfTier}
     >
       <canvas
         ref={canvasRef}

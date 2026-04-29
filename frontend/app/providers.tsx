@@ -25,6 +25,8 @@ import ScriptToggle from './components/ScriptToggle';
 import ThemeToggle from './components/ThemeToggle';
 import SaCalibrator from './components/SaCalibrator';
 import AudioContextResumer from './components/AudioContextResumer';
+import ErrorBoundary from './components/ErrorBoundary';
+import GlobalErrorListener from './components/GlobalErrorListener';
 
 /**
  * ReducedMotionBridge — sets data-reduced-motion="true"|"false" on <html>.
@@ -98,20 +100,24 @@ function SaSeedBridge() {
 
 export default function Providers({ children }: { children: ReactNode }) {
   return (
-    <MotionConfig reducedMotion="user">
-      <AuthProvider>
-        <VoiceWaveProvider>
-          <ReducedMotionBridge />
-          <LevelBridge />
-          <SaSeedBridge />
-          {/* Audit #1 — global AudioContext resume on visibilitychange.
-              Critical for mobile where backgrounding suspends contexts. */}
-          <AudioContextResumer />
-          {children}
-          <FloatingChrome />
-        </VoiceWaveProvider>
-      </AuthProvider>
-    </MotionConfig>
+    <ErrorBoundary>
+      <MotionConfig reducedMotion="user">
+        <AuthProvider>
+          <VoiceWaveProvider>
+            <ReducedMotionBridge />
+            <LevelBridge />
+            <SaSeedBridge />
+            {/* Audit #1 — global AudioContext resume on visibilitychange.
+                Critical for mobile where backgrounding suspends contexts. */}
+            <AudioContextResumer />
+            {/* Audit #13 — async error capture into the events table. */}
+            <GlobalErrorListener />
+            {children}
+            <FloatingChrome />
+          </VoiceWaveProvider>
+        </AuthProvider>
+      </MotionConfig>
+    </ErrorBoundary>
   );
 }
 
