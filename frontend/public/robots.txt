@@ -1,0 +1,9 @@
+# Sādhanā — Hindustani classical music practice app
+# https://aacrit.github.io/sadhana
+
+User-agent: *
+Allow: /
+# Internal admin routes — uncomment when added
+# Disallow: /admin/
+
+Sitemap: https://aacrit.github.io/sadhana/sitemap.xml

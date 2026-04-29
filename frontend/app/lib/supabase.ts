@@ -417,6 +417,30 @@ export async function completeRiyaz(userId: string): Promise<void> {
     .eq('user_id', userId);
 }
 
+// ---------------------------------------------------------------------------
+// GDPR / DPDP / LGPD — account deletion + data export (migration 005)
+// ---------------------------------------------------------------------------
+
+/**
+ * Queue the current user's account for deletion. Hard-deletes user-scoped
+ * data immediately; the auth.users row is purged by a periodic admin pass
+ * walking the deletion_requests queue. Idempotent.
+ */
+export async function deleteMyAccount(): Promise<void> {
+  const { error } = await supabase.rpc('delete_my_account');
+  if (error) throw new Error(error.message);
+}
+
+/**
+ * Export every user-scoped row as a single JSON document. Caller is
+ * responsible for serialising and triggering the download.
+ */
+export async function exportMyData(): Promise<unknown> {
+  const { data, error } = await supabase.rpc('export_my_data');
+  if (error) throw new Error(error.message);
+  return data;
+}
+
 /**
  * Resolve the next lesson the student should resume.
  *

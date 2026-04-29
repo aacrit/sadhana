@@ -17,6 +17,7 @@ import type { RecentRaga } from '../../lib/types';
 import { useAuth } from '../../lib/auth';
 import { getRecentRagas, getYesterdayWorstSwara, getNextLessonId } from '../../lib/supabase';
 import PracticeReminder, { requestNotificationPermission } from '../../components/PracticeReminder';
+import InstallPrompt from '../../components/InstallPrompt';
 import homeStyles from '../../styles/beginner.module.css';
 
 // ---------------------------------------------------------------------------
@@ -282,6 +283,13 @@ export default function BeginnerPage() {
         todayRagaId={todayRaga.id}
         todayRagaName={todayRaga.name}
       />
+
+      {/* Audit #6 — PWA install prompt. We capture beforeinstallprompt at
+          mount and only surface the affordance after the student has
+          completed at least one riyaz (first session count > 0). On iOS
+          where beforeinstallprompt does not fire, we coach Add to Home
+          Screen with a guided overlay. */}
+      <InstallPrompt visible={riyazDone || (recentRagas.length > 0)} />
 
       {/* Arriving moment — 6s cinematic intro on first daily open */}
       <AnimatePresence>

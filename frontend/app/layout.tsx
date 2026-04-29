@@ -63,23 +63,77 @@ const ibmPlexMono = IBM_Plex_Mono({
 // Metadata
 // ---------------------------------------------------------------------------
 
+const SITE_URL = 'https://aacrit.github.io/sadhana';
+
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: {
-    default: 'Sadhana',
-    template: '%s | Sadhana',
+    default: 'Sādhanā — Hindustani classical music practice',
+    template: '%s · Sādhanā',
   },
   description:
-    'A music physics engine. Not learning about music. Becoming it.',
-  applicationName: 'Sadhana',
+    'A music physics engine for Hindustani classical music. Tanpura drone, real-time pitch feedback against 22 shrutis, raga-aware practice. Free, no ads, no recordings.',
+  applicationName: 'Sādhanā',
   keywords: [
     'Hindustani classical music',
     'raga',
     'sadhana',
+    'sādhanā',
     'ear training',
     'pitch detection',
     'tanpura',
     'sargam',
+    'shruti',
+    'bhairav',
+    'yaman',
+    'bhoopali',
+    'voice training',
+    'Indian classical music app',
   ],
+  authors: [{ name: 'Aacrit' }],
+  creator: 'Aacrit',
+  publisher: 'Aacrit',
+  // Audit #5 — SEO surface. Robots, OpenGraph, Twitter card so the app
+  // is discoverable by search engines and previewable on every share.
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  openGraph: {
+    title: 'Sādhanā — Hindustani classical music practice',
+    description:
+      'A music physics engine for Hindustani classical music. Tanpura drone, real-time pitch feedback against 22 shrutis, raga-aware practice.',
+    url: SITE_URL,
+    siteName: 'Sādhanā',
+    type: 'website',
+    locale: 'en_IN',
+    images: [
+      {
+        url: '/sadhana/og-image.svg',
+        width: 1200,
+        height: 630,
+        alt: 'Sādhanā — Hindustani classical music practice app',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Sādhanā — Hindustani classical music practice',
+    description:
+      'Tanpura drone, real-time pitch feedback against 22 shrutis, raga-aware practice. Free, no ads, no recordings.',
+    images: ['/sadhana/og-image.svg'],
+  },
+  alternates: {
+    canonical: SITE_URL,
+  },
+  category: 'music education',
 };
 
 export const viewport: Viewport = {
