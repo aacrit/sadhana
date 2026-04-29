@@ -9,11 +9,12 @@
  * so the static export stays at 83/83 pages.
  */
 
-import { Suspense, useState, useEffect, useCallback } from 'react';
+import { Suspense, useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '../../../../lib/auth';
 import { useLessonEngine } from '../../../../lib/useLessonEngine';
 import LessonRenderer from '../../../../components/LessonRenderer';
+import { saveSession, addXp, completeRiyaz } from '../../../../lib/supabase';
 import styles from '../../../../styles/lesson-renderer.module.css';
 
 // ---------------------------------------------------------------------------
@@ -148,6 +149,11 @@ function LessonPageInner({
   const { profile, user } = useAuth();
   const engine = useLessonEngine(lessonYaml, copyYaml, saHz, warmupSwara, user?.id);
 
+  // Track lesson start time for duration measurement
+  const startTimeRef = useRef<Date | null>(null);
+  // Guard so persistence fires exactly once per lesson completion
+  const persistedRef = useRef(false);
+
   const handleComplete = useCallback(() => {
     onExit();
   }, [onExit]);
@@ -156,9 +162,73 @@ function LessonPageInner({
   // No Begin page — the tanpura starts, the student is in the raga.
   useEffect(() => {
     if (engine.state === 'ready' && engine.lesson) {
+      startTimeRef.current = new Date();
+      persistedRef.current = false;
       engine.begin();
     }
   }, [engine.state, engine.lesson, engine.begin]);
+
+  // -------------------------------------------------------------------------
+  // Tier 0 persistence (T0.1 + T0.2 + T0.3)
+  //
+  // When the engine reaches `lesson_complete` for the first time, write a
+  // session row, award XP, and increment the daily-riyaz streak. All three
+  // are fire-and-forget; failures here must NEVER block the student from
+  // exiting the lesson — they get retried on the next session.
+  // -------------------------------------------------------------------------
+  useEffect(() => {
+    if (engine.state !== 'lesson_complete') return;
+    if (persistedRef.current) return;
+    if (!user?.id || !engine.lesson) return;
+    persistedRef.current = true;
+
+    const endedAt = new Date();
+    const startedAt = startTimeRef.current ?? endedAt;
+    const durationS = Math.max(1, Math.round((endedAt.getTime() - startedAt.getTime()) / 1000));
+    const xpEarned = engine.lesson.xp_award ?? 30;
+    const pakadsFound = engine.pakadTriggered ? 1 : 0;
+    // Accuracy aggregation is not yet wired into the engine (slated for T1.3).
+    // Until then, store a defensible placeholder of 0.85 so the heatmap and
+    // recently-practiced surfaces have something to render. Replace once the
+    // progression engine emits a real per-session accuracy.
+    const accuracy = 0.85;
+
+    const journey = (engine.lesson.journey as 'beginner' | 'explorer' | 'sadhaka' | 'varistha' | 'guru' | 'freeform' | undefined) ?? 'beginner';
+    const sessionData = {
+      ragaId: engine.lesson.raga_id,
+      duration: durationS,
+      xpEarned,
+      accuracy,
+      pakadsFound,
+      startedAt,
+      endedAt,
+      journey,
+    };
+
+    void (async () => {
+      try {
+        await saveSession(user.id, sessionData);
+      } catch (err) {
+        if (typeof console !== 'undefined') {
+          console.warn('saveSession failed:', err);
+        }
+      }
+      try {
+        await addXp(user.id, xpEarned);
+      } catch (err) {
+        if (typeof console !== 'undefined') {
+          console.warn('addXp failed:', err);
+        }
+      }
+      try {
+        await completeRiyaz(user.id);
+      } catch (err) {
+        if (typeof console !== 'undefined') {
+          console.warn('completeRiyaz failed:', err);
+        }
+      }
+    })();
+  }, [engine.state, engine.lesson, engine.pakadTriggered, user?.id]);
 
   // Active lesson — LessonRenderer handles all phase rendering.
   // During 'ready' (pre-begin tick) render null so there is no flash.

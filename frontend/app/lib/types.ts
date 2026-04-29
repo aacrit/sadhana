@@ -115,6 +115,8 @@ export interface SessionData {
   readonly startedAt: Date;
   /** Timestamp when session ended. */
   readonly endedAt: Date;
+  /** Journey context — beginner | explorer | sadhaka | varistha | guru | freeform. */
+  readonly journey?: JourneyId | 'sadhaka' | 'varistha' | 'guru';
 }
 
 // ---------------------------------------------------------------------------

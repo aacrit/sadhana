@@ -172,7 +172,7 @@ export async function saveSession(
     xp_earned: session.xpEarned,
     avg_accuracy: session.accuracy,
     pakad_found: session.pakadsFound > 0,
-    journey: 'beginner',
+    journey: session.journey ?? 'beginner',
     started_at: session.startedAt.toISOString(),
     ended_at: session.endedAt.toISOString(),
   });

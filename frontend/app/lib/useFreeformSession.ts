@@ -642,7 +642,7 @@ async function saveFreeformSession(
     // We cannot call hooks here (outside React), so we access Supabase
     // directly for the session insert. The supabase module exports the
     // client; we use it with a simplified insert.
-    const { supabase, completeRiyaz } = await import('./supabase');
+    const { supabase, completeRiyaz, addXp } = await import('./supabase');
 
     // Get current user from Supabase auth
     const { data: { user } } = await supabase.auth.getUser();
@@ -660,6 +660,12 @@ async function saveFreeformSession(
       started_at: new Date(Date.now() - durationS * 1000).toISOString(),
       ended_at: new Date().toISOString(),
     });
+
+    // Tier 0 (T0.1): increment profile.xp. Previously the row was written
+    // with xp_earned but the user's running total was never updated.
+    if (xpEarned > 0) {
+      await addXp(user.id, xpEarned);
+    }
 
     // Update the daily streak — freeform riyaz counts toward the streak
     // just like a structured lesson. Previously only useLessonEngine paths
