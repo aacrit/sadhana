@@ -20,8 +20,10 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '../lib/auth';
 import { useLessonEngine } from '../lib/useLessonEngine';
 import LessonRenderer from './LessonRenderer';
-import { saveSession, addXp, completeRiyaz } from '../lib/supabase';
+import { saveSession, addXp, completeRiyaz, getProgressionEvents, setProfileLevel } from '../lib/supabase';
 import { emit, emitError } from '../lib/telemetry';
+import { deriveLevel } from '@/engine/progression/level-gates';
+import { getLevelTitle } from '../lib/types';
 import styles from '../styles/lesson-renderer.module.css';
 
 // ---------------------------------------------------------------------------
@@ -276,8 +278,26 @@ function Runtime({
       } catch (err) {
         emitError('completeRiyaz', err, { lessonId: engine.lesson?.id });
       }
+
+      // Audit #3 — derive level from event log and persist if changed.
+      // After all the lesson-completed / pakad-recognised emits above
+      // have flushed, the events table reflects the latest milestone.
+      try {
+        const events = await getProgressionEvents(user.id);
+        const derivedTitle = deriveLevel(events);
+        const currentTitle = getLevelTitle(profile?.level ?? 1);
+        if (derivedTitle !== currentTitle) {
+          await setProfileLevel(user.id, derivedTitle);
+          void emit('level-gate-earned', {
+            from: currentTitle,
+            to: derivedTitle,
+          });
+        }
+      } catch (err) {
+        emitError('deriveLevel', err);
+      }
     })();
-  }, [engine.state, engine.lesson, engine.pakadTriggered, user?.id]);
+  }, [engine.state, engine.lesson, engine.pakadTriggered, user?.id, profile?.level]);
 
   if (engine.state === 'ready' || engine.state === 'loading') {
     return (

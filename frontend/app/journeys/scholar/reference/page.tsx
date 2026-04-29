@@ -17,6 +17,7 @@
 
 import Link from 'next/link';
 import { SWARAS } from '@/engine/theory/swaras';
+import { RAGA_LIST } from '@/engine/theory';
 import ShrutiPlayer from './ShrutiPlayer';
 import styles from '../../../styles/scholar.module.css';
 
@@ -96,6 +97,48 @@ export default function ScholarReferencePage() {
           flat notes of Bhairav, the sharp tivra Ma of Yaman, the slightly
           flat shuddha Ga that gives Yaman its characteristic colour.
         </p>
+      </section>
+
+      {/* Audit #16 — per-raga reference grid. Every Raga object in the
+          engine surfaced as a navigable reference card. The Scholar moat. */}
+      <section
+        className={styles.referenceSection}
+        aria-label="Raga reference"
+      >
+        <h2 style={{
+          fontFamily: 'var(--font-serif)',
+          fontWeight: 300,
+          fontSize: 'var(--text-xl)',
+          color: 'var(--text)',
+          textAlign: 'center',
+          letterSpacing: 'var(--tracking-royal)',
+          marginTop: 'var(--space-8)',
+        }}>
+          Ragas
+        </h2>
+        <p className={styles.referenceNote}>
+          Every raga the engine knows. Aroha, avaroha, vadi, samvadi, pakad,
+          allowed ornaments — read straight from the engine&rsquo;s
+          musicological objects, every phrase playable.
+        </p>
+        <div className={styles.lessonGrid} style={{ marginTop: 'var(--space-4)' }}>
+          {RAGA_LIST.map((raga) => (
+            <Link
+              key={raga.id}
+              href={`/journeys/scholar/reference/ragas/${raga.id}`}
+              className={styles.lessonTile}
+            >
+              <span className={styles.lessonNum}>{raga.thaat}</span>
+              <span className={styles.lessonTitle}>
+                <span className="romanized-only">{raga.name}</span>
+                <span className="devanagari-only swara-text">{raga.nameDevanagari}</span>
+              </span>
+              <span className={styles.lessonRaga}>
+                {raga.prahara.length > 0 ? `prahar ${raga.prahara.join(', ')}` : 'any time'}
+              </span>
+            </Link>
+          ))}
+        </div>
       </section>
     </div>
   );

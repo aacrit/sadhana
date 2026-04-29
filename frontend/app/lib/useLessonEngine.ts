@@ -91,6 +91,11 @@ const VOICE_PHASE_TYPES: readonly PhaseType[] = [
   // samples from to score student claps against beat times.
   'tala_exercise',
   'tala_melody_exercise',
+  // Audit #8 — modulation + controlled-deviation analyzers consume
+  // pitch history. Voice pipeline must be running for the StructuredPhase
+  // recording window to capture samples.
+  'modulation_awareness',
+  'controlled_deviation',
 ];
 
 /**
@@ -536,6 +541,8 @@ export function useLessonEngine(
       case 'mastery_challenge':
       case 'tala_exercise':
       case 'tala_melody_exercise':
+      case 'modulation_awareness':
+      case 'controlled_deviation':
       case 'passive_phrase_recognition': {
         if (skipMicFlag) break;
 

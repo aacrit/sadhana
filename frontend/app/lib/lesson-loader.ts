@@ -186,6 +186,20 @@ export interface LessonPhase {
   readonly base_phrase?: readonly string[];
   readonly call_phrase_alt?: readonly string[];
 
+  // modulation_awareness (Guru-04)
+  readonly phrase_raga_start?: string;
+  readonly phrase_raga_end?: string;
+  readonly transition_swara?: string | null;
+  readonly phrase_duration_s?: number;
+  // response_duration_s already declared above for raga_identification
+
+  // controlled_deviation (Guru-03)
+  readonly allowed_deviations?: readonly Readonly<{
+    swara: string;
+    role: 'passing' | 'fleeting' | 'held';
+    max_duration_ms: number;
+  }>[];
+
   // mastery_challenge / passive_phrase_recognition
   readonly min_match_confidence?: number;
   /** Top-level hold duration for ornament_challenge phases (seconds). */
