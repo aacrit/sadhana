@@ -113,8 +113,13 @@ engine/
 │   ├── pitch-mapping.ts      # Hz → swara → cents deviation (context-aware).
 │   │                         # Knows komal Re in Bhairav is different from komal Re in Kafi.
 │   │                         # Accounts for raga context when scoring pitch accuracy.
-│   └── phrase-recognition.ts # Identifies pakad (characteristic phrase) in sung input.
-│                             # Signals: "you just sang the pakad of Yaman."
+│   ├── phrase-recognition.ts # Identifies pakad (characteristic phrase) in sung input.
+│   │                         # Signals: "you just sang the pakad of Yaman."
+│   ├── practice-scoring.ts   # 0–3 star scoring + XP delta for guided practice.
+│   ├── modulation.ts         # Detects sustained transition swaras in pitch history
+│   │                         # (Guru modulation_awareness exercises).
+│   └── deviation.ts          # Verdicts allowed deviation occurrences (role +
+│                             # max_duration_ms) for controlled_deviation exercises.
 │
 ├── synthesis/
 │   ├── tanpura.ts            # Tanpura drone synthesis from first principles.
@@ -141,16 +146,27 @@ engine/
 │                             # Sympathetic vibrations, accuracy bands, raga gating.
 │                             # 51 unit tests. Pure TypeScript. Zero UI.
 │
-└── voice/
-    ├── pipeline.ts           # THE MOAT. Voice processing chain.
-    │                         # CURRENT: AnalyserNode + main-thread Pitchy/McLeod → pitch-mapping
-    │                         # → raga-grammar validation → accuracy scoring. ~25–35ms latency.
-    │                         # TARGET: AudioWorklet → RNNoise (WASM) → Pitchy/McLeod → …
-    │                         # Architecture supports RNNoise/Worklet insertion without rewiring.
-    ├── accuracy.ts           # Pitch accuracy model. Not just "are you on pitch?"
-    │                         # "Are you on the right shruti of this raga, with the
-    │                         # correct ornament, in the right context of the phrase?"
-    └── feedback.ts           # What to show the student. Instant, beautiful, correct.
+├── voice/
+│   ├── pipeline.ts           # THE MOAT. Voice processing chain.
+│   │                         # CURRENT: AnalyserNode + main-thread Pitchy/McLeod → pitch-mapping
+│   │                         # → raga-grammar validation → accuracy scoring. ~25–35ms latency.
+│   │                         # TARGET: AudioWorklet → RNNoise (WASM) → Pitchy/McLeod → …
+│   │                         # Architecture supports RNNoise/Worklet insertion without rewiring.
+│   ├── accuracy.ts           # Pitch accuracy model. Not just "are you on pitch?"
+│   │                         # "Are you on the right shruti of this raga, with the
+│   │                         # correct ornament, in the right context of the phrase?"
+│   ├── feedback.ts           # What to show the student. Instant, beautiful, correct.
+│   ├── ornament-evaluator.ts # Scores sung ornaments (meend / andolan / gamak / kan /
+│   │                         # murki / khatka / zamzama) against expected shape.
+│   └── onset-detection.ts    # Spectral-flux onset detector + tala scorer (clap_sam,
+│                             # clap_sam_khali, sing_on_sam exercises in TalaPhase).
+│
+└── progression/
+    └── level-gates.ts        # Six musical-act gates (shishya_first_sa,
+                              # sadhaka_pakad_mastery, sadhaka_aroha_mastery,
+                              # varistha_ornament_skill, varistha_modulation,
+                              # guru_full_rendering) + deriveLevel / earnedGates /
+                              # pendingGates predicates.
 ```
 
 ---
@@ -165,6 +181,7 @@ engine/
 │                                                                 │
 │  physics/ → theory/ → analysis/ → synthesis/ → voice/          │
 │                                  interaction/ (Tantri)          │
+│                                  progression/ (level gates)     │
 └─────────────────────────────┬───────────────────────────────────┘
                               │  engine exposes typed API
 ┌─────────────────────────────▼───────────────────────────────────┐
@@ -370,10 +387,12 @@ Sādhanā/
 ├── engine/                   # THE MUSIC ENGINE — pure TypeScript, zero UI
 │   ├── physics/              # Harmonics, resonance, just intonation
 │   ├── theory/               # Swaras, shrutis, ragas/, thaats, talas/, ornaments
-│   ├── analysis/             # Raga grammar, pitch mapping, phrase recognition
+│   ├── analysis/             # Raga grammar, pitch mapping, phrase recognition,
+│   │                         # practice-scoring, modulation, deviation
 │   ├── synthesis/            # Tanpura, swara voices, tala pulse
 │   ├── interaction/          # Tantri — the instrument (12 swara strings)
-│   └── voice/                # Pipeline, accuracy, feedback
+│   ├── voice/                # Pipeline, accuracy, feedback, ornament-evaluator, onset-detection
+│   └── progression/          # Level gates (musical-act predicates, deriveLevel)
 ├── frontend/
 │   ├── app/
 │   │   ├── auth/             # Void design language auth portal (Google, email, guest)

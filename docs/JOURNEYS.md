@@ -208,6 +208,8 @@ Props: `partialFrequencies?`, `voiceAmplitude?`, `active?`, `className?`, `style
 | `VoiceTimbreSelector` | components/VoiceTimbreSelector.tsx | Harmonium / voice-male / voice-female selector. Drives `timbre` prop on `useLessonAudio`. |
 | `VoiceWave` | components/VoiceWave.tsx | Ambient voice waveform visualization. Uses VoiceWaveContext for cross-component pitch data. Fixed canvas, `position: fixed`. Animation loop pauses when `document.hidden` (tab visibility guard). Animation timestep uses actual RAF delta (`timestamp - prevTimestamp`) so speed is frame-rate independent (correct at 60Hz, 120Hz, 144Hz, and slow devices). |
 | `GuidedPractice` | components/GuidedPractice.tsx | 4-stage guided raga practice with 0-3 star scoring per stage. Used in Explorer raga detail practice route. Driven by `useGuidedPractice` hook. |
+| `JourneyLessonClient` | components/JourneyLessonClient.tsx | Shared lesson-render shell extracted from beginner `LessonClient`. Used by all four journey-specific dynamic lesson routes (`/journeys/{beginner,explorer,scholar,master}/lessons/[id]`). Wraps `useLessonEngine` + `LessonRenderer` and handles XP, streak, session persistence on completion. |
+| `PracticeReminder` | components/PracticeReminder.tsx | Local Notifications API reminder firing at the prime hour of the time-of-day raga (Bhairav 6am, Bhimpalasi 2pm, Bhoopali 6pm, Yaman 7pm, Bageshri 9pm). Permission-gated; opt-in via profile. |
 
 ---
 
@@ -331,7 +333,7 @@ Source: `frontend/app/profile/page.tsx`
 
 ## Explorer, Scholar, Master
 
-v1 state: Explorer has a full page at `frontend/app/journeys/explorer/page.tsx` with raga browser, ear training (`/ear-training`), interval training (`/interval-training`), and raga detail (`/[ragaId]`) routes. Scholar and Master have pages at `frontend/app/journeys/{scholar,master}/page.tsx` with "being built" messaging. All three are navigable from the home page.
+v1 state: Explorer has a full page at `frontend/app/journeys/explorer/page.tsx` with raga browser, ear training (`/ear-training`), interval training (`/interval-training`), raga detail (`/[ragaId]`), and a Sadhaka lesson catalog rendered through dynamic route `/journeys/explorer/lessons/[id]`. Scholar (`/journeys/scholar/page.tsx`) renders the Varistha lesson catalog plus the engine reference page (`/journeys/scholar/reference`). Master (`/journeys/master/page.tsx`) renders the Guru lesson catalog. The "Arriving soon" gate panel previously shown for Scholar/Master was replaced in rev 12 once the 31 orphaned YAMLs (10 Sadhaka + 11 Varistha + 10 Guru) were wired through `JourneyLessonClient`. All three pages are navigable from the home page.
 
 ### Explorer — Guided Practice (Star Scoring)
 

@@ -16,6 +16,8 @@ Mic (getUserMedia) -> AnalyserNode (FFT 2048) -> Pitchy McLeod (main thread) -> 
   -> raga grammar check -> pakad recognition -> VoiceEvent callbacks
 ```
 
+**Onset / tala branch:** for `tala_exercise` and `tala_melody_exercise` phases, `TalaPhase.tsx` taps the same analyser stream, runs `detectOnsets()` (spectral flux) from `engine/voice/onset-detection.ts`, and scores the resulting onsets against the engine TalaPlayer's beat times via `scoreTalaAlignment()`. Default tolerance ±150ms. This branch is independent of pitch detection — clap-based exercises can succeed without any pitch hits.
+
 **TARGET pipeline** (future — owned by `acoustics-engineer`):
 ```
 Mic -> AudioWorklet (off-thread) -> RNNoise WASM (denoise) -> Pitchy McLeod -> mapPitchToSwara -> ...
