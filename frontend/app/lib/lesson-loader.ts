@@ -113,11 +113,15 @@ export interface LessonPhase {
   readonly allowed_swaras?: readonly string[];
 
   // call_response
+  // Note: YAML may use scalar strings (`engine_plays: Sa`) OR arrays
+  // (`engine_plays: [Sa, Pa]`). Renderer normalises both shapes.
   readonly rounds?: number;
   readonly calls?: readonly {
-    readonly engine_plays: readonly string[];
-    readonly student_sings: readonly string[];
+    readonly engine_plays: string | readonly string[];
+    readonly student_sings: string | readonly string[];
   }[];
+  readonly call_phrase?: readonly string[];
+  readonly response_cycles?: number;
 
   // passive_phrase_recognition
   readonly watch_for_pakad?: boolean;
@@ -160,9 +164,30 @@ export interface LessonPhase {
   readonly exercise_per_raga?: readonly Readonly<Record<string, unknown>>[];
   readonly tolerance_cents?: number;
 
-  // tala_exercise
+  // tala_exercise / tala_melody_exercise
   readonly tala?: string;
+  readonly tala_id?: string;
   readonly beats?: number;
+  readonly cycles?: number;
+  readonly tempo_bpm?: number;
+  readonly exercise?: string;
+  readonly timing_tolerance_ms?: number;
+  readonly highlight_sam?: boolean;
+  readonly show_beat_markers?: boolean;
+  readonly mode?: string;            // tala/raga modes: listen, sing, listen_only, alap, jod, jhala
+  readonly raga_id?: string;
+
+  // interval_exercise
+  readonly interval_pool?: readonly (readonly [string, string])[];
+  readonly play_count?: number;
+  readonly answer_mode?: string;     // listen_then_choose, sing, ...
+
+  // bandish / composition / taan
+  readonly base_phrase?: readonly string[];
+  readonly call_phrase_alt?: readonly string[];
+
+  // mastery_challenge / passive_phrase_recognition
+  readonly min_match_confidence?: number;
 
   // grammar_exercise
   readonly grammar_rule?: string;

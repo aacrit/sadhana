@@ -9,15 +9,21 @@
  * React component.
  *
  * Phase type → Component mapping:
- *   tanpura_drone            → TanpuraDronePhase (inline)
- *   sa_detection             → SaDetectionPhase (inline)
- *   swara_introduction       → SwaraIntroduction (existing)
- *   phrase_playback          → PhrasePlayback (existing)
- *   pitch_exercise           → PitchExercisePhase (inline)
- *   phrase_exercise          → PhraseExercisePhase (inline)
- *   call_response            → CallResponsePhase (placeholder)
- *   passive_phrase_recognition → FreeSingingPhase (inline)
- *   session_summary          → SessionSummaryPhase (inline)
+ *   tanpura_drone / raga_opening    → TanpuraDronePhase (inline)
+ *   sa_detection                    → SaDetectionPhase (inline)
+ *   swara_introduction              → SwaraIntroduction or SwaraComparison
+ *   phrase_playback                 → PhrasePlayback
+ *   pitch / phrase / sing_along /
+ *   passive_phrase_recognition /
+ *   ornament / raga_identification  → LessonPracticeSurface
+ *   call_response                   → CallResponseCycle
+ *   mastery_challenge               → MasteryChallenge
+ *   swara_comparison                → SwaraComparison
+ *   interval_exercise               → IntervalChoice
+ *   tala_exercise / tala_melody     → TalaPhase
+ *   raga_comparison                 → RagaComparisonPhase (inline)
+ *   Cluster F generic               → StructuredPhase
+ *   session_summary                 → SessionSummaryPhase (inline)
  */
 
 import { motion, AnimatePresence } from 'framer-motion';
@@ -27,8 +33,14 @@ import type { LessonEngineControls } from '../lib/useLessonEngine';
 import { getSwaraFrequency } from '@/engine/theory/swaras';
 import type { Swara } from '@/engine/theory/types';
 import SwaraIntroduction from './SwaraIntroduction';
+import SwaraComparison from './SwaraComparison';
 import PhrasePlayback from './PhrasePlayback';
 import LessonPracticeSurface from './LessonPracticeSurface';
+import CallResponseCycle from './CallResponseCycle';
+import MasteryChallenge from './MasteryChallenge';
+import IntervalChoice from './IntervalChoice';
+import TalaPhase from './TalaPhase';
+import StructuredPhase from './StructuredPhase';
 // VoiceVisualization removed — Tantri is the primary visualization surface.
 // All phase components that previously mounted VoiceVisualization now rely
 // on the persistent Tantri layer which sits behind the phase content at z-index 0.
@@ -127,104 +139,6 @@ function SaDetectionPhase({
   );
 }
 
-/** Pitch exercise — single swara hold. Tantri is the visualization. */
-function PitchExercisePhase({
-  phase,
-  onAdvance,
-}: {
-  phase: LessonPhase;
-  onAdvance: () => void;
-}) {
-  // Silent warmup phase — no copy, no button. Tantri shows the swara; engine auto-advances.
-  const isWarmup = phase.id.startsWith('__warmup_');
-  if (isWarmup) return null;
-  return (
-    <motion.div key={phase.id} {...phaseTransition} className={styles.centeredMessage}>
-      <button
-        type="button"
-        className={styles.actionButton}
-        onClick={onAdvance}
-        style={{ marginTop: 'var(--space-4)' }}
-      >
-        Continue
-      </button>
-    </motion.div>
-  );
-}
-
-/** Phrase exercise — guided singing. Tantri is the visualization. */
-function PhraseExercisePhase({
-  phase,
-  onAdvance,
-}: {
-  phase: LessonPhase;
-  onAdvance: () => void;
-}) {
-  return (
-    <motion.div key={phase.id} {...phaseTransition} className={styles.centeredMessage}>
-      <button
-        type="button"
-        className={styles.actionButton}
-        onClick={onAdvance}
-        style={{ marginTop: 'var(--space-4)' }}
-      >
-        Continue
-      </button>
-    </motion.div>
-  );
-}
-
-/** Free singing with passive pakad recognition. Tantri is the visualization. */
-function FreeSingingPhase({
-  phase,
-  onAdvance,
-}: {
-  phase: LessonPhase;
-  onAdvance: () => void;
-}) {
-  return (
-    <motion.div key={phase.id} {...phaseTransition} className={styles.centeredMessage}>
-      <button
-        type="button"
-        className={styles.actionButton}
-        onClick={onAdvance}
-        style={{ marginTop: 'var(--space-4)' }}
-      >
-        Done
-      </button>
-    </motion.div>
-  );
-}
-
-/**
- * Raga identification — engine plays pakad, student sings in response.
- * Full engine integration (pakad playback + response evaluation) is Cluster F.
- * Tantri provides pitch visualization.
- */
-function RagaIdentificationPhase({
-  phase,
-  onAdvance,
-}: {
-  phase: LessonPhase;
-  onAdvance: () => void;
-}) {
-  return (
-    <motion.div key={phase.id} {...phaseTransition} className={styles.centeredMessage}>
-      <p className={styles.phaseHint}>
-        Listen, then sing.
-      </p>
-      <button
-        type="button"
-        className={styles.actionButton}
-        onClick={onAdvance}
-        style={{ marginTop: 'var(--space-4)' }}
-      >
-        Continue
-      </button>
-    </motion.div>
-  );
-}
-
 /**
  * Raga comparison — two ragas played side by side.
  * Shows raga name and plays pakad phrase via audio.
@@ -261,61 +175,6 @@ function RagaComparisonPhase({
         className={styles.actionButton}
         onClick={onAdvance}
       >
-        Continue
-      </button>
-    </motion.div>
-  );
-}
-
-/**
- * Mastery challenge — structured assessment phase.
- * Shows targets and accepts voice input. Tantri is the pitch visualization.
- */
-function MasteryChallengePhase({
-  phase,
-  onAdvance,
-}: {
-  phase: LessonPhase;
-  onAdvance: () => void;
-}) {
-  return (
-    <motion.div key={phase.id} {...phaseTransition} className={styles.centeredMessage}>
-      {phase.targets && phase.targets.length > 0 && (
-        <div className={styles.challengeTargets}>
-          {phase.targets.map((t) => (
-            <span key={t.swara} className={styles.challengeTarget}>
-              {t.swara}
-            </span>
-          ))}
-        </div>
-      )}
-      <button
-        type="button"
-        className={styles.actionButton}
-        onClick={onAdvance}
-        style={{ marginTop: 'var(--space-4)' }}
-      >
-        Continue
-      </button>
-    </motion.div>
-  );
-}
-
-/**
- * Generic structured phase — for tala_exercise, grammar_exercise, interval_exercise,
- * swara_comparison, and other Cluster F phase types.
- * Shows instruction and Continue.
- */
-function StructuredPhase({
-  phase,
-  onAdvance,
-}: {
-  phase: LessonPhase;
-  onAdvance: () => void;
-}) {
-  return (
-    <motion.div key={phase.id} {...phaseTransition} className={styles.centeredMessage}>
-      <button type="button" className={styles.actionButton} onClick={onAdvance}>
         Continue
       </button>
     </motion.div>
@@ -448,11 +307,26 @@ function PhaseDispatcher({
     case 'sa_detection':
       return <SaDetectionPhase phase={phase} onAdvance={engine.advancePhase} />;
 
-    case 'swara_introduction':
+    case 'swara_introduction': {
+      // presentation: 'comparison' with exactly two swaras → A/B side-by-side
+      const swaras = phase.swaras ?? [];
+      if (phase.presentation === 'comparison' && swaras.length === 2) {
+        return (
+          <SwaraComparison
+            phaseId={phase.id}
+            swaraA={swaras[0]!}
+            swaraB={swaras[1]!}
+            instruction={phase.instruction?.trim()}
+            onAdvance={engine.advancePhase}
+            onPlaySwara={(s) => engine.audio.playSwara(s)}
+            onHighlightString={onHighlightString}
+          />
+        );
+      }
       return (
         <motion.div key={phase.id} {...phaseTransition}>
           <SwaraIntroduction
-            swaras={[...(phase.swaras ?? [])]}
+            swaras={[...swaras]}
             onComplete={engine.advancePhase}
             audioFirst={phase.audio_first ?? true}
             revealDelayMs={phase.swara_reveal_delay_ms ?? 1200}
@@ -461,6 +335,7 @@ function PhaseDispatcher({
           />
         </motion.div>
       );
+    }
 
     case 'phrase_playback':
       return (
@@ -523,13 +398,11 @@ function PhaseDispatcher({
 
     case 'call_response':
       return (
-        <LessonPracticeSurface
-          phaseId={phase.id}
-          voiceFeedback={engine.voiceFeedback}
+        <CallResponseCycle
+          phase={phase}
+          engine={engine}
           onAdvance={engine.advancePhase}
-          advanceLabel="Continue"
-          saHz={engine.saHz}
-          ragaId={ragaId}
+          onHighlightString={onHighlightString}
         />
       );
 
@@ -615,22 +488,60 @@ function PhaseDispatcher({
 
     case 'mastery_challenge':
       return (
-        <LessonPracticeSurface
-          phaseId={phase.id}
-          challengeTargets={phase.targets}
-          voiceFeedback={engine.voiceFeedback}
+        <MasteryChallenge
+          phase={phase}
+          engine={engine}
           onAdvance={engine.advancePhase}
-          saHz={engine.saHz}
-          ragaId={ragaId}
         />
       );
 
     // --- Structured phases (Cluster F full engine) ------------------------
 
-    case 'swara_comparison':
+    case 'swara_comparison': {
+      const a = phase.swara_a;
+      const b = phase.swara_b;
+      if (a && b) {
+        return (
+          <SwaraComparison
+            phaseId={phase.id}
+            swaraA={a}
+            swaraB={b}
+            instruction={phase.instruction?.trim()}
+            onAdvance={engine.advancePhase}
+            onPlaySwara={(s) => engine.audio.playSwara(s)}
+            onHighlightString={onHighlightString}
+          />
+        );
+      }
+      return (
+        <StructuredPhase phase={phase} engine={engine} onAdvance={engine.advancePhase} />
+      );
+    }
+
     case 'interval_exercise':
+      if (phase.answer_mode === 'listen_then_choose' && phase.interval_pool && phase.interval_pool.length > 0) {
+        return (
+          <IntervalChoice
+            phase={phase}
+            engine={engine}
+            onAdvance={engine.advancePhase}
+          />
+        );
+      }
+      return (
+        <StructuredPhase phase={phase} engine={engine} onAdvance={engine.advancePhase} />
+      );
+
     case 'tala_exercise':
     case 'tala_melody_exercise':
+      return (
+        <TalaPhase
+          phase={phase}
+          engine={engine}
+          onAdvance={engine.advancePhase}
+        />
+      );
+
     case 'grammar_exercise':
     case 'bandish_exercise':
     case 'composition_exercise':
@@ -644,6 +555,7 @@ function PhaseDispatcher({
       return (
         <StructuredPhase
           phase={phase}
+          engine={engine}
           onAdvance={engine.advancePhase}
         />
       );

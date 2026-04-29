@@ -377,20 +377,24 @@ A 90-day grid heatmap is displayed on the profile page (Section 5). Each cell re
 
 ---
 
-## Known Gaps / Pedagogy Debt
+## Pedagogy Wiring (rev 11) — silent-drop fields now rendered
 
-These are pre-existing silent-drop fields surfaced by the v1 curriculum integration audit. They represent design-stage intent that was not yet wired to rendering logic. Flagged for future curriculum-designer + frontend-builder coordination.
+The v1 audit surfaced four classes of silent-drop YAML fields. All four are now wired:
 
-| Field | YAML Phase Types | Current Behavior | Issue |
+| Field | YAML Phase Types | Renderer | Behaviour |
 |-------|---|---|---|
-| `presentation: comparison` | `swara_comparison`, `raga_comparison` | Renders as sequential static text; no side-by-side UI, no toggle | Student sees both options merged, loses pedagogical contrast |
-| `call_response.calls` loop | `call_response` | Runs the `responses` phase once; `calls` cycle not looped (engine-plays / student-sings pattern should repeat 3-5×) | Teacher typically repeats call-response 3-5 times for memory formation; current UI plays once and moves on |
-| `mastery_challenge.tolerance_cents` | `mastery_challenge` | Phase renders but the engine does not gate pass/fail on `tolerance_cents` — students can pass with out-of-spec accuracy | Mastery challenges are meant to enforce strict accuracy; currently underdescored |
-| Cluster F structured phases | `tala_exercise`, `grammar_exercise`, `ornament_exercise`, `raga_structure` (and others with `structured_input` field) | Render with generic "Continue" button; no structured input UI, no multi-step guided flow | Students see a static lesson; engine expects phase-specific micro-interactions (e.g., clicking beats in tala, painting a phrase shape in grammar) |
+| `presentation: comparison` | `swara_introduction` (2 swaras) | `SwaraComparison.tsx` | Side-by-side A/B cards with independent Listen buttons; Continue gates softly until both heard |
+| `call_response.calls` loop | `call_response` | `CallResponseCycle.tsx` | Engine plays each `engine_plays`, opens a `student_sings` window (1.1s/swara, 2–6s clamp), repeats `response_cycles` × `rounds` times |
+| `mastery_challenge.tolerance_cents` | `mastery_challenge` | `MasteryChallenge.tsx` | Per-target hold meter; consecutive ms within ±tolerance × confidence ≥ 0.4 → pass; verdict gated on `min_accuracy` (default 0.85) |
+| `interval_pool` + `answer_mode: listen_then_choose` | `interval_exercise` | `IntervalChoice.tsx` | Plays target × `play_count`, shows pool as multiple choice, advances on round count |
+| `tala_id`, `tempo_bpm`, `cycles`, `mode` | `tala_exercise`, `tala_melody_exercise` | `TalaPhase.tsx` | Starts engine TalaPlayer, beat strip with sam (saffron) / khali (hollow) markers, advances after `cycles` cycles |
+| `swara_a`, `swara_b` | `swara_comparison` | `SwaraComparison.tsx` | Same A/B surface as comparison-presentation |
+| Cluster F instruction-led | `bandish_exercise`, `composition_exercise`, `taan_exercise`, `teaching_exercise`, `raga_rendering`, `modulation_awareness`, `controlled_deviation`, `shruti_exercise`, `ornament_context_exercise`, `grammar_exercise` | `StructuredPhase.tsx` | Renders meta strip (raga · mode · tempo), instruction body, phrase chips, Listen button (when phrase present, tempo-aware), Continue |
 
-### Remediation Path
+`call_response` and `mastery_challenge` are now in `VOICE_PHASE_TYPES` so the voice pipeline starts and Tantri shows live pitch during sing windows.
 
-- **curriculum-designer** audits lesson YAML to document which gaps block each lesson
-- **frontend-builder** implements structured phase renderers for Cluster F (highest ROI — affects >20 lessons)
-- **music-director** + **curriculum-designer** review `mastery_challenge` intent and reset `tolerance_cents` per lesson
-- `call_response` loop: add `response_cycles: int` YAML field (default 1) and wire to `CallResponsePhase` loop counter
+### Outstanding deeper work
+
+- **Sadhaka journey activation** (CEO advisor #1) — UI route + lesson list still gated; lessons themselves now render correctly when reached.
+- **Ornament evaluation in mastery_challenge** — currently only the per-target hold gate runs; ornament-specific evaluation (`evaluation.oscillation_rate_hz`, `evaluation.trajectory_smoothness`, etc.) still passthrough.
+- **Modulation / controlled deviation** — phases render instruction + Listen but do not yet evaluate the transition swara or fleeting-tone duration; these need engine-side analyzers.
