@@ -1,6 +1,6 @@
 # Music Team Standards
 
-Last updated: 2026-04-19
+Last updated: 2026-04-29
 
 Raga database standards, shruti science, and cultural guidelines for all musicological content in the engine.
 
@@ -105,6 +105,19 @@ These are the most audibly different from ET. A trained ear hears them immediate
 ### Consonance Model
 
 The engine uses the Euler/Helmholtz consonance model: `score = 1 / (1 + log2(p*q))`. Plomp-Levelt critical band roughness (ERB formula from Glasberg & Moore 1990) for physical roughness measurement. Both are in `engine/physics/resonance.ts`.
+
+### Pitch Tolerance by Level (LEVEL_TOLERANCE)
+
+Accuracy thresholds define the band around the target shruti where a sung note scores as "correct." Gaussian accuracy curve: score 1.0 at ±0 cents, 0.5 at the tolerance boundary.
+
+| Level | Tolerance | Pedagogy |
+|-------|-----------|----------|
+| Shishya (beginner) | ±35 cents | Forgiving. Learning to hear swara differences. |
+| Sadhaka (practitioner) | ±20 cents | Intermediate. Distinguishing shuddha/komal variants. |
+| Varistha (advanced) | ±12 cents | Demanding. Shruti-level accuracy within ragas. |
+| Guru (mastery) | ±8 cents | Rigorous. Professional-grade intonation. |
+
+These tolerances are hardcoded in `engine/analysis/pitch-mapping.ts` and affect all accuracy scoring in `engine/voice/accuracy.ts`. They were tightened in the consensus fix wave (2026-04-29) from 50/25/15/10 to 35/20/12/8 to increase pedagogical rigor without losing accessibility.
 
 ---
 

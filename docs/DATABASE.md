@@ -1,12 +1,13 @@
 # Database Schema Reference
 
-Last updated: 2026-04-19
+Last updated: 2026-04-29
 
 Supabase (free tier). All tables have Row Level Security (RLS) enabled. Every table is scoped to the authenticated user via `auth.uid()`.
 
 Migrations:
 - `supabase/migrations/001_initial_schema.sql` — base schema
 - `supabase/migrations/002_worst_swara.sql` — adds `worst_swara` column to `sessions` table
+- `supabase/migrations/003_increment_rpcs.sql` — adds `increment_xp(p_user_id, p_xp_delta)` and `increment_raga_session(p_user_id, p_raga_id)` RPCs for atomic operations; updates profiles INSERT/DELETE policies; allows `'freeform'` in journey CHECK constraint; adds index on exercise_attempts(user_id, created_at DESC)
 
 ---
 
@@ -38,7 +39,7 @@ One row per practice session.
 |--------|------|---------|-------|
 | `id` | uuid PK | uuid_generate_v4() | -- |
 | `user_id` | uuid FK | -- | References profiles(id) CASCADE |
-| `raga_id` | text | -- | NOT NULL |
+| `raga_id` | text | -- | NOT NULL. Can be any raga ID or `'freeform'` for open riyaz sessions. |
 | `sa_hz` | numeric(8,4) | -- | Sa at time of session |
 | `duration_s` | integer | 0 | CHECK >= 0 |
 | `xp_earned` | integer | 0 | CHECK >= 0 |
@@ -145,6 +146,17 @@ Source: `frontend/app/lib/supabase.ts`
 | `getRecentRagas` | `(userId, limit)` | Fetch last N raga_encounters ordered by `last_practiced DESC` |
 | `getPracticeHistory` | `(userId, days)` | Aggregate sessions by day for the last N days. Returns `{ date: string, minutes: number, sessions: number }[]`. Used by the profile heatmap. |
 | `getYesterdayWorstSwara` | `(userId)` | Returns the `worst_swara` value from the most recent session whose `started_at` falls on the calendar day before today. Returns `null` if no yesterday session exists or `worst_swara` is unset. Used by `useLessonEngine` to inject the Return Note warmup phase via `?warmup=` URL param. |
+
+---
+
+## RPCs (Stored Procedures)
+
+| RPC | Signature | Purpose |
+|-----|-----------|---------|
+| `increment_xp` | `(p_user_id uuid, p_xp_delta int) → void` | Atomically increment user XP. Prevents race conditions when multiple sessions complete simultaneously. |
+| `increment_raga_session` | `(p_user_id uuid, p_raga_id text) → void` | Atomically increment raga_encounters session_count and update last_practiced timestamp. Prevents race conditions on raga_encounters table. |
+
+Both RPCs are wrapped by corresponding Supabase client helpers in `frontend/app/lib/supabase.ts` and are race-free (single SQL transaction per call).
 
 ---
 

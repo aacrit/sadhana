@@ -1,6 +1,6 @@
 # Audio Engine
 
-Last updated: 2026-04-19
+Last updated: 2026-04-29
 
 Voice capture, pitch detection, tanpura synthesis, and swara playback. Everything runs in the browser. $0 operational cost.
 
@@ -49,11 +49,12 @@ Runs on `requestAnimationFrame`. Each frame:
 1. Read time-domain data from AnalyserNode into Float32Array
 2. Compute RMS -- if < 0.01, emit silence
 3. Call `pitchDetector.findPitch(buffer, sampleRate)` -- returns [hz, clarity]
-4. If clarity >= threshold (default 0.80) and 50 < hz < `sa_hz * 8` (max ~4200 Hz): valid pitch
-5. Map pitch via `mapPitchToSwara(hz, saHz, clarity, ragaId, level)`
-6. Add detected swara to rolling buffer (default size 20)
-7. Check buffer for pakad match (5s cooldown between detections)
-8. Emit VoiceEvent
+4. Apply 3-frame median filter + 5-frame octave-error rejection to stabilize jitter
+5. If clarity >= threshold (default 0.80) and 50 < hz < `sa_hz * 8` (max ~4200 Hz): valid pitch
+6. Map pitch via `mapPitchToSwara(hz, saHz, clarity, ragaId, level)`
+7. Add detected swara to rolling buffer (default size 20, ring buffer with reused snapshot)
+8. Check buffer for pakad match via per-pakad cooldown Map keyed by pakad sequence (prevents repeat fires)
+9. Emit VoiceEvent
 
 **Threshold notes:** `clarityThreshold` defaults to 0.80 (not 0.85 -- corrected). There is no separate NOISE_RMS threshold; Pitchy runs whenever RMS > SILENCE_RMS (0.01) and clarity alone distinguishes valid pitch from noise. The pitch ceiling is `min(sa_hz * 8, 4200)` to accommodate the full vocal range for students with low Sa references (e.g., Sa = G2 at 98 Hz, ceiling = 784 Hz without the multiplier extension).
 
@@ -116,10 +117,10 @@ Steps:
 
 | Level | Tolerance | Score 0.5 at |
 |-------|-----------|--------------|
-| Shishya | +/-50 cents | 50 cents deviation |
-| Sadhaka | +/-25 cents | 25 cents deviation |
-| Varistha | +/-15 cents | 15 cents deviation |
-| Guru | +/-10 cents | 10 cents deviation |
+| Shishya | +/-35 cents | 35 cents deviation |
+| Sadhaka | +/-20 cents | 20 cents deviation |
+| Varistha | +/-12 cents | 12 cents deviation |
+| Guru | +/-8 cents | 8 cents deviation |
 
 ---
 

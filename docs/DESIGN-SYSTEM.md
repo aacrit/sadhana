@@ -1,6 +1,6 @@
 # Design System -- Ragamala
 
-Last updated: 2026-04-19
+Last updated: 2026-04-29
 
 ---
 
@@ -44,6 +44,7 @@ Tokens live in `frontend/app/styles/tokens.css`.
 | `--bg-4` | `#1A3A2E` | Highest elevation |
 | `--text` | `#F0E6D3` | Primary text (warm parchment) |
 | `--text-2` | `#B8A99A` | Secondary text |
+| `--text-2xs` | `0.625rem` | Extra-small text sizing (10px at 16px base) |
 | `--text-3` | `#7A6B5E` | Tertiary / muted |
 | `--border` | `rgba(240, 230, 211, 0.1)` | Subtle borders |
 | `--border-2` | `rgba(240, 230, 211, 0.06)` | Faintest borders |
@@ -787,7 +788,7 @@ When raga deactivates: all 12 strings return to chromatic layout over 600ms.
 --tantri-string-sa-width: 2px;
 --tantri-string-pa-width: 2px;
 --tantri-string-default-width: 1px;
---tantri-string-rest-opacity: 0.22;
+--tantri-string-rest-opacity: 0.22;  /* At-rest in-raga string visibility. Ghost opacity (0.08) for out-of-raga. */
 --tantri-string-ghost-opacity: 0.08;
 --tantri-string-achala-opacity: 0.15;
 --tantri-ripple-duration: 400ms;
