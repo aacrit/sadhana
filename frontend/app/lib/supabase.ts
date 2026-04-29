@@ -337,7 +337,7 @@ export async function completeRiyaz(userId: string): Promise<void> {
   // Fetch existing streak row
   const { data: streakData } = await supabase
     .from('streaks')
-    .select('current_streak, longest_streak, last_riyaz_date')
+    .select('current_streak, longest_streak, last_riyaz_date, freezes_remaining, last_freeze_earned_date')
     .eq('user_id', userId)
     .maybeSingle();
 
@@ -348,6 +348,7 @@ export async function completeRiyaz(userId: string): Promise<void> {
       current_streak: 1,
       longest_streak: 1,
       last_riyaz_date: today,
+      freezes_remaining: 0,
     });
     return;
   }
@@ -358,17 +359,41 @@ export async function completeRiyaz(userId: string): Promise<void> {
   if (lastDate === today) return;
 
   // Calculate gap in UTC days (timezone-independent)
+  const oldStreak = streakData.current_streak as number;
+  const oldFreezes = (streakData.freezes_remaining as number | null) ?? 0;
   let newStreak = 1;
+  let newFreezes = oldFreezes;
+
   if (lastDate) {
     const lastIdx = utcDayIndexFromString(lastDate);
     const dayDiff = todayIdx - lastIdx;
 
     if (dayDiff === 1) {
       // Consecutive day — increment
-      newStreak = (streakData.current_streak as number) + 1;
+      newStreak = oldStreak + 1;
+    } else if (dayDiff === 2 && oldFreezes > 0) {
+      // T1.4 — single missed day, freeze available. Consume one freeze
+      // and continue the streak. The freeze covers exactly one day; a
+      // gap of 3+ days still resets, even if more freezes remain.
+      newStreak = oldStreak + 1;
+      newFreezes = oldFreezes - 1;
     }
-    // dayDiff > 1: gap, reset to 1 (already set above)
+    // dayDiff > 2 OR (dayDiff === 2 && oldFreezes === 0): hard reset
     // dayDiff <= 0: clock skew or stale row — treat as fresh day
+  }
+
+  // T1.4 — freeze accrual: one freeze per 30 consecutive days, cap at 3.
+  // Earned at every multiple of 30; tracked via last_freeze_earned_date so
+  // the same milestone doesn't grant multiple freezes if a row is touched
+  // more than once in a day.
+  const lastFreezeEarned = streakData.last_freeze_earned_date as string | null;
+  if (
+    newStreak > 0 &&
+    newStreak % 30 === 0 &&
+    newFreezes < 3 &&
+    lastFreezeEarned !== today
+  ) {
+    newFreezes = Math.min(3, newFreezes + 1);
   }
 
   const longestStreak = Math.max(
@@ -376,13 +401,19 @@ export async function completeRiyaz(userId: string): Promise<void> {
     newStreak,
   );
 
+  const updatePayload: Record<string, unknown> = {
+    current_streak: newStreak,
+    longest_streak: longestStreak,
+    last_riyaz_date: today,
+    freezes_remaining: newFreezes,
+  };
+  if (newFreezes > oldFreezes) {
+    updatePayload.last_freeze_earned_date = today;
+  }
+
   await supabase
     .from('streaks')
-    .update({
-      current_streak: newStreak,
-      longest_streak: longestStreak,
-      last_riyaz_date: today,
-    })
+    .update(updatePayload)
     .eq('user_id', userId);
 }
 

@@ -8,7 +8,7 @@
 
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getRagaForTimeOfDay } from '@/engine/theory';
@@ -16,6 +16,7 @@ import { DEFAULT_USER, getLevelTitle, getLevelColor } from '../../lib/types';
 import type { RecentRaga } from '../../lib/types';
 import { useAuth } from '../../lib/auth';
 import { getRecentRagas, getYesterdayWorstSwara, getNextLessonId } from '../../lib/supabase';
+import PracticeReminder, { requestNotificationPermission } from '../../components/PracticeReminder';
 import homeStyles from '../../styles/beginner.module.css';
 
 // ---------------------------------------------------------------------------
@@ -243,6 +244,24 @@ export default function BeginnerPage() {
     [resumeLessonId],
   );
 
+  // T1.4 — Notification permission state. Drives the visibility of the
+  // "Enable reminders" inline prompt. We only show the prompt when the
+  // browser supports notifications and the permission is still 'default'.
+  const [notifyPerm, setNotifyPerm] = useState<NotificationPermission | 'unsupported' | null>(null);
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (typeof Notification === 'undefined') {
+      setNotifyPerm('unsupported');
+      return;
+    }
+    setNotifyPerm(Notification.permission);
+  }, []);
+
+  const handleEnableNotifications = useCallback(async () => {
+    const result = await requestNotificationPermission();
+    setNotifyPerm(result);
+  }, []);
+
   // ---------------------------------------------------------------------------
   // Render
   // ---------------------------------------------------------------------------
@@ -255,6 +274,15 @@ export default function BeginnerPage() {
       initial="hidden"
       animate="visible"
     >
+      {/* T1.4 — practice reminder. Mounts a side-effect-only component that
+          fires a local Notification at the time-of-day-raga's prime hour
+          when the student has Notification permission and an undone riyaz. */}
+      <PracticeReminder
+        riyazDone={riyazDone}
+        todayRagaId={todayRaga.id}
+        todayRagaName={todayRaga.name}
+      />
+
       {/* Arriving moment — 6s cinematic intro on first daily open */}
       <AnimatePresence>
         {showArriving && (() => {
@@ -438,6 +466,28 @@ export default function BeginnerPage() {
           ))
         )}
       </motion.section>
+
+      {/* T1.4 — opt-in notification banner. Shows once if the student
+          hasn't yet decided. Hidden after a decision (granted or denied)
+          and on browsers without the API. */}
+      {notifyPerm === 'default' && !riyazDone && (
+        <motion.aside
+          className={homeStyles.notifyOptIn}
+          variants={fadeUp}
+          aria-label="Enable practice reminders"
+        >
+          <p className={homeStyles.notifyOptInText}>
+            Want a quiet nudge when your raga&rsquo;s time arrives?
+          </p>
+          <button
+            type="button"
+            className={homeStyles.notifyOptInButton}
+            onClick={handleEnableNotifications}
+          >
+            Enable reminders
+          </button>
+        </motion.aside>
+      )}
 
       {/* Lesson catalog */}
       <motion.section
