@@ -566,4 +566,238 @@
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   letter-spacing: var(--tracking-wide);
+  transition: border-color 240ms ease, color 240ms ease;
+}
+
+/* Mastery: target reached */
+.challengeTargetActive {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.challengeTargetPassed {
+  color: var(--correct);
+  border-color: var(--correct);
+}
+
+.challengeTargetFailed {
+  color: var(--needs-work);
+  border-color: var(--needs-work);
+}
+
+/* Hold timer (mastery challenge) */
+.holdMeter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  margin: var(--space-4) 0;
+}
+
+.holdMeterTrack {
+  width: 240px;
+  height: 2px;
+  background: var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.holdMeterFill {
+  height: 100%;
+  background: var(--accent);
+  transition: width 80ms linear, background-color 240ms ease;
+}
+
+.holdMeterFillPassed {
+  background: var(--correct);
+}
+
+.holdMeterLabel {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  color: var(--text-2);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+}
+
+/* Multiple-choice (interval / raga identification) */
+.choiceRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  justify-content: center;
+  margin: var(--space-4) 0;
+  max-width: 480px;
+}
+
+.choiceButton {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--text);
+  background: transparent;
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  letter-spacing: var(--tracking-wide);
+  cursor: pointer;
+  transition: border-color 180ms ease, color 180ms ease, background-color 180ms ease;
+}
+
+.choiceButton:hover {
+  border-color: var(--text-2);
+  color: var(--text);
+}
+
+.choiceCorrect {
+  border-color: var(--correct);
+  color: var(--correct);
+}
+
+.choiceWrong {
+  border-color: var(--needs-work);
+  color: var(--needs-work);
+}
+
+.choiceButton:disabled {
+  cursor: default;
+  opacity: 0.85;
+}
+
+/* Phase instruction body — for Cluster F instruction-led phases */
+.phaseInstruction {
+  font-family: var(--font-serif);
+  font-size: var(--text-base);
+  font-weight: var(--weight-light);
+  color: var(--text);
+  line-height: var(--leading-relaxed);
+  letter-spacing: var(--tracking-normal);
+  max-width: 36ch;
+  text-align: center;
+  white-space: pre-line;
+  margin: var(--space-4) 0;
+}
+
+.phaseMeta {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  color: var(--text-2);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  margin-bottom: var(--space-2);
+}
+
+/* Comparison cards (A/B swara or raga) */
+.comparisonRow {
+  display: flex;
+  gap: var(--space-6);
+  align-items: center;
+  justify-content: center;
+  margin: var(--space-5) 0;
+}
+
+.comparisonCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  min-width: 140px;
+  transition: border-color 240ms ease;
+}
+
+.comparisonCard:hover {
+  border-color: var(--text-2);
+}
+
+.comparisonLabel {
+  font-family: var(--font-serif);
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-light);
+  color: var(--text);
+  letter-spacing: var(--tracking-royal);
+}
+
+.comparisonRoman {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  color: var(--text-2);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+}
+
+.comparisonDivider {
+  color: var(--text-3);
+  font-size: var(--text-base);
+  font-family: var(--font-serif);
+}
+
+/* Beat strip (tala_exercise) */
+.beatStrip {
+  display: flex;
+  gap: var(--space-1);
+  justify-content: center;
+  margin: var(--space-4) 0;
+  flex-wrap: wrap;
+  max-width: 480px;
+}
+
+.beatDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--border);
+  transition: background-color 80ms linear, transform 80ms ease;
+}
+
+.beatDotActive {
+  background: var(--text);
+  transform: scale(1.4);
+}
+
+.beatDotSam {
+  background: var(--accent);
+  transform: scale(1.6);
+  box-shadow: 0 0 6px color-mix(in srgb, var(--accent) 60%, transparent);
+}
+
+.beatDotKhali {
+  background: var(--text-3);
+  border: 1px solid var(--text-2);
+  background-color: transparent;
+}
+
+.tempoLabel {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  color: var(--text-2);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+}
+
+/* Verdict banner (mastery / interval pass-fail) */
+.verdictBanner {
+  font-family: var(--font-serif);
+  font-size: var(--text-lg);
+  font-weight: var(--weight-light);
+  color: var(--text);
+  margin: var(--space-3) 0;
+  letter-spacing: var(--tracking-royal);
+}
+
+.verdictPass {
+  color: var(--correct);
+}
+
+.verdictFail {
+  color: var(--needs-work);
+}
+
+.verdictDetail {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  color: var(--text-2);
+  letter-spacing: var(--tracking-wide);
+  margin-top: var(--space-1);
 }
