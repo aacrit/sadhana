@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 # Sādhanā
 
-Last updated: 2026-04-29 (rev 10)
+Last updated: 2026-04-29 (rev 12)
 
 > Sanskrit: sādhanā (साधना) — disciplined practice toward mastery. Not learning about music. Becoming it.
 
