@@ -149,36 +149,46 @@ export default function MasterPage() {
         ))}
       </motion.section>
 
-      {/* Horizon panel — what this journey will contain */}
-      <motion.div className={styles.gatePanel} variants={fadeUp} role="region" aria-label="Journey status">
-        <p className={styles.gateTitle}>
-          Arriving soon
+      {/* Lesson catalog — the Guru curriculum (10 lessons). Wired to
+          /journeys/master/lessons/[id]. Level gating defers to T1.3's
+          progression engine. */}
+      <motion.section
+        className={styles.lessonSection}
+        variants={fadeUp}
+        aria-label="Guru lessons"
+      >
+        <h2 className={styles.lessonHeading}>Guru lessons</h2>
+        <p className={styles.lessonIntro}>
+          Ten lessons that take you from Varistha to Guru. Bandish composition,
+          modulation, taan patterns, and the complete rendering of a raga
+          (alap → jod → jhala). The teaching exercise asks you to explain a
+          raga back to the engine. Open mastery has no script.
         </p>
-
-        <p className={styles.gateDescription}>
-          Composition tools, phrase generation, teaching mode, and the full
-          22-shruti palette. The engine becomes your instrument.
-        </p>
-
-        <Link href="/" className={styles.practiceLink}>
-          Return to practice
-          <svg
-            width="14"
-            height="14"
-            viewBox="0 0 14 14"
-            fill="none"
-            aria-hidden="true"
-          >
-            <path
-              d="M5 3L9 7L5 11"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </Link>
-      </motion.div>
+        <div className={styles.lessonGrid}>
+          {[
+            { id: 'guru-01-raga-id-advanced', num: 1, title: 'The Listening Guru', raga: 'Identification' },
+            { id: 'guru-02-bandish', num: 2, title: 'The Fixed Composition', raga: 'Bandish' },
+            { id: 'guru-03-bhairavi', num: 3, title: 'The Flexible Raga', raga: 'Bhairavi' },
+            { id: 'guru-04-modulation', num: 4, title: 'Where One Becomes Another', raga: 'Modulation' },
+            { id: 'guru-05-taan', num: 5, title: 'The Fast Run', raga: 'Taan' },
+            { id: 'guru-06-kedar-hameer', num: 6, title: 'The Two Mas', raga: 'Kedar / Hameer' },
+            { id: 'guru-07-sohini-marwa', num: 7, title: 'Same Constraint, Different Worlds', raga: 'Sohini / Marwa' },
+            { id: 'guru-08-raga-rendering', num: 8, title: 'The Complete Rendering', raga: 'Alap—Jod—Jhala' },
+            { id: 'guru-09-teaching', num: 9, title: 'The Guru Teaches', raga: 'Teaching' },
+            { id: 'guru-10-open-mastery', num: 10, title: 'No Ceiling', raga: 'Open Mastery' },
+          ].map((lesson) => (
+            <Link
+              key={lesson.id}
+              href={`/journeys/master/lessons/${lesson.id}`}
+              className={styles.lessonTile}
+            >
+              <span className={styles.lessonNum}>{String(lesson.num).padStart(2, '0')}</span>
+              <span className={styles.lessonTitle}>{lesson.title}</span>
+              <span className={styles.lessonRaga}>{lesson.raga}</span>
+            </Link>
+          ))}
+        </div>
+      </motion.section>
     </motion.div>
   );
 }
