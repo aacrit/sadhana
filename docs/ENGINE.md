@@ -14,6 +14,8 @@ import { mapPitchToSwara, VoicePipeline, TanpuraDrone } from '@/engine'
 
 ```
 physics/ -> theory/ -> analysis/ -> synthesis/ -> voice/
+                                                  interaction/  (Tantri)
+                                                  progression/  (level gates)
 ```
 
 Each layer depends only on the layers to its left.
@@ -263,6 +265,29 @@ Star rating and XP model for guided practice sessions.
 
 Star thresholds: 0 stars < 0.40, 1 star >= 0.40, 2 stars >= 0.65, 3 stars >= 0.85. XP is awarded as the delta above the student's previous best for that raga (no repeat grinding).
 
+### modulation.ts
+
+Detects sustained transition swaras in a pitch history. Used by Guru `modulation_awareness` exercises (e.g. Bhairav → Bhairavi via Ga_k held > 1500ms).
+
+| Export | Kind | Description |
+|--------|------|-------------|
+| `ModulationDetection` | interface | `{ detected, transitionSwara?, sustainedMs?, confidence }` |
+| `detectModulation(pitchHistory, transitionSwara, saHz, opts?)` | fn | Returns detection over a `[hz, timestampMs]` window. Default min sustain 1500ms, ±20 cents tolerance. |
+
+5 unit tests.
+
+### deviation.ts
+
+Verdicts allowed-deviation occurrences for Guru `controlled_deviation` exercises. Each occurrence has a `role` ('passing' / 'kan' / 'expressive') and a `max_duration_ms`. The verdict is pass/fail per occurrence.
+
+| Export | Kind | Description |
+|--------|------|-------------|
+| `DeviationOccurrence` | interface | `{ swara, durationMs, role, maxDurationMs }` |
+| `DeviationVerdict` | interface | `{ pass, reason? }` |
+| `verdictDeviation(occurrence)` | fn | Returns verdict — `passing` ≤ 250ms, `kan` ≤ 80ms, `expressive` ≤ 600ms (defaults; overridable). |
+
+5 unit tests.
+
 ---
 
 ## synthesis/
@@ -361,3 +386,36 @@ Scoring weights: `overall = 0.5 * shapeFit + 0.2 * timing + 0.3 * arrivalScore`.
 - **arrival**: Gaussian (σ = 25 cents) scoring of the average cents deviation across the final 120ms window. Used to check the student lands on the target swara.
 
 Wired into `OrnamentExercisePhase` in `LessonRenderer.tsx`. `ornament_exercise`, `andolan`, and `meend` added to `VOICE_PHASE_TYPES` (fixes a latent mic-closed bug where those phase types were silently skipped).
+
+### onset-detection.ts
+
+Spectral-flux onset detector and tala-alignment scorer. Powers the `clap_sam`, `clap_sam_khali`, and `sing_on_sam` modes of `tala_exercise` / `tala_melody_exercise` phases.
+
+| Export | Kind | Description |
+|--------|------|-------------|
+| `Onset` | interface | `{ timeMs, strength }` |
+| `OnsetDetectorOptions` | interface | `{ sampleRate, hopSize?, threshold?, minIntervalMs? }` |
+| `detectOnsets(samples, opts)` | fn | Returns `Onset[]` from a Float32Array of mono PCM. STFT-based spectral flux. |
+| `TalaScore` | interface | `{ hits, misses, score, perBeatHits[] }` |
+| `scoreTalaAlignment(onsets, beatTimesMs, toleranceMs?)` | fn | Per-beat hit/miss verdict. Default ±150ms tolerance. |
+
+`TalaPhase.tsx` records mic via the analyser, runs `detectOnsets`, and calls `scoreTalaAlignment` against the beat times produced by the engine TalaPlayer. 11 unit tests.
+
+---
+
+## progression/
+
+### level-gates.ts
+
+Six musical-act gates as predicates over a student's recent history. The level system is unlocked by specific musical performance, not XP (per CLAUDE.md locked decisions).
+
+| Export | Kind | Description |
+|--------|------|-------------|
+| `LevelGateId` | type | `'shishya_first_sa' \| 'sadhaka_pakad_mastery' \| 'sadhaka_aroha_mastery' \| 'varistha_ornament_skill' \| 'varistha_modulation' \| 'guru_full_rendering'` |
+| `GateContext` | interface | Aggregated student progress (sessions, pakad-finds, ornament scores, modulation detections, etc.) |
+| `LEVEL_GATES` | const | Record of gate id → predicate function over GateContext |
+| `earnedGates(ctx)` | fn | Returns `LevelGateId[]` currently satisfied |
+| `pendingGates(ctx)` | fn | Returns gates not yet earned, in pedagogical order |
+| `deriveLevel(ctx)` | fn | Returns the highest level (`'shishya' \| 'sadhaka' \| 'varistha' \| 'guru'`) whose required gates are all earned |
+
+9 unit tests. Frontend integration (profile-page wire-up + event-emit on gate satisfaction) deferred — see `docs/JOURNEYS.md` rev 12 status.

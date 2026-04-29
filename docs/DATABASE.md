@@ -8,6 +8,7 @@ Migrations:
 - `supabase/migrations/001_initial_schema.sql` — base schema
 - `supabase/migrations/002_worst_swara.sql` — adds `worst_swara` column to `sessions` table
 - `supabase/migrations/003_increment_rpcs.sql` — adds `increment_xp(p_user_id, p_xp_delta)` and `increment_raga_session(p_user_id, p_raga_id)` RPCs for atomic operations; updates profiles INSERT/DELETE policies; allows `'freeform'` in journey CHECK constraint; adds index on exercise_attempts(user_id, created_at DESC)
+- `supabase/migrations/004_streak_freeze_and_events.sql` — adds `streaks.freezes_remaining` (CHECK 0–3, default 0) and `streaks.last_freeze_earned_date` (date) for streak-freeze recovery; creates `public.events` telemetry table with RLS
 
 ---
 
@@ -109,9 +110,27 @@ One row per user. Daily riyaz streak tracking.
 | `current_streak` | integer | 0 | CHECK >= 0 |
 | `longest_streak` | integer | 0 | CHECK >= 0 |
 | `last_riyaz_date` | date | null | -- |
+| `freezes_remaining` | integer | 0 | CHECK 0–3. Streak-freeze credits consumed on a 1-day gap. Earned one per 30 consecutive days. Cap 3. (Migration 004) |
+| `last_freeze_earned_date` | date | null | Date the most recent freeze credit was earned. Prevents double-awarding within the same 30-day window. (Migration 004) |
 | `updated_at` | timestamptz | now() | Auto-updated via trigger |
 
 RLS: select own, insert own, update own.
+
+### events
+
+Lightweight client telemetry. One row per emitted event. Added by migration 004. Source: `frontend/app/lib/telemetry.ts` (`emit()` / `emitError()`).
+
+| Column | Type | Default | Notes |
+|--------|------|---------|-------|
+| `id` | uuid PK | gen_random_uuid() | -- |
+| `user_id` | uuid FK | -- | References profiles(id) CASCADE. Nullable for unauthenticated emissions. |
+| `name` | text | -- | NOT NULL. Event name (e.g., `lesson-started`, `phase-skipped`, `mic-denied`, `error`). |
+| `payload` | jsonb | null | Optional structured payload. |
+| `created_at` | timestamptz | now() | -- |
+
+Indexes: `(user_id, created_at DESC)`, `(name)`
+
+RLS: select own, insert own.
 
 ### raga_encounters
 
@@ -189,3 +208,4 @@ All tables enforce `auth.uid() = user_id` (or `auth.uid() = id` for profiles). N
 | lesson_progress | own | own | own | -- |
 | streaks | own | own | own | -- |
 | raga_encounters | own | own | own | -- |
+| events | own | own | -- | -- |

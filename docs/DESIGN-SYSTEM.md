@@ -229,6 +229,9 @@ Noto Serif Devanagari is the fourth voice. It serves as the native script for al
 - CSS rules switch font-family based on `data-script` attribute.
 - Content is stored in both scripts; the toggle controls which renders.
 
+**Fallback chain (`--font-devanagari` in `tokens.css`):**
+`'Noto Serif Devanagari', 'Noto Sans Devanagari', 'Mangal', 'Devanagari MT', system-ui, sans-serif`. The previous generic `serif` fallback silently substituted whatever the OS chose for serif — typically a face with no Devanagari coverage. The explicit chain ensures shaped Devanagari rendering across Android (Noto Sans Devanagari), Windows (Mangal), and Apple platforms (Devanagari MT). `font-feature-settings: "calt" 1, "liga" 1, "dlig" 1` is enforced on `.swara-text` and Devanagari-bearing classes so conjunct shaping is not skipped.
+
 ### Type Scale
 
 Modular, base 16px, ratio ~1.25 (major third).
