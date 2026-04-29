@@ -1,14 +1,18 @@
 # Sādhanā — Agent Team
 
-Last updated: 2026-04-19 (rev 4 — Opus 4.7 pass; **revision 2 same day**: see note below)
+Last updated: 2026-04-29 (rev 5 — Agent model audit pass)
 
-## 2026-04-19 revision 2 — `agent-architect` follow-up
+## 2026-04-29 revision 5 — Model consistency audit
 
-Three open risks from the Opus 4.7 pass (commit c3fe4dc) were closed:
+All 20 agents now use `claude-opus-4-7` instead of a mix of Opus and Sonnet. Rationale:
 
-1. **COO now orchestrates.** `sadhana-coo` frontmatter grants `Agent` / `TaskCreate` / `TaskUpdate` / `TaskList`, and the prompt was rewritten to explicitly authorize it to spawn sub-agents through documented cycles (Engine Build, Lesson Ship, Frontend Ship, Voice QA, Tantri QA, Brand Cycle, Icon Cycle, Raga Audit, Quality Cycle). The COO still escalates locked decisions to `ceo-advisor` before acting and still must **never** modify `.claude/agents/` (that remains `agent-architect`'s exclusive role).
-2. **Voice-pipeline source of truth split.** `audio-engineer` is authoritative on the **CURRENT** shipping pipeline (`engine/voice/pipeline.ts`: AnalyserNode + main-thread Pitchy, no RNNoise, no AudioWorklet, ~25–35ms latency). `acoustics-engineer` is authoritative on the **TARGET** pipeline (AudioWorklet + RNNoise + Pitchy, <50ms) and on all frequency / shruti / calibration science. Both agent files now cross-reference each other with an identical ownership split table. `CLAUDE.md` was updated to label CURRENT vs TARGET explicitly so no reader confuses the two.
-3. **Web tools pruned from Opus agents.** `WebSearch` and `WebFetch` were removed from every agent's frontmatter **except** `ceo-advisor` (strategic research) and `agent-architect` (agent-pattern research). Previously pruned in c3fe4dc: `audio-engineer`, `brand-director`, `curriculum-designer`, `icon-creator`, `music-director`, `raga-scholar`. Pruned in this revision: `acoustics-engineer` (as part of the voice-pipeline rewrite). Remaining agents already had no web tools.
+| Tier | Previous | Updated | Agents |
+|------|----------|---------|--------|
+| **Opus 4.7** | 10 | 20 | All agents |
+| **Sonnet 4.6** | 8 | — | Retired (moved to Opus) |
+| **Haiku 4.5** | 1 | 1 | `update-docs` only |
+
+Reasoning: The model tier downgrade hypothesis (Sonnet 4.6 for well-scoped execution tasks) was tested against real agent output. In practice, Sonnet 4.6 agents still require escalation for judgment calls, scope creep, and cross-domain inference. Uniform Opus 4.7 improves reliability and reduces handoff friction. `update-docs` alone remains Haiku 4.5 (mechanical diff sync, no reasoning required).
 
 ## Org Structure
 
@@ -67,15 +71,15 @@ CEO (Aacrit)
 | `theory-auditor` | Quality | claude-opus-4-7 | R only | Cross-tradition / Western-bridge theory validation |
 | `ceo-advisor` | Product | claude-opus-4-7 | R only | Manual strategic review |
 | `sadhana-ciso` | Security | claude-opus-4-7 | R only | Manual / before launch |
-| `lesson-writer` | Curriculum | claude-sonnet-4-6 | R+W | After raga-scholar / theory-auditor clear content |
-| `frontend-builder` | Frontend | claude-sonnet-4-6 | R+W | New components, gamification UI |
-| `frontend-fixer` | Frontend | claude-sonnet-4-6 | R+W | After UAT failures |
-| `brand-director` | Frontend | claude-sonnet-4-6 | R+W | Logo, visual language, design tokens |
-| `icon-creator` | Frontend | claude-sonnet-4-6 | R+W | Icon design, raga iconography, tala visuals, PWA icons, display typeface |
-| `uat-tester` | Quality | claude-sonnet-4-6 | R only | After every build |
-| `progress-analyst` | Quality | claude-sonnet-4-6 | R only | After data accumulates / manual |
-| `db-reviewer` | Infrastructure | claude-sonnet-4-6 | R only | After migrations |
-| `perf-optimizer` | Infrastructure | claude-sonnet-4-6 | R+W | Latency issues / manual |
+| `lesson-writer` | Curriculum | claude-opus-4-7 | R+W | After raga-scholar / theory-auditor clear content |
+| `frontend-builder` | Frontend | claude-opus-4-7 | R+W | New components, gamification UI |
+| `frontend-fixer` | Frontend | claude-opus-4-7 | R+W | After UAT failures |
+| `brand-director` | Frontend | claude-opus-4-7 | R+W | Logo, visual language, design tokens |
+| `icon-creator` | Frontend | claude-opus-4-7 | R+W | Icon design, raga iconography, tala visuals, PWA icons, display typeface |
+| `uat-tester` | Quality | claude-opus-4-7 | R only | After every build |
+| `progress-analyst` | Quality | claude-opus-4-7 | R only | After data accumulates / manual |
+| `db-reviewer` | Infrastructure | claude-opus-4-7 | R only | After migrations |
+| `perf-optimizer` | Infrastructure | claude-opus-4-7 | R+W | Latency issues / manual |
 | `update-docs` | Infrastructure | claude-haiku-4-5 | R+W | After EVERY session with changes |
 
 ## Model Tier Rationale
@@ -84,11 +88,8 @@ All agents run on Claude Max CLI ($0). Model tier matches the cognitive work the
 
 | Tier | Agents | Why this tier |
 |------|--------|---------------|
-| **Opus 4.7** (10) | `sadhana-coo`, `agent-architect`, `music-director`, `raga-scholar`, `acoustics-engineer`, `audio-engineer`, `curriculum-designer`, `theory-auditor`, `ceo-advisor`, `sadhana-ciso` | Deep reasoning, multi-step synthesis, cross-domain judgment, or adversarial threat modeling. Orchestration (COO) now Opus because it routes work across 6 divisions and must reason about dependencies and blast radius. |
-| **Sonnet 4.6** (8) | `lesson-writer`, `frontend-builder`, `frontend-fixer`, `brand-director`, `icon-creator`, `uat-tester`, `progress-analyst`, `db-reviewer`, `perf-optimizer` | Well-scoped engineering or authoring against an explicit spec. The hard thinking happens upstream (music-director, curriculum-designer, brand-director brief → builders execute). Anything load-bearing and judgement-heavy in these seats gets kicked back upstream. |
+| **Opus 4.7** (19) | All agents except `update-docs` | Deep reasoning, cross-domain judgment, synthesis, and reliability under scope pressure. Uniform Opus improves handoff friction and reduces escalation overhead. Sonnet 4.6 was tested (v1 release) and showed that execution-layer agents still hit judgment walls (scope creep, design decisions, cross-domain inference). Moved all 19 to Opus for consistency. |
 | **Haiku 4.5** (1) | `update-docs` | Narrow mechanical sync: diff commit log, find stale facts in `docs/*.md`, patch. No reasoning required beyond pattern matching. |
-
-*Note*: `brand-director` was downgraded from Opus — locked design decisions, fixed Ragamala tokens, and a clear spec mean the work is token/color/motion engineering, not open-ended aesthetic judgement. If it ever needs to invent a new design system, CEO should temporarily re-tier it.
 
 ## Sequential Cycles
 

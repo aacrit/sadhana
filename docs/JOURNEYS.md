@@ -1,6 +1,6 @@
 # Journey UX Specs
 
-Last updated: 2026-04-19
+Last updated: 2026-04-29
 
 Four entry points to the same engine. Different interfaces, different depth, same musical truth.
 
@@ -374,3 +374,23 @@ Audio: 4-partial additive synthesis via `StereoPannerNode` + `Web Audio API` (no
 Source: `frontend/app/profile/page.tsx`
 
 A 90-day grid heatmap is displayed on the profile page (Section 5). Each cell represents one day; intensity levels 0–4 encode practice volume (minutes). Data fetched via `getPracticeHistory(userId, 90)` from Supabase. A legend and total-minutes label accompany the grid. Cell intensity thresholds: 0 = no practice, 1 = 1–5 min, 2 = 6–15 min, 3 = 16–30 min, 4 = >30 min.
+
+---
+
+## Known Gaps / Pedagogy Debt
+
+These are pre-existing silent-drop fields surfaced by the v1 curriculum integration audit. They represent design-stage intent that was not yet wired to rendering logic. Flagged for future curriculum-designer + frontend-builder coordination.
+
+| Field | YAML Phase Types | Current Behavior | Issue |
+|-------|---|---|---|
+| `presentation: comparison` | `swara_comparison`, `raga_comparison` | Renders as sequential static text; no side-by-side UI, no toggle | Student sees both options merged, loses pedagogical contrast |
+| `call_response.calls` loop | `call_response` | Runs the `responses` phase once; `calls` cycle not looped (engine-plays / student-sings pattern should repeat 3-5×) | Teacher typically repeats call-response 3-5 times for memory formation; current UI plays once and moves on |
+| `mastery_challenge.tolerance_cents` | `mastery_challenge` | Phase renders but the engine does not gate pass/fail on `tolerance_cents` — students can pass with out-of-spec accuracy | Mastery challenges are meant to enforce strict accuracy; currently underdescored |
+| Cluster F structured phases | `tala_exercise`, `grammar_exercise`, `ornament_exercise`, `raga_structure` (and others with `structured_input` field) | Render with generic "Continue" button; no structured input UI, no multi-step guided flow | Students see a static lesson; engine expects phase-specific micro-interactions (e.g., clicking beats in tala, painting a phrase shape in grammar) |
+
+### Remediation Path
+
+- **curriculum-designer** audits lesson YAML to document which gaps block each lesson
+- **frontend-builder** implements structured phase renderers for Cluster F (highest ROI — affects >20 lessons)
+- **music-director** + **curriculum-designer** review `mastery_challenge` intent and reset `tolerance_cents` per lesson
+- `call_response` loop: add `response_cycles: int` YAML field (default 1) and wire to `CallResponsePhase` loop counter

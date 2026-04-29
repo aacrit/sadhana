@@ -1,6 +1,6 @@
 # Engine Reference
 
-Last updated: 2026-04-19
+Last updated: 2026-04-29
 
 The engine lives at `/engine/`. Pure TypeScript. Zero UI. Zero dependencies except Tone.js (synthesis only). Single barrel export from `engine/index.ts`.
 
@@ -141,7 +141,7 @@ v1 pedagogy ragas (fully used in journeys):
 | Yaman | Kalyan | sampoorna/sampoorna | Ga / Ni | 5, 6 | All shuddha + Ma_t |
 | Bhimpalasi | Kafi | shadava/sampoorna | Ma / Sa | 3, 4 | Ga_k, Ni_k (komal) |
 | Bhairav | Bhairav | sampoorna/sampoorna | Dha_k / Re_k | 1, 8 | Re_k, Dha_k (andolan) |
-| Bageshri | Kafi | shadava/sampoorna | Ma / Sa | 6, 7 | Ga_k, Ni_k |
+| Bageshri | Kafi | shadava/sampoorna | Ma / Sa | 6, 7 | Ga_k, Ni_k, tanpuraTuning: Ni |
 
 Additional engine ragas (defined, not yet wired to journeys): Asavari, Bhairavi, Bilawal, Darbari Kanada, Desh, Durga, Hameer, Hamsadhwani, Jaunpuri, Jog, Kafi, Kedar, Khamaj, Lalit, Madhuvanti, Malkauns, Marwa, Multani, Pahadi, Puriya, Puriya Dhanashri, Shree, Sohini, Tilak Kamod, Todi.
 
@@ -205,7 +205,7 @@ Bridge from Hz to musical domain.
 | Export | Kind | Description |
 |--------|------|-------------|
 | `Level` | type | `'shishya' \| 'sadhaka' \| 'varistha' \| 'guru'` |
-| `LEVEL_TOLERANCE` | const | shishya: 50c, sadhaka: 25c, varistha: 15c, guru: 10c |
+| `LEVEL_TOLERANCE` | const | shishya: 35c, sadhaka: 20c, varistha: 12c, guru: 8c |
 | `PitchResult` | interface | hz, centsFromSa, nearestSwara, nearestShruti, deviationCents, clarity, inRagaContext, expectedOrnament, accuracy |
 | `mapPitchToSwara(hz, saHz, clarity?, ragaId?, level?)` | fn | Primary pipeline function. <0.5ms per call. |
 | `isValidInRaga(swara, raga)` | fn | Swara in aroha/avaroha and not varjit |
@@ -279,7 +279,7 @@ Additive synthesis drone from first principles.
 | `DEFAULT_TANPURA_CONFIG` | const | 261.63 Hz, volume 0.3, stringCount 2, cycleDuration 2.0s, groundString 'Pa', 0.4 cents jivari detune |
 | `TanpuraDrone` | class | `start()`, `stop()`, `setSa(hz)`, `setVolume(v, rampMs?)`, `getPartialFrequencies()`, `getProfiles()` |
 
-Architecture: up to 4 strings x 10 partials (default 2 strings = 20 oscillators). Third string detuned 2 cents for shimmer when stringCount >= 3. String volume balance: Pa/Ma/Ni 0.7, low Sa 0.6, middle Sa 1.0. 500ms fade-out on stop. Web Audio API directly (no Tone.js).
+Architecture: up to 4 strings x 10 partials (default 2 strings = 20 oscillators). Third string detuned 2 cents for shimmer when stringCount >= 3. String volume balance: Pa/Ma/Ni 0.7, low Sa 0.6, middle Sa 1.0. Attack: 35ms exponential ramp (was 15ms linear) for natural string-contact character. Pluck cycle: strings plucked sequentially with crossfading sustain (no gaps). Per-partial jivari detune: deterministic ±0.4 cent offset from seeded xorshift32 PRNG (same pattern every pluck). 600ms fade-out on stop with double-stop safety (captured graph snapshot). Web Audio API directly (no Tone.js).
 
 Level-scaled stringCount: shishya=2 (Sa + ground), sadhaka=3, varistha=4. Progressive disclosure matches Tantri string visibility.
 
