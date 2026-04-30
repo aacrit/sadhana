@@ -1,6 +1,6 @@
 # Design System -- Ragamala
 
-Last updated: 2026-04-29
+Last updated: 2026-04-29 (rev 13 — operations hooks)
 
 ---
 
@@ -808,3 +808,21 @@ When raga deactivates: all 12 strings return to chromatic layout over 600ms.
 - Raga worlds: labels inherit `--raga-accent`. Bhairav strings have pale rose labels. Yaman strings have amber labels. The entire field shifts with ink diffusion.
 - Jali texture: responds to sustained perfect pitch, connecting Tantri to the texture language.
 - Level progression: at Guru level, Sa's terminus point shifts from saffron to gold (`--gold`). A zarr-kashi single-point accent. The only gold in the string field.
+
+---
+
+## Operations Hooks (rev 13)
+
+The following operational additions landed in the rev 13 pre-launch readiness audit. They are not visual decisions but they affect the surface the design system runs on.
+
+### Perf tier (Tantri)
+
+`frontend/app/lib/usePerfTier.ts` detects low-end Android (heuristic: device memory + hardwareConcurrency). The Tantri container receives a `data-perf-tier` attribute. CSS rules gate ambient animations on low tier — ripple, glow halos, and cosine-driven body undulation are suppressed so the canvas stays at 60fps on weaker devices. Saffron color encoding and string strikes remain. Strings still vibrate. Visual identity is unchanged; only ambient secondary motion is dropped.
+
+### Error boundary (root)
+
+`frontend/app/components/ErrorBoundary.tsx` (class component) + `GlobalErrorListener` are mounted at the providers root. Uncaught render errors and `window.error` / `unhandledrejection` events are caught and emitted to `events` (audit #13). The fallback UI uses Ragamala tokens — single-column, Cormorant Garamond title, no decorative accent (errors do not earn saffron). Reload CTA is the only action.
+
+### Lighthouse CI gate
+
+`lighthouserc.json` + `.github/workflows/deploy-pages.yml` step run Lighthouse against the static export on every deploy. Budgets are advisory in rev 13 (warn, do not block). When promoted to blocking, the gate enforces: Performance ≥ 90, Accessibility ≥ 95, Best Practices ≥ 95, SEO ≥ 95. Any visual or motion change that risks these thresholds must be measured on Lighthouse before merge.

@@ -1,6 +1,6 @@
 # Database Schema Reference
 
-Last updated: 2026-04-29
+Last updated: 2026-04-29 (rev 13 — migrations 005 + 006)
 
 Supabase (free tier). All tables have Row Level Security (RLS) enabled. Every table is scoped to the authenticated user via `auth.uid()`.
 
@@ -9,6 +9,8 @@ Migrations:
 - `supabase/migrations/002_worst_swara.sql` — adds `worst_swara` column to `sessions` table
 - `supabase/migrations/003_increment_rpcs.sql` — adds `increment_xp(p_user_id, p_xp_delta)` and `increment_raga_session(p_user_id, p_raga_id)` RPCs for atomic operations; updates profiles INSERT/DELETE policies; allows `'freeform'` in journey CHECK constraint; adds index on exercise_attempts(user_id, created_at DESC)
 - `supabase/migrations/004_streak_freeze_and_events.sql` — adds `streaks.freezes_remaining` (CHECK 0–3, default 0) and `streaks.last_freeze_earned_date` (date) for streak-freeze recovery; creates `public.events` telemetry table with RLS
+- `supabase/migrations/005_account_deletion_export.sql` — GDPR / India DPDP / Brazil LGPD floor (audit #4). Adds `public.deletion_requests` queue table with RLS, `delete_my_account()` RPC (queues auth deletion + hard-deletes user-scoped rows), `export_my_data()` RPC (returns full user JSONB document). Both RPCs `SECURITY INVOKER` + `auth.uid()` guarded.
+- `supabase/migrations/006_events_retention.sql` — events retention (audit #14). Adds `prune_old_events(retention_days int default 90)` returning rows-deleted count; best-effort `pg_cron` schedule (`prune-events-weekly`, Sunday 07:00 UTC) when extension is enabled. Otherwise driven by GitHub Action keep-alive (`.github/workflows/supabase-keepalive.yml`).
 
 ---
 
@@ -132,6 +134,19 @@ Indexes: `(user_id, created_at DESC)`, `(name)`
 
 RLS: select own, insert own.
 
+### deletion_requests
+
+Pending GDPR/DPDP/LGPD account deletions. Inserted by `delete_my_account()` (audit #4). One row per user (unique constraint). Project owner runs a periodic admin cleanup that walks unprocessed rows and calls `auth.admin.delete()`.
+
+| Column | Type | Default | Notes |
+|--------|------|---------|-------|
+| `id` | uuid PK | gen_random_uuid() | -- |
+| `user_id` | uuid FK | -- | References profiles(id) CASCADE. UNIQUE — one pending request per user. |
+| `requested_at` | timestamptz | now() | -- |
+| `processed_at` | timestamptz | null | Set by admin cleanup when auth row is deleted. |
+
+RLS: select own, insert own (no update/delete from client).
+
 ### raga_encounters
 
 Per-user per-raga practice history. Supports "recent ragas" display and raga unlock tracking.
@@ -174,6 +189,9 @@ Source: `frontend/app/lib/supabase.ts`
 |-----|-----------|---------|
 | `increment_xp` | `(p_user_id uuid, p_xp_delta int) → void` | Atomically increment user XP. Prevents race conditions when multiple sessions complete simultaneously. |
 | `increment_raga_session` | `(p_user_id uuid, p_raga_id text) → void` | Atomically increment raga_encounters session_count and update last_practiced timestamp. Prevents race conditions on raga_encounters table. |
+| `delete_my_account` | `() → void` | GDPR/DPDP/LGPD account deletion (audit #4, migration 005). Queues row in `deletion_requests`, blanks `profiles.display_name`, hard-deletes `events`/`sessions`/`raga_encounters`/`streaks`. SECURITY INVOKER + `auth.uid()` check. Profile row stays so RLS still resolves until the admin cleanup runs `auth.admin.delete()`. Wrapped by `requestAccountDeletion()` in `frontend/app/lib/supabase.ts`. |
+| `export_my_data` | `() → jsonb` | GDPR/DPDP/LGPD data export (audit #4, migration 005). Returns single jsonb document with `exported_at`, `user_id`, `profile`, `streak`, `sessions[]`, `raga_encounters[]`, `events[]`. Caller serialises and offers as a JSON download. SECURITY INVOKER + `auth.uid()` check. |
+| `prune_old_events` | `(retention_days int default 90) → int` | Events retention (audit #14, migration 006). Deletes events older than `retention_days`, returns row count. Called weekly via best-effort `pg_cron` job `prune-events-weekly` (Sunday 07:00 UTC) when the extension is enabled. SECURITY DEFINER. |
 
 Both RPCs are wrapped by corresponding Supabase client helpers in `frontend/app/lib/supabase.ts` and are race-free (single SQL transaction per call).
 
@@ -209,3 +227,4 @@ All tables enforce `auth.uid() = user_id` (or `auth.uid() = id` for profiles). N
 | streaks | own | own | own | -- |
 | raga_encounters | own | own | own | -- |
 | events | own | own | -- | -- |
+| deletion_requests | own | own | -- | -- |

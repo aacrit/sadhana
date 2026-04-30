@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 # Sādhanā
 
-Last updated: 2026-04-29 (rev 12)
+Last updated: 2026-04-29 (rev 13)
 
 > Sanskrit: sādhanā (साधना) — disciplined practice toward mastery. Not learning about music. Becoming it.
 
@@ -396,9 +396,14 @@ Sādhanā/
 ├── frontend/
 │   ├── app/
 │   │   ├── auth/             # Void design language auth portal (Google, email, guest)
-│   │   ├── profile/          # XP, streak, level progression, encouragement
+│   │   ├── onboarding/       # /onboarding/sa first-launch Sa calibration (audit #11, rev 13)
+│   │   ├── legal/            # /legal/privacy, /legal/terms (audit #4, rev 13)
+│   │   ├── profile/          # XP, streak, level progression, /profile/privacy (audit #4, rev 13)
 │   │   ├── journeys/         # Beginner / Explorer / Scholar / Master / Freeform
-│   │   ├── components/       # Shared: PracticeSession, VoiceFeedback, TanpuraViz, ScriptToggle...
+│   │   │                     # scholar/reference/ragas/[id] per-raga reference (audit #16)
+│   │   ├── components/       # Shared: PracticeSession, VoiceFeedback, TanpuraViz, ScriptToggle,
+│   │   │                     # AudioContextResumer, ErrorBoundary, GlobalErrorListener,
+│   │   │                     # InstallPrompt, KeyboardModeHint, RagaReferencePlayer (rev 13)...
 │   │   ├── lib/              # Supabase client, types
 │   │   ├── three/            # Three.js tanpura waveform scene
 │   │   └── styles/           # tokens.css (Ragamala design tokens)

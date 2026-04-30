@@ -1,6 +1,6 @@
 # Audio Engine
 
-Last updated: 2026-04-29
+Last updated: 2026-04-29 (rev 13 — AudioContext background-resume)
 
 Voice capture, pitch detection, tanpura synthesis, and swara playback. Everything runs in the browser. $0 operational cost.
 
@@ -706,6 +706,14 @@ The `useLessonAudio` hook accepts a `timbre: TantriTimbre` parameter (`'harmoniu
 Signature: `useLessonAudio(sa_hz?, ragaId, timbre?): LessonAudioControls`. All journey pages pass `timbre` from `useTimbreSelection()`.
 
 **AudioContext lifecycle for tabla (canonical pattern):** `useLessonAudio` holds a `talaCtxRef` alongside `talaPlayerRef`. `startTala()` reuses the existing `AudioContext` if it is still open (`state !== 'closed'`), creating a new one only when none exists. `stopTala()` closes `talaCtxRef` after disposing the player, releasing the OS audio resource. `dispose()` nulls the ref. This prevents hitting the browser's simultaneous-AudioContext cap after ~6 toggle cycles. The same pattern is applied in the freeform page (`talaCtxRef` co-managed with `talaPlayerRef`). Any new code that creates a `TalaPlayer` must follow this ref-reuse/close-on-teardown pattern.
+
+**Background-resume (audit #1, BLOCKER, rev 13):** When the OS suspends a tab (Safari iOS backgrounding, screen lock, switch app), every `AudioContext` enters `'suspended'`. Returning to the tab does not auto-resume — the student returns to silence. The fix is a global registry plus a frontend resumer:
+
+- `frontend/app/lib/audio-context-registry.ts` — `registerAudioContext(ctx)` / `getRegisteredContexts()`. Auto-cleanup on `state === 'closed'` via the context's `statechange` listener; callers do not need to unregister.
+- `engine/voice/pipeline.ts` exposes `getAudioContext()` and registers its context after creation. `engine/synthesis/tanpura.ts` does the same on `start()`. `useLessonAudio` registers its `talaCtxRef`.
+- `frontend/app/components/AudioContextResumer.tsx` mounts at the providers root. On `visibilitychange` (tab visible) and `window.focus` it walks the registry, calls `ctx.resume()` on every suspended context. If Safari refuses (gesture required), a "Tap to resume" overlay appears.
+
+Any new code that creates an `AudioContext` MUST call `registerAudioContext(ctx)` immediately after construction so background-resume continues to work.
 
 **Sa calibration clarity (real Pitchy values):** `lesson-audio.ts` previously called `onCandidate(median, 1.0)`, hardcoding clarity at 1.0 for all accepted holds — meaning the Sa calibrator could not distinguish a clean sung Sa from noise that happened to trigger. Clarity is now threaded through the hold accumulator (`holdClaritySum`) and reported as the mean clarity of accepted holds. The calibrator receives real Pitchy confidence, not a constant.
 
