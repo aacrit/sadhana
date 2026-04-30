@@ -1,6 +1,6 @@
 # Journey UX Specs
 
-Last updated: 2026-04-29
+Last updated: 2026-04-29 (rev 13 — pre-launch readiness audit)
 
 Four entry points to the same engine. Different interfaces, different depth, same musical truth.
 
@@ -429,4 +429,33 @@ Subsequent work tackled the items deferred at rev 11. Status as of this rev:
 
 ### Routes
 
-- 83 (rev 10) → 114 (rev 11) → 115 (rev 12, +Scholar reference page).
+- 83 (rev 10) → 114 (rev 11) → 115 (rev 12, +Scholar reference page) → 150 (rev 13, +30 per-raga reference pages, +Sa onboarding, +privacy/terms, +sitemap).
+
+---
+
+### rev 13 — Pre-launch readiness audit (16 items)
+
+The following 16 items were closed across three commits on `claude/critical-fixes-and-voice-wave` (5c95134 / a6a1e7e / 911f243 / 71ef4ee). All status verified against `git log` and on-disk paths.
+
+| # | Item | Wave | Status | Notes |
+|---|------|------|--------|-------|
+| 1 | AudioContext lifecycle (BLOCKER) | A | Shipped | `frontend/app/components/AudioContextResumer.tsx` + `frontend/app/lib/audio-context-registry.ts`. Engine pipeline + tanpura + tabla register their contexts. Resume on `visibilitychange` / focus, "Tap to resume" overlay if Safari refuses. See `docs/AUDIO-ENGINE.md`. |
+| 2 | Telemetry call sites | A | Shipped | ~15 `emit()` callers across `JourneyLessonClient`, `useLessonEngine`, `SaCalibrator`, `profile/page.tsx`, `PracticeReminder`. |
+| 3 | Level-gates UI wire-up | B | Shipped | `JourneyLessonClient.handleComplete` calls `deriveLevel` + `setProfileLevel` after every lesson. `/profile` renders Mastery Acts list with `gateEarned` / `gatePending` markers. New supabase helpers: `getProgressionEvents`, `setProfileLevel`. |
+| 4 | Account deletion + data export (BLOCKER) | A | Shipped | Migration 005 (`delete_my_account`, `export_my_data`, `deletion_requests` table). New routes: `/profile/privacy`, `/legal/privacy`, `/legal/terms`. |
+| 5 | SEO surface | A | Shipped | `layout.tsx` metadata expanded (`openGraph`, `twitter`, `robots`, `canonical`). New: `frontend/public/og-image.svg`, `frontend/public/robots.txt`, `frontend/app/sitemap.ts` (force-static; lists 39 lessons + journeys + auxiliary). |
+| 6 | PWA install prompt | A | Shipped | `frontend/app/components/InstallPrompt.tsx` mounted on Beginner home, captures `beforeinstallprompt`, iOS coaching overlay. |
+| 7 | Mic-denied recovery | A | Shipped | `MicGate` in `LessonRenderer` detects platform (iOS / Android / desktop), shows tailored unblock instructions, retries on focus. |
+| 8 | Modulation / deviation wired | B | Shipped | `StructuredPhase.tsx` branches voice-evaluated phase types (`modulation_awareness`, `controlled_deviation`), captures pitch history, runs `detectModulation` / `analyzeDeviation`, surfaces verdict. Added to `VOICE_PHASE_TYPES`. |
+| 9 | Voice corpus regression | C | Skeleton | `engine/voice/__fixtures__/README.md` documents recording protocol; `engine/voice/pipeline.regression.test.ts` walks fixtures and emits one test per WAV (currently skipped — no fixtures yet). |
+| 10 | Tantri perf tier | C | Shipped | `frontend/app/lib/usePerfTier.ts` detects low-end Android. Sets `data-perf-tier` on Tantri container; CSS rules gate ambient animations on low tier. |
+| 11 | First-launch Sa onboarding | A | Shipped | New `/onboarding/sa` route. `JourneyLessonClient` redirects when `profile.saHz` is the C4 default (261.6256). |
+| 13 | Error capture + Lighthouse CI | C | Shipped | `frontend/app/components/ErrorBoundary.tsx` class component at providers root + `GlobalErrorListener` for `window.error` / `unhandledrejection`. `lighthouserc.json` + Lighthouse CI step in `deploy-pages.yml` (currently advisory). |
+| 14 | Supabase keep-alive | C | Shipped | `.github/workflows/supabase-keepalive.yml` twice-weekly cron. Migration 006 `prune_old_events` + best-effort `pg_cron` weekly schedule. |
+| 15 | Keyboard mode discoverability | B | Shipped | `frontend/app/components/KeyboardModeHint.tsx` button + modal on Beginner home. |
+| 16 | Scholar per-raga reference | B | Shipped | `/journeys/scholar/reference/ragas/[id]` auto-renders every Raga from engine. `RagaReferencePlayer` client component. Static export grew 120 → 150 routes. |
+
+#### Test counts (rev 13)
+
+- Engine: 476 (unchanged) + 1 placeholder regression file (`pipeline.regression.test.ts`, currently skipped) → 477 across 15 files (1 skipped).
+- 6 Supabase migrations now (001 → 006).
